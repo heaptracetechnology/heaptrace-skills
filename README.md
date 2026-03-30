@@ -12,15 +12,62 @@
 </p>
 
 <p align="center">
-  <a href="https://lmsht.com/skills">📖 Browse Skills</a> •
-  <a href="https://lmsht.com/skills">⬇️ Download</a>
+  <a href="https://lmsht.com/skills">📖 Browse Skills</a>
 </p>
+
+---
+
+## Quick Setup
+
+Both **Claude Code** and **Cursor** use the same skill file format. Clone this repo and copy.
+
+### Step 1 — Clone
+
+```bash
+git clone https://github.com/heaptracetechnology/heaptrace-skills.git
+```
+
+### Step 2 — Copy to Your Tool
+
+#### Claude Code
+
+```bash
+# Project-level (this project only)
+cp -r heaptrace-skills/*/ your-project/.claude/skills/
+
+# Personal (all projects)
+cp -r heaptrace-skills/*/ ~/.claude/skills/
+```
+
+**Path:** `.claude/skills/<skill-name>/SKILL.md`
+
+#### Cursor
+
+```bash
+# Project-level (this project only)
+cp -r heaptrace-skills/*/ your-project/.cursor/skills/
+
+# Personal (all projects — check Cursor docs for global path)
+cp -r heaptrace-skills/*/ ~/.cursor/skills/
+```
+
+**Path:** `.cursor/skills/<skill-name>/skill.md`
+
+### Step 3 — Add to .gitignore
+
+Skills are **personal tools** — don't commit them to your project repo:
+
+```bash
+# Add to your project's .gitignore
+echo ".claude/skills/" >> .gitignore
+echo ".cursor/skills/" >> .gitignore
+```
 
 ---
 
 ## What Are Skills?
 
-Skills are structured instruction files that guide AI coding assistants (Claude Code, Cursor, or any tool) through specific development tasks. Instead of writing prompts from scratch every time, skills give consistent, battle-tested processes your entire team can follow.
+Skills are structured instruction files that guide AI coding assistants through specific development tasks. Instead of writing prompts from scratch, skills give consistent, battle-tested processes your entire team can follow.
 
 ```
 Client gives a task
@@ -160,40 +207,14 @@ Requirements, proposals, prioritization, and stakeholder updates.
 
 ---
 
-## Setup
-
-### Claude Code
-
-1. Open Claude Code → Settings → Skills
-2. Upload individual `.zip` files from `docs/claude-zips/`
-3. Each skill becomes available as a slash command
-
-### Cursor
-
-1. Copy the `.cursor/rules/` folder from the Cursor ZIP into your project root
-2. Skills are automatically loaded as `.mdc` rule files
-3. Reference them in your prompts
-
-### Manual
-
-1. Copy any `SKILL.md` file into your project
-2. Reference it in your AI assistant's context
-3. Follow the step-by-step instructions
-
----
-
 ## Every Skill Includes
 
-```
-┌──────────────────────────────────────────────────────────────┐
-│  ✅ Step-by-step workflow with ASCII flow diagrams            │
-│  ✅ Decision trees for ambiguous situations                   │
-│  ✅ Checklists and templates you can copy-paste               │
-│  ✅ Common mistakes and anti-patterns                         │
-│  ✅ Real-world examples (not lorem ipsum)                     │
-│  ✅ 6 mandatory rules enforced on every task                  │
-└──────────────────────────────────────────────────────────────┘
-```
+- Step-by-step workflow with ASCII flow diagrams
+- Decision trees for ambiguous situations
+- Checklists and templates you can copy-paste
+- Common mistakes and anti-patterns
+- Real-world examples (not lorem ipsum)
+- 6 mandatory rules enforced on every task
 
 ### Mandatory Rules (Built Into Every Skill)
 
@@ -206,13 +227,59 @@ Requirements, proposals, prioritization, and stakeholder updates.
 
 ---
 
-## Downloads
+## Customizing Skills
 
-| Format | What You Get | Link |
-|--------|-------------|------|
-| **Claude Code** | 66 individual `.zip` files (upload one at a time) | [Browse](https://lmsht.com/skills) |
-| **Cursor** | Single `.zip` with `.cursor/rules/*.mdc` files | [Browse](https://lmsht.com/skills) |
-| **Documentation** | Interactive HTML site with all skills | [lmsht.com/skills](https://lmsht.com/skills) |
+You can tune any skill for your project:
+
+1. Open the `SKILL.md` file in any text editor
+2. Modify steps, add project-specific patterns, adjust checklists
+3. Add your team's conventions, naming rules, or tech stack details
+4. Save — the updated skill is used immediately on next invocation
+
+Skills are yours to customize. Make them fit your workflow.
+
+---
+
+## Repo Structure
+
+```
+heaptrace-skills/
+├── feature-plan/SKILL.md          ← Developer pack
+├── feature-work/SKILL.md
+├── find-fix/SKILL.md
+├── smart-commit/SKILL.md
+├── suggest/SKILL.md
+├── code-review/SKILL.md
+├── test-gen/SKILL.md
+├── explain/SKILL.md
+├── sec-audit/SKILL.md
+├── release-notes/SKILL.md
+├── lead-engineer/                  ← Lead Engineer pack
+│   ├── sprint-plan/SKILL.md
+│   ├── arch-review/SKILL.md
+│   └── ...
+├── architect/                      ← Technical Architect pack
+│   ├── system-design/SKILL.md
+│   └── ...
+├── qa/                             ← QA / Testing pack
+│   ├── test-plan/SKILL.md
+│   └── ...
+├── automation-qa/                  ← Automation QA pack
+│   ├── cypress-test/SKILL.md
+│   └── ...
+├── cloud-engineer/                 ← AWS Cloud Engineer pack
+│   ├── vpc-design/SKILL.md
+│   └── ...
+├── designer/                       ← UI/UX Designer pack
+│   ├── wireframe/SKILL.md
+│   └── ...
+├── business/                       ← Business / Product pack
+│   ├── prd-write/SKILL.md
+│   └── ...
+└── docs/
+    ├── index.html                  ← Skills documentation site
+    └── announcement-email.html     ← Team announcement template
+```
 
 ---
 
@@ -223,13 +290,14 @@ Copyright © 2026 **Heaptrace Technology Private Limited**
 This repository and its contents are **confidential and proprietary**. Skills are provided exclusively to licensed clients and their development teams for internal use only.
 
 **You MAY:**
-- ✅ Use within your development team
-- ✅ Customize and tune for your project
-- ✅ Use with Claude Code, Cursor, or any AI coding tool
+- Use within your development team
+- Customize and tune for your project
+- Use with Claude Code, Cursor, or any AI coding tool
 
 **You MAY NOT:**
-- ❌ Redistribute, share, or publish publicly
-- ❌ Sell, sublicense, or transfer to third parties
-- ❌ Remove or modify copyright notices
+- Redistribute, share, or publish publicly
+- Sell, sublicense, or transfer to third parties
+- Remove or modify copyright notices
+- Commit skill files to any public or shared repository
 
 Contact: **support@heaptrace.com**
