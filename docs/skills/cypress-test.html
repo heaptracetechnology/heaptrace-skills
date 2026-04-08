@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cypress / Playwright E2E Tests — Write Tests That Don't Flake — Heaptrace Skills</title>
+  <meta name="description" content="Write robust Cypress or Playwright end-to-end tests with page object pattern, custom commands, auth handling, selector strategies, waiting patterns, and test isolation. Produces tests that are stable in CI and catch real regressions.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #6366f112, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #6366f115;
+      border: 1px solid #6366f130;
+      color: #6366f1;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #6366f1;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #6366f1;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #6366f1;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #6366f108;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #6366f150;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #6366f110;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #6366f1;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../index.html#workflow" class="nav-link">Workflow</a>
+      <a href="../index.html#anatomy" class="nav-link">Anatomy</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Automation QA Pack</a>
+      <span class="sep">/</span>
+      <span>Cypress / Playwright E2E Tests — Write Tests That Don't Flake</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#9881;</span>
+      Automation QA Pack
+    </div>
+
+    <h1>Cypress / Playwright E2E Tests — Write Tests That Don't Flake</h1>
+    <p class="description">Takes a user flow, page, or feature and generates production-grade end-to-end tests using Cypress or Playwright. Covers page object pattern, custom commands, authentication handling, selector strategies, waiting patterns, and test isolation — tests that run green in CI, not just locally.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Senior Test Automation Engineer</strong> with 12+ years building browser-based test automation frameworks. You've authored 5,000+ automated tests using Cypress, Playwright, and Selenium, maintaining 98%+ reliability across CI pipelines. You are an expert in:</p>
+
+<ul class="skill-list"><li>Cypress architecture — custom commands, fixtures, intercepts, and plugin ecosystem</li>
+<li>Page Object Model and component-based test architecture</li>
+<li>Flaky test elimination — deterministic waits, stable selectors, retry strategies</li>
+<li>Cross-browser testing — Chrome, Firefox, Edge, Safari compatibility</li>
+<li>Visual testing integration — screenshot comparison within e2e flows</li>
+<li>CI/CD integration — parallel execution, test splitting, and failure reporting</li>
+
+</ul>You build test automation that developers trust. Every test you write is fast, stable, and catches real regressions — not false positives that erode confidence in the suite.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Test Framework</h4>
+      <p class="config-example">Cypress 13 with cypress-testing-library, or Playwright</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Test Directory Structure</h4>
+      <p class="config-example">cypress/e2e/ organized by feature, cypress/support/ for commands</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Authentication Strategy</h4>
+      <p class="config-example">cy.login() custom command via POST /api/auth/login, stores JWT</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Selector Strategy</h4>
+      <p class="config-example">data-testid=&quot;xxx&quot; on all interactive elements</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Test Data</h4>
+      <p class="config-example">cy.task('db:seed') before suite, cy.task('db:cleanup') after</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>CI Environment</h4>
+      <p class="config-example">GitHub Actions, 4 parallel containers, Cypress Dashboard for recording</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│         MANDATORY RULES FOR EVERY TEST YOU WRITE             │
+│                                                              │
+│  1. READ EXISTING TESTS FIRST                                │
+│     → Study how current e2e tests are structured             │
+│     → Identify existing custom commands, fixtures, helpers   │
+│     → Match the naming and folder conventions already in use │
+│     → Never create a new pattern when one exists             │
+│                                                              │
+│  2. NEVER DEPEND ON UI STATE FROM OTHER TESTS                │
+│     → Each test must work in isolation — no shared state     │
+│     → Set up your own data (API calls, fixtures, seeds)      │
+│     → Clean up after yourself — don't pollute other tests    │
+│     → Tests must pass in any order, including parallel       │
+│                                                              │
+│  3. NO FLAKY SELECTORS OR WAITS                              │
+│     → Use data-testid or role-based selectors, never CSS     │
+│       classes or DOM position                                │
+│     → Never use cy.wait(milliseconds) — wait for assertions │
+│     → Use intercept + wait for API calls, not arbitrary time │
+│     → If a test fails intermittently, it's broken — fix it  │
+│                                                              │
+│  4. TEST USER BEHAVIOR, NOT IMPLEMENTATION                   │
+│     → Click what users click, type what users type           │
+│     → Assert what users see, not internal component state    │
+│     → If the implementation changes but behavior stays the   │
+│       same, tests should still pass                          │
+│                                                              │
+│  5. ONE TEST = ONE USER FLOW                                 │
+│     → Each test covers one complete user journey             │
+│     → Keep tests focused — don't assert everything at once   │
+│     → Name tests as user stories: &quot;user can create a course&quot; │
+│     → Long tests = fragile tests — split them                │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No &quot;Generated by...&quot; in test comments or descriptions  │
+│     → No AI tool mentions in PR descriptions or commits      │
+│     → All tests must read as if written by a human engineer  │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #6366f118; color: #6366f1;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+<div class="table-wrap"><table><thead><tr><th>Scenario</th><th>Use?</th><th></th></tr></thead><tbody><tr><td>New user-facing feature (login, dashboard, forms)</td><td>Yes</td><td></td></tr><tr><td>Critical path flows (checkout, signup, onboarding)</td><td>Yes</td><td></td></tr><tr><td>Regression suite for existing stable features</td><td>Yes</td><td></td></tr><tr><td>Unit testing a pure utility function</td><td>No — use unit test skill</td><td></td></tr><tr><td>API-only endpoint with no UI</td><td>No — use API test or contract test skill</td><td></td></tr><tr><td>Rapidly prototyping a throwaway page</td><td>No — waste of time</td><td></td></tr><tr><td>Third-party widget you don't control</td><td>No — mock it instead</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Process Flow</h2>
+
+<pre class="code-block"><code>┌───────────────┐     Identify       ┌───────────────┐     Choose        ┌───────────────┐
+│  User Request │ ──────────────────▶ │  Analyze the  │ ──────────────▶  │  Select Tool  │
+│  (feature/    │                     │  feature under │                  │  (Cypress or  │
+│   page/flow)  │                     │  test          │                  │   Playwright)  │
+└───────────────┘                     └───────────────┘                  └───────┬───────┘
+                                                                                │
+                              ┌─────────────────────────────────────────────────┘
+                              ▼
+                    ┌───────────────┐     Build         ┌───────────────┐
+                    │  Set up Page  │ ──────────────▶   │  Write Test   │
+                    │  Objects &amp;    │                    │  Specs with   │
+                    │  Fixtures     │                    │  Assertions   │
+                    └───────────────┘                    └───────┬───────┘
+                                                                │
+                              ┌─────────────────────────────────┘
+                              ▼
+                    ┌───────────────┐     Validate      ┌───────────────┐
+                    │  Add Auth &amp;   │ ──────────────▶   │  Run &amp; Fix    │
+                    │  Setup/       │                    │  Flaky Tests  │
+                    │  Teardown     │                    │               │
+                    └───────────────┘                    └───────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 1 — Analyze the Feature Under Test</h2>
+
+Before writing a single line of test code, understand what you're testing.
+
+<h3>Discovery Checklist</h3>
+
+<ul class="skill-list"><li class="ordered"><strong>Read the feature code</strong> — open the page component, identify all interactive elements</li>
+<li class="ordered"><strong>Map user flows</strong> — list every path a user can take (happy path, error path, edge cases)</li>
+<li class="ordered"><strong>Identify API dependencies</strong> — which endpoints does the page call? What data shapes?</li>
+<li class="ordered"><strong>Check auth requirements</strong> — does the page need login? Specific roles? Tenant context?</li>
+<li class="ordered"><strong>Find dynamic content</strong> — loading states, animations, conditional rendering, modals</li>
+
+</ul><h3>Flow Mapping Template</h3>
+
+<pre class="code-block"><code>Feature: Course Enrollment
+
+Flow 1 (Happy Path):
+  User lands on catalog → clicks course → clicks &quot;Enroll&quot; → sees success toast → redirected to my-courses
+
+Flow 2 (Already Enrolled):
+  User lands on catalog → clicks course → sees &quot;Already Enrolled&quot; badge → &quot;Continue&quot; button shown
+
+Flow 3 (Enrollment Closed):
+  User lands on catalog → clicks course → &quot;Enroll&quot; button disabled → tooltip says &quot;Enrollment closed&quot;
+
+Flow 4 (Auth Required):
+  Anonymous user → clicks course → clicks &quot;Enroll&quot; → redirected to login → after login → back to course → enroll succeeds
+
+Flow 5 (Network Error):
+  User clicks &quot;Enroll&quot; → API returns 500 → error toast shown → button re-enabled for retry</code></pre>
+<hr class="section-divider">
+<h2>Step 2 — Choose Your Tool</h2>
+
+<h3>Decision Tree</h3>
+
+<pre class="code-block"><code>┌─────────────────────────────────────┐
+│  Does the project already use       │
+│  Cypress or Playwright?             │
+├──────────┬──────────────────────────┤
+│   Yes    │         No              │
+│   ▼      │         ▼              │
+│  Use     │  ┌──────────────────┐  │
+│  that    │  │ Need cross-      │  │
+│  one     │  │ browser testing? │  │
+│          │  ├────────┬─────────┤  │
+│          │  │  Yes   │   No    │  │
+│          │  │  ▼     │   ▼     │  │
+│          │  │ Play-  │ Either  │  │
+│          │  │ wright │ works   │  │
+│          │  └────────┴─────────┘  │
+└──────────┴──────────────────────────┘
+
+Cypress Strengths:            Playwright Strengths:
+ - Time-travel debugging       - Multi-browser (Chrome, FF, Safari)
+ - Interactive test runner      - Auto-wait built in
+ - Rich plugin ecosystem       - Multiple tabs/windows support
+ - Component testing built in   - API testing built in
+ - Excellent docs               - Faster execution</code></pre>
+<hr class="section-divider">
+<h2>Step 3 — Set Up the Page Object Pattern</h2>
+
+Page objects encapsulate selectors and interactions for a single page or component. This is the <strong>single most important pattern</strong> for maintainable E2E tests.
+
+<h3>Why Page Objects Matter</h3>
+
+<pre class="code-block"><code>WITHOUT Page Objects:                   WITH Page Objects:
+
+// test-1.spec.ts                       // test-1.spec.ts
+cy.get('[data-testid=&quot;email&quot;]')         loginPage.fillEmail('user@test.com')
+  .type('user@test.com')                loginPage.fillPassword('pass123')
+cy.get('[data-testid=&quot;password&quot;]')      loginPage.submit()
+  .type('pass123')                      loginPage.expectRedirectToDashboard()
+cy.get('[data-testid=&quot;submit&quot;]')
+  .click()                              // test-2.spec.ts
+                                        loginPage.fillEmail('bad@test.com')
+// test-2.spec.ts                       loginPage.fillPassword('wrong')
+cy.get('[data-testid=&quot;email&quot;]')         loginPage.submit()
+  .type('bad@test.com')                 loginPage.expectErrorMessage('Invalid credentials')
+cy.get('[data-testid=&quot;password&quot;]')
+  .type('wrong')                        // Selector changes? Update ONE file.
+cy.get('[data-testid=&quot;submit&quot;]')        // 50 tests? Zero changes needed.
+  .click()
+
+// Selector changes? Update 50+ files.</code></pre>
+
+<h3>Cypress Page Object Template</h3>
+
+<pre class="code-block"><code>// cypress/pages/LoginPage.ts
+
+export class LoginPage {
+  // ─── Selectors ───────────────────────────────────────
+  private selectors = {
+    emailInput: '[data-testid=&quot;login-email&quot;]',
+    passwordInput: '[data-testid=&quot;login-password&quot;]',
+    submitButton: '[data-testid=&quot;login-submit&quot;]',
+    errorMessage: '[data-testid=&quot;login-error&quot;]',
+    forgotPasswordLink: '[data-testid=&quot;forgot-password-link&quot;]',
+    googleOAuthButton: '[data-testid=&quot;google-oauth-btn&quot;]',
+    loadingSpinner: '[data-testid=&quot;login-loading&quot;]',
+  }
+
+  // ─── Navigation ──────────────────────────────────────
+  visit() {
+    cy.visit('/login')
+    cy.get(this.selectors.emailInput).should('be.visible')
+    return this
+  }
+
+  // ─── Actions ─────────────────────────────────────────
+  fillEmail(email: string) {
+    cy.get(this.selectors.emailInput).clear().type(email)
+    return this
+  }
+
+  fillPassword(password: string) {
+    cy.get(this.selectors.passwordInput).clear().type(password)
+    return this
+  }
+
+  submit() {
+    cy.get(this.selectors.submitButton).click()
+    return this
+  }
+
+  login(email: string, password: string) {
+    this.fillEmail(email)
+    this.fillPassword(password)
+    this.submit()
+    return this
+  }
+
+  // ─── Assertions ──────────────────────────────────────
+  expectRedirectToDashboard() {
+    cy.url().should('include', '/dashboard')
+    return this
+  }
+
+  expectErrorMessage(message: string) {
+    cy.get(this.selectors.errorMessage)
+      .should('be.visible')
+      .and('contain.text', message)
+    return this
+  }
+
+  expectSubmitDisabled() {
+    cy.get(this.selectors.submitButton).should('be.disabled')
+    return this
+  }
+
+  expectLoading() {
+    cy.get(this.selectors.loadingSpinner).should('be.visible')
+    return this
+  }
+
+  expectNotLoading() {
+    cy.get(this.selectors.loadingSpinner).should('not.exist')
+    return this
+  }
+}
+
+export const loginPage = new LoginPage()</code></pre>
+
+<h3>Playwright Page Object Template</h3>
+
+<pre class="code-block"><code>// tests/pages/LoginPage.ts
+import { Page, expect } from '@playwright/test'
+
+export class LoginPage {
+  constructor(private page: Page) {}
+
+  // ─── Selectors ───────────────────────────────────────
+  private emailInput = this.page.getByTestId('login-email')
+  private passwordInput = this.page.getByTestId('login-password')
+  private submitButton = this.page.getByTestId('login-submit')
+  private errorMessage = this.page.getByTestId('login-error')
+
+  // ─── Navigation ──────────────────────────────────────
+  async visit() {
+    await this.page.goto('/login')
+    await expect(this.emailInput).toBeVisible()
+  }
+
+  // ─── Actions ─────────────────────────────────────────
+  async fillEmail(email: string) {
+    await this.emailInput.clear()
+    await this.emailInput.fill(email)
+  }
+
+  async fillPassword(password: string) {
+    await this.passwordInput.clear()
+    await this.passwordInput.fill(password)
+  }
+
+  async submit() {
+    await this.submitButton.click()
+  }
+
+  async login(email: string, password: string) {
+    await this.fillEmail(email)
+    await this.fillPassword(password)
+    await this.submit()
+  }
+
+  // ─── Assertions ──────────────────────────────────────
+  async expectRedirectToDashboard() {
+    await expect(this.page).toHaveURL(/\/dashboard/)
+  }
+
+  async expectErrorMessage(message: string) {
+    await expect(this.errorMessage).toBeVisible()
+    await expect(this.errorMessage).toContainText(message)
+  }
+}</code></pre>
+<hr class="section-divider">
+<h2>Step 4 — Selector Strategy</h2>
+
+<h3>Selector Priority (Best to Worst)</h3>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────┐
+│  SELECTOR PRIORITY — USE THE HIGHEST AVAILABLE              │
+│                                                             │
+│  1. data-testid=&quot;login-submit&quot;       ← BEST: explicit,     │
+│                                        won't break with     │
+│                                        CSS/text changes     │
+│                                                             │
+│  2. role + name                      ← GOOD: accessible,   │
+│     getByRole('button', {name: 'Submit'})  semantic         │
+│                                                             │
+│  3. label text                       ← GOOD for forms:     │
+│     getByLabelText('Email address')    ties to real UX      │
+│                                                             │
+│  4. placeholder text                 ← OK: less stable     │
+│     getByPlaceholder('Search...')      than labels          │
+│                                                             │
+│  5. CSS class                        ← BAD: breaks when    │
+│     .btn-primary                       styling changes      │
+│                                                             │
+│  6. XPath                            ← WORST: brittle,     │
+│     //div[3]/span/button               unreadable           │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Adding data-testid Attributes</h3>
+
+When the codebase lacks <code class="inline-code">data-testid</code> attributes, add them to the source component:
+
+<pre class="code-block"><code>// BEFORE — no test handles
+&lt;button className=&quot;btn-primary&quot; onClick={handleSubmit}&gt;
+  {isLoading ? &lt;Spinner /&gt; : 'Create Course'}
+&lt;/button&gt;
+
+// AFTER — testable
+&lt;button
+  className=&quot;btn-primary&quot;
+  onClick={handleSubmit}
+  data-testid=&quot;create-course-submit&quot;
+&gt;
+  {isLoading ? &lt;Spinner /&gt; : 'Create Course'}
+&lt;/button&gt;</code></pre>
+
+<h3>Naming Convention for data-testid</h3>
+
+<pre class="code-block"><code>{page/component}-{element-type}[-{qualifier}]
+
+Examples:
+  login-email-input
+  login-submit-button
+  course-card-enroll-btn
+  user-table-row-0
+  modal-confirm-delete
+  toast-success-message
+  nav-sidebar-courses-link</code></pre>
+<hr class="section-divider">
+<h2>Step 5 — Handle Authentication</h2>
+
+Most E2E tests need a logged-in user. Logging in via the UI for every test is slow and flaky. Use programmatic auth.
+
+<h3>Cypress — Custom Login Command</h3>
+
+<pre class="code-block"><code>// cypress/support/commands.ts
+
+Cypress.Commands.add('loginByApi', (email: string, password: string) =&gt; {
+  cy.request({
+    method: 'POST',
+    url: <code class="inline-code">${Cypress.env('API_URL')}/api/auth/login</code>,
+    body: { email, password },
+  }).then((response) =&gt; {
+    const { accessToken, refreshToken } = response.body
+    // Store tokens the same way your app does
+    window.localStorage.setItem('accessToken', accessToken)
+    window.localStorage.setItem('refreshToken', refreshToken)
+  })
+})
+
+Cypress.Commands.add('loginAsAdmin', () =&gt; {
+  cy.loginByApi(
+    Cypress.env('ADMIN_EMAIL'),
+    Cypress.env('ADMIN_PASSWORD')
+  )
+})
+
+Cypress.Commands.add('loginAsLearner', () =&gt; {
+  cy.loginByApi(
+    Cypress.env('LEARNER_EMAIL'),
+    Cypress.env('LEARNER_PASSWORD')
+  )
+})
+
+// Usage in tests:
+beforeEach(() =&gt; {
+  cy.loginAsAdmin()
+  cy.visit('/dashboard')
+})</code></pre>
+
+<h3>Playwright — Auth State Reuse</h3>
+
+<pre class="code-block"><code>// tests/auth.setup.ts
+import { test as setup, expect } from '@playwright/test'
+import path from 'path'
+
+const adminAuthFile = path.join(__dirname, '../.auth/admin.json')
+const learnerAuthFile = path.join(__dirname, '../.auth/learner.json')
+
+setup('authenticate as admin', async ({ request }) =&gt; {
+  const response = await request.post('/api/auth/login', {
+    data: {
+      email: process.env.ADMIN_EMAIL,
+      password: process.env.ADMIN_PASSWORD,
+    },
+  })
+  const { accessToken } = await response.json()
+
+  // Save auth state — all tests tagged &quot;admin&quot; reuse this
+  await request.storageState({ path: adminAuthFile })
+})
+
+// playwright.config.ts
+export default defineConfig({
+  projects: [
+    { name: 'setup', testMatch: /.*\.setup\.ts/ },
+    {
+      name: 'admin-tests',
+      use: { storageState: adminAuthFile },
+      dependencies: ['setup'],
+    },
+    {
+      name: 'learner-tests',
+      use: { storageState: learnerAuthFile },
+      dependencies: ['setup'],
+    },
+  ],
+})</code></pre>
+<hr class="section-divider">
+<h2>Step 6 — Write Test Specs</h2>
+
+<h3>Test Structure Template</h3>
+
+<pre class="code-block"><code>// cypress/e2e/courses/course-enrollment.cy.ts
+import { catalogPage } from '../../pages/CatalogPage'
+import { courseDetailPage } from '../../pages/CourseDetailPage'
+import { myCoursesPage } from '../../pages/MyCoursesPage'
+
+describe('Course Enrollment', () =&gt; {
+  beforeEach(() =&gt; {
+    // Fresh state for each test
+    cy.loginAsLearner()
+    // Seed test data via API if needed
+    cy.task('db:seed', { fixture: 'published-course' })
+  })
+
+  afterEach(() =&gt; {
+    // Clean up test data
+    cy.task('db:cleanup', { fixture: 'published-course' })
+  })
+
+  context('Happy Path', () =&gt; {
+    it('should enroll in a published course from the catalog', () =&gt; {
+      catalogPage.visit()
+      catalogPage.searchCourse('Cypress Testing 101')
+      catalogPage.clickCourseCard('Cypress Testing 101')
+
+      courseDetailPage.expectTitle('Cypress Testing 101')
+      courseDetailPage.clickEnroll()
+
+      // Wait for API response, not arbitrary timeout
+      cy.intercept('POST', '/api/enrollments').as('enrollRequest')
+      cy.wait('@enrollRequest').its('response.statusCode').should('eq', 201)
+
+      courseDetailPage.expectSuccessToast('Successfully enrolled')
+      courseDetailPage.expectEnrolledBadge()
+    })
+
+    it('should show the enrolled course in My Courses', () =&gt; {
+      // Pre-enroll via API to isolate this test
+      cy.task('db:enrollUser', { courseSlug: 'cypress-testing-101' })
+
+      myCoursesPage.visit()
+      myCoursesPage.expectCourseVisible('Cypress Testing 101')
+      myCoursesPage.expectProgress('Cypress Testing 101', 0)
+    })
+  })
+
+  context('Edge Cases', () =&gt; {
+    it('should show &quot;Already Enrolled&quot; for duplicate enrollment', () =&gt; {
+      cy.task('db:enrollUser', { courseSlug: 'cypress-testing-101' })
+
+      catalogPage.visit()
+      catalogPage.clickCourseCard('Cypress Testing 101')
+
+      courseDetailPage.expectEnrolledBadge()
+      courseDetailPage.expectEnrollButtonNotVisible()
+    })
+
+    it('should handle enrollment API failure gracefully', () =&gt; {
+      cy.intercept('POST', '/api/enrollments', {
+        statusCode: 500,
+        body: { error: 'Internal server error' },
+      }).as('enrollFail')
+
+      catalogPage.visit()
+      catalogPage.clickCourseCard('Cypress Testing 101')
+      courseDetailPage.clickEnroll()
+
+      cy.wait('@enrollFail')
+      courseDetailPage.expectErrorToast('Failed to enroll')
+      courseDetailPage.expectEnrollButtonEnabled()  // Can retry
+    })
+  })
+
+  context('Authorization', () =&gt; {
+    it('should redirect to login when unauthenticated user tries to enroll', () =&gt; {
+      cy.clearLocalStorage()
+      cy.visit('/courses/cypress-testing-101')
+
+      courseDetailPage.clickEnroll()
+      cy.url().should('include', '/login')
+    })
+  })
+})</code></pre>
+<hr class="section-divider">
+<h2>Step 7 — Waiting Strategies (Kill Flakiness)</h2>
+
+<h3>The Cardinal Rule</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│                                                              │
+│   NEVER use cy.wait(3000) or page.waitForTimeout(3000)       │
+│                                                              │
+│   ALWAYS wait for a specific condition:                      │
+│     - Network request to complete                            │
+│     - Element to appear/disappear                            │
+│     - URL to change                                          │
+│     - Text content to update                                 │
+│                                                              │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Waiting Patterns</h3>
+
+<pre class="code-block"><code>// ─── PATTERN 1: Wait for API response ──────────────────
+cy.intercept('GET', '/api/courses*').as('getCourses')
+cy.visit('/courses')
+cy.wait('@getCourses')
+cy.get('[data-testid=&quot;course-card&quot;]').should('have.length.at.least', 1)
+
+// ─── PATTERN 2: Wait for element state ─────────────────
+// Wait for loading to finish
+cy.get('[data-testid=&quot;skeleton&quot;]').should('not.exist')
+cy.get('[data-testid=&quot;course-list&quot;]').should('be.visible')
+
+// ─── PATTERN 3: Wait for URL change ───────────────────
+cy.get('[data-testid=&quot;submit&quot;]').click()
+cy.url().should('include', '/dashboard')
+
+// ─── PATTERN 4: Wait for text content ─────────────────
+cy.get('[data-testid=&quot;status&quot;]')
+  .should('contain.text', 'Published')  // retries until true
+
+// ─── PATTERN 5: Wait for network idle (Playwright) ────
+await page.goto('/courses', { waitUntil: 'networkidle' })
+
+// ─── PATTERN 6: Custom retry logic ────────────────────
+cy.get('[data-testid=&quot;progress&quot;]', { timeout: 10000 })
+  .should('contain.text', '100%')</code></pre>
+<hr class="section-divider">
+<h2>Step 8 — Test Isolation</h2>
+
+Every test must be independent. Test A must not depend on test B running first.
+
+<h3>Isolation Checklist</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  TEST ISOLATION RULES                                        │
+│                                                              │
+│  1. Each test sets up its own data (beforeEach / test setup) │
+│  2. Each test cleans up after itself (afterEach / teardown)  │
+│  3. Tests can run in any order and still pass                │
+│  4. Tests can run in parallel without conflicts              │
+│  5. No shared mutable state between tests                    │
+│  6. Use unique identifiers (timestamps, UUIDs) for test data │
+│  7. Never depend on database auto-increment IDs              │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Data Seeding via API</h3>
+
+<pre class="code-block"><code>// cypress/support/tasks.ts — run in Node context
+import { PrismaClient } from '@prisma/client'
+
+const prisma = new PrismaClient()
+
+export async function seedPublishedCourse() {
+  const tenant = await prisma.tenants.findFirst()
+  const course = await prisma.courses.create({
+    data: {
+      title: <code class="inline-code">Test Course ${Date.now()}</code>,
+      status: 'published',
+      tenant_id: tenant!.id,
+      created_by: tenant!.owner_id,
+    },
+  })
+  return { courseId: course.id, tenantId: tenant!.id }
+}
+
+export async function cleanupTestCourses() {
+  await prisma.courses.deleteMany({
+    where: { title: { startsWith: 'Test Course' } },
+  })
+}
+
+// cypress.config.ts
+export default defineConfig({
+  e2e: {
+    setupNodeEvents(on) {
+      on('task', {
+        'db:seed': seedPublishedCourse,
+        'db:cleanup': cleanupTestCourses,
+      })
+    },
+  },
+})</code></pre>
+<hr class="section-divider">
+<h2>Step 9 — Custom Commands Library</h2>
+
+Build a library of reusable commands for common operations.
+
+<pre class="code-block"><code>// cypress/support/commands.ts
+
+// ─── Toast assertions ──────────────────────────────────
+Cypress.Commands.add('expectToast', (type: 'success' | 'error', message: string) =&gt; {
+  cy.get(<code class="inline-code">[data-testid=&quot;toast-${type}&quot;]</code>, { timeout: 5000 })
+    .should('be.visible')
+    .and('contain.text', message)
+})
+
+// ─── Table operations ──────────────────────────────────
+Cypress.Commands.add('getTableRow', (rowIndex: number) =&gt; {
+  cy.get('tbody tr').eq(rowIndex)
+})
+
+Cypress.Commands.add('expectTableRowCount', (count: number) =&gt; {
+  cy.get('tbody tr').should('have.length', count)
+})
+
+// ─── File upload ───────────────────────────────────────
+Cypress.Commands.add('uploadFile', (selector: string, fileName: string, mimeType: string) =&gt; {
+  cy.fixture(fileName, 'binary').then((content) =&gt; {
+    const blob = Cypress.Blob.binaryStringToBlob(content, mimeType)
+    const file = new File([blob], fileName, { type: mimeType })
+    const dataTransfer = new DataTransfer()
+    dataTransfer.items.add(file)
+
+    cy.get(selector).then((el) =&gt; {
+      ;(el[0] as HTMLInputElement).files = dataTransfer.files
+      cy.wrap(el).trigger('change', { force: true })
+    })
+  })
+})
+
+// ─── Intercept + wait shorthand ────────────────────────
+Cypress.Commands.add(
+  'interceptAndWait',
+  (method: string, url: string, alias: string, action: () =&gt; void) =&gt; {
+    cy.intercept(method, url).as(alias)
+    action()
+    cy.wait(<code class="inline-code">@${alias}</code>)
+  }
+)</code></pre>
+<hr class="section-divider">
+<h2>Step 10 — Fixtures and Test Data</h2>
+
+<pre class="code-block"><code>cypress/
+├── fixtures/
+│   ├── users/
+│   │   ├── admin.json            → { &quot;email&quot;: &quot;admin@test.com&quot;, ... }
+│   │   ├── learner.json          → { &quot;email&quot;: &quot;learner@test.com&quot;, ... }
+│   │   └── unauthenticated.json  → { &quot;token&quot;: null }
+│   ├── courses/
+│   │   ├── published-course.json → Full course with sections
+│   │   ├── draft-course.json     → Draft course
+│   │   └── empty-course.json     → Course with no content
+│   └── api-responses/
+│       ├── enrollment-success.json
+│       ├── enrollment-error.json
+│       └── courses-list.json
+├── pages/
+│   ├── LoginPage.ts
+│   ├── DashboardPage.ts
+│   ├── CatalogPage.ts
+│   └── CourseDetailPage.ts
+├── support/
+│   ├── commands.ts
+│   ├── e2e.ts
+│   └── index.d.ts               → TypeScript declarations for custom commands
+└── e2e/
+    ├── auth/
+    │   ├── login.cy.ts
+    │   └── signup.cy.ts
+    ├── courses/
+    │   ├── course-enrollment.cy.ts
+    │   └── course-creation.cy.ts
+    └── admin/
+        └── user-management.cy.ts</code></pre>
+<hr class="section-divider">
+<h2>Common Mistakes / Anti-Patterns</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  ANTI-PATTERN                    │  DO THIS INSTEAD          │
+├──────────────────────────────────┼───────────────────────────┤
+│  cy.wait(5000)                   │  cy.wait('@apiAlias')     │
+│  cy.get('.btn-class')            │  cy.get('[data-testid]')  │
+│  Test depends on previous test   │  Each test is independent │
+│  Login via UI in every test      │  Programmatic auth        │
+│  Hardcoded IDs in selectors      │  Dynamic data-testid      │
+│  Asserting on array length === 5 │  length.at.least(1)       │
+│  Testing implementation details  │  Test user-visible behavior│
+│  One giant test file             │  Split by feature/page    │
+│  No cleanup after test           │  afterEach cleanup        │
+│  Skipping .should() retries      │  Always use assertions    │
+│  cy.get(sel).then(el =&gt; ...)     │  cy.get(sel).should(...)  │
+│  Testing third-party components  │  Mock external boundaries │
+└──────────────────────────────────┴───────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Tips for Best Results</h2>
+
+<ul class="skill-list"><li class="ordered"><strong>Start with the happy path</strong> — get the basic flow working before edge cases</li>
+<li class="ordered"><strong>Use <code class="inline-code">cy.intercept()</code> liberally</strong> — intercept every API call your test triggers so you control timing</li>
+<li class="ordered"><strong>Name your test files by feature</strong>, not by page — <code class="inline-code">course-enrollment.cy.ts</code> not <code class="inline-code">catalog-page.cy.ts</code></li>
+<li class="ordered"><strong>Keep tests under 30 seconds each</strong> — if a test is longer, split it</li>
+<li class="ordered"><strong>Run tests headless in CI</strong>, headed locally for debugging</li>
+<li class="ordered"><strong>Use <code class="inline-code">cy.screenshot()</code> on failure</strong> — configured in <code class="inline-code">cypress.config.ts</code> for automatic screenshots</li>
+<li class="ordered"><strong>Tag tests with <code class="inline-code">@smoke</code>, <code class="inline-code">@regression</code></strong> — run smoke tests on every PR, full suite nightly</li>
+<li class="ordered"><strong>Never test CSS styling</strong> — that's visual regression testing, not E2E</li>
+<li class="ordered"><strong>Write the test FIRST when fixing a bug</strong> — prove the bug exists, then fix it, then the test passes</li>
+<li class="ordered"><strong>Review test failures before blaming flakiness</strong> — most "flaky" tests have a real timing bug</li>
+</ul><hr class="section-divider">
+<h2>Cypress Config Reference</h2>
+
+<pre class="code-block"><code>// cypress.config.ts
+import { defineConfig } from 'cypress'
+
+export default defineConfig({
+  e2e: {
+    baseUrl: 'http://localhost:3000',
+    viewportWidth: 1280,
+    viewportHeight: 720,
+    defaultCommandTimeout: 8000,
+    requestTimeout: 10000,
+    responseTimeout: 30000,
+    video: false,                    // Disable video in CI to save time
+    screenshotOnRunFailure: true,
+    retries: {
+      runMode: 2,                    // Retry failed tests in CI
+      openMode: 0,                   // No retry when developing locally
+    },
+    env: {
+      API_URL: 'http://localhost:3001',
+      ADMIN_EMAIL: 'admin@test.com',
+      ADMIN_PASSWORD: 'TestPass123!',
+    },
+    setupNodeEvents(on, config) {
+      // Register tasks, plugins
+    },
+  },
+})</code></pre>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="contract-test.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">Contract Testing — Catch Breaking Changes Before Production</span></span></a>
+    <a href="mock-service.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Mock Service — Build Test Doubles That Don't Lie</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    66 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

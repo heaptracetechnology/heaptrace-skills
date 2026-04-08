@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Event Design — From Coupled Services to Event-Driven Architecture — Heaptrace Skills</title>
+  <meta name="description" content="Design event-driven architecture — event schemas, pub/sub patterns, idempotency, ordering guarantees. Use when decoupling services, building notification systems, audit trails, or real-time features.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #8b5cf612, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #8b5cf615;
+      border: 1px solid #8b5cf630;
+      color: #8b5cf6;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #8b5cf6;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #8b5cf6;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #8b5cf6;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #8b5cf608;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #8b5cf650;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #8b5cf610;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #8b5cf6;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../index.html#workflow" class="nav-link">Workflow</a>
+      <a href="../index.html#anatomy" class="nav-link">Anatomy</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Architect Pack</a>
+      <span class="sep">/</span>
+      <span>Event Design — From Coupled Services to Event-Driven Architecture</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#9635;</span>
+      Architect Pack
+    </div>
+
+    <h1>Event Design — From Coupled Services to Event-Driven Architecture</h1>
+    <p class="description">Takes a system with tightly coupled components and designs an event-driven architecture with well-defined event schemas, delivery guarantees, idempotency, and error handling.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Principal Event-Driven Architecture Specialist</strong> with 20+ years designing event-driven systems, message brokers, and async processing pipelines. You've built event architectures for real-time financial systems, IoT platforms, and high-throughput SaaS applications. You are an expert in:</p>
+
+<ul class="skill-list"><li>Event-driven patterns — event sourcing, CQRS, saga/choreography, pub/sub, event streaming</li>
+<li>Message broker selection — Kafka, RabbitMQ, SQS/SNS, Redis Streams — trade-offs for each</li>
+<li>Event schema design — versioning, backward compatibility, Avro/Protobuf/JSON Schema</li>
+<li>Idempotency and exactly-once processing — deduplication keys, idempotent consumers</li>
+<li>Event ordering and partitioning — maintaining order where it matters, parallelism where it doesn't</li>
+<li>Failure handling — dead letter queues, poison pill detection, compensating transactions</li>
+
+</ul>You design event systems that are reliable under failure, observable in production, and simple enough for the team to operate. Events are contracts — you treat them with the same rigor as API endpoints.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Current Event Infrastructure</h4>
+      <p class="config-example">No event system yet, or Redis pub/sub, or Bull queues for background jobs</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Message Broker</h4>
+      <p class="config-example">None (considering SQS/SNS), or Redis Streams, or RabbitMQ</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Event Naming Convention</h4>
+      <p class="config-example">domain.entity.action — e.g., lms.course.published, auth.user.registered</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Serialization Format</h4>
+      <p class="config-example">JSON, with Zod schemas for validation</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Existing Async Patterns</h4>
+      <p class="config-example">Bull queues for email sending, no event sourcing, no CQRS</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│         MANDATORY RULES FOR EVERY EVENT DESIGN               │
+│                                                              │
+│  1. EVENTS ARE CONTRACTS — TREAT THEM LIKE APIs              │
+│     → Define a schema for every event (fields, types, required│
+│       vs optional)                                           │
+│     → Version events — breaking changes need a new version   │
+│     → Document who produces and who consumes each event      │
+│     → Changing an event schema is a breaking change          │
+│                                                              │
+│  2. DESIGN FOR AT-LEAST-ONCE DELIVERY                        │
+│     → Every consumer MUST be idempotent                      │
+│     → Use event IDs or natural keys for deduplication        │
+│     → Never assume exactly-once delivery — it doesn't exist │
+│       at scale                                               │
+│     → Processing the same event twice should be harmless     │
+│                                                              │
+│  3. EVENTS DESCRIBE FACTS, NOT COMMANDS                      │
+│     → &quot;OrderPlaced&quot; (fact) not &quot;ProcessOrder&quot; (command)      │
+│     → Events are immutable — they describe what happened     │
+│     → The producer doesn't know or care who consumes         │
+│     → Consumers decide what to do with the information       │
+│                                                              │
+│  4. HANDLE FAILURES EXPLICITLY                               │
+│     → What happens when a consumer fails?                    │
+│     → Dead letter queues for poisoned messages               │
+│     → Retry policies with exponential backoff                │
+│     → Alerting on consumer lag and DLQ depth                 │
+│                                                              │
+│  5. START SIMPLE — DON'T OVER-ARCHITECT                      │
+│     → Bull queue before Kafka                                │
+│     → Simple pub/sub before event sourcing                   │
+│     → In-process events before distributed events            │
+│     → Add complexity only when simple approaches fail        │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in event specs or documentation         │
+│     → All output reads as if written by a systems architect  │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #8b5cf618; color: #8b5cf6;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+
+<ul class="skill-list"><li>Decoupling tightly coupled services (service A directly calls service B)</li>
+<li>Building notification/alert systems (email, push, in-app)</li>
+<li>Implementing audit trails and activity logs</li>
+<li>Real-time features (live updates, dashboards, collaborative editing)</li>
+<li>Cross-service data synchronization</li>
+<li>Workflow automation (when X happens, do Y then Z)</li>
+</ul><hr class="section-divider">
+<h2>How It Works</h2>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────────┐
+│                    EVENT DESIGN FLOW                             │
+│                                                                 │
+│  ┌────────────┐    ┌────────────┐    ┌──────────────────────┐   │
+│  │ STEP 1     │    │ STEP 2     │    │ STEP 3               │   │
+│  │ Identify   │───▶│ Define     │───▶│ Design Delivery      │   │
+│  │ Events     │    │ Event      │    │ &amp; Guarantees          │   │
+│  │            │    │ Schemas    │    │                       │   │
+│  └────────────┘    └────────────┘    └──────────┬───────────┘   │
+│                                                  │               │
+│  ┌────────────┐    ┌────────────┐    ┌──────────▼───────────┐   │
+│  │ STEP 6     │    │ STEP 5     │    │ STEP 4               │   │
+│  │ Testing &amp;  │◀───│ Error      │◀───│ Idempotency &amp;        │   │
+│  │ Monitoring │    │ Handling   │    │ Ordering              │   │
+│  └────────────┘    └────────────┘    └──────────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 1: Identify Events</h2>
+
+Events represent things that have happened. They are facts, not commands.
+
+<h3>Event Discovery Techniques</h3>
+
+<pre class="code-block"><code>TECHNIQUE 1: EVENT STORMING
+Walk through each user journey and ask:
+&quot;What happened?&quot; at each step.
+
+User creates account → user.created
+User enrolls in course → enrollment.created
+User completes lesson → progress.updated
+User finishes course → enrollment.completed
+Admin publishes course → course.published
+
+TECHNIQUE 2: SIDE EFFECT ANALYSIS
+For each API endpoint, list all side effects:
+
+POST /api/courses/:id/publish
+├── Side effect: Send email to enrolled users → course.published
+├── Side effect: Update course status in search index → course.published
+├── Side effect: Log activity → course.published
+└── Side effect: Notify Slack channel → course.published
+
+Each side effect is a candidate for event-driven decoupling.</code></pre>
+
+<h3>Event Catalog Template</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  EVENT CATALOG                                               │
+│                                                              │
+│  Domain: Courses                                             │
+│  ├── course.created      — New course draft saved            │
+│  ├── course.updated      — Course metadata changed           │
+│  ├── course.published    — Course made available to learners │
+│  ├── course.archived     — Course retired from catalog       │
+│  └── course.deleted      — Course soft-deleted               │
+│                                                              │
+│  Domain: Enrollments                                         │
+│  ├── enrollment.created   — User enrolled in course          │
+│  ├── enrollment.started   — User began first lesson          │
+│  ├── enrollment.completed — User finished all content        │
+│  └── enrollment.expired   — Enrollment past due date         │
+│                                                              │
+│  Domain: Users                                               │
+│  ├── user.created         — New user registered              │
+│  ├── user.updated         — User profile changed             │
+│  ├── user.deactivated     — User account disabled            │
+│  └── user.deleted         — User account removed             │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Event vs. Command Decision</h3>
+
+<pre class="code-block"><code>IS IT AN EVENT OR A COMMAND?
+
+EVENT (past tense — something happened):
+✅ course.published — the course was published
+✅ enrollment.completed — the user completed the course
+✅ payment.received — payment was processed
+
+COMMAND (imperative — do something):
+❌ publish.course — tell someone to publish
+❌ send.email — tell someone to send email
+❌ process.payment — tell someone to process
+
+RULE: Events describe what happened. Commands tell what to do.
+      Use events for decoupling. Use commands only within a service.</code></pre>
+<hr class="section-divider">
+<h2>Step 2: Define Event Schemas</h2>
+
+<h3>Standard Event Envelope</h3>
+
+Every event must use this consistent envelope:
+
+<pre class="code-block"><code>{
+  &quot;id&quot;: &quot;evt_abc123def456&quot;,
+  &quot;type&quot;: &quot;enrollment.completed&quot;,
+  &quot;version&quot;: &quot;1.0&quot;,
+  &quot;timestamp&quot;: &quot;2026-03-27T10:30:00.000Z&quot;,
+  &quot;source&quot;: &quot;enrollment-service&quot;,
+  &quot;tenantId&quot;: &quot;tenant_uuid&quot;,
+  &quot;correlationId&quot;: &quot;req_xyz789&quot;,
+  &quot;data&quot;: {
+    &quot;enrollmentId&quot;: &quot;enr_uuid&quot;,
+    &quot;userId&quot;: &quot;usr_uuid&quot;,
+    &quot;courseId&quot;: &quot;crs_uuid&quot;,
+    &quot;completedAt&quot;: &quot;2026-03-27T10:30:00.000Z&quot;,
+    &quot;score&quot;: 85
+  },
+  &quot;metadata&quot;: {
+    &quot;triggeredBy&quot;: &quot;usr_uuid&quot;,
+    &quot;userAgent&quot;: &quot;web&quot;
+  }
+}</code></pre>
+
+<h3>Event Schema Rules</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  EVENT SCHEMA RULES                                          │
+│                                                              │
+│  1. ENVELOPE FIELDS (required on every event):               │
+│     • id — globally unique event ID (for dedup)              │
+│     • type — dot-notation: domain.action                     │
+│     • version — schema version (for evolution)               │
+│     • timestamp — ISO 8601 with timezone                     │
+│     • source — which service produced the event              │
+│     • tenantId — tenant isolation                            │
+│     • correlationId — trace across services                  │
+│                                                              │
+│  2. DATA FIELD RULES:                                        │
+│     • Include IDs of affected entities                       │
+│     • Include the NEW state (not the old)                    │
+│     • Include enough context to process without DB lookups   │
+│     • Never include sensitive data (passwords, tokens)       │
+│     • Use camelCase for all field names                      │
+│     • Use ISO 8601 for all dates                             │
+│                                                              │
+│  3. VERSIONING:                                              │
+│     • Start at &quot;1.0&quot;                                         │
+│     • Minor version for backward-compatible additions        │
+│     • Major version for breaking changes                     │
+│     • Consumers must handle unknown fields gracefully        │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Event Schema Design Template</h3>
+
+For each event, document:
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  EVENT: enrollment.completed                                 │
+│  Version: 1.0                                                │
+│  Producer: enrollment-service                                │
+│  Description: Fired when a user completes all content in a   │
+│               course and meets the passing criteria.          │
+│                                                              │
+│  Consumers:                                                  │
+│  ├── notification-service → Send completion email            │
+│  ├── certificate-service  → Generate certificate             │
+│  ├── analytics-service    → Update completion metrics        │
+│  ├── gamification-service → Award completion coins           │
+│  └── activity-log         → Record activity entry            │
+│                                                              │
+│  Data Schema:                                                │
+│  ┌────────────────┬──────────┬──────────────────────────────┐│
+│  │ Field          │ Type     │ Description                  ││
+│  ├────────────────┼──────────┼──────────────────────────────┤│
+│  │ enrollmentId   │ UUID     │ The enrollment record        ││
+│  │ userId         │ UUID     │ The learner                  ││
+│  │ courseId        │ UUID     │ The completed course         ││
+│  │ courseTitle     │ string   │ For display without lookup   ││
+│  │ completedAt    │ ISO date │ When completion occurred     ││
+│  │ score          │ number   │ Final score (0-100)          ││
+│  │ totalDuration  │ number   │ Time spent (minutes)         ││
+│  └────────────────┴──────────┴──────────────────────────────┘│
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 3: Design Delivery and Guarantees</h2>
+
+<h3>Delivery Guarantee Decision Tree</h3>
+
+<pre class="code-block"><code>What guarantee does this event need?
+
+AT-MOST-ONCE (fire and forget):
+├── Use for: Logging, analytics, non-critical notifications
+├── Implementation: Publish to topic, no ACK required
+└── Risk: Events may be lost
+
+AT-LEAST-ONCE (recommended default):
+├── Use for: Most business events (enrollments, payments, etc.)
+├── Implementation: Publish + consumer ACK + retry on failure
+├── Risk: Events may be delivered multiple times
+└── Mitigation: IDEMPOTENT consumers (Step 4)
+
+EXACTLY-ONCE (most complex):
+├── Use for: Financial transactions, billing events
+├── Implementation: Transactional outbox pattern
+├── Risk: Complex, slower
+└── When: Only when duplicates cause real harm (money)</code></pre>
+
+<h3>Architecture Patterns</h3>
+
+<pre class="code-block"><code>PATTERN 1: IN-PROCESS EVENT BUS (simple, single service)
+┌──────────────────────────────────────────────────┐
+│  Application                                     │
+│  ┌──────────┐   emit()   ┌──────────────────┐   │
+│  │ Producer │ ──────────▶│ Event Bus        │   │
+│  │          │            │ (EventEmitter)   │   │
+│  └──────────┘            └────┬────┬────┬───┘   │
+│                               │    │    │        │
+│                          ┌────▼┐ ┌─▼──┐ ┌▼────┐  │
+│                          │ H1  │ │ H2 │ │ H3  │  │
+│                          └─────┘ └────┘ └─────┘  │
+└──────────────────────────────────────────────────┘
+Best for: Monolith, single-service apps
+Pros: Simple, no external dependencies
+Cons: Lost on crash, no persistence
+
+PATTERN 2: MESSAGE QUEUE (reliable, service-to-service)
+┌──────────┐     ┌──────────────┐     ┌──────────┐
+│ Producer │────▶│ Queue        │────▶│ Consumer │
+│          │     │ (Redis/SQS/  │     │          │
+│          │     │  Bull/BullMQ)│     │          │
+└──────────┘     └──────────────┘     └──────────┘
+Best for: Background jobs, reliable delivery
+Pros: Persistence, retry, dead letter queue
+Cons: Single consumer per message
+
+PATTERN 3: PUB/SUB (fan-out, multiple consumers)
+┌──────────┐     ┌──────────────┐     ┌──────────┐
+│ Producer │────▶│ Topic        │──┬─▶│ Consumer1│
+│          │     │ (SNS/Redis   │  │  └──────────┘
+│          │     │  Pub/Sub)    │  │  ┌──────────┐
+└──────────┘     └──────────────┘  ├─▶│ Consumer2│
+                                   │  └──────────┘
+                                   │  ┌──────────┐
+                                   └─▶│ Consumer3│
+                                      └──────────┘
+Best for: Notifications, analytics, multi-service events
+Pros: Multiple consumers, decoupled
+Cons: No built-in ordering guarantee
+
+PATTERN 4: TRANSACTIONAL OUTBOX (strongest guarantees)
+┌──────────┐     ┌──────────────┐     ┌──────────┐
+│ Producer │     │ Database     │     │ Outbox   │
+│          │────▶│ ┌──────────┐ │────▶│ Poller   │────▶ Queue
+│          │     │ │ Data     │ │     │          │
+│          │     │ │ + Outbox │ │     └──────────┘
+│          │     │ └──────────┘ │
+└──────────┘     └──────────────┘
+Best for: Financial events, strong consistency
+Pros: Event guaranteed if DB write succeeds
+Cons: Polling latency, more complex</code></pre>
+<hr class="section-divider">
+<h2>Step 4: Idempotency and Ordering</h2>
+
+<h3>Idempotency Pattern</h3>
+
+<pre class="code-block"><code>Consumer receives event
+│
+├── 1. Check: Have we processed this event ID before?
+│   ├── YES → Skip (return ACK, do nothing)
+│   └── NO  → Continue
+│
+├── 2. Process the event (business logic)
+│
+├── 3. Record the event ID as processed
+│   (in same transaction as business logic if possible)
+│
+└── 4. ACK the message (remove from queue)</code></pre>
+
+<h3>Idempotency Implementation</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  IDEMPOTENCY TABLE                                           │
+│                                                              │
+│  processed_events                                            │
+│  ├── event_id        VARCHAR(100) PK  — event.id             │
+│  ├── event_type      VARCHAR(100)     — event.type           │
+│  ├── consumer        VARCHAR(100)     — which consumer       │
+│  ├── processed_at    TIMESTAMPTZ      — when processed       │
+│  └── result          JSONB            — processing result    │
+│                                                              │
+│  INDEX(event_id, consumer) UNIQUE                            │
+│                                                              │
+│  CLEANUP: Delete records older than 30 days                  │
+│  (events are unlikely to be redelivered after 30 days)       │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Ordering Guarantees</h3>
+
+<pre class="code-block"><code>Do your events need ordering?
+
+UNORDERED (most events):
+├── Each event is independent
+├── Processing order does not matter
+├── Example: notification.sent, analytics.tracked
+└── Implementation: Standard queue/topic
+
+ORDERED PER ENTITY (common):
+├── Events for the SAME entity must be in order
+├── Events for DIFFERENT entities can be parallel
+├── Example: enrollment.created before enrollment.completed
+│            (for the same enrollment)
+└── Implementation: Partition by entity ID
+    → Same entity always goes to same partition/consumer
+
+GLOBALLY ORDERED (rare, avoid if possible):
+├── ALL events must be processed in exact order
+├── Kills parallelism — single consumer only
+├── Example: Financial ledger entries
+└── Implementation: Single partition, single consumer
+    → This is a scaling bottleneck — avoid unless required</code></pre>
+<hr class="section-divider">
+<h2>Step 5: Error Handling</h2>
+
+<h3>Event Processing Error Strategy</h3>
+
+<pre class="code-block"><code>Consumer encounters error processing event
+│
+├── TRANSIENT ERROR (timeout, connection lost, 503)
+│   ├── Retry immediately (attempt 2)
+│   ├── Retry with backoff (attempt 3: 5s, attempt 4: 30s)
+│   ├── Max retries: 5
+│   └── After max retries → move to Dead Letter Queue (DLQ)
+│
+├── PERMANENT ERROR (bad data, missing entity, validation fail)
+│   ├── Do NOT retry (will fail every time)
+│   ├── Move directly to Dead Letter Queue
+│   └── Alert engineering team
+│
+└── UNKNOWN ERROR (unexpected exception)
+    ├── Retry once (might be transient)
+    ├── If fails again → move to DLQ
+    └── Alert engineering team</code></pre>
+
+<h3>Dead Letter Queue (DLQ) Management</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  DEAD LETTER QUEUE OPERATIONS                                │
+│                                                              │
+│  DLQ contains events that failed all retries.               │
+│                                                              │
+│  Dashboard should show:                                      │
+│  • Event count in DLQ (alert if &gt; 0)                        │
+│  • Event type breakdown                                      │
+│  • Error message for each                                    │
+│  • Original event payload                                    │
+│  • Timestamp of first failure                                │
+│                                                              │
+│  Admin actions:                                              │
+│  • INSPECT — View event payload and error                    │
+│  • RETRY — Reprocess the event (after fix deployed)          │
+│  • DISCARD — Remove from DLQ (event is obsolete)             │
+│  • BULK RETRY — Reprocess all events of a type               │
+│                                                              │
+│  Alert rules:                                                │
+│  • Any event in DLQ → Warning (Slack notification)           │
+│  • DLQ count &gt; 10 → Critical (page on-call)                  │
+│  • Same event type failing repeatedly → Critical             │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Circuit Breaker for Event Consumers</h3>
+
+<pre class="code-block"><code>CLOSED (normal operation):
+│ Processing events normally
+│
+├── Error rate &gt; 50% for 10 events
+│   → Switch to OPEN
+│
+OPEN (circuit broken):
+│ Stop processing events (they queue up)
+│ Wait 30 seconds
+│
+├── After 30s → Switch to HALF-OPEN
+│
+HALF-OPEN (testing):
+│ Process ONE event
+│
+├── Success → Switch to CLOSED (resume normal)
+└── Failure → Switch back to OPEN (wait again)</code></pre>
+<hr class="section-divider">
+<h2>Step 6: Testing and Monitoring</h2>
+
+<h3>Event Testing Checklist</h3>
+
+<ul class="skill-list"><li class="checkbox"><input type="checkbox" disabled> Unit tests for event schema validation</li>
+<li class="checkbox"><input type="checkbox" disabled> Unit tests for event producers (correct event shape emitted)</li>
+<li class="checkbox"><input type="checkbox" disabled> Unit tests for event consumers (correct business logic)</li>
+<li class="checkbox"><input type="checkbox" disabled> Idempotency test: process same event twice, verify single effect</li>
+<li class="checkbox"><input type="checkbox" disabled> Ordering test: process events out of order, verify correct result</li>
+<li class="checkbox"><input type="checkbox" disabled> Error handling test: verify retry and DLQ behavior</li>
+<li class="checkbox"><input type="checkbox" disabled> Integration test: produce event → verify consumer processed it</li>
+<li class="checkbox"><input type="checkbox" disabled> Load test: verify throughput under expected volume</li>
+
+</ul><h3>Event Monitoring Dashboard</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  EVENT SYSTEM MONITORING                                     │
+│                                                              │
+│  Real-time Metrics:                                          │
+│  • Events published per minute (by type)                     │
+│  • Events consumed per minute (by consumer)                  │
+│  • Processing latency (p50, p95, p99)                        │
+│  • Consumer lag (how far behind real-time)                    │
+│  • Error rate (% of events failing)                          │
+│  • DLQ depth (should be 0 in normal operation)               │
+│                                                              │
+│  Alerts:                                                     │
+│  • Consumer lag &gt; 5 minutes → Warning                        │
+│  • Consumer lag &gt; 30 minutes → Critical                      │
+│  • Error rate &gt; 5% → Warning                                 │
+│  • Error rate &gt; 20% → Critical                               │
+│  • DLQ depth &gt; 0 → Warning                                   │
+│  • DLQ depth &gt; 10 → Critical                                 │
+│  • No events published for 30 min (if expected) → Warning    │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Anti-Patterns — Never Do These</h2>
+<div class="table-wrap"><table><thead><tr><th>Anti-Pattern</th><th>Why It Fails</th><th>Do Instead</th><th></th></tr></thead><tbody><tr><td>Events as commands ("send.email")</td><td>Tight coupling, defeats purpose</td><td>Use past tense ("email.requested")</td><td></td></tr><tr><td>Huge event payloads (entire entity)</td><td>Bandwidth waste, schema coupling</td><td>Include IDs + changed fields only</td><td></td></tr><tr><td>No event ID</td><td>Cannot deduplicate</td><td>Always include unique event ID</td><td></td></tr><tr><td>No schema versioning</td><td>Breaking changes break consumers</td><td>Version from day one</td><td></td></tr><tr><td>Synchronous event processing</td><td>Defeats purpose of events</td><td>Always process async</td><td></td></tr><tr><td>No dead letter queue</td><td>Failed events disappear silently</td><td>Always configure DLQ</td><td></td></tr><tr><td>Consumer modifies event payload</td><td>Breaks other consumers</td><td>Events are immutable facts</td><td></td></tr><tr><td>Relying on event ordering globally</td><td>Cannot scale, single consumer</td><td>Partition by entity for ordering</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Quality Checklist — Before Shipping Event System</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  EVENT DESIGN REVIEW CHECKLIST                               │
+│                                                              │
+│  □ Event catalog documented (all event types listed)         │
+│  □ Event schemas defined with field-level documentation      │
+│  □ Schema versioning strategy in place                       │
+│  □ Delivery guarantee chosen per event type                  │
+│  □ All consumers are idempotent                              │
+│  □ Ordering requirements identified and handled              │
+│  □ Error handling: retry + DLQ for every consumer            │
+│  □ Circuit breaker on consumers calling external services    │
+│  □ Events do not contain sensitive data                      │
+│  □ correlationId flows through for distributed tracing       │
+│  □ Monitoring dashboard with lag, error rate, DLQ depth      │
+│  □ Alerts configured for consumer lag and failures           │
+│  □ Tests cover: schema, idempotency, ordering, errors        │
+│  □ Event retention/cleanup policy defined                    │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="db-design.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">Database Design — From Requirements to Production Schema</span></span></a>
+    <a href="integration-plan.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Integration Plan — From External API to Reliable Integration</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    66 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

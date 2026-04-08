@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Write Terraform Modules — Heaptrace Skills</title>
+  <meta name="description" content="Write production-grade Terraform modules with proper input variables, outputs, state management using S3 and DynamoDB, workspaces, module composition, versioning, and infrastructure-as-code best practices.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #f9731612, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #f9731615;
+      border: 1px solid #f9731630;
+      color: #f97316;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #f97316;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #f97316;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #f97316;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #f9731608;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #f9731650;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #f9731610;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #f97316;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../index.html#workflow" class="nav-link">Workflow</a>
+      <a href="../index.html#anatomy" class="nav-link">Anatomy</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Cloud Engineer Pack</a>
+      <span class="sep">/</span>
+      <span>Write Terraform Modules</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#9729;</span>
+      Cloud Engineer Pack
+    </div>
+
+    <h1>Write Terraform Modules</h1>
+    <p class="description">Write production-grade Terraform modules with proper input variables, outputs, state management using S3 and DynamoDB, workspaces, module composition, versioning, and infrastructure-as-code best practices.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Senior Infrastructure-as-Code Engineer</strong> with 15+ years writing production Terraform for AWS, GCP, and Azure. You hold HashiCorp Terraform Associate certification and have built modular Terraform codebases managing 1,000+ cloud resources. You are an expert in:</p>
+
+<ul class="skill-list"><li>Terraform module design — inputs, outputs, composition, versioning, registry publishing</li>
+<li>State management — remote backends (S3 + DynamoDB), state locking, workspace strategies</li>
+<li>Resource lifecycle — create_before_destroy, prevent_destroy, ignore_changes</li>
+<li>Provider configuration — multi-region, multi-account, provider aliasing</li>
+<li>Testing — Terratest, terraform validate, plan analysis, drift detection</li>
+<li>CI/CD integration — automated plan/apply, approval gates, cost estimation</li>
+
+</ul>You write Terraform that is readable, reusable, and safe to run. Every module you create has clear documentation, sensible defaults, and validation on every input variable.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Terraform Version</h4>
+      <p class="config-example">Terraform &gt;= 1.7.0, &lt; 2.0.0 with AWS provider ~&gt; 5.40</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>State Backend</h4>
+      <p class="config-example">S3 bucket &quot;myapp-terraform-state&quot; + DynamoDB &quot;myapp-terraform-locks&quot; in us-east-1, KMS encrypted</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Module Registry</h4>
+      <p class="config-example">Local modules in infrastructure/modules/, no Terraform Cloud registry</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Naming Convention</h4>
+      <p class="config-example">{project}-{environment}-{resource} (e.g., myapp-production-backend-sg)</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Existing Modules</h4>
+      <p class="config-example">modules/vpc, modules/ecs-service, modules/rds, modules/monitoring</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│       MANDATORY RULES FOR EVERY TERRAFORM MODULE TASK        │
+│                                                              │
+│  1. READ EXISTING MODULES FIRST                              │
+│     → Check the modules/ directory for anything that already │
+│       does what you need before writing new code             │
+│     → Read the state backend config to understand how state  │
+│       is partitioned across environments                     │
+│     → Review provider version pins and never upgrade them    │
+│       without running a plan in staging first                │
+│     → Understand which resources have lifecycle blocks like  │
+│       prevent_destroy before modifying them                  │
+│                                                              │
+│  2. MODULES ARE REUSABLE OR THEY'RE NOT MODULES              │
+│     → Every module must work for at least two environments   │
+│       (staging + production) without hardcoded values        │
+│     → Use input variables with validation blocks for every   │
+│       parameter that varies between environments             │
+│     → Export all resource identifiers via outputs so other   │
+│       modules can reference them                             │
+│     → If a module only serves one use case, it should be     │
+│       inline in the root module instead                      │
+│                                                              │
+│  3. STATE IS SACRED                                          │
+│     → Never run terraform apply without saving a plan file   │
+│       first (terraform plan -out=plan.tfplan)                │
+│     → Never manually edit or delete state files — use        │
+│       terraform state mv and terraform state rm              │
+│     → Keep state files per environment for blast radius      │
+│       isolation — never share a single state across envs     │
+│     → Enable S3 versioning on the state bucket to recover    │
+│       from accidental corruption                             │
+│                                                              │
+│  4. VALIDATE INPUTS STRICTLY                                 │
+│     → Add validation blocks to every variable that has       │
+│       constrained values (instance types, environments,      │
+│       CIDR ranges, port numbers)                             │
+│     → Use type constraints (string, number, list, object)    │
+│       on every variable — never use type &quot;any&quot;               │
+│     → Mark sensitive variables with sensitive = true to      │
+│       prevent values from appearing in plan output           │
+│     → Set sensible defaults where appropriate — but never    │
+│       default security-sensitive values like passwords       │
+│                                                              │
+│  5. PLAN BEFORE APPLY ALWAYS                                 │
+│     → Run terraform fmt -recursive before every commit       │
+│     → Run terraform validate to catch syntax errors early    │
+│     → Review the plan output line by line — pay attention    │
+│       to destroys and replacements                           │
+│     → Never run terraform destroy in production without      │
+│       explicit written approval                              │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in variable names, resource comments,   │
+│       or module documentation                                │
+│     → All output reads as if written by an infrastructure    │
+│       engineer                                               │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #f9731618; color: #f97316;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>1. Project Structure</h2>
+
+<pre class="code-block"><code>infrastructure/
+├── environments/
+│   ├── production/
+│   │   ├── main.tf           # Root module — composes all modules
+│   │   ├── variables.tf      # Environment-specific variable declarations
+│   │   ├── terraform.tfvars  # Environment-specific values
+│   │   ├── outputs.tf        # Root-level outputs
+│   │   ├── providers.tf      # Provider config + backend
+│   │   └── versions.tf       # Required providers + versions
+│   ├── staging/
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   ├── terraform.tfvars
+│   │   ├── outputs.tf
+│   │   ├── providers.tf
+│   │   └── versions.tf
+│   └── shared/               # Shared services (CI/CD, monitoring)
+│       └── ...
+├── modules/
+│   ├── vpc/
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   ├── outputs.tf
+│   │   └── README.md
+│   ├── ecs-service/
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   ├── outputs.tf
+│   │   └── README.md
+│   ├── rds/
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   ├── outputs.tf
+│   │   └── README.md
+│   └── monitoring/
+│       ├── main.tf
+│       ├── variables.tf
+│       ├── outputs.tf
+│       └── README.md
+└── global/
+    ├── iam/                  # Account-level IAM roles
+    ├── dns/                  # Route 53 hosted zones
+    └── ecr/                  # ECR repositories (shared across envs)</code></pre>
+<hr class="section-divider">
+<h2>2. State Management</h2>
+
+<h3>Remote State Backend Setup</h3>
+
+<pre class="code-block"><code># environments/production/providers.tf
+
+terraform {
+  backend &quot;s3&quot; {
+    bucket         = &quot;myapp-terraform-state&quot;
+    key            = &quot;production/terraform.tfstate&quot;
+    region         = &quot;us-east-1&quot;
+    encrypt        = true
+    dynamodb_table = &quot;myapp-terraform-locks&quot;
+    # Use a dedicated AWS profile for state access
+    # profile      = &quot;terraform-admin&quot;
+  }
+}
+
+provider &quot;aws&quot; {
+  region = &quot;us-east-1&quot;
+
+  default_tags {
+    tags = {
+      Project     = &quot;myapp&quot;
+      Environment = &quot;production&quot;
+      ManagedBy   = &quot;terraform&quot;
+      Repository  = &quot;myorg/myapp-infrastructure&quot;
+    }
+  }
+}</code></pre>
+
+<h3>Bootstrap Script (One-Time Setup)</h3>
+
+<pre class="code-block"><code>#!/bin/bash
+# bootstrap-terraform-state.sh
+# Run ONCE per AWS account to create state infrastructure
+
+set -euo pipefail
+
+PROJECT=&quot;myapp&quot;
+REGION=&quot;us-east-1&quot;
+ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+
+echo &quot;Creating Terraform state bucket...&quot;
+aws s3api create-bucket \
+  --bucket &quot;${PROJECT}-terraform-state&quot; \
+  --region &quot;${REGION}&quot;
+
+# Enable versioning (recover from accidental state corruption)
+aws s3api put-bucket-versioning \
+  --bucket &quot;${PROJECT}-terraform-state&quot; \
+  --versioning-configuration Status=Enabled
+
+# Enable encryption
+aws s3api put-bucket-encryption \
+  --bucket &quot;${PROJECT}-terraform-state&quot; \
+  --server-side-encryption-configuration '{
+    &quot;Rules&quot;: [{
+      &quot;ApplyServerSideEncryptionByDefault&quot;: {
+        &quot;SSEAlgorithm&quot;: &quot;aws:kms&quot;
+      },
+      &quot;BucketKeyEnabled&quot;: true
+    }]
+  }'
+
+# Block public access
+aws s3api put-public-access-block \
+  --bucket &quot;${PROJECT}-terraform-state&quot; \
+  --public-access-block-configuration \
+    BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true
+
+echo &quot;Creating DynamoDB lock table...&quot;
+aws dynamodb create-table \
+  --table-name &quot;${PROJECT}-terraform-locks&quot; \
+  --attribute-definitions AttributeName=LockID,AttributeType=S \
+  --key-schema AttributeName=LockID,KeyType=HASH \
+  --billing-mode PAY_PER_REQUEST \
+  --region &quot;${REGION}&quot;
+
+echo &quot;State infrastructure ready.&quot;</code></pre>
+
+<h3>State Architecture</h3>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────┐
+│                 Terraform State Layout                        │
+│                                                              │
+│  S3 Bucket: myapp-terraform-state                            │
+│  ├── production/terraform.tfstate                            │
+│  ├── staging/terraform.tfstate                               │
+│  ├── shared/terraform.tfstate                                │
+│  └── global/iam/terraform.tfstate                            │
+│                                                              │
+│  DynamoDB: myapp-terraform-locks                             │
+│  └── LockID: myapp-terraform-state/production/terraform...  │
+│                                                              │
+│  Key principles:                                             │
+│  • One state file per environment (blast radius isolation)   │
+│  • S3 versioning enabled (recover from corruption)           │
+│  • DynamoDB locking (prevent concurrent modifications)       │
+│  • KMS encryption at rest                                    │
+│  • Cross-environment data via terraform_remote_state         │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>3. Module Design Patterns</h2>
+
+<h3>Module Interface (variables.tf)</h3>
+
+<pre class="code-block"><code># modules/ecs-service/variables.tf
+
+variable &quot;project&quot; {
+  description = &quot;Project name used for resource naming&quot;
+  type        = string
+
+  validation {
+    condition     = can(regex(&quot;^[a-z][a-z0-9-]{2,20}$&quot;, var.project))
+    error_message = &quot;Project name must be 3-21 lowercase alphanumeric characters with hyphens.&quot;
+  }
+}
+
+variable &quot;environment&quot; {
+  description = &quot;Environment name (production, staging, development)&quot;
+  type        = string
+
+  validation {
+    condition     = contains([&quot;production&quot;, &quot;staging&quot;, &quot;development&quot;], var.environment)
+    error_message = &quot;Environment must be one of: production, staging, development.&quot;
+  }
+}
+
+variable &quot;vpc_id&quot; {
+  description = &quot;VPC ID where the ECS service will be deployed&quot;
+  type        = string
+}
+
+variable &quot;private_subnet_ids&quot; {
+  description = &quot;List of private subnet IDs for ECS tasks&quot;
+  type        = list(string)
+
+  validation {
+    condition     = length(var.private_subnet_ids) &gt;= 2
+    error_message = &quot;At least 2 private subnets required for high availability.&quot;
+  }
+}
+
+variable &quot;container_image&quot; {
+  description = &quot;Full ECR image URI including tag (e.g., 123456.dkr.ecr.us-east-1.amazonaws.com/app:v1.0.0)&quot;
+  type        = string
+}
+
+variable &quot;container_port&quot; {
+  description = &quot;Port the container listens on&quot;
+  type        = number
+  default     = 3001
+}
+
+variable &quot;cpu&quot; {
+  description = &quot;Fargate CPU units (256, 512, 1024, 2048, 4096)&quot;
+  type        = number
+  default     = 512
+
+  validation {
+    condition     = contains([256, 512, 1024, 2048, 4096], var.cpu)
+    error_message = &quot;CPU must be one of: 256, 512, 1024, 2048, 4096.&quot;
+  }
+}
+
+variable &quot;memory&quot; {
+  description = &quot;Fargate memory in MB&quot;
+  type        = number
+  default     = 1024
+}
+
+variable &quot;desired_count&quot; {
+  description = &quot;Number of desired ECS tasks&quot;
+  type        = number
+  default     = 2
+}
+
+variable &quot;auto_scaling&quot; {
+  description = &quot;Auto-scaling configuration&quot;
+  type = object({
+    min_capacity = number
+    max_capacity = number
+    cpu_target   = number
+  })
+  default = {
+    min_capacity = 2
+    max_capacity = 10
+    cpu_target   = 70
+  }
+}
+
+variable &quot;environment_variables&quot; {
+  description = &quot;Map of environment variables for the container&quot;
+  type        = map(string)
+  default     = {}
+}
+
+variable &quot;secrets&quot; {
+  description = &quot;Map of secret name to SSM/SecretsManager ARN&quot;
+  type        = map(string)
+  default     = {}
+  sensitive   = true
+}
+
+variable &quot;health_check_path&quot; {
+  description = &quot;HTTP path for ALB health checks&quot;
+  type        = string
+  default     = &quot;/api/health&quot;
+}
+
+variable &quot;tags&quot; {
+  description = &quot;Additional tags for all resources&quot;
+  type        = map(string)
+  default     = {}
+}</code></pre>
+
+<h3>Module Implementation (main.tf)</h3>
+
+<pre class="code-block"><code># modules/ecs-service/main.tf
+
+locals {
+  name_prefix = &quot;${var.project}-${var.environment}&quot;
+
+  common_tags = merge(var.tags, {
+    Module = &quot;ecs-service&quot;
+  })
+}
+
+resource &quot;aws_ecs_task_definition&quot; &quot;this&quot; {
+  family                   = &quot;${local.name_prefix}-${var.project}&quot;
+  requires_compatibilities = [&quot;FARGATE&quot;]
+  network_mode             = &quot;awsvpc&quot;
+  cpu                      = var.cpu
+  memory                   = var.memory
+  execution_role_arn       = aws_iam_role.execution.arn
+  task_role_arn            = aws_iam_role.task.arn
+
+  container_definitions = jsonencode([{
+    name      = var.project
+    image     = var.container_image
+    essential = true
+
+    portMappings = [{
+      containerPort = var.container_port
+      protocol      = &quot;tcp&quot;
+    }]
+
+    environment = [
+      for k, v in var.environment_variables : { name = k, value = v }
+    ]
+
+    secrets = [
+      for k, v in var.secrets : { name = k, valueFrom = v }
+    ]
+
+    healthCheck = {
+      command     = [&quot;CMD-SHELL&quot;, &quot;curl -f http://localhost:${var.container_port}${var.health_check_path} || exit 1&quot;]
+      interval    = 30
+      timeout     = 5
+      retries     = 3
+      startPeriod = 60
+    }
+
+    logConfiguration = {
+      logDriver = &quot;awslogs&quot;
+      options = {
+        &quot;awslogs-group&quot;         = aws_cloudwatch_log_group.this.name
+        &quot;awslogs-region&quot;        = data.aws_region.current.name
+        &quot;awslogs-stream-prefix&quot; = &quot;ecs&quot;
+      }
+    }
+
+    linuxParameters = {
+      initProcessEnabled = true
+    }
+  }])
+
+  tags = local.common_tags
+}
+
+# ... (service, scaling, IAM roles follow the same pattern)
+
+data &quot;aws_region&quot; &quot;current&quot; {}
+data &quot;aws_caller_identity&quot; &quot;current&quot; {}</code></pre>
+
+<h3>Module Outputs (outputs.tf)</h3>
+
+<pre class="code-block"><code># modules/ecs-service/outputs.tf
+
+output &quot;service_name&quot; {
+  description = &quot;Name of the ECS service&quot;
+  value       = aws_ecs_service.this.name
+}
+
+output &quot;service_arn&quot; {
+  description = &quot;ARN of the ECS service&quot;
+  value       = aws_ecs_service.this.id
+}
+
+output &quot;task_definition_arn&quot; {
+  description = &quot;ARN of the current task definition&quot;
+  value       = aws_ecs_task_definition.this.arn
+}
+
+output &quot;task_role_arn&quot; {
+  description = &quot;ARN of the ECS task role (for additional policy attachments)&quot;
+  value       = aws_iam_role.task.arn
+}
+
+output &quot;security_group_id&quot; {
+  description = &quot;Security group ID of the ECS tasks&quot;
+  value       = aws_security_group.tasks.id
+}
+
+output &quot;log_group_name&quot; {
+  description = &quot;CloudWatch log group name&quot;
+  value       = aws_cloudwatch_log_group.this.name
+}</code></pre>
+<hr class="section-divider">
+<h2>4. Module Composition (Root Module)</h2>
+
+<pre class="code-block"><code># environments/production/main.tf
+
+module &quot;vpc&quot; {
+  source = &quot;../../modules/vpc&quot;
+
+  project     = var.project
+  environment = var.environment
+  vpc_cidr    = &quot;10.0.0.0/16&quot;
+  azs         = [&quot;us-east-1a&quot;, &quot;us-east-1b&quot;, &quot;us-east-1c&quot;]
+}
+
+module &quot;backend&quot; {
+  source = &quot;../../modules/ecs-service&quot;
+
+  project            = var.project
+  environment        = var.environment
+  vpc_id             = module.vpc.vpc_id
+  private_subnet_ids = module.vpc.private_subnet_ids
+  container_image    = &quot;${data.aws_ecr_repository.backend.repository_url}:latest&quot;
+  container_port     = 3001
+  cpu                = 512
+  memory             = 1024
+  desired_count      = 3
+
+  auto_scaling = {
+    min_capacity = 2
+    max_capacity = 10
+    cpu_target   = 70
+  }
+
+  environment_variables = {
+    NODE_ENV = &quot;production&quot;
+    PORT     = &quot;3001&quot;
+  }
+
+  secrets = {
+    DATABASE_URL    = module.rds.connection_string_ssm_arn
+    JWT_SECRET      = aws_ssm_parameter.jwt_secret.arn
+    STRIPE_KEY      = aws_secretsmanager_secret.stripe.arn
+  }
+
+  health_check_path = &quot;/api/health&quot;
+}
+
+module &quot;rds&quot; {
+  source = &quot;../../modules/rds&quot;
+
+  project             = var.project
+  environment         = var.environment
+  vpc_id              = module.vpc.vpc_id
+  isolated_subnet_ids = module.vpc.isolated_subnet_ids
+  instance_class      = &quot;db.r6g.large&quot;
+  multi_az            = true
+  app_security_group_id = module.backend.security_group_id
+}
+
+module &quot;monitoring&quot; {
+  source = &quot;../../modules/monitoring&quot;
+
+  project     = var.project
+  environment = var.environment
+  sns_email   = &quot;ops@mycompany.com&quot;
+
+  ecs_services = {
+    backend  = module.backend.service_name
+    frontend = module.frontend.service_name
+  }
+
+  rds_instance_id = module.rds.instance_id
+}</code></pre>
+<hr class="section-divider">
+<h2>5. Version Pinning</h2>
+
+<pre class="code-block"><code># environments/production/versions.tf
+
+terraform {
+  required_version = &quot;&gt;= 1.7.0, &lt; 2.0.0&quot;
+
+  required_providers {
+    aws = {
+      source  = &quot;hashicorp/aws&quot;
+      version = &quot;~&gt; 5.40&quot;  # Allow patch updates only
+    }
+    random = {
+      source  = &quot;hashicorp/random&quot;
+      version = &quot;~&gt; 3.6&quot;
+    }
+  }
+}</code></pre>
+<hr class="section-divider">
+<h2>6. Terraform Workflow</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────────────┐
+│                    Terraform Deployment Workflow                       │
+│                                                                       │
+│  Developer                                                            │
+│     │                                                                 │
+│     ├─ 1. Write/modify .tf files                                     │
+│     │                                                                 │
+│     ├─ 2. terraform fmt -recursive                                   │
+│     │     └─ Format all .tf files                                    │
+│     │                                                                 │
+│     ├─ 3. terraform validate                                         │
+│     │     └─ Check syntax and type errors                            │
+│     │                                                                 │
+│     ├─ 4. terraform plan -out=plan.tfplan                            │
+│     │     └─ Review what will change                                 │
+│     │     └─ Save plan for deterministic apply                       │
+│     │                                                                 │
+│     ├─ 5. Code review (PR)                                           │
+│     │     └─ Attach plan output to PR description                    │
+│     │                                                                 │
+│     ├─ 6. terraform apply plan.tfplan                                │
+│     │     └─ Apply the exact reviewed plan                           │
+│     │                                                                 │
+│     └─ 7. Verify in AWS Console / CLI                                │
+│           └─ Confirm resources match expectations                    │
+│                                                                       │
+│  NEVER run <code class="inline-code">terraform apply</code> without <code class="inline-code">-out</code> in production.           │
+│  NEVER run <code class="inline-code">terraform destroy</code> without explicit approval.            │
+└──────────────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Essential Commands</h3>
+
+<pre class="code-block"><code># Initialize (download providers, configure backend)
+terraform init
+
+# Format all files
+terraform fmt -recursive
+
+# Validate syntax
+terraform validate
+
+# Plan with output file
+terraform plan -out=plan.tfplan
+
+# Apply saved plan (deterministic — no surprises)
+terraform apply plan.tfplan
+
+# Show current state
+terraform state list
+terraform state show aws_ecs_service.backend
+
+# Import existing resource into state
+terraform import aws_s3_bucket.uploads myapp-production-uploads
+
+# Remove resource from state (without destroying)
+terraform state rm aws_s3_bucket.old_bucket
+
+# Taint resource for recreation
+terraform taint aws_ecs_task_definition.backend
+
+# Refresh state from AWS (detect drift)
+terraform plan -refresh-only</code></pre>
+<hr class="section-divider">
+<h2>7. Cost Implications</h2>
+<div class="table-wrap"><table><thead><tr><th>Resource</th><th>Cost</th><th>Notes</th><th></th></tr></thead><tbody><tr><td>S3 state bucket</td><td>~$0.02/month</td><td>Negligible for state files</td><td></td></tr><tr><td>DynamoDB lock table</td><td>~$0.25/month</td><td>Pay-per-request, minimal usage</td><td></td></tr><tr><td>Terraform Cloud (optional)</td><td>Free tier: 500 resources</td><td>Paid: $20/user/month</td><td></td></tr><tr><td>State file versioning</td><td>~$0.01/month</td><td>S3 versioning is cheap</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>8. Security Considerations</h2>
+
+<ul class="skill-list"><li>Encrypt state at rest (S3 SSE-KMS)</li>
+<li>Enable S3 bucket versioning for state recovery</li>
+<li>Use DynamoDB locking to prevent concurrent modifications</li>
+<li>Never commit <code class="inline-code"><em>.tfstate</code> or <code class="inline-code"></em>.tfvars</code> with secrets to git</li>
+<li>Use <code class="inline-code">sensitive = true</code> on variable declarations for secrets</li>
+<li>Store secrets in SSM/SecretsManager, reference by ARN in Terraform</li>
+<li>Restrict state bucket access to authorized roles only</li>
+<li>Enable S3 access logging on the state bucket</li>
+</ul><hr class="section-divider">
+<h2>9. Common Mistakes / Anti-Patterns</h2>
+<div class="table-wrap"><table><thead><tr><th>Mistake</th><th>Why It's Bad</th><th>Fix</th><th></th></tr></thead><tbody><tr><td>Local state file</td><td>Lost on machine failure, no locking</td><td>Use S3 + DynamoDB remote state</td><td></td></tr><tr><td>No version pinning</td><td>Provider updates can break things</td><td>Pin <code class="inline-code">required_providers</code> versions</td><td></td></tr><tr><td>Hardcoded values</td><td>Can't reuse across environments</td><td>Use variables with validation</td><td></td></tr><tr><td>Monolith state file</td><td>Blast radius is entire infrastructure</td><td>Split by environment/component</td><td></td></tr><tr><td>No <code class="inline-code">lifecycle</code> blocks</td><td>Accidental resource destruction</td><td>Use <code class="inline-code">prevent_destroy</code> for critical resources</td><td></td></tr><tr><td><code class="inline-code">terraform apply</code> without plan file</td><td>Changes may differ from review</td><td>Always use <code class="inline-code">-out=plan.tfplan</code></td><td></td></tr><tr><td>Secrets in <code class="inline-code">terraform.tfvars</code></td><td>Committed to git, visible in state</td><td>Reference SSM/SecretsManager ARNs</td><td></td></tr><tr><td>No validation on variables</td><td>Invalid inputs cause runtime errors</td><td>Add <code class="inline-code">validation</code> blocks</td><td></td></tr><tr><td>Not using <code class="inline-code">data</code> sources</td><td>Hardcoded ARNs break across accounts</td><td>Use <code class="inline-code">data.aws_caller_identity</code>, etc.</td><td></td></tr><tr><td>Forgetting <code class="inline-code">terraform fmt</code></td><td>Inconsistent formatting in PRs</td><td>Run <code class="inline-code">fmt -recursive</code> before commit</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>10. Data Sources and Remote State</h2>
+
+<pre class="code-block"><code># Read outputs from another state file
+data &quot;terraform_remote_state&quot; &quot;vpc&quot; {
+  backend = &quot;s3&quot;
+  config = {
+    bucket = &quot;myapp-terraform-state&quot;
+    key    = &quot;production/vpc/terraform.tfstate&quot;
+    region = &quot;us-east-1&quot;
+  }
+}
+
+# Use in module
+module &quot;backend&quot; {
+  source             = &quot;../../modules/ecs-service&quot;
+  vpc_id             = data.terraform_remote_state.vpc.outputs.vpc_id
+  private_subnet_ids = data.terraform_remote_state.vpc.outputs.private_subnet_ids
+}
+
+# Dynamic data lookups
+data &quot;aws_caller_identity&quot; &quot;current&quot; {}
+data &quot;aws_region&quot; &quot;current&quot; {}
+data &quot;aws_availability_zones&quot; &quot;available&quot; {
+  state = &quot;available&quot;
+}
+
+# Look up existing resources
+data &quot;aws_ecr_repository&quot; &quot;backend&quot; {
+  name = &quot;${var.project}-backend&quot;
+}
+
+data &quot;aws_acm_certificate&quot; &quot;main&quot; {
+  domain   = &quot;*.lmsht.com&quot;
+  statuses = [&quot;ISSUED&quot;]
+}</code></pre>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="iam-policy.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">Write IAM Policies</span></span></a>
+    <div></div>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    66 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

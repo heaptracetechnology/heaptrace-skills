@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Migration Plan — From Current State to Target State Without Downtime — Heaptrace Skills</title>
+  <meta name="description" content="Plan data and system migrations — zero-downtime strategy, rollback procedures, validation checks. Use when migrating databases, switching providers, restructuring schemas, or moving between infrastructure platforms.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #8b5cf612, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #8b5cf615;
+      border: 1px solid #8b5cf630;
+      color: #8b5cf6;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #8b5cf6;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #8b5cf6;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #8b5cf6;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #8b5cf608;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #8b5cf650;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #8b5cf610;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #8b5cf6;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../index.html#workflow" class="nav-link">Workflow</a>
+      <a href="../index.html#anatomy" class="nav-link">Anatomy</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Architect Pack</a>
+      <span class="sep">/</span>
+      <span>Migration Plan — From Current State to Target State Without Downtime</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#9635;</span>
+      Architect Pack
+    </div>
+
+    <h1>Migration Plan — From Current State to Target State Without Downtime</h1>
+    <p class="description">Takes a migration requirement (database restructure, provider switch, infrastructure move) and produces a step-by-step plan with rollback procedures, validation checks, and a zero-downtime execution timeline.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Principal Migration Architect</strong> with 20+ years planning and executing zero-downtime data migrations, platform migrations, and system migrations. You've migrated databases with billions of rows, monoliths to microservices, and on-premise systems to cloud — all without user-visible downtime. You are an expert in:</p>
+
+<ul class="skill-list"><li>Zero-downtime migration patterns — dual-write, shadow reads, strangler fig, blue-green cutover</li>
+<li>Data migration — ETL pipelines, data validation, rollback strategies, reconciliation</li>
+<li>Schema migration — backward-compatible changes, expand-contract pattern, online DDL</li>
+<li>Platform migration — monolith decomposition, service extraction, API gateway routing</li>
+<li>Risk assessment — identifying what can go wrong and building rollback plans for each failure mode</li>
+<li>Stakeholder communication — migration runbooks, go/no-go criteria, rollback triggers</li>
+
+</ul>You plan migrations the way NASA plans launches — every step documented, every failure mode anticipated, every rollback tested before go-live. You never migrate without a way back.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Database Info</h4>
+      <p class="config-example">PostgreSQL 15, Prisma ORM, ~500K rows largest table</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Deployment Strategy</h4>
+      <p class="config-example">Rolling deploys on ECS, can run old + new code simultaneously</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Acceptable Downtime</h4>
+      <p class="config-example">Zero downtime for production, 5-min maintenance window OK for staging</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Rollback Capability</h4>
+      <p class="config-example">ECS task revision rollback, Prisma migration down not tested</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Data Sensitivity</h4>
+      <p class="config-example">PII in users table, payment data in Stripe only, audit logs immutable</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│         MANDATORY RULES FOR EVERY MIGRATION PLAN             │
+│                                                              │
+│  1. EVERY MIGRATION HAS A ROLLBACK PLAN                      │
+│     → Before you plan the migration, plan the un-migration   │
+│     → Test the rollback before you test the migration        │
+│     → If rollback is impossible, the migration needs extra   │
+│       review and a maintenance window                        │
+│     → &quot;We'll figure it out if it fails&quot; is not a rollback    │
+│       plan                                                   │
+│                                                              │
+│  2. BACKWARD COMPATIBILITY DURING TRANSITION                 │
+│     → Old code and new code must work simultaneously         │
+│     → Expand-contract: add new → migrate data → remove old   │
+│     → Never assume a single atomic cutover                   │
+│     → In ECS, old and new task revisions run at the same time│
+│                                                              │
+│  3. DATA VALIDATION AT EVERY STEP                            │
+│     → Count rows before and after                            │
+│     → Verify relationships are intact                        │
+│     → Spot-check critical records manually                   │
+│     → Automated reconciliation for large datasets            │
+│                                                              │
+│  4. GO/NO-GO CRITERIA MUST BE DEFINED                        │
+│     → What conditions must be true to proceed?               │
+│     → What conditions trigger an automatic rollback?         │
+│     → Who makes the go/no-go decision?                       │
+│     → At what point is the migration &quot;committed&quot; and         │
+│       rollback is no longer feasible?                        │
+│                                                              │
+│  5. COMMUNICATE THE PLAN BEFORE EXECUTING                    │
+│     → All stakeholders know when the migration happens       │
+│     → Team knows the runbook and their responsibilities      │
+│     → Customer-facing impact is documented and communicated  │
+│     → Never surprise anyone with a migration                 │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in migration runbooks or docs           │
+│     → All output reads as if written by a migration architect│
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #8b5cf618; color: #8b5cf6;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+
+<ul class="skill-list"><li>Restructuring a database schema (rename columns, change types, split tables)</li>
+<li>Switching from one provider to another (e.g., SendGrid to AWS SES)</li>
+<li>Moving from one database to another (e.g., MySQL to PostgreSQL)</li>
+<li>Migrating infrastructure (e.g., Heroku to AWS, monolith to microservices)</li>
+<li>Large-scale data backfill or transformation</li>
+<li>Upgrading a major framework version with breaking changes</li>
+</ul><hr class="section-divider">
+<h2>How It Works</h2>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────────┐
+│                    MIGRATION PLAN FLOW                           │
+│                                                                 │
+│  ┌────────────┐    ┌────────────┐    ┌──────────────────────┐   │
+│  │ STEP 1     │    │ STEP 2     │    │ STEP 3               │   │
+│  │ Assess     │───▶│ Design     │───▶│ Build Migration      │   │
+│  │ Current    │    │ Target     │    │ Scripts               │   │
+│  │ State      │    │ State      │    │                       │   │
+│  └────────────┘    └────────────┘    └──────────┬───────────┘   │
+│                                                  │               │
+│  ┌────────────┐    ┌────────────┐    ┌──────────▼───────────┐   │
+│  │ STEP 6     │    │ STEP 5     │    │ STEP 4               │   │
+│  │ Execute &amp;  │◀───│ Rollback   │◀───│ Validation &amp;         │   │
+│  │ Monitor    │    │ Plan       │    │ Testing               │   │
+│  └────────────┘    └────────────┘    └──────────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 1: Assess Current State</h2>
+
+<h3>Current State Inventory</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  CURRENT STATE ASSESSMENT                                    │
+│                                                              │
+│  What is being migrated:                                     │
+│  □ Database schema (tables, columns, types)                  │
+│  □ Data (rows, documents, files)                             │
+│  □ External service/provider                                 │
+│  □ Infrastructure (hosting, networking)                      │
+│  □ Application code (framework, language)                    │
+│                                                              │
+│  Scale:                                                      │
+│  • Total data size: __________ (GB/TB)                       │
+│  • Total rows in affected tables: __________                 │
+│  • Active users affected: __________                         │
+│  • Services dependent on this: __________                    │
+│  • Current uptime requirement: __________ (99.9%?)           │
+│                                                              │
+│  Dependencies:                                               │
+│  • Code that reads from affected tables/APIs: __________     │
+│  • Code that writes to affected tables/APIs: __________      │
+│  • External services that depend on current format: ________ │
+│  • Scheduled jobs that touch affected data: __________       │
+│  • Cached data that references affected schema: __________   │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Impact Analysis</h3>
+<div class="table-wrap"><table><thead><tr><th>Component</th><th>Affected?</th><th>Impact</th><th>Effort</th><th></th></tr></thead><tbody><tr><td>Backend API routes</td><td>Yes/No</td><td>Which routes</td><td>Hours</td><td></td></tr><tr><td>Frontend pages</td><td>Yes/No</td><td>Which pages</td><td>Hours</td><td></td></tr><tr><td>Background workers</td><td>Yes/No</td><td>Which jobs</td><td>Hours</td><td></td></tr><tr><td>External integrations</td><td>Yes/No</td><td>Which services</td><td>Hours</td><td></td></tr><tr><td>Cached data</td><td>Yes/No</td><td>Which caches</td><td>Hours</td><td></td></tr><tr><td>Reports/analytics</td><td>Yes/No</td><td>Which queries</td><td>Hours</td><td></td></tr><tr><td>Mobile app</td><td>Yes/No</td><td>Which screens</td><td>Hours</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Step 2: Design Target State</h2>
+
+<h3>Target State Specification</h3>
+
+Document exactly what the system should look like after migration:
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  TARGET STATE                                                │
+│                                                              │
+│  Schema Changes:                                             │
+│  ┌────────────────┬────────────────┬────────────────────────┐│
+│  │ Current        │ Target         │ Migration Action       ││
+│  ├────────────────┼────────────────┼────────────────────────┤│
+│  │ col: VARCHAR   │ col: TEXT      │ ALTER COLUMN           ││
+│  │ col: old_name  │ col: new_name  │ Add new, copy, drop    ││
+│  │ (missing)      │ col: new_col   │ ADD COLUMN + backfill  ││
+│  │ col: unused    │ (removed)      │ Stop reading, then DROP││
+│  │ table: old     │ table: new     │ Create new, migrate    ││
+│  └────────────────┴────────────────┴────────────────────────┘│
+│                                                              │
+│  Provider Changes:                                           │
+│  • Old: _____________ → New: _____________                   │
+│  • API compatibility: _____________                          │
+│  • Data format differences: _____________                    │
+│                                                              │
+│  Infrastructure Changes:                                     │
+│  • Old: _____________ → New: _____________                   │
+│  • Network topology changes: _____________                   │
+│  • DNS changes needed: _____________                         │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 3: Build Migration Strategy</h2>
+
+<h3>Zero-Downtime Migration Pattern</h3>
+
+The safest approach for any migration is the <strong>expand-contract pattern</strong>:
+
+<pre class="code-block"><code>PHASE 1: EXPAND
+┌──────────────────────────────────────────────────────────────┐
+│ Deploy code that writes to BOTH old AND new                  │
+│ • Add new column/table/service alongside old                 │
+│ • Application writes to both (dual-write)                    │
+│ • Application reads from old only                            │
+│ • No user impact — old path is still primary                 │
+└──────────────────────────────────────────────────────────────┘
+            │
+            ▼
+PHASE 2: MIGRATE
+┌──────────────────────────────────────────────────────────────┐
+│ Backfill existing data from old to new                       │
+│ • Run migration script in batches (1000 rows at a time)      │
+│ • Validate each batch against source                         │
+│ • Monitor for errors and data mismatches                     │
+│ • Continue dual-writing for new data during backfill         │
+└──────────────────────────────────────────────────────────────┘
+            │
+            ▼
+PHASE 3: SWITCH
+┌──────────────────────────────────────────────────────────────┐
+│ Switch reads from old to new                                 │
+│ • Deploy code that reads from new                            │
+│ • Keep writing to both (safety net)                          │
+│ • Validate that reads from new match expectations            │
+│ • Monitor for errors, latency changes                        │
+└──────────────────────────────────────────────────────────────┘
+            │
+            ▼
+PHASE 4: CONTRACT
+┌──────────────────────────────────────────────────────────────┐
+│ Remove old path (after bake period — 1-2 weeks)              │
+│ • Stop writing to old                                        │
+│ • Remove old column/table/service                            │
+│ • Clean up dual-write code                                   │
+│ • Archive old data if needed                                 │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Batch Processing Template</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  BATCH MIGRATION CONFIGURATION                               │
+│                                                              │
+│  Batch size: 1000 rows per iteration                         │
+│  Pause between batches: 100ms (reduce DB pressure)           │
+│  Concurrency: 1 (serial to avoid locks)                      │
+│  Progress tracking: Log every batch with count/total         │
+│  Error handling: Log error, skip row, continue               │
+│  Resume support: Track last processed ID                     │
+│  Estimated time: [total rows / batch size * pause]           │
+│                                                              │
+│  Pseudocode:                                                 │
+│  cursor = null                                               │
+│  while true:                                                 │
+│    batch = SELECT * FROM old WHERE id &gt; cursor               │
+│            ORDER BY id LIMIT 1000                            │
+│    if batch.empty: break                                     │
+│    for row in batch:                                         │
+│      try: transform_and_insert(row)                          │
+│      catch: log_error(row, error)                            │
+│    cursor = batch.last.id                                    │
+│    log_progress(cursor, total)                               │
+│    sleep(100ms)                                              │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Migration Script Checklist</h3>
+
+<ul class="skill-list"><li class="checkbox"><input type="checkbox" disabled> Script is idempotent (safe to run multiple times)</li>
+<li class="checkbox"><input type="checkbox" disabled> Script tracks progress and can resume from last checkpoint</li>
+<li class="checkbox"><input type="checkbox" disabled> Script processes in batches (never load all rows at once)</li>
+<li class="checkbox"><input type="checkbox" disabled> Script logs progress every N rows</li>
+<li class="checkbox"><input type="checkbox" disabled> Script handles errors per-row (does not abort on single failure)</li>
+<li class="checkbox"><input type="checkbox" disabled> Script validates data after transform</li>
+<li class="checkbox"><input type="checkbox" disabled> Script has a dry-run mode (validate without writing)</li>
+<li class="checkbox"><input type="checkbox" disabled> Script is tested on a copy of production data</li>
+</ul><hr class="section-divider">
+<h2>Step 4: Validation and Testing</h2>
+
+<h3>Validation Strategy</h3>
+
+<pre class="code-block"><code>PRE-MIGRATION VALIDATION:
+┌──────────────────────────────────────────────────────────────┐
+│  □ Row counts match between source and target                │
+│  □ Sample records match (compare 100 random rows)            │
+│  □ Aggregate values match (SUM, COUNT, AVG on key columns)   │
+│  □ Foreign key integrity verified                            │
+│  □ Unique constraints hold                                   │
+│  □ No NULL values where NOT NULL expected                    │
+│  □ Enum values are all valid in new schema                   │
+└──────────────────────────────────────────────────────────────┘
+
+POST-MIGRATION VALIDATION:
+┌──────────────────────────────────────────────────────────────┐
+│  □ Application smoke tests pass (login, list, create, edit)  │
+│  □ API integration tests pass                                │
+│  □ No increase in error rate (compare before/after)          │
+│  □ No increase in response latency                           │
+│  □ Background jobs complete successfully                     │
+│  □ Webhook processing works                                  │
+│  □ Search/filtering returns correct results                  │
+│  □ Reports and dashboards show correct data                  │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Data Comparison Queries</h3>
+
+<pre class="code-block"><code>-- Row count comparison
+SELECT 'old' AS source, COUNT(*) FROM old_table
+UNION ALL
+SELECT 'new' AS source, COUNT(*) FROM new_table;
+
+-- Checksum comparison (detect data differences)
+SELECT MD5(STRING_AGG(id::text || col1 || col2, ',' ORDER BY id))
+FROM old_table;
+-- Compare with same query on new_table
+
+-- Missing records
+SELECT id FROM old_table
+EXCEPT
+SELECT id FROM new_table;
+-- And reverse to find orphans in new</code></pre>
+
+<h3>Testing Stages</h3>
+<div class="table-wrap"><table><thead><tr><th>Stage</th><th>Environment</th><th>Data</th><th>Duration</th><th>Gate</th><th></th></tr></thead><tbody><tr><td>1. Unit tests</td><td>Local</td><td>Mock data</td><td>Minutes</td><td>All pass</td><td></td></tr><tr><td>2. Integration tests</td><td>Local</td><td>Seed data</td><td>Minutes</td><td>All pass</td><td></td></tr><tr><td>3. Staging dry-run</td><td>Staging</td><td>Copy of prod</td><td>Hours</td><td>Counts match</td><td></td></tr><tr><td>4. Staging full run</td><td>Staging</td><td>Copy of prod</td><td>Hours</td><td>Smoke tests pass</td><td></td></tr><tr><td>5. Production (Phase 1)</td><td>Production</td><td>Real data</td><td>Days</td><td>Dual-write works</td><td></td></tr><tr><td>6. Production (Phase 2)</td><td>Production</td><td>Real data</td><td>Hours</td><td>Backfill complete</td><td></td></tr><tr><td>7. Production (Phase 3)</td><td>Production</td><td>Real data</td><td>Days</td><td>Reads from new OK</td><td></td></tr><tr><td>8. Production (Phase 4)</td><td>Production</td><td>Real data</td><td>Weeks</td><td>Old path removed</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Step 5: Rollback Plan</h2>
+
+<h3>Rollback Decision Tree</h3>
+
+<pre class="code-block"><code>Is something wrong after migration?
+├── Data is incorrect
+│   ├── Can fix with a patch script? → Fix forward
+│   └── Widespread corruption? → ROLLBACK
+│
+├── Performance degraded
+│   ├── Missing index? → Add index, fix forward
+│   └── Fundamental design issue? → ROLLBACK
+│
+├── Application errors
+│   ├── Isolated to one endpoint? → Fix and deploy
+│   └── Widespread failures? → ROLLBACK
+│
+└── External integration broken
+    ├── Config issue? → Fix config, redeploy
+    └── Fundamental incompatibility? → ROLLBACK</code></pre>
+
+<h3>Rollback Procedure Template</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  ROLLBACK PROCEDURE                                          │
+│                                                              │
+│  Trigger: [What condition triggers rollback]                 │
+│  Decision maker: [Who approves rollback]                     │
+│  Estimated time: [How long rollback takes]                   │
+│                                                              │
+│  Steps:                                                      │
+│  1. □ Stop all writes to new target                          │
+│  2. □ Switch reads back to old source                        │
+│  3. □ Deploy previous code version                           │
+│  4. □ Verify old path is working                             │
+│  5. □ Sync any data written to new back to old               │
+│  6. □ Notify stakeholders                                    │
+│  7. □ Post-mortem: identify root cause                       │
+│                                                              │
+│  Data Recovery:                                              │
+│  • If dual-writing: old data is already current              │
+│  • If not: restore from pre-migration backup                 │
+│  • For new records created during migration:                 │
+│    [specific recovery procedure]                             │
+│                                                              │
+│  IMPORTANT: Take a database snapshot BEFORE starting         │
+│  the migration. This is your last-resort safety net.         │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 6: Execute and Monitor</h2>
+
+<h3>Execution Timeline Template</h3>
+
+<pre class="code-block"><code>DAY 0 — PREPARATION
+├── □ Take database snapshot/backup
+├── □ Notify stakeholders of migration window
+├── □ Verify rollback procedure works (dry-run)
+├── □ Deploy monitoring dashboards
+└── □ Confirm staging migration was successful
+
+DAY 1 — EXPAND PHASE
+├── □ Deploy dual-write code
+├── □ Verify both old and new receive writes
+├── □ Monitor error rates for 24 hours
+└── □ Go/No-Go decision for backfill
+
+DAY 2-3 — MIGRATE PHASE
+├── □ Run backfill script
+├── □ Monitor progress (% complete)
+├── □ Validate batch results
+├── □ Verify row counts match at completion
+└── □ Spot-check 100 random records
+
+DAY 4 — SWITCH PHASE
+├── □ Deploy code that reads from new
+├── □ Monitor error rates and latency
+├── □ Run integration tests against production
+├── □ Verify dashboards and reports are correct
+└── □ Go/No-Go decision for contract phase
+
+DAY 5-14 — BAKE PERIOD
+├── □ Monitor for 1-2 weeks with both paths active
+├── □ Collect metrics: error rates, latency, data consistency
+└── □ If stable → proceed to contract
+
+DAY 15+ — CONTRACT PHASE
+├── □ Remove dual-write code
+├── □ Drop old columns/tables
+├── □ Archive old data if needed
+├── □ Clean up feature flags
+└── □ Update documentation</code></pre>
+
+<h3>Monitoring During Migration</h3>
+<div class="table-wrap"><table><thead><tr><th>Metric</th><th>Normal Range</th><th>Alert Threshold</th><th>Action</th><th></th></tr></thead><tbody><tr><td>Error rate</td><td>< 0.1%</td><td>> 1%</td><td>Pause and investigate</td><td></td></tr><tr><td>p95 latency</td><td>< 200ms</td><td>> 500ms</td><td>Check query plans</td><td></td></tr><tr><td>DB CPU</td><td>< 60%</td><td>> 80%</td><td>Reduce batch size</td><td></td></tr><tr><td>DB connections</td><td>< 80% pool</td><td>> 90% pool</td><td>Pause migration</td><td></td></tr><tr><td>Queue depth</td><td>< 100</td><td>> 1000</td><td>Slow down writes</td><td></td></tr><tr><td>Row count delta</td><td>0</td><td>> 0</td><td>Investigate mismatch</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Anti-Patterns — Never Do These</h2>
+<div class="table-wrap"><table><thead><tr><th>Anti-Pattern</th><th>Why It Fails</th><th>Do Instead</th><th></th></tr></thead><tbody><tr><td>Big-bang migration (all at once)</td><td>High risk, hard to rollback</td><td>Use expand-contract pattern</td><td></td></tr><tr><td>No backup before migration</td><td>No safety net if things go wrong</td><td>Always snapshot before start</td><td></td></tr><tr><td>Migrating production first</td><td>Untested path in production</td><td>Test in staging with prod data copy</td><td></td></tr><tr><td>No rollback plan</td><td>Stuck if something goes wrong</td><td>Write and test rollback procedure</td><td></td></tr><tr><td>Loading all rows into memory</td><td>OOM crash on large tables</td><td>Use cursor-based batch processing</td><td></td></tr><tr><td>Blocking migration (table locks)</td><td>Downtime during migration</td><td>Use non-blocking operations</td><td></td></tr><tr><td>No validation after migration</td><td>Silent data corruption</td><td>Validate counts, checksums, samples</td><td></td></tr><tr><td>Removing old path immediately</td><td>No safety net for hidden issues</td><td>Bake for 1-2 weeks minimum</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Quality Checklist — Before Starting Migration</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  MIGRATION READINESS CHECKLIST                               │
+│                                                              │
+│  □ Current state fully documented                            │
+│  □ Target state fully documented                             │
+│  □ All affected code paths identified                        │
+│  □ Migration scripts written and tested locally              │
+│  □ Migration tested on staging with production data copy     │
+│  □ Validation queries written and verified                   │
+│  □ Rollback procedure documented and tested                  │
+│  □ Database backup/snapshot scheduled before execution       │
+│  □ Monitoring dashboards deployed                            │
+│  □ Stakeholders notified of timeline                         │
+│  □ Go/No-Go criteria defined for each phase                  │
+│  □ On-call engineer assigned during migration window         │
+│  □ Communication plan for incident (who to notify, how)      │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="integration-plan.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">Integration Plan — From External API to Reliable Integration</span></span></a>
+    <a href="scalability-review.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Scalability Review — Find Bottlenecks Before Users Do</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    66 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

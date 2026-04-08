@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mock Service — Build Test Doubles That Don't Lie — Heaptrace Skills</title>
+  <meta name="description" content="Create mock APIs and services for testing using MSW, Nock, or custom mock servers. Covers when to mock vs use real services, mock data factories, network request interception, test reset patterns, and TypeScript-safe mocking. Produces reliable, maintainable test doubles.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #6366f112, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #6366f115;
+      border: 1px solid #6366f130;
+      color: #6366f1;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #6366f1;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #6366f1;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #6366f1;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #6366f108;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #6366f150;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #6366f110;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #6366f1;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../index.html#workflow" class="nav-link">Workflow</a>
+      <a href="../index.html#anatomy" class="nav-link">Anatomy</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Automation QA Pack</a>
+      <span class="sep">/</span>
+      <span>Mock Service — Build Test Doubles That Don't Lie</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#9881;</span>
+      Automation QA Pack
+    </div>
+
+    <h1>Mock Service — Build Test Doubles That Don't Lie</h1>
+    <p class="description">Takes an API dependency (internal or external) and creates properly typed mock services that intercept network requests at the right layer. Covers MSW for browser/integration tests, Nock for Node.js tests, custom mock servers for E2E, and factory patterns for test data generation.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Senior Test Infrastructure Engineer</strong> with 12+ years building mock services, API stubs, and test doubles for complex distributed systems. You've created mock architectures for systems with 50+ external API dependencies. You are an expert in:</p>
+
+<ul class="skill-list"><li>MSW (Mock Service Worker) — browser and Node.js request interception</li>
+<li>Nock, WireMock, and custom mock servers for API simulation</li>
+<li>Contract-based mocking — ensuring mocks match real API behavior</li>
+<li>Stateful mocks — simulating multi-step workflows (auth flows, payment sequences)</li>
+<li>Error simulation — timeouts, 500s, rate limits, partial failures, slow responses</li>
+<li>Mock maintenance — keeping mocks in sync when real APIs change</li>
+
+</ul>You build mocks that behave like real services — including their failure modes. Every mock you create is a faithful stand-in that lets tests run fast and offline without hiding real integration bugs.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Mock Framework</h4>
+      <p class="config-example">MSW (Mock Service Worker) for browser + Node.js, or Nock for Node.js only</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>External APIs to Mock</h4>
+      <p class="config-example">Stripe (payments), Google OAuth, SendGrid (email), S3 (file storage)</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Mock Directory</h4>
+      <p class="config-example">src/backend/__mocks__/, or tests/mocks/</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Shared Mock Patterns</h4>
+      <p class="config-example">Factory functions for mock responses, shared fixtures for common entities</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Contract Source</h4>
+      <p class="config-example">OpenAPI specs in /specs/, or live API responses captured as fixtures</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│        MANDATORY RULES FOR EVERY MOCK SERVICE                │
+│                                                              │
+│  1. MOCKS MUST MATCH REAL API BEHAVIOR                       │
+│     → Response shapes, status codes, and headers must match  │
+│       the real API                                           │
+│     → If the real API returns 422 for invalid input, so      │
+│       does the mock                                          │
+│     → A test passing against a wrong mock is worse than no   │
+│       test                                                   │
+│                                                              │
+│  2. MOCK FAILURES, NOT JUST SUCCESS                          │
+│     → Every mock must support error responses                │
+│     → Simulate timeouts, rate limits, and 500 errors         │
+│     → Simulate partial failures (200 but with error in body) │
+│     → If your tests only see 200s, they're not testing       │
+│       error handling                                         │
+│                                                              │
+│  3. KEEP MOCKS IN SYNC WITH REAL APIs                        │
+│     → When the real API changes, update the mock immediately │
+│     → Use contract tests to detect drift                     │
+│     → A stale mock gives false confidence                    │
+│     → Date-stamp mocks so you know when they were last       │
+│       verified                                               │
+│                                                              │
+│  4. MOCKS ARE SHARED CODE — TREAT THEM ACCORDINGLY           │
+│     → Centralize mock definitions — don't copy per test      │
+│     → Factory functions for common mock responses            │
+│     → Document what each mock simulates                      │
+│     → Other developers will use your mocks                   │
+│                                                              │
+│  5. MOCK AT THE RIGHT LEVEL                                  │
+│     → Mock external APIs at the HTTP boundary (MSW, Nock)    │
+│     → Don't mock internal functions unless absolutely needed │
+│     → The more internal mocks you have, the less your tests  │
+│       prove                                                  │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in mock files or documentation          │
+│     → All output reads as if written by a test engineer      │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #6366f118; color: #6366f1;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+<div class="table-wrap"><table><thead><tr><th>Scenario</th><th>Use?</th><th></th></tr></thead><tbody><tr><td>Frontend component tests that call APIs</td><td>Yes — use MSW</td><td></td></tr><tr><td>Backend unit tests for a service that calls another API</td><td>Yes — use Nock</td><td></td></tr><tr><td>Integration tests needing predictable API responses</td><td>Yes</td><td></td></tr><tr><td>Testing error handling (500s, timeouts, rate limits)</td><td>Yes — mocking is the only reliable way</td><td></td></tr><tr><td>Testing against a third-party API (Stripe, SendGrid)</td><td>Yes — never hit real paid APIs in tests</td><td></td></tr><tr><td>Full E2E tests testing the real user flow</td><td>No — use real backend; mock only externals</td><td></td></tr><tr><td>Load/performance testing</td><td>No — use real services to measure real performance</td><td></td></tr><tr><td>Testing your own database queries</td><td>No — use a test database, not mocks</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Decision Tree — What to Mock, What to Keep Real</h2>
+
+<pre class="code-block"><code>┌────────────────────────────────────────────┐
+│  Is the dependency YOUR OWN service?       │
+├──────────┬─────────────────────────────────┤
+│   Yes    │          No (3rd party)         │
+│   ▼      │          ▼                      │
+│ ┌──────────────┐  ┌──────────────────────┐ │
+│ │ Unit test?   │  │ ALWAYS MOCK           │ │
+│ ├──────┬───────┤  │ 3rd-party APIs:      │ │
+│ │ Yes  │  No   │  │  - Stripe            │ │
+│ │ ▼    │  ▼    │  │  - SendGrid          │ │
+│ │Mock  │Real   │  │  - AWS S3            │ │
+│ │it    │svc    │  │  - Google OAuth      │ │
+│ │      │+ test │  │  - Anthropic AI      │ │
+│ │      │DB     │  │ Use their test/sandbox│ │
+│ │      │       │  │ mode when available   │ │
+│ └──────┴───────┘  └──────────────────────┘ │
+└────────────────────────────────────────────┘</code></pre>
+
+<h3>The Mocking Spectrum</h3>
+
+<pre class="code-block"><code>     Full Real                                                  Full Mock
+     ◄─────────────────────────────────────────────────────────────►
+
+     E2E Test           Integration Test         Unit Test
+     Real DB            Test DB + Mock externals  Everything mocked
+     Real Backend       Real service code         Function isolation
+     Real Frontend      Mocked 3rd-party APIs     Mocked dependencies
+     Real Browser       In-memory where possible  No I/O
+
+     HIGHEST CONFIDENCE ────────────────────── FASTEST EXECUTION
+     SLOWEST EXECUTION  ────────────────────── LOWEST CONFIDENCE</code></pre>
+<hr class="section-divider">
+<h2>Mock Tool Selection</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  TOOL           │  LAYER        │  BEST FOR                  │
+├──────────────────┼───────────────┼────────────────────────────┤
+│  MSW            │  Network      │  Browser tests, React      │
+│  (Mock Service  │  (intercepts  │  component tests, Next.js  │
+│   Worker)       │  fetch/XHR)   │  integration tests         │
+│                 │               │                            │
+│  Nock           │  Network      │  Node.js tests, backend    │
+│                 │  (intercepts  │  service tests, API client  │
+│                 │  http module) │  tests                     │
+│                 │               │                            │
+│  cy.intercept() │  Network      │  Cypress E2E tests (built  │
+│                 │  (proxy)      │  in, no extra library)     │
+│                 │               │                            │
+│  Jest mocks     │  Module       │  Mocking internal modules, │
+│  (jest.mock)    │  (replaces    │  database clients, file    │
+│                 │  imports)     │  system                    │
+│                 │               │                            │
+│  Custom Server  │  Full server  │  E2E tests needing a fake  │
+│  (Express)      │  (runs on    │  third-party API           │
+│                 │  a port)     │                            │
+└──────────────────┴───────────────┴────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>MSW (Mock Service Worker) — Browser & Node</h2>
+
+<h3>Setup for React/Next.js Tests</h3>
+
+<pre class="code-block"><code>// src/mocks/server.ts — for Node.js test environment (Jest/Vitest)
+import { setupServer } from 'msw/node'
+import { handlers } from './handlers'
+
+export const server = setupServer(...handlers)
+
+// src/mocks/browser.ts — for browser test environment (Storybook, dev)
+import { setupWorker } from 'msw/browser'
+import { handlers } from './handlers'
+
+export const worker = setupWorker(...handlers)</code></pre>
+
+<h3>Handler Structure</h3>
+
+<pre class="code-block"><code>// src/mocks/handlers/index.ts
+import { courseHandlers } from './courses'
+import { authHandlers } from './auth'
+import { enrollmentHandlers } from './enrollments'
+
+export const handlers = [
+  ...authHandlers,
+  ...courseHandlers,
+  ...enrollmentHandlers,
+]</code></pre>
+
+<pre class="code-block"><code>// src/mocks/handlers/courses.ts
+import { http, HttpResponse, delay } from 'msw'
+import { courseFactory } from '../factories/course'
+
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+
+export const courseHandlers = [
+  // ─── GET /api/courses ────────────────────────────────
+  http.get(<code class="inline-code">${BASE_URL}/api/courses</code>, async ({ request }) =&gt; {
+    const url = new URL(request.url)
+    const status = url.searchParams.get('status')
+    const page = parseInt(url.searchParams.get('page') || '1')
+    const limit = parseInt(url.searchParams.get('limit') || '20')
+
+    // Simulate realistic delay
+    await delay(100)
+
+    const courses = courseFactory.buildList(limit, {
+      status: status || 'published',
+    })
+
+    return HttpResponse.json({
+      items: courses,
+      total: 47,
+      page,
+      limit,
+      totalPages: 3,
+    })
+  }),
+
+  // ─── GET /api/courses/:id ───────────────────────────
+  http.get(<code class="inline-code">${BASE_URL}/api/courses/:id</code>, async ({ params }) =&gt; {
+    const { id } = params
+
+    if (id === 'not-found-id') {
+      return HttpResponse.json(
+        { error: 'Course not found' },
+        { status: 404 }
+      )
+    }
+
+    await delay(50)
+
+    return HttpResponse.json(
+      courseFactory.build({ id: id as string })
+    )
+  }),
+
+  // ─── POST /api/courses ──────────────────────────────
+  http.post(<code class="inline-code">${BASE_URL}/api/courses</code>, async ({ request }) =&gt; {
+    const body = await request.json() as Record&lt;string, unknown&gt;
+
+    // Validate required fields
+    if (!body.title) {
+      return HttpResponse.json(
+        { error: 'Title is required' },
+        { status: 400 }
+      )
+    }
+
+    await delay(200)
+
+    return HttpResponse.json(
+      courseFactory.build({
+        title: body.title as string,
+        status: 'draft',
+      }),
+      { status: 201 }
+    )
+  }),
+
+  // ─── Error scenario handlers ────────────────────────
+  // These are used by specific tests that override defaults
+  http.get(<code class="inline-code">${BASE_URL}/api/courses/error-500</code>, () =&gt; {
+    return HttpResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }),
+]</code></pre>
+
+<h3>Test Setup with MSW</h3>
+
+<pre class="code-block"><code>// src/tests/setup.ts (for Jest or Vitest)
+import { server } from '../mocks/server'
+
+beforeAll(() =&gt; {
+  // Start MSW server before all tests
+  server.listen({
+    onUnhandledRequest: 'warn',  // Warn about unhandled requests
+  })
+})
+
+afterEach(() =&gt; {
+  // Reset handlers to defaults between tests
+  // This is CRITICAL — without it, test overrides leak
+  server.resetHandlers()
+})
+
+afterAll(() =&gt; {
+  server.close()
+})</code></pre>
+
+<h3>Per-Test Handler Overrides</h3>
+
+<pre class="code-block"><code>import { http, HttpResponse } from 'msw'
+import { server } from '../../mocks/server'
+
+describe('Course List', () =&gt; {
+  it('shows error state when API fails', async () =&gt; {
+    // Override ONLY for this test — reset in afterEach
+    server.use(
+      http.get('*/api/courses', () =&gt; {
+        return HttpResponse.json(
+          { error: 'Database connection failed' },
+          { status: 500 }
+        )
+      })
+    )
+
+    render(&lt;CourseList /&gt;)
+
+    await waitFor(() =&gt; {
+      expect(screen.getByText('Failed to load courses')).toBeInTheDocument()
+    })
+  })
+
+  it('shows empty state when no courses', async () =&gt; {
+    server.use(
+      http.get('*/api/courses', () =&gt; {
+        return HttpResponse.json({
+          items: [],
+          total: 0,
+          page: 1,
+          limit: 20,
+          totalPages: 0,
+        })
+      })
+    )
+
+    render(&lt;CourseList /&gt;)
+
+    await waitFor(() =&gt; {
+      expect(screen.getByText('No courses found')).toBeInTheDocument()
+    })
+  })
+
+  it('loads and displays courses', async () =&gt; {
+    // Uses default handler — no override needed
+    render(&lt;CourseList /&gt;)
+
+    await waitFor(() =&gt; {
+      expect(screen.getAllByTestId('course-card')).toHaveLength(20)
+    })
+  })
+})</code></pre>
+<hr class="section-divider">
+<h2>Nock — Node.js HTTP Mocking</h2>
+
+<h3>When to Use Nock vs MSW</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────┐
+│  Nock: intercepts Node.js http module    │
+│  MSW:  intercepts fetch/XHR in browser   │
+│                                          │
+│  Use Nock when:                          │
+│   - Testing backend services             │
+│   - Testing API clients in Node.js       │
+│   - Testing middleware                   │
+│   - Testing webhook handlers             │
+│                                          │
+│  Use MSW when:                           │
+│   - Testing React/Next.js components     │
+│   - Testing browser-side API calls       │
+│   - Testing with React Testing Library   │
+│   - Storybook mock data                  │
+└──────────────────────────────────────────┘</code></pre>
+
+<h3>Nock Patterns</h3>
+
+<pre class="code-block"><code>// tests/services/stripe-service.test.ts
+import nock from 'nock'
+import { StripeService } from '../../services/stripe'
+
+describe('StripeService', () =&gt; {
+  const stripeApi = nock('https://api.stripe.com')
+
+  afterEach(() =&gt; {
+    nock.cleanAll()              // Remove all interceptors
+    nock.enableNetConnect()      // Re-enable real HTTP (safety)
+  })
+
+  it('creates a customer', async () =&gt; {
+    stripeApi
+      .post('/v1/customers', {
+        email: 'user@test.com',
+        name: 'Test User',
+      })
+      .reply(200, {
+        id: 'cus_test123',
+        email: 'user@test.com',
+        name: 'Test User',
+        created: 1234567890,
+      })
+
+    const service = new StripeService()
+    const customer = await service.createCustomer('user@test.com', 'Test User')
+
+    expect(customer.id).toBe('cus_test123')
+    expect(stripeApi.isDone()).toBe(true)  // Verify the mock was called
+  })
+
+  it('handles Stripe API errors', async () =&gt; {
+    stripeApi
+      .post('/v1/customers')
+      .reply(402, {
+        error: {
+          type: 'card_error',
+          message: 'Your card was declined',
+        },
+      })
+
+    const service = new StripeService()
+
+    await expect(
+      service.createCustomer('user@test.com', 'Test User')
+    ).rejects.toThrow('Your card was declined')
+  })
+
+  it('retries on network timeout', async () =&gt; {
+    // First call times out
+    stripeApi
+      .post('/v1/customers')
+      .delayConnection(10000)   // Simulate timeout
+      .reply(200, {})
+
+    // Second call (retry) succeeds
+    stripeApi
+      .post('/v1/customers')
+      .reply(200, { id: 'cus_retry_success' })
+
+    const service = new StripeService({ timeout: 1000, retries: 1 })
+    const customer = await service.createCustomer('user@test.com', 'Test User')
+
+    expect(customer.id).toBe('cus_retry_success')
+  })
+})</code></pre>
+<hr class="section-divider">
+<h2>Mock Data Factories</h2>
+
+<h3>Why Factories Beat Fixtures</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  FIXTURES (JSON files)            FACTORIES (Builder funcs)  │
+│                                                              │
+│  Static data                      Dynamic data               │
+│  One shape per file               Infinite variations        │
+│  Hard to customize per test       Override any field          │
+│  Drift from real schema           Type-checked against schema│
+│  Copy-pasted across tests         Single source of truth     │
+│  &quot;fixtures/user-admin.json&quot;       userFactory.build({admin:1})│
+│  &quot;fixtures/user-learner.json&quot;     userFactory.build({role:..})│
+│  &quot;fixtures/user-no-email.json&quot;    userFactory.build({email:0})│
+│  = 20 fixture files               = 1 factory function       │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Factory Pattern Implementation</h3>
+
+<pre class="code-block"><code>// src/mocks/factories/base.ts
+import { v4 as uuid } from 'uuid'
+
+type FactoryDefinition&lt;T&gt; = {
+  [K in keyof T]: T[K] | (() =&gt; T[K])
+}
+
+export function createFactory&lt;T extends Record&lt;string, unknown&gt;&gt;(
+  defaults: FactoryDefinition&lt;T&gt;
+) {
+  let sequence = 0
+
+  function build(overrides: Partial&lt;T&gt; = {}): T {
+    sequence++
+    const result = {} as T
+
+    for (const key of Object.keys(defaults) as (keyof T)[]) {
+      const defaultValue = defaults[key]
+      if (key in overrides) {
+        result[key] = overrides[key]!
+      } else if (typeof defaultValue === 'function') {
+        result[key] = (defaultValue as () =&gt; T[keyof T])()
+      } else {
+        result[key] = defaultValue as T[keyof T]
+      }
+    }
+
+    return result
+  }
+
+  function buildList(count: number, overrides: Partial&lt;T&gt; = {}): T[] {
+    return Array.from({ length: count }, () =&gt; build(overrides))
+  }
+
+  function getSequence() {
+    return sequence
+  }
+
+  return { build, buildList, getSequence }
+}</code></pre>
+
+<pre class="code-block"><code>// src/mocks/factories/course.ts
+import { createFactory } from './base'
+import { v4 as uuid } from 'uuid'
+
+interface MockCourse {
+  id: string
+  title: string
+  description: string
+  status: string
+  category: string
+  created_at: string
+  updated_at: string
+  sections_count: number
+  enrolled_count: number
+  thumbnail_url: string | null
+  created_by: string
+}
+
+export const courseFactory = createFactory&lt;MockCourse&gt;({
+  id: () =&gt; uuid(),
+  title: () =&gt; <code class="inline-code">Test Course ${Date.now()}</code>,
+  description: 'A comprehensive course for testing purposes.',
+  status: 'published',
+  category: 'Engineering',
+  created_at: () =&gt; new Date().toISOString(),
+  updated_at: () =&gt; new Date().toISOString(),
+  sections_count: 5,
+  enrolled_count: 12,
+  thumbnail_url: null,
+  created_by: () =&gt; uuid(),
+})
+
+// Usage:
+// courseFactory.build()                          → default course
+// courseFactory.build({ status: 'draft' })       → draft course
+// courseFactory.build({ title: 'My Course' })    → custom title
+// courseFactory.buildList(10)                    → 10 courses
+// courseFactory.buildList(5, { status: 'draft'}) → 5 draft courses</code></pre>
+
+<pre class="code-block"><code>// src/mocks/factories/user.ts
+import { createFactory } from './base'
+import { v4 as uuid } from 'uuid'
+
+interface MockUser {
+  id: string
+  email: string
+  first_name: string
+  last_name: string
+  role: string
+  is_active: boolean
+  tenant_id: string
+  avatar_url: string | null
+  created_at: string
+}
+
+let userSeq = 0
+
+export const userFactory = createFactory&lt;MockUser&gt;({
+  id: () =&gt; uuid(),
+  email: () =&gt; <code class="inline-code">user${++userSeq}@test.com</code>,
+  first_name: () =&gt; <code class="inline-code">User</code>,
+  last_name: () =&gt; <code class="inline-code">${userSeq}</code>,
+  role: 'learner',
+  is_active: true,
+  tenant_id: () =&gt; uuid(),
+  avatar_url: null,
+  created_at: () =&gt; new Date().toISOString(),
+})</code></pre>
+<hr class="section-divider">
+<h2>Resetting Mocks Between Tests</h2>
+
+<h3>The Reset Flow</h3>
+
+<pre class="code-block"><code>┌──────────┐     beforeEach    ┌──────────┐     Test runs     ┌──────────┐
+│  Clean   │ ───────────────▶  │  Fresh   │ ────────────────▶ │  Test    │
+│  state   │                   │  mocks   │                    │  adds    │
+│          │                   │  applied │                    │  overrides│
+└──────────┘                   └──────────┘                    └────┬─────┘
+                                                                    │
+     ┌──────────────────────────────────────────────────────────────┘
+     │  afterEach
+     ▼
+┌──────────┐
+│  Reset   │ → server.resetHandlers()  (MSW)
+│  all     │ → nock.cleanAll()         (Nock)
+│  mocks   │ → jest.restoreAllMocks()  (Jest)
+│          │ → factory sequence reset  (optional)
+└──────────┘</code></pre>
+
+<h3>Critical Reset Rules</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  MOCK RESET RULES — NEVER SKIP                              │
+│                                                              │
+│  1. ALWAYS reset mocks in afterEach, not afterAll            │
+│     → afterAll resets only once after all tests in a file    │
+│     → afterEach resets after EACH test — prevents leakage   │
+│                                                              │
+│  2. Reset ORDER matters:                                     │
+│     → First:  server.resetHandlers()  (network mocks)       │
+│     → Second: jest.restoreAllMocks()  (module mocks)        │
+│     → Third:  cleanup any test data   (DB seeds)            │
+│                                                              │
+│  3. Use server.use() for per-test overrides                  │
+│     → They auto-reset on server.resetHandlers()             │
+│     → Never modify the default handlers array directly       │
+│                                                              │
+│  4. VERIFY mocks were called                                 │
+│     → nock.isDone() — were all interceptors consumed?        │
+│     → expect(fetchMock).toHaveBeenCalled()                   │
+│     → Uncalled mocks = either dead code or wrong URL         │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Type-Safe Mocking</h2>
+
+<h3>Typing Mock Responses</h3>
+
+<pre class="code-block"><code>// src/types/api.ts — share these between frontend and mock handlers
+export interface CourseListResponse {
+  items: Course[]
+  total: number
+  page: number
+  limit: number
+  totalPages: number
+}
+
+export interface Course {
+  id: string
+  title: string
+  description: string
+  status: 'draft' | 'published' | 'archived'
+  category: string
+  created_at: string
+}
+
+// src/mocks/handlers/courses.ts
+import type { CourseListResponse, Course } from '../../types/api'
+
+http.get('*/api/courses', () =&gt; {
+  // TypeScript ensures the response matches the real API shape
+  const response: CourseListResponse = {
+    items: courseFactory.buildList(10),
+    total: 10,
+    page: 1,
+    limit: 20,
+    totalPages: 1,
+  }
+  return HttpResponse.json(response)
+})</code></pre>
+
+<h3>Typing Jest Mocks</h3>
+
+<pre class="code-block"><code>// Typed mock for a service
+import { EmailService } from '../services/email'
+
+jest.mock('../services/email')
+
+const mockEmailService = jest.mocked(EmailService)
+
+// Now TypeScript knows the shape of the mock
+mockEmailService.prototype.send.mockResolvedValue({ messageId: 'test-123' })
+
+// This would be a TypeScript error:
+// mockEmailService.prototype.send.mockResolvedValue({ wrong_field: true })</code></pre>
+<hr class="section-divider">
+<h2>Common Mistakes / Anti-Patterns</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  ANTI-PATTERN                    │  DO THIS INSTEAD          │
+├──────────────────────────────────┼───────────────────────────┤
+│  Mocking your own database       │  Use a test database      │
+│  Not resetting mocks             │  afterEach → resetHandlers│
+│  Fixtures with 500-line JSON     │  Factory functions         │
+│  Mocking fetch globally          │  MSW per-handler intercept│
+│  Hardcoded UUIDs in mocks        │  Factory-generated UUIDs  │
+│  Mock returns don't match schema │  Type-check mock responses│
+│  Mocking too deep (internals)    │  Mock at the boundary     │
+│  No verification mocks were used │  assert isDone / called   │
+│  Same mock data for all tests    │  Customize per scenario   │
+│  Mocking in production code      │  Mocks in test files only │
+│  Using real 3rd-party APIs       │  Always mock externals    │
+│  Not testing error responses     │  Mock 400/500/timeout     │
+└──────────────────────────────────┴───────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Tips for Best Results</h2>
+
+<ul class="skill-list"><li class="ordered"><strong>Mock at the network boundary</strong> — not at the module level. MSW and Nock intercept HTTP, which means your real fetch/axios code runs too</li>
+<li class="ordered"><strong>Keep factories close to your API types</strong> — if the API type changes, the factory should break at compile time</li>
+<li class="ordered"><strong>Test the error path first</strong> — mocking 500s and timeouts is the most valuable use of mocks because you can't reliably trigger these with real services</li>
+<li class="ordered"><strong>Use <code class="inline-code">onUnhandledRequest: 'error'</code></strong> in MSW — this catches any fetch call your handlers don't cover, preventing silent failures</li>
+<li class="ordered"><strong>One factory per entity</strong> — <code class="inline-code">userFactory</code>, <code class="inline-code">courseFactory</code>, <code class="inline-code">enrollmentFactory</code>. Never a generic <code class="inline-code">dataFactory</code></li>
+<li class="ordered"><strong>Name your mocked scenarios</strong> — <code class="inline-code">server.use(coursesEmptyState)</code> is clearer than inline handler definitions</li>
+<li class="ordered"><strong>Simulate realistic delays</strong> — <code class="inline-code">await delay(100)</code> catches race conditions that instant responses hide</li>
+<li class="ordered"><strong>Never mock what you own</strong> — if you control both the client and server, test them together. Mock only third-party boundaries</li>
+<li class="ordered"><strong>Verify mock coverage</strong> — if you have 20 handlers but tests only trigger 5, you have dead mock code</li>
+<li class="ordered"><strong>Keep mocks in sync with real API</strong> — run contract tests (see contract-test skill) to ensure mocks match reality</li></ul>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="cypress-test.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">Cypress / Playwright E2E Tests — Write Tests That Don't Flake</span></span></a>
+    <a href="test-coverage.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Test Coverage — Measure What Matters, Not Just Lines</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    66 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

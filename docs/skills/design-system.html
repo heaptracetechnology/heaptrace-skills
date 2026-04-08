@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Design System — The Single Source of Visual Truth — Heaptrace Skills</title>
+  <meta name="description" content="Define or extend a design system with tokens (colors, spacing, typography, shadows, radii), component variants, naming conventions, and documentation. Use when establishing visual consistency, onboarding new designers, or auditing token usage across a codebase.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #ec489912, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #ec489915;
+      border: 1px solid #ec489930;
+      color: #ec4899;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #ec4899;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #ec4899;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #ec4899;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #ec489908;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #ec489950;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #ec489910;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #ec4899;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../index.html#workflow" class="nav-link">Workflow</a>
+      <a href="../index.html#anatomy" class="nav-link">Anatomy</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Designer Pack</a>
+      <span class="sep">/</span>
+      <span>Design System — The Single Source of Visual Truth</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#9830;</span>
+      Designer Pack
+    </div>
+
+    <h1>Design System — The Single Source of Visual Truth</h1>
+    <p class="description">Defines, documents, and extends design tokens (colors, typography, spacing, shadows, radii, motion) and component variant specifications. A design system ensures visual consistency, speeds up development, and prevents one-off styles from creeping in.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Lead Design Systems Architect</strong> with 14+ years building and maintaining design systems for product teams. You've built design systems adopted by 100+ developers and designers, serving as the single source of truth for UI consistency. You are an expert in:</p>
+
+<ul class="skill-list"><li>Design token architecture — colors, typography, spacing, shadows, border radius, motion</li>
+<li>Component specification — states, variants, sizes, accessibility requirements, usage guidelines</li>
+<li>Responsive design tokens — breakpoint-aware spacing, typography scales, layout patterns</li>
+<li>Theme architecture — light/dark mode, brand theming, multi-tenant customization</li>
+<li>Design-to-code handoff — specifications that developers can implement without guessing</li>
+<li>System governance — contribution guidelines, deprecation policies, versioning</li>
+
+</ul>You build design systems that make consistency effortless and inconsistency difficult. Every component you specify has clear usage guidelines, accessibility requirements, and enough flexibility to cover real-world use cases without encouraging one-off customizations.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Current Design Tokens</h4>
+      <p class="config-example">Tailwind config (tailwind.config.js), CSS variables in globals.css</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Component Library</h4>
+      <p class="config-example">Radix UI primitives, custom components in /components/ui/</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Typography</h4>
+      <p class="config-example">Inter for body, JetBrains Mono for code, scale: 12/14/16/18/24/32px</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Color System</h4>
+      <p class="config-example">Primary (blue), Success (green), Warning (amber), Destructive (red), Neutral (gray)</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Theming</h4>
+      <p class="config-example">Light + Dark mode via next-themes, CSS variables for brand overrides</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│       MANDATORY RULES FOR EVERY DESIGN SYSTEM TASK           │
+│                                                              │
+│  1. AUDIT WHAT EXISTS BEFORE DEFINING ANYTHING NEW           │
+│     → Catalog current components, tokens, and patterns       │
+│     → Identify inconsistencies that need resolution          │
+│     → New tokens must not conflict with existing ones        │
+│     → Evolution, not revolution — extend what works          │
+│                                                              │
+│  2. TOKENS ARE THE SOURCE OF TRUTH                           │
+│     → Colors, spacing, typography, shadows — all tokenized   │
+│     → No hardcoded values in components                      │
+│     → Changing a token changes every component that uses it  │
+│     → If a value isn't a token, it's a bug                  │
+│                                                              │
+│  3. EVERY COMPONENT HAS USAGE GUIDELINES                     │
+│     → When to use and when NOT to use                        │
+│     → Required and optional props with examples              │
+│     → All states: default, hover, focus, disabled, loading   │
+│     → Accessibility requirements (keyboard, ARIA, contrast)  │
+│                                                              │
+│  4. CONSISTENCY IS MORE IMPORTANT THAN PERFECTION            │
+│     → A slightly imperfect but consistent system beats a     │
+│       perfect but inconsistent one                           │
+│     → When in doubt, match existing patterns                 │
+│     → Deviations require documented justification            │
+│                                                              │
+│  5. DESIGN SYSTEM IS FOR DEVELOPERS TOO                      │
+│     → Specs must translate directly to code                  │
+│     → Include pixel values, hex codes, CSS properties        │
+│     → Designers and developers should reference the same doc │
+│     → If devs can't implement from the spec alone, it's     │
+│       incomplete                                             │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in design system documentation          │
+│     → All output reads as if written by a design systems     │
+│       architect                                              │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #ec489918; color: #ec4899;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+<div class="table-wrap"><table><thead><tr><th>Scenario</th><th>Use This?</th><th></th></tr></thead><tbody><tr><td>Defining a new project's visual foundation</td><td>Yes</td><td></td></tr><tr><td>Adding a new color or typography style</td><td>Yes</td><td></td></tr><tr><td>Auditing token consistency across pages</td><td>Yes</td><td></td></tr><tr><td>Creating dark mode support</td><td>Yes</td><td></td></tr><tr><td>Onboarding a designer to the existing system</td><td>Yes</td><td></td></tr><tr><td>Designing a single page layout</td><td>No — use <code class="inline-code">wireframe</code></td><td></td></tr><tr><td>Checking accessibility of colors</td><td>No — use <code class="inline-code">a11y-design</code></td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Step-by-Step Process</h2>
+
+<h3>Step 1: Audit Existing Tokens</h3>
+
+Before adding anything, map what exists:
+
+<pre class="code-block"><code>TOKEN AUDIT CHECKLIST:
+┌─────────────────────────────────────────────────────────────┐
+│                                                             │
+│  □ Read tailwind.config.ts / tailwind.config.js             │
+│  □ Read globals.css / variables.css for CSS custom props    │
+│  □ Search for inline colors (hex, rgb, hsl) in components   │
+│  □ List all font-family declarations                        │
+│  □ List all hardcoded spacing values                        │
+│  □ List all shadow declarations                             │
+│  □ List all border-radius values                            │
+│  □ Check for dark mode variables/classes                    │
+│  □ Check for breakpoint definitions                         │
+│  □ Identify tokens used inconsistently across files         │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Step 2: Define the Color System</h3>
+
+<pre class="code-block"><code>COLOR ARCHITECTURE:
+
+  ┌─ Brand Colors ────────────────────────────────────────────┐
+  │                                                           │
+  │  Primary (main brand action color)                        │
+  │  ┌─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┐ │
+  │  │ 50  │ 100 │ 200 │ 300 │ 400 │ 500 │ 600 │ 700 │ 800 │ │
+  │  │░░░░░│░░░░░│▒▒▒▒▒│▒▒▒▒▒│▓▓▓▓▓│█████│█████│█████│█████│ │
+  │  │light│     │     │     │ def │ dark│     │     │deep │ │
+  │  └─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┘ │
+  │                                                           │
+  │  Usage:                                                   │
+  │  50:  Backgrounds (hover states, selected rows)           │
+  │  100: Subtle backgrounds (badges, tags)                   │
+  │  200: Borders (focus rings, active borders)               │
+  │  500: Default buttons, links, icons                       │
+  │  600: Hover state for primary actions                     │
+  │  700: Active/pressed state                                │
+  │  900: Text on light backgrounds                           │
+  │                                                           │
+  └───────────────────────────────────────────────────────────┘
+
+  ┌─ Semantic Colors ─────────────────────────────────────────┐
+  │                                                           │
+  │  Success    ██ green-500    Positive actions, completion   │
+  │  Warning    ██ amber-500    Caution, pending, degraded    │
+  │  Error      ██ red-500      Destructive, failed, invalid  │
+  │  Info       ██ blue-500     Informational, neutral alerts │
+  │                                                           │
+  │  Each semantic color needs the full 50-900 scale          │
+  │                                                           │
+  └───────────────────────────────────────────────────────────┘
+
+  ┌─ Neutral Colors (grays) ──────────────────────────────────┐
+  │                                                           │
+  │  ┌─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┐ │
+  │  │ 50  │ 100 │ 200 │ 300 │ 400 │ 500 │ 600 │ 700 │ 800 │ │
+  │  │░░░░░│░░░░░│▒▒▒▒▒│▒▒▒▒▒│▓▓▓▓▓│█████│█████│█████│█████│ │
+  │  └─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┘ │
+  │                                                           │
+  │  50:   Page background                                    │
+  │  100:  Card/section background                            │
+  │  200:  Borders, dividers                                  │
+  │  300:  Disabled backgrounds                               │
+  │  400:  Placeholder text                                   │
+  │  500:  Secondary text, icons                              │
+  │  600:  Body text (light mode)                             │
+  │  700:  Headings                                           │
+  │  800:  High-emphasis text                                 │
+  │  900:  Maximum contrast text                              │
+  │                                                           │
+  └───────────────────────────────────────────────────────────┘</code></pre>
+
+<strong>Color Naming Convention:</strong>
+
+<pre class="code-block"><code>NAMING DECISION TREE:
+
+  What kind of color?
+  ├── Brand identity
+  │   └── primary-{50-900}, secondary-{50-900}
+  ├── Status/feedback
+  │   └── success-{50-900}, warning-{50-900}, error-{50-900}, info-{50-900}
+  ├── Neutral/gray
+  │   └── gray-{50-900} or neutral-{50-900}
+  └── Semantic/functional
+      └── text-{primary|secondary|muted|disabled}
+          bg-{primary|secondary|muted|elevated}
+          border-{default|strong|subtle}
+
+  NEVER:
+  ✕ Use color names: &quot;blue&quot;, &quot;red&quot; → use &quot;primary&quot;, &quot;error&quot;
+  ✕ Use arbitrary values: &quot;#3B82F6&quot; inline → use token
+  ✕ Mix naming schemes: &quot;primary-blue&quot; and &quot;btn-color&quot;</code></pre>
+
+<h3>Step 3: Define Typography Scale</h3>
+
+<pre class="code-block"><code>TYPOGRAPHY SCALE:
+
+  ┌────────────┬────────┬────────────┬───────────┬──────────────────┐
+  │ Token      │ Size   │ Weight     │ Line-Ht   │ Use              │
+  ├────────────┼────────┼────────────┼───────────┼──────────────────┤
+  │ text-xs    │ 12px   │ 400        │ 16px      │ Captions, badges │
+  │ text-sm    │ 14px   │ 400        │ 20px      │ Body text, forms │
+  │ text-base  │ 16px   │ 400        │ 24px      │ Primary body     │
+  │ text-lg    │ 18px   │ 500        │ 28px      │ Card titles      │
+  │ text-xl    │ 20px   │ 600        │ 28px      │ Section headers  │
+  │ text-2xl   │ 24px   │ 600        │ 32px      │ Page headers     │
+  │ text-3xl   │ 30px   │ 700        │ 36px      │ Hero/marketing   │
+  │ text-4xl   │ 36px   │ 700        │ 40px      │ Landing pages    │
+  └────────────┴────────┴────────────┴───────────┴──────────────────┘
+
+  VISUAL SCALE:
+
+  text-4xl ████████████████████████████████████  Landing Hero
+  text-3xl ██████████████████████████████        Marketing H1
+  text-2xl ████████████████████████              Page Title
+  text-xl  ██████████████████████                Section Header
+  text-lg  ████████████████████                  Card Title
+  text-base ██████████████████                   Body Copy
+  text-sm  ████████████████                      Form Labels
+  text-xs  ██████████████                        Captions
+
+  FONT FAMILIES:
+
+  ┌─────────────┬────────────────────┬─────────────────────┐
+  │ Token       │ Font               │ Use                 │
+  ├─────────────┼────────────────────┼─────────────────────┤
+  │ font-sans   │ Inter, sans-serif  │ All UI text         │
+  │ font-mono   │ JetBrains Mono     │ Code, data, IDs     │
+  │ font-display│ Cal Sans, display  │ Marketing headlines │
+  └─────────────┴────────────────────┴─────────────────────┘</code></pre>
+
+<h3>Step 4: Define Spacing Scale</h3>
+
+<pre class="code-block"><code>SPACING SCALE (base unit: 4px):
+
+  Token    │ Value  │ Visual             │ Use
+  ─────────┼────────┼────────────────────┼──────────────────
+  space-0  │ 0px    │                    │ Reset
+  space-0.5│ 2px    │ ▏                  │ Hairline gaps
+  space-1  │ 4px    │ ▎                  │ Icon-label gap
+  space-1.5│ 6px    │ ▍                  │ Tight padding
+  space-2  │ 8px    │ ▌                  │ Related elements
+  space-3  │ 12px   │ ▋                  │ Form field gap
+  space-4  │ 16px   │ █                  │ Card padding
+  space-5  │ 20px   │ █▎                 │ Comfortable gap
+  space-6  │ 24px   │ █▌                 │ Section gap
+  space-8  │ 32px   │ ██                 │ Major blocks
+  space-10 │ 40px   │ ██▌                │ Layout spacing
+  space-12 │ 48px   │ ███                │ Page margins
+  space-16 │ 64px   │ ████               │ Hero spacing
+  space-20 │ 80px   │ █████              │ Section breaks
+
+  SPACING DECISION TREE:
+
+  What are you spacing?
+  ├── Icon next to text                    → space-1 (4px)
+  ├── Related form elements                → space-2 to space-3 (8-12px)
+  ├── Cards in a grid                      → space-4 to space-6 (16-24px)
+  ├── Major page sections                  → space-8 to space-12 (32-48px)
+  ├── Padding inside a card/container      → space-4 to space-6 (16-24px)
+  ├── Page-level horizontal margins        → space-6 to space-8 (24-32px)
+  └── Between header and content           → space-6 to space-8 (24-32px)</code></pre>
+
+<h3>Step 5: Define Component Tokens</h3>
+
+<pre class="code-block"><code>COMPONENT TOKEN MAP:
+
+  ┌─ Button ──────────────────────────────────────────────────┐
+  │                                                           │
+  │  Variant    │ BG         │ Text      │ Border    │ Hover  │
+  │  ──────────┼────────────┼───────────┼───────────┼────────│
+  │  Primary   │ primary-600│ white     │ none      │ pri-700│
+  │  Secondary │ white      │ gray-700  │ gray-300  │ gray-50│
+  │  Ghost     │ transparent│ gray-600  │ none      │ gray-50│
+  │  Danger    │ red-600    │ white     │ none      │ red-700│
+  │  Link      │ transparent│ pri-600   │ none      │ pri-700│
+  │                                                           │
+  │  Size      │ Height │ Padding-X │ Font-Size │ Radius     │
+  │  ──────────┼────────┼───────────┼───────────┼────────────│
+  │  xs        │ 28px   │ 8px       │ 12px      │ radius-md  │
+  │  sm        │ 32px   │ 12px      │ 14px      │ radius-md  │
+  │  md        │ 36px   │ 16px      │ 14px      │ radius-md  │
+  │  lg        │ 40px   │ 20px      │ 16px      │ radius-md  │
+  │  xl        │ 48px   │ 24px      │ 16px      │ radius-lg  │
+  │                                                           │
+  │  States:                                                  │
+  │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐  │
+  │  │ Default  │  │  Hover   │  │  Active  │  │ Disabled │  │
+  │  │ pri-600  │  │  pri-700 │  │  pri-800 │  │ gray-300 │  │
+  │  │ shadow-sm│  │ shadow-md│  │ shadow-xs│  │ no shadow│  │
+  │  └──────────┘  └──────────┘  └──────────┘  └──────────┘  │
+  │  ┌──────────┐                                             │
+  │  │  Focus   │                                             │
+  │  │ ring-2   │                                             │
+  │  │ pri-200  │                                             │
+  │  └──────────┘                                             │
+  └───────────────────────────────────────────────────────────┘
+
+  ┌─ Badge ───────────────────────────────────────────────────┐
+  │                                                           │
+  │  Variant   │ BG          │ Text        │ Border           │
+  │  ─────────┼─────────────┼─────────────┼──────────────────│
+  │  default  │ gray-100    │ gray-700    │ gray-200         │
+  │  success  │ green-50    │ green-700   │ green-200        │
+  │  warning  │ amber-50    │ amber-700   │ amber-200        │
+  │  error    │ red-50      │ red-700     │ red-200          │
+  │  info     │ blue-50     │ blue-700    │ blue-200         │
+  │  primary  │ pri-50      │ pri-700     │ pri-200          │
+  │                                                           │
+  └───────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Step 6: Define Shadows, Radii, and Motion</h3>
+
+<pre class="code-block"><code>SHADOW SCALE:
+
+  Token      │ Value                              │ Use
+  ───────────┼────────────────────────────────────┼──────────────
+  shadow-xs  │ 0 1px 2px rgba(0,0,0,0.05)        │ Subtle lift
+  shadow-sm  │ 0 1px 3px rgba(0,0,0,0.1)         │ Cards, buttons
+  shadow-md  │ 0 4px 6px rgba(0,0,0,0.1)         │ Dropdowns
+  shadow-lg  │ 0 10px 15px rgba(0,0,0,0.1)       │ Modals, popovers
+  shadow-xl  │ 0 20px 25px rgba(0,0,0,0.1)       │ Large modals
+  shadow-none│ none                               │ Reset / flat
+
+BORDER RADIUS SCALE:
+
+  Token      │ Value  │ Visual          │ Use
+  ───────────┼────────┼─────────────────┼──────────────
+  radius-none│ 0px    │ ┌──────┐        │ Sharp corners
+  radius-sm  │ 4px    │ ╭──────╮        │ Subtle rounding
+  radius-md  │ 6px    │ ╭──────╮        │ Default (inputs, buttons)
+  radius-lg  │ 8px    │ ╭──────╮        │ Cards, containers
+  radius-xl  │ 12px   │ ╭──────╮        │ Large cards, modals
+  radius-2xl │ 16px   │ ╭──────╮        │ Pill shapes
+  radius-full│ 9999px │  (    )         │ Circles, pills
+
+MOTION / TRANSITION TOKENS:
+
+  Token            │ Duration │ Easing              │ Use
+  ─────────────────┼──────────┼─────────────────────┼─────────────
+  duration-fast    │ 100ms    │ ease-out             │ Hover effects
+  duration-normal  │ 200ms    │ ease-in-out          │ State changes
+  duration-slow    │ 300ms    │ ease-in-out          │ Modals, panels
+  duration-slower  │ 500ms    │ cubic-bezier custom  │ Page transitions
+
+  MOTION RULE:
+  □ Hover/focus: 100-150ms (instant feedback)
+  □ Opening/closing: 200-300ms (smooth but not slow)
+  □ Large layouts: 300-500ms (pages, sidebars)
+  □ Never exceed 500ms — feels sluggish</code></pre>
+<hr class="section-divider">
+<h2>Dark Mode Token Mapping</h2>
+
+<pre class="code-block"><code>LIGHT / DARK MODE PAIRS:
+
+  Semantic Token     │ Light Mode        │ Dark Mode
+  ───────────────────┼───────────────────┼──────────────────
+  bg-primary         │ white             │ gray-950
+  bg-secondary       │ gray-50           │ gray-900
+  bg-muted           │ gray-100          │ gray-800
+  bg-elevated        │ white             │ gray-900
+  ───────────────────┼───────────────────┼──────────────────
+  text-primary       │ gray-900          │ gray-50
+  text-secondary     │ gray-600          │ gray-400
+  text-muted         │ gray-400          │ gray-500
+  text-disabled      │ gray-300          │ gray-600
+  ───────────────────┼───────────────────┼──────────────────
+  border-default     │ gray-200          │ gray-700
+  border-strong      │ gray-300          │ gray-600
+  border-subtle      │ gray-100          │ gray-800
+  ───────────────────┼───────────────────┼──────────────────
+  shadow-card        │ shadow-sm         │ shadow-none +
+                     │                   │ border-subtle
+
+  IMPLEMENTATION:
+  Use CSS custom properties so dark mode is automatic:
+
+  :root {
+    --bg-primary: theme(colors.white);
+    --text-primary: theme(colors.gray.900);
+  }
+  .dark {
+    --bg-primary: theme(colors.gray.950);
+    --text-primary: theme(colors.gray.50);
+  }</code></pre>
+<hr class="section-divider">
+<h2>Common Mistakes and Anti-Patterns</h2>
+
+<pre class="code-block"><code>MISTAKE 1: One-off color values
+
+  BEFORE (bad):                        AFTER (good):
+  className=&quot;text-[#6366F1]&quot;           className=&quot;text-primary-500&quot;
+  className=&quot;bg-[#EEF2FF]&quot;            className=&quot;bg-primary-50&quot;
+
+  Rule: If you use a hex value more than once, it MUST be a token.
+
+MISTAKE 2: Inconsistent spacing
+
+  BEFORE (bad):                        AFTER (good):
+  className=&quot;p-3 mt-7 mb-5 gap-9&quot;     className=&quot;p-4 mt-8 mb-6 gap-4&quot;
+                                       (all values on the 4px grid)
+
+  Rule: Every spacing value must be on the 4px base grid.
+
+MISTAKE 3: Too many font sizes
+
+  BEFORE (bad):                        AFTER (good):
+  13px, 14px, 15px, 16px, 17px        text-sm (14px), text-base (16px)
+  (5 sizes that are barely different)  (2 distinct sizes with clear purpose)
+
+  Rule: Use the typographic scale. No arbitrary font sizes.
+
+MISTAKE 4: No semantic naming
+
+  BEFORE (bad):                        AFTER (good):
+  --blue-button-bg                     --btn-primary-bg
+  --red-text                           --text-error
+  --light-gray-border                  --border-subtle
+
+  Rule: Name by function/purpose, not visual appearance.</code></pre>
+<hr class="section-divider">
+<h2>Design System Quality Checklist</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  DESIGN SYSTEM QUALITY CHECKLIST                             │
+│                                                              │
+│  Tokens                                                      │
+│  □ Color palette complete (primary, semantic, neutral)        │
+│  □ All colors have 50-900 scale                              │
+│  □ Typography scale defined (size, weight, line-height)      │
+│  □ Spacing scale on 4px grid                                 │
+│  □ Shadow scale defined (xs through xl)                      │
+│  □ Border radius scale defined                               │
+│  □ Motion/transition tokens defined                          │
+│                                                              │
+│  Naming                                                      │
+│  □ Semantic names (not visual: &quot;primary&quot; not &quot;blue&quot;)         │
+│  □ Consistent format (kebab-case throughout)                 │
+│  □ No duplicate tokens with different names                  │
+│  □ Clear hierarchy (bg-primary &gt; bg-secondary &gt; bg-muted)    │
+│                                                              │
+│  Dark Mode                                                   │
+│  □ Every light token has a dark equivalent                   │
+│  □ Contrast ratios maintained in both modes                  │
+│  □ Shadows adjusted for dark backgrounds                     │
+│  □ Semantic colors still readable in dark mode               │
+│                                                              │
+│  Components                                                  │
+│  □ All variants documented (primary, secondary, ghost...)    │
+│  □ All sizes documented (xs, sm, md, lg, xl)                 │
+│  □ All states documented (default, hover, active, disabled)  │
+│  □ Focus states use consistent ring style                    │
+│  □ Disabled states are visually distinct but not hidden      │
+│                                                              │
+│  Documentation                                               │
+│  □ Usage examples for every token                            │
+│  □ Do/don't examples showing correct vs incorrect usage      │
+│  □ Decision tree for choosing variants                       │
+│  □ Migration guide if replacing existing tokens              │
+│                                                              │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Output Format</h2>
+
+When defining or extending a design system, always deliver:
+
+<ul class="skill-list"><li class="ordered"><strong>Audit summary</strong> — what exists, what is missing, what is inconsistent</li>
+<li class="ordered"><strong>Color system</strong> — full palette with scales and semantic mapping</li>
+<li class="ordered"><strong>Typography scale</strong> — sizes, weights, line heights, font families</li>
+<li class="ordered"><strong>Spacing scale</strong> — values, visual reference, usage guidance</li>
+<li class="ordered"><strong>Component tokens</strong> — per-component variant and state specifications</li>
+<li class="ordered"><strong>Dark mode mapping</strong> — light/dark pairs for every semantic token</li>
+<li class="ordered"><strong>Naming conventions</strong> — rules for naming new tokens</li>
+<li class="ordered"><strong>Migration notes</strong> — what to change in existing code (if applicable)</li>
+<li class="ordered"><strong>Usage examples</strong> — correct and incorrect usage for each token</li></ul>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="design-handoff.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">Design Handoff — From Design to Code, Zero Ambiguity</span></span></a>
+    <a href="micro-interaction.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Micro-Interaction — The Details That Make UX Feel Alive</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    66 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

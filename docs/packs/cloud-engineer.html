@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cloud Engineer Pack — Heaptrace Skills</title>
+  <meta name="description" content="Cloud infrastructure — VPC design, ECS deployments, RDS setup, IAM policies, Terraform modules, CI/CD, and disaster recovery.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+
+  <style>
+    .pack-hero { padding: calc(var(--nav-height) + 60px) 0 60px; text-align: center; position: relative; overflow: hidden; }
+    .pack-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(249, 115, 22, 0.1), transparent 70%); pointer-events: none; }
+    .pack-hero-content { position: relative; z-index: 1; }
+    .pack-hero-icon { width: 80px; height: 80px; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 40px; margin: 0 auto 24px; background: rgba(249, 115, 22, 0.1); border: 1px solid rgba(249, 115, 22, 0.2); }
+    .pack-hero h1 { font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; margin-bottom: 12px; letter-spacing: -0.02em; }
+    .pack-hero-desc { font-size: 1.1rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto 24px; line-height: 1.7; }
+    .pack-hero-meta { display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; padding: 6px 16px; border-radius: 999px; background: rgba(249, 115, 22, 0.08); color: #f97316; border: 1px solid rgba(249, 115, 22, 0.15); }
+    .skills-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    @media (max-width: 768px) { .skills-grid { grid-template-columns: 1fr; } }
+    .skill-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; transition: var(--transition); display: flex; flex-direction: column; text-decoration: none; color: inherit; }
+    .skill-card:hover { transform: translateY(-4px); border-color: rgba(249, 115, 22, 0.4); box-shadow: 0 8px 30px rgba(249, 115, 22, 0.1); }
+    .skill-card-name { font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+    .skill-card-name svg { opacity: 0; transition: var(--transition-fast); color: #f97316; }
+    .skill-card:hover .skill-card-name svg { opacity: 1; transform: translateX(4px); }
+    .skill-card-desc { font-size: 0.87rem; color: var(--text-secondary); line-height: 1.65; flex-grow: 1; }
+    .skill-card-id { display: inline-flex; align-items: center; gap: 6px; font-size: 0.72rem; font-family: 'JetBrains Mono', monospace; font-weight: 500; padding: 4px 10px; border-radius: 999px; background: rgba(249, 115, 22, 0.06); color: #f97316; border: 1px solid rgba(249, 115, 22, 0.12); margin-top: 16px; width: fit-content; }
+    .back-link { display: inline-flex; align-items: center; gap: 8px; color: var(--text-secondary); font-size: 0.9rem; font-weight: 500; transition: var(--transition-fast); margin-top: 48px; }
+    .back-link:hover { color: #f97316; }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo"><div class="nav-logo-icon">H</div><span>Heaptrace Skills</span></a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../index.html#workflow" class="nav-link">Workflow</a>
+      <a href="../index.html#anatomy" class="nav-link">Anatomy</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<section class="pack-hero">
+  <div class="container pack-hero-content">
+    <div class="pack-hero-icon">&#x2601;&#xFE0F;</div>
+    <h1>Cloud Engineer Pack</h1>
+    <p class="pack-hero-desc">Cloud infrastructure — VPC design, ECS deployments, RDS setup, IAM policies, Terraform modules, CI/CD, and disaster recovery.</p>
+    <div class="pack-hero-meta">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+      10 Skills
+    </div>
+  </div>
+</section>
+
+<section class="section-sm">
+  <div class="container">
+    <div class="skills-grid">
+
+      <a href="../skills/vpc-design.html" class="skill-card">
+        <div class="skill-card-name">vpc-design<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+        <div class="skill-card-desc">Design and implement production-grade AWS VPC architectures with proper subnet tiers, NAT gateways, security groups, NACLs, VPC peering, flow logs, and CIDR planning.</div>
+        <div class="skill-card-id">cloud-engineer / vpc-design</div>
+      </a>
+
+      <a href="../skills/ecs-deploy.html" class="skill-card">
+        <div class="skill-card-name">ecs-deploy<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+        <div class="skill-card-desc">Deploy containerized applications to AWS ECS with Fargate or EC2 launch types, covering task definitions, services, ALB integration, auto-scaling, and blue/green deployments.</div>
+        <div class="skill-card-id">cloud-engineer / ecs-deploy</div>
+      </a>
+
+      <a href="../skills/rds-setup.html" class="skill-card">
+        <div class="skill-card-name">rds-setup<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+        <div class="skill-card-desc">Set up production-grade Amazon RDS PostgreSQL instances with proper sizing, multi-AZ deployments, read replicas, automated backups, parameter groups, and performance insights.</div>
+        <div class="skill-card-id">cloud-engineer / rds-setup</div>
+      </a>
+
+      <a href="../skills/iam-policy.html" class="skill-card">
+        <div class="skill-card-name">iam-policy<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+        <div class="skill-card-desc">Write least-privilege IAM policies for AWS services, covering roles, policies, trust relationships, cross-account access, service-linked roles, and policy evaluation logic.</div>
+        <div class="skill-card-id">cloud-engineer / iam-policy</div>
+      </a>
+
+      <a href="../skills/terraform-module.html" class="skill-card">
+        <div class="skill-card-name">terraform-module<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+        <div class="skill-card-desc">Write production-grade Terraform modules with proper input variables, outputs, state management using S3 and DynamoDB, workspaces, module composition, and versioning.</div>
+        <div class="skill-card-id">cloud-engineer / terraform-module</div>
+      </a>
+
+      <a href="../skills/ci-cd-pipeline.html" class="skill-card">
+        <div class="skill-card-name">ci-cd-pipeline<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+        <div class="skill-card-desc">Build production-grade CI/CD pipelines using GitHub Actions for AWS deployments, covering ECR image builds, ECS deployments, rollback strategies, and environment promotion.</div>
+        <div class="skill-card-id">cloud-engineer / ci-cd-pipeline</div>
+      </a>
+
+      <a href="../skills/monitoring-setup.html" class="skill-card">
+        <div class="skill-card-name">monitoring-setup<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+        <div class="skill-card-desc">Set up comprehensive CloudWatch monitoring with custom metrics, alarms, dashboards, log groups, log insights queries, SNS alerts, and actionable alerting strategies.</div>
+        <div class="skill-card-id">cloud-engineer / monitoring-setup</div>
+      </a>
+
+      <a href="../skills/cost-optimize.html" class="skill-card">
+        <div class="skill-card-name">cost-optimize<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+        <div class="skill-card-desc">Audit and optimize AWS costs through right-sizing, reserved instances, savings plans, unused resource cleanup, S3 lifecycle policies, and Compute Optimizer recommendations.</div>
+        <div class="skill-card-id">cloud-engineer / cost-optimize</div>
+      </a>
+
+      <a href="../skills/disaster-recovery.html" class="skill-card">
+        <div class="skill-card-name">disaster-recovery<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+        <div class="skill-card-desc">Plan and implement disaster recovery strategies for AWS workloads, covering RTO/RPO definitions, backup strategies, cross-region replication, failover testing, and runbook creation.</div>
+        <div class="skill-card-id">cloud-engineer / disaster-recovery</div>
+      </a>
+
+      <a href="../skills/secrets-manage.html" class="skill-card">
+        <div class="skill-card-name">secrets-manage<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+        <div class="skill-card-desc">Manage application secrets and configuration using AWS SSM Parameter Store and Secrets Manager, covering rotation policies, access control, and environment variable injection.</div>
+        <div class="skill-card-id">cloud-engineer / secrets-manage</div>
+      </a>
+
+    </div>
+
+    <div class="text-center">
+      <a href="../index.html#packs" class="back-link">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Back to all packs
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-links">
+      <a href="https://github.com/heaptracetechnology/heaptrace-skills" class="footer-link" target="_blank" rel="noopener">GitHub</a>
+      <a href="../index.html#packs" class="footer-link">Packs</a>
+      <a href="../setup/index.html" class="footer-link">Setup Guide</a>
+      <a href="https://heaptrace.com" class="footer-link" target="_blank" rel="noopener">Heaptrace</a>
+    </div>
+    <div class="footer-copy">
+      MIT License &middot; Built by <a href="https://heaptrace.com" target="_blank" rel="noopener">Heaptrace Technology</a>
+      <br>66 Skills &middot; 8 Packs &middot; Free &amp; Open Source
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

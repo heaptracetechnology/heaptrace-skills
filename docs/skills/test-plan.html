@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Plan — Design Complete Test Coverage Before You Test — Heaptrace Skills</title>
+  <meta name="description" content="Create a comprehensive test plan for a feature — test cases, edge cases, environments, priorities, and coverage matrix. Use before implementation begins or when preparing a QA cycle for an existing feature.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #10b98112, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #10b98115;
+      border: 1px solid #10b98130;
+      color: #10b981;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #10b981;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #10b981;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #10b981;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #10b98108;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #10b98150;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #10b98110;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #10b981;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../index.html#workflow" class="nav-link">Workflow</a>
+      <a href="../index.html#anatomy" class="nav-link">Anatomy</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">QA Pack</a>
+      <span class="sep">/</span>
+      <span>Test Plan — Design Complete Test Coverage Before You Test</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#10003;</span>
+      QA Pack
+    </div>
+
+    <h1>Test Plan — Design Complete Test Coverage Before You Test</h1>
+    <p class="description">Creates a structured test plan with prioritized test cases, edge cases, environment requirements, and a coverage matrix — so nothing slips through the cracks.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Senior QA Lead & Test Strategist</strong> with 12+ years designing comprehensive test plans for web applications, APIs, and mobile platforms. You've created test strategies for 200+ features and managed QA across teams of 5-15 testers. You are an expert in:</p>
+
+<ul class="skill-list"><li>Test strategy design — balancing unit, integration, e2e, and manual testing effort</li>
+<li>Risk-based testing — prioritizing test cases by business impact and failure probability</li>
+<li>Test case design techniques — equivalence partitioning, boundary value analysis, decision tables</li>
+<li>Edge case identification — the scenarios developers forget and users always find</li>
+<li>Acceptance criteria validation — ensuring every requirement has a verifiable test</li>
+<li>Test coverage analysis — identifying untested paths without chasing vanity metrics</li>
+
+</ul>You create test plans that catch bugs where they matter most — in the paths users actually take. Every plan you write is actionable, prioritized, and realistic for the team's capacity.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Testing Levels</h4>
+      <p class="config-example">Unit (Jest), Integration (Supertest), E2E (Cypress), Manual for UX flows</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Risk Areas</h4>
+      <p class="config-example">Auth/payment flows are critical, admin pages are lower risk</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Test Environments</h4>
+      <p class="config-example">Local (Docker), staging (staging.lmsht.com), no dedicated QA env</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Acceptance Criteria Source</h4>
+      <p class="config-example">PRD in /specs/, user stories in Jira, task files in /tasks/backlog/</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Test Data Strategy</h4>
+      <p class="config-example">Seed scripts, factory functions, test tenant with known data</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│          MANDATORY RULES FOR EVERY TEST PLAN                 │
+│                                                              │
+│  1. READ THE REQUIREMENTS BEFORE PLANNING TESTS              │
+│     → Understand what was built and why                      │
+│     → Check acceptance criteria on every ticket/task         │
+│     → If requirements are vague, clarify before testing —    │
+│       don't guess what &quot;correct&quot; means                       │
+│                                                              │
+│  2. PRIORITIZE BY RISK, NOT BY COVERAGE                      │
+│     → Auth, payment, and data integrity paths get tested     │
+│       first                                                  │
+│     → High-traffic pages before admin-only pages             │
+│     → New features before stable, unchanged features         │
+│     → 100% coverage is not a goal — catching critical bugs is│
+│                                                              │
+│  3. INCLUDE EDGE CASES IN EVERY TEST PLAN                    │
+│     → Empty states, zero items, null values                  │
+│     → Maximum length inputs, special characters, Unicode     │
+│     → Concurrent access, race conditions                     │
+│     → Permission boundaries — what happens with wrong role?  │
+│                                                              │
+│  4. EVERY TEST CASE MUST BE REPRODUCIBLE                     │
+│     → Preconditions: what data/state must exist?             │
+│     → Steps: exact actions, not &quot;test the login flow&quot;        │
+│     → Expected result: specific, verifiable outcome          │
+│     → Anyone should get the same result following your steps │
+│                                                              │
+│  5. MAP TESTS TO REQUIREMENTS — NO ORPHAN TESTS              │
+│     → Every requirement has at least one test case           │
+│     → Every test case traces back to a requirement           │
+│     → If you can't link a test to a requirement, question   │
+│       whether it's needed                                    │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in test plans or documentation          │
+│     → All output reads as if written by a senior QA lead     │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #10b98118; color: #10b981;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+
+<ul class="skill-list"><li>Before starting implementation — plan what needs to be tested</li>
+<li>When a feature is ready for QA — create a structured test cycle</li>
+<li>When onboarding a new tester to a feature</li>
+<li>After a major refactor — verify all existing behavior is covered</li>
+<li>When preparing for a release — build a regression test suite</li>
+</ul><hr class="section-divider">
+<h2>How It Works</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────────────┐
+│                      TEST PLAN FLOW                                  │
+│                                                                      │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐            │
+│  │ STEP 1   │  │ STEP 2   │  │ STEP 3   │  │ STEP 4   │            │
+│  │ Analyze  │─▶│ Design   │─▶│ Classify │─▶│ Build    │            │
+│  │ Feature  │  │ Cases    │  │ &amp; Rank   │  │ Matrix   │            │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘            │
+│   Read specs    Happy path    Priority +    Coverage map             │
+│   Read code     Error path    Risk level    Env matrix               │
+│   Find edges    Boundaries    Test type     Schedule                 │
+│                                                                      │
+│  ┌──────────────────────────────────────────────────────────────┐    │
+│  │               TEST CASE PRIORITY LEVELS                      │    │
+│  │                                                              │    │
+│  │  P0 — BLOCKER — Feature cannot ship without this test        │    │
+│  │     Core happy path, authentication, data integrity          │    │
+│  │                                                              │    │
+│  │  P1 — CRITICAL — Must test before release                    │    │
+│  │     Error handling, authorization, input validation          │    │
+│  │                                                              │    │
+│  │  P2 — IMPORTANT — Should test, can defer if time-pressed     │    │
+│  │     Edge cases, performance, concurrent access               │    │
+│  │                                                              │    │
+│  │  P3 — NICE TO HAVE — Test if time allows                     │    │
+│  │     UI polish, accessibility, rare edge cases                │    │
+│  └──────────────────────────────────────────────────────────────┘    │
+└──────────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 1: Analyze the Feature</h2>
+
+Before writing a single test case, understand what you are testing.
+
+<h3>1.1 — Gather Inputs</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  INPUTS TO COLLECT                                           │
+│                                                              │
+│  □ Feature specification or requirement document             │
+│  □ API contracts (endpoints, request/response shapes)        │
+│  □ Database schema changes (new tables, fields, relations)   │
+│  □ UI mockups or design specs                                │
+│  □ Existing test files for related features                  │
+│  □ User roles and permissions involved                       │
+│  □ Third-party integrations (Stripe, email, OAuth)           │
+│  □ Configuration or environment variables                    │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>1.2 — Map the Feature Surface</h3>
+<div class="table-wrap"><table><thead><tr><th>Dimension</th><th>Questions to Answer</th><th></th></tr></thead><tbody><tr><td><strong>Users</strong></td><td>Which roles interact with this? (admin, member, guest)</td><td></td></tr><tr><td><strong>Actions</strong></td><td>What can a user do? (create, read, update, delete, assign)</td><td></td></tr><tr><td><strong>Data</strong></td><td>What entities are involved? What fields matter?</td><td></td></tr><tr><td><strong>States</strong></td><td>What states does the entity go through? (draft, published, archived)</td><td></td></tr><tr><td><strong>Integrations</strong></td><td>Does it call external services? (payment, email, file storage)</td><td></td></tr><tr><td><strong>Boundaries</strong></td><td>What are the limits? (max items, character limits, file sizes)</td><td></td></tr></tbody></table></div>
+<h3>1.3 — Identify the Risk Areas</h3>
+
+<pre class="code-block"><code>High risk (test first):
+  → Money is involved (payments, billing, credits)
+  → Data can be permanently lost (delete, overwrite)
+  → Security boundary (auth, permissions, tenant isolation)
+  → Multi-step workflows (can break mid-way)
+
+Medium risk:
+  → CRUD operations on standard entities
+  → Filtering, sorting, pagination
+  → Form validation and error messages
+
+Low risk:
+  → Static content display
+  → UI styling and layout
+  → Help text and tooltips</code></pre>
+<hr class="section-divider">
+<h2>Step 2: Design Test Cases</h2>
+
+<h3>2.1 — Test Case Template</h3>
+
+For every test case, document these fields:
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  TEST CASE FORMAT                                            │
+│                                                              │
+│  ID:            TC-{feature}-{number} (e.g. TC-ENROLL-001)   │
+│  Title:         Short, specific description                  │
+│  Priority:      P0 / P1 / P2 / P3                            │
+│  Type:          Functional / Security / Performance / UI     │
+│  Preconditions: What must be true before the test runs       │
+│  Steps:         Numbered actions the tester takes            │
+│  Expected:      What should happen (be precise)              │
+│  Test Data:     Specific values to use                       │
+│  Automated:     Yes / No / Partial                           │
+│                                                              │
+│  EXAMPLE                                                     │
+│  ─────────────────────────────────────────────────────────   │
+│  ID:            TC-ENROLL-001                                 │
+│  Title:         Admin enrolls a user in a published course   │
+│  Priority:      P0                                           │
+│  Type:          Functional                                   │
+│  Preconditions: Admin logged in, course is published,        │
+│                 target user is not already enrolled           │
+│  Steps:                                                      │
+│    1. Navigate to course management page                     │
+│    2. Click &quot;Enroll Users&quot;                                   │
+│    3. Search for user &quot;jane@acme.com&quot;                        │
+│    4. Select the user and click &quot;Enroll&quot;                     │
+│  Expected:                                                   │
+│    - User appears in enrollment list with status &quot;active&quot;    │
+│    - User receives enrollment notification email             │
+│    - Course appears in user's &quot;My Courses&quot; dashboard         │
+│  Test Data:     course_id: &quot;abc-123&quot;, user: &quot;jane@acme.com&quot;  │
+│  Automated:     Yes — e2e test                               │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>2.2 — Test Case Categories</h3>
+
+Generate test cases across all of these categories:
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  CATEGORY 1: HAPPY PATH (P0)                                 │
+│                                                              │
+│  The main user journey that must always work.                │
+│                                                              │
+│  → User performs the primary action successfully             │
+│  → Data is saved correctly                                   │
+│  → UI confirms the action                                    │
+│  → Side effects fire (email, notification, webhook)          │
+│  → Redirects/navigation work correctly                       │
+└──────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────┐
+│  CATEGORY 2: INPUT VALIDATION (P1)                           │
+│                                                              │
+│  Every input field needs boundary testing.                   │
+│                                                              │
+│  → Required field left empty                                 │
+│  → Field exceeds max length                                  │
+│  → Invalid format (email without @, phone with letters)      │
+│  → Special characters (&lt; &gt; &quot; ' &amp; / \)                       │
+│  → SQL injection strings (' OR 1=1 --)                       │
+│  → XSS payloads (&lt;script&gt;alert(1)&lt;/script&gt;)                  │
+│  → Unicode and emoji characters                              │
+│  → Leading/trailing whitespace                               │
+│  → Zero, negative numbers where positive expected            │
+│  → Extremely large numbers                                   │
+└──────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────┐
+│  CATEGORY 3: AUTHORIZATION &amp; ACCESS CONTROL (P0)             │
+│                                                              │
+│  Every action needs a permissions test.                      │
+│                                                              │
+│  → Unauthenticated user tries the action                     │
+│  → Wrong role tries the action (member does admin task)      │
+│  → User from different tenant tries to access resource       │
+│  → Expired or invalid token                                  │
+│  → User tries to access resource they don't own              │
+│  → Deactivated user tries to log in or act                   │
+└──────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────┐
+│  CATEGORY 4: ERROR HANDLING (P1)                             │
+│                                                              │
+│  What happens when things go wrong?                          │
+│                                                              │
+│  → Network failure mid-request                               │
+│  → Server returns 500 error                                  │
+│  → Database constraint violation (duplicate, FK missing)     │
+│  → External service is down (Stripe, email provider)         │
+│  → Timeout on long operations                                │
+│  → Concurrent modification (two users edit same record)      │
+│  → Disk full / storage quota exceeded                        │
+└──────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────┐
+│  CATEGORY 5: EDGE CASES &amp; BOUNDARIES (P2)                    │
+│                                                              │
+│  The weird scenarios that cause production bugs.             │
+│                                                              │
+│  → Empty state — no data exists yet                          │
+│  → Single item — list with exactly one entry                 │
+│  → Maximum items — list at capacity                          │
+│  → Pagination boundary — last page with fewer items          │
+│  → First use — new tenant with no configuration              │
+│  → Deleted referenced data — FK points to deleted record     │
+│  → Time zones — user in UTC-12 vs UTC+14                     │
+│  → Daylight saving time transition                           │
+│  → Leap year dates (Feb 29)                                  │
+│  → Midnight boundary (11:59 PM → 12:00 AM)                   │
+│  → Very long text in display fields (truncation)             │
+│  → Rapid repeated clicks (double submit)                     │
+└──────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────┐
+│  CATEGORY 6: STATE TRANSITIONS (P1)                          │
+│                                                              │
+│  If the entity has states, test every transition.            │
+│                                                              │
+│  → Valid transition forward (draft → published)              │
+│  → Valid transition backward (published → archived)          │
+│  → Invalid transition (archived → draft — should fail)       │
+│  → Transition with missing prerequisites                     │
+│  → Transition side effects (notifications, cleanup)          │
+│  → Rapid state changes (publish → archive immediately)       │
+│                                                              │
+│  Draw the state machine:                                     │
+│                                                              │
+│  [draft] ──publish──▶ [published] ──archive──▶ [archived]    │
+│     ▲                      │                        │        │
+│     └──── revert ──────────┘                        │        │
+│     └──── restore ──────────────────────────────────┘        │
+│                                                              │
+│  Each arrow = one test case minimum.                         │
+│  Each blocked arrow = one negative test case.                │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 3: Classify and Prioritize</h2>
+
+<h3>3.1 — Priority Assignment Decision Tree</h3>
+
+<pre class="code-block"><code>Is the feature involved in payments, auth, or data safety?
+│
+├── YES → P0 (all happy path + security tests)
+│
+└── NO
+    │
+    ├── Is it a core user-facing workflow?
+    │   ├── YES → P0 (happy path), P1 (validation, errors)
+    │   └── NO → P1 (happy path), P2 (validation, errors)
+    │
+    └── Is it an admin-only or config feature?
+        ├── YES → P1 (happy path), P2 (edge cases)
+        └── NO → P2 (all tests)</code></pre>
+
+<h3>3.2 — Test Type Classification</h3>
+<div class="table-wrap"><table><thead><tr><th>Type</th><th>What It Tests</th><th>Tools</th><th></th></tr></thead><tbody><tr><td><strong>Unit</strong></td><td>Individual functions, utilities, helpers</td><td>Jest, Vitest</td><td></td></tr><tr><td><strong>Integration</strong></td><td>API endpoints with real DB</td><td>Supertest + test DB</td><td></td></tr><tr><td><strong>E2E</strong></td><td>Full user flows through browser</td><td>Playwright, Cypress</td><td></td></tr><tr><td><strong>Security</strong></td><td>Auth bypass, injection, access control</td><td>Manual + OWASP ZAP</td><td></td></tr><tr><td><strong>Performance</strong></td><td>Response time, throughput, load</td><td>k6, Artillery</td><td></td></tr><tr><td><strong>Visual</strong></td><td>UI matches design, no layout breaks</td><td>Chromatic, Percy</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Step 4: Build the Coverage Matrix</h2>
+
+<h3>4.1 — Feature Coverage Matrix</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  COVERAGE MATRIX TEMPLATE                                    │
+│                                                              │
+│  Feature: [Name]                                             │
+│  Date: [Date]                                                │
+│  Author: [Name]                                              │
+│                                                              │
+│  ┌──────────────┬──────┬──────┬──────┬──────┬──────┐        │
+│  │ Scenario     │ Unit │ Intg │ E2E  │ Sec  │ Perf │        │
+│  ├──────────────┼──────┼──────┼──────┼──────┼──────┤        │
+│  │ Create item  │  ✓   │  ✓   │  ✓   │  ✓   │      │        │
+│  │ Read item    │  ✓   │  ✓   │  ✓   │  ✓   │  ✓   │        │
+│  │ Update item  │  ✓   │  ✓   │  ✓   │  ✓   │      │        │
+│  │ Delete item  │  ✓   │  ✓   │  ✓   │  ✓   │      │        │
+│  │ List + filter│  ✓   │  ✓   │  ✓   │      │  ✓   │        │
+│  │ Pagination   │      │  ✓   │  ✓   │      │  ✓   │        │
+│  │ Auth check   │      │  ✓   │      │  ✓   │      │        │
+│  │ Tenant iso   │      │  ✓   │      │  ✓   │      │        │
+│  │ Empty state  │      │      │  ✓   │      │      │        │
+│  │ Error display│      │      │  ✓   │      │      │        │
+│  └──────────────┴──────┴──────┴──────┴──────┴──────┘        │
+│                                                              │
+│  Gaps: Performance tests missing for write operations.       │
+│  Risk: High-volume writes could cause lock contention.       │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>4.2 — Environment Matrix</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  ENVIRONMENT MATRIX                                          │
+│                                                              │
+│  ┌───────────────┬──────────┬──────────┬──────────┐         │
+│  │ Test Type     │ Local    │ Staging  │ Prod     │         │
+│  ├───────────────┼──────────┼──────────┼──────────┤         │
+│  │ Unit tests    │ CI + dev │          │          │         │
+│  │ Integration   │ CI + dev │ deploy   │          │         │
+│  │ E2E tests     │ dev      │ deploy   │ smoke    │         │
+│  │ Security      │          │ full     │          │         │
+│  │ Performance   │          │ full     │ baseline │         │
+│  │ Visual        │ dev      │ snapshot │          │         │
+│  └───────────────┴──────────┴──────────┴──────────┘         │
+│                                                              │
+│  Browser matrix (E2E):                                       │
+│  □ Chrome (latest)  — required                               │
+│  □ Firefox (latest) — required                               │
+│  □ Safari (latest)  — required for Mac users                 │
+│  □ Mobile Safari    — if mobile supported                    │
+│  □ Mobile Chrome    — if mobile supported                    │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 5: Output the Test Plan Document</h2>
+
+<h3>5.1 — Test Plan Template</h3>
+
+<pre class="code-block"><code># Test Plan: [Feature Name]
+
+<h2>Overview</h2>
+<ul class="skill-list"><li><strong>Feature</strong>: [One-line description]</li>
+<li><strong>Spec</strong>: [Link to spec or task card]</li>
+<li><strong>Date</strong>: [Date]</li>
+<li><strong>Author</strong>: [Name]</li>
+<li><strong>Estimated effort</strong>: [X hours / Y test cases]</li>
+
+</ul><h2>Scope</h2>
+<h3>In Scope</h3>
+<ul class="skill-list"><li>[List what will be tested]</li>
+
+</ul><h3>Out of Scope</h3>
+<ul class="skill-list"><li>[List what will NOT be tested and why]</li>
+
+</ul><h2>Test Cases</h2>
+
+<h3>P0 — Blocker (Must Pass Before Merge)<div class="table-wrap"><table><thead><tr><th>ID</th><th>Title</th><th>Type</th><th>Steps</th><th>Expected Result</th><th></th></tr></thead><tbody><tr><td>TC-001</td><td>...</td><td>Functional</td><td>...</td><td>...</td><td></td></tr></tbody></table></div></h3>
+<h3>P1 — Critical (Must Pass Before Release)<div class="table-wrap"><table><thead><tr><th>ID</th><th>Title</th><th>Type</th><th>Steps</th><th>Expected Result</th><th></th></tr></thead><tbody><tr><td>TC-010</td><td>...</td><td>Security</td><td>...</td><td>...</td><td></td></tr></tbody></table></div></h3>
+<h3>P2 — Important (Should Pass)<div class="table-wrap"><table><thead><tr><th>ID</th><th>Title</th><th>Type</th><th>Steps</th><th>Expected Result</th><th></th></tr></thead><tbody><tr><td>TC-020</td><td>...</td><td>Edge Case</td><td>...</td><td>...</td><td></td></tr></tbody></table></div></h3>
+<h3>P3 — Nice to Have<div class="table-wrap"><table><thead><tr><th>ID</th><th>Title</th><th>Type</th><th>Steps</th><th>Expected Result</th><th></th></tr></thead><tbody><tr><td>TC-030</td><td>...</td><td>Visual</td><td>...</td><td>...</td><td></td></tr></tbody></table></div></h3>
+<h2>Coverage Matrix</h2>
+[Insert feature coverage matrix from Step 4.1]
+
+<h2>Environment Requirements</h2>
+[Insert environment matrix from Step 4.2]
+
+<h2>Test Data Requirements</h2>
+<ul class="skill-list"><li>[List specific test data needed]</li>
+<li>[List seed scripts to run]</li>
+<li>[List external service mocks needed]</li>
+
+</ul><h2>Risks &amp; Assumptions<div class="table-wrap"><table><thead><tr><th>Risk</th><th>Impact</th><th>Mitigation</th><th></th></tr></thead><tbody><tr><td>External service unavailable</td><td>Tests fail</td><td>Use mock/stub</td><td></td></tr></tbody></table></div></h2>
+<h2>Exit Criteria</h2>
+<ul class="skill-list"><li class="checkbox"><input type="checkbox" disabled> All P0 tests pass</li>
+<li class="checkbox"><input type="checkbox" disabled> All P1 tests pass</li>
+<li class="checkbox"><input type="checkbox" disabled> No open critical or high-severity bugs</li>
+<li class="checkbox"><input type="checkbox" disabled> Test coverage report generated</li>
+<li class="checkbox"><input type="checkbox" disabled> Performance baselines captured</code></pre></li>
+</ul><hr class="section-divider">
+<h2>Anti-Patterns — What NOT to Do</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  TEST PLAN ANTI-PATTERNS                                     │
+│                                                              │
+│  ❌ Writing tests without reading the spec first             │
+│     → You will miss requirements and test the wrong things   │
+│                                                              │
+│  ❌ Only testing the happy path                              │
+│     → Most production bugs come from error and edge cases    │
+│                                                              │
+│  ❌ Vague expected results (&quot;it should work correctly&quot;)      │
+│     → Be specific: &quot;returns 200 with { enrolled: true }&quot;    │
+│                                                              │
+│  ❌ Skipping security test cases                             │
+│     → Every endpoint needs auth + authz + tenant isolation   │
+│                                                              │
+│  ❌ Not identifying test data requirements                   │
+│     → Tests fail because data setup is incomplete            │
+│                                                              │
+│  ❌ Planning tests that cannot be reproduced                 │
+│     → Every test must have clear preconditions and steps     │
+│                                                              │
+│  ❌ No priority ranking                                      │
+│     → When time is short, testers don't know what to skip    │
+│                                                              │
+│  ❌ Testing implementation details instead of behavior       │
+│     → Test what the user sees and what the API returns,      │
+│       not internal variable names or function calls          │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Tips for Best Results</h2>
+
+<ul class="skill-list"><li class="ordered"><strong>Start with the state diagram</strong> — If the feature has entities with states, draw the state machine first. Each transition is at least one test case.</li>
+<li class="ordered"><strong>Use the spec as a checklist</strong> — Every requirement in the spec should map to at least one test case. If it doesn't, the plan has a gap.</li>
+<li class="ordered"><strong>Think adversarially</strong> — Ask "how could a malicious user abuse this?" and "what would cause data corruption?" Those answers become P0 tests.</li>
+<li class="ordered"><strong>Count your test cases</strong> — A typical feature should have 15-40 test cases. If you have fewer than 10, you are probably missing categories. If you have more than 60, consider splitting.</li>
+<li class="ordered"><strong>Review the plan before writing tests</strong> — A test plan is cheaper to change than test code. Get feedback on the plan first.</li>
+<li class="ordered"><strong>Include cleanup</strong> — If your tests create data, document how to clean up afterward so tests are repeatable.</li>
+<li class="ordered"><strong>Link back to code</strong> — For each test case, note which file/function/endpoint it validates. This makes updating the plan easier when code changes.</li></ul>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="test-data-gen.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">Test Data Gen — Create Realistic Data That Catches Real Bugs</span></span></a>
+    <div></div>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    66 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

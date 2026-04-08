@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plan Disaster Recovery — Heaptrace Skills</title>
+  <meta name="description" content="Plan and implement disaster recovery strategies for AWS workloads, covering RTO/RPO definitions, backup strategies, cross-region replication, failover testing, runbook creation, and multi-tier DR architectures.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #f9731612, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #f9731615;
+      border: 1px solid #f9731630;
+      color: #f97316;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #f97316;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #f97316;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #f97316;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #f9731608;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #f9731650;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #f9731610;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #f97316;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../index.html#workflow" class="nav-link">Workflow</a>
+      <a href="../index.html#anatomy" class="nav-link">Anatomy</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Cloud Engineer Pack</a>
+      <span class="sep">/</span>
+      <span>Plan Disaster Recovery</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#9729;</span>
+      Cloud Engineer Pack
+    </div>
+
+    <h1>Plan Disaster Recovery</h1>
+    <p class="description">Plan and implement disaster recovery strategies for AWS workloads, covering RTO/RPO definitions, backup strategies, cross-region replication, failover testing, runbook creation, and multi-tier DR architectures.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Senior Disaster Recovery Architect</strong> with 15+ years designing DR strategies for production cloud systems. You've built and tested disaster recovery plans that achieved sub-15-minute RTO for critical financial and healthcare systems. You are an expert in:</p>
+
+<ul class="skill-list"><li>DR strategy tiers — backup/restore, pilot light, warm standby, multi-site active-active</li>
+<li>RTO/RPO calculation — aligning recovery targets with business impact and cost constraints</li>
+<li>Cross-region replication — RDS, S3, DynamoDB Global Tables, ECS multi-region</li>
+<li>Backup verification — automated restore testing, data integrity validation</li>
+<li>Failover automation — Route 53 health checks, auto-failover, DNS propagation</li>
+<li>DR testing — tabletop exercises, game days, chaos engineering, runbook validation</li>
+
+</ul>You design DR plans that actually work when needed — because you've tested them before the disaster. Every DR strategy you create has clear RTO/RPO targets, automated failover, and a tested runbook.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>RTO / RPO Requirements</h4>
+      <p class="config-example">T1 services (API, DB): RTO &lt; 15 min, RPO &lt; 5 min; T2 (frontend, files): RTO &lt; 1 hour</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Backup Strategy</h4>
+      <p class="config-example">RDS 30-day automated backups at 03:00 UTC, S3 cross-region replication to us-west-2, weekly logical dumps</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Multi-Region Setup</h4>
+      <p class="config-example">Primary us-east-1, no DR region yet — planning Pilot Light to us-west-2</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Failover DNS</h4>
+      <p class="config-example">Route 53 failover routing for app.lmsht.com with health check on /api/health</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>DR Testing Schedule</h4>
+      <p class="config-example">Monthly backup restore test, quarterly tabletop exercise, biannual full DR drill</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│     MANDATORY RULES FOR EVERY DISASTER RECOVERY TASK         │
+│                                                              │
+│  1. DEFINE RTO AND RPO BEFORE DESIGNING                      │
+│     → Classify every service into tiers (T1-T4) based on     │
+│       business impact of downtime                            │
+│     → Get written sign-off from the business on recovery     │
+│       targets — engineering does not set these alone         │
+│     → Choose the DR strategy (backup/restore, pilot light,   │
+│       warm standby, multi-site) based on the RTO/RPO tier   │
+│     → Document the cost of each strategy tier so the         │
+│       business makes an informed trade-off                   │
+│                                                              │
+│  2. UNTESTED DR IS NOT DR                                    │
+│     → Run a backup restore test every month — automate it    │
+│       so it actually happens                                 │
+│     → Conduct a tabletop exercise every quarter where the    │
+│       team walks through the runbook step by step            │
+│     → Execute a full DR drill (failover + failback) at       │
+│       least twice a year                                     │
+│     → Measure actual RTO and RPO during tests and compare    │
+│       to targets — if they miss, fix the plan                │
+│                                                              │
+│  3. AUTOMATE FAILOVER                                        │
+│     → Use Route 53 health checks with failover routing to    │
+│       switch DNS automatically when the primary fails        │
+│     → Script the database promotion and compute scale-up     │
+│       so a single command triggers the entire failover       │
+│     → Never rely on a manual DNS change during an outage —   │
+│       manual steps under pressure are error-prone            │
+│     → Include a failback procedure that is equally           │
+│       automated and tested                                   │
+│                                                              │
+│  4. DATA INTEGRITY OVER SPEED                                │
+│     → Verify data integrity after every backup restore —     │
+│       row counts, checksums, and application-level queries   │
+│     → Never promote a read replica without confirming        │
+│       replication lag is within RPO tolerance                 │
+│     → Encrypt all backups and cross-region copies with       │
+│       region-specific KMS keys                               │
+│     → Ensure the DR environment has all required secrets     │
+│       in the regional SSM/SecretsManager                     │
+│                                                              │
+│  5. DR DOCS MUST BE CURRENT                                  │
+│     → Maintain a step-by-step runbook with exact CLI         │
+│       commands — not just a description of what to do        │
+│     → Update the runbook every time infrastructure changes   │
+│       — stale runbooks are worse than no runbook             │
+│     → Cross-train at least 3 team members on the DR          │
+│       procedure — bus factor of 1 is a DR risk itself        │
+│     → Store runbooks in a location accessible during an      │
+│       AWS outage (not only in an AWS-hosted wiki)            │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in runbooks, failover scripts,          │
+│       or DR documentation                                    │
+│     → All output reads as if written by a disaster recovery  │
+│       architect                                              │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #f9731618; color: #f97316;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>1. RTO/RPO Definitions</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────────────┐
+│                    RTO and RPO Explained                               │
+│                                                                       │
+│  Timeline:                                                            │
+│                                                                       │
+│  ──────────────────────┬──────────────────┬─────────────────────     │
+│  Last good backup      │ Disaster occurs  │ Service restored          │
+│  (data preserved)      │                  │                           │
+│  ──────────────────────┴──────────────────┴─────────────────────     │
+│                                                                       │
+│  ◄──── RPO ────►                          ◄──── RTO ────►            │
+│  Recovery Point                           Recovery Time               │
+│  Objective                                Objective                   │
+│                                                                       │
+│  RPO = Maximum acceptable DATA LOSS                                   │
+│        &quot;How much data can we afford to lose?&quot;                         │
+│        RPO = 1 hour → Backups every hour minimum                     │
+│        RPO = 0 → Synchronous replication required                    │
+│                                                                       │
+│  RTO = Maximum acceptable DOWNTIME                                    │
+│        &quot;How quickly must we be back online?&quot;                          │
+│        RTO = 4 hours → Cold standby is acceptable                    │
+│        RTO = 15 min → Hot standby or multi-region active             │
+└──────────────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>RTO/RPO by Service Tier</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────────────┐
+│                Service Tier Classification                            │
+│                                                                       │
+│  Tier │ Services           │ RTO Target │ RPO Target │ Strategy      │
+│  ──────────────────────────────────────────────────────────────      │
+│  T1   │ API, Auth, DB      │ &lt; 15 min   │ &lt; 5 min    │ Multi-AZ     │
+│       │ (Core platform)    │            │            │ + auto-fail  │
+│  ──────────────────────────────────────────────────────────────      │
+│  T2   │ Frontend, CDN,     │ &lt; 1 hour   │ &lt; 1 hour   │ Multi-AZ     │
+│       │ File storage       │            │            │ + manual fail│
+│  ──────────────────────────────────────────────────────────────      │
+│  T3   │ Analytics, Reports │ &lt; 4 hours  │ &lt; 24 hours │ Backup +     │
+│       │ Batch processing   │            │            │ restore      │
+│  ──────────────────────────────────────────────────────────────      │
+│  T4   │ Dev/staging envs   │ &lt; 24 hours │ &lt; 24 hours │ Rebuild from │
+│       │ Internal tools     │            │            │ IaC + backup │
+└──────────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>2. DR Strategy Tiers</h2>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────────────────┐
+│                    DR Strategy Comparison                                │
+│                                                                          │
+│  Strategy         │ RTO      │ RPO      │ Monthly Cost │ Complexity     │
+│  ────────────────────────────────────────────────────────────────       │
+│  Backup &amp; Restore │ 4-24 hr  │ 1-24 hr  │ $ (low)      │ Simple         │
+│  Pilot Light      │ 1-4 hr   │ Minutes  │ $$ (moderate)│ Medium         │
+│  Warm Standby     │ 10-30 min│ Minutes  │ $$$ (high)   │ High           │
+│  Multi-Site Active│ &lt; 1 min  │ Near-zero│ $$$$ (2x)    │ Very High      │
+│                                                                          │
+│  ┌──────────────────────────────────────────────────────────────┐       │
+│  │  Backup &amp; Restore                                            │       │
+│  │                                                               │       │
+│  │  Primary Region (us-east-1)          DR Region (us-west-2)  │       │
+│  │  ┌──────────────────┐               ┌───────────────────┐   │       │
+│  │  │ Full stack        │   Backups →   │ S3 (snapshots)    │   │       │
+│  │  │ running           │               │ (nothing running) │   │       │
+│  │  └──────────────────┘               └───────────────────┘   │       │
+│  │                                                               │       │
+│  │  On disaster: Restore from snapshots, deploy infra via IaC  │       │
+│  └──────────────────────────────────────────────────────────────┘       │
+│                                                                          │
+│  ┌──────────────────────────────────────────────────────────────┐       │
+│  │  Pilot Light                                                  │       │
+│  │                                                               │       │
+│  │  Primary Region (us-east-1)          DR Region (us-west-2)  │       │
+│  │  ┌──────────────────┐               ┌───────────────────┐   │       │
+│  │  │ Full stack        │   Replication │ RDS read replica  │   │       │
+│  │  │ running           │   ──────────→ │ (data only, min   │   │       │
+│  │  │                   │               │  compute running) │   │       │
+│  │  └──────────────────┘               └───────────────────┘   │       │
+│  │                                                               │       │
+│  │  On disaster: Promote replica, scale up ECS, update DNS     │       │
+│  └──────────────────────────────────────────────────────────────┘       │
+│                                                                          │
+│  ┌──────────────────────────────────────────────────────────────┐       │
+│  │  Warm Standby                                                 │       │
+│  │                                                               │       │
+│  │  Primary Region (us-east-1)          DR Region (us-west-2)  │       │
+│  │  ┌──────────────────┐               ┌───────────────────┐   │       │
+│  │  │ Full stack        │   Replication │ Reduced capacity   │   │       │
+│  │  │ 3 ECS tasks       │   ──────────→ │ 1 ECS task         │   │       │
+│  │  │ db.r6g.large      │               │ db.r6g.large       │   │       │
+│  │  └──────────────────┘               └───────────────────┘   │       │
+│  │                                                               │       │
+│  │  On disaster: Scale up ECS tasks, promote DB, update DNS    │       │
+│  └──────────────────────────────────────────────────────────────┘       │
+└─────────────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>3. Backup Strategy Implementation</h2>
+
+<h3>Database Backups</h3>
+
+<pre class="code-block"><code># RDS automated backups (built-in)
+resource &quot;aws_db_instance&quot; &quot;main&quot; {
+  # ... other config ...
+
+  # Automated backups
+  backup_retention_period   = 30       # Keep 30 days of backups
+  backup_window             = &quot;03:00-04:00&quot;  # 3-4 AM UTC
+  copy_tags_to_snapshot     = true
+  delete_automated_backups  = false    # Keep backups even if instance deleted
+  skip_final_snapshot       = false    # Always create final snapshot on delete
+  final_snapshot_identifier = &quot;${local.project}-${local.environment}-final&quot;
+}
+
+# Cross-region snapshot copy (for DR)
+resource &quot;aws_db_instance_automated_backups_replication&quot; &quot;dr&quot; {
+  source_db_instance_arn = aws_db_instance.main.arn
+  retention_period       = 7  # Keep 7 days in DR region
+  kms_key_id             = aws_kms_key.dr_region.arn
+
+  provider = aws.dr_region  # us-west-2
+}</code></pre>
+
+<h3>S3 Cross-Region Replication</h3>
+
+<pre class="code-block"><code>resource &quot;aws_s3_bucket_replication_configuration&quot; &quot;uploads&quot; {
+  bucket = aws_s3_bucket.uploads.id
+  role   = aws_iam_role.s3_replication.arn
+
+  rule {
+    id     = &quot;replicate-all&quot;
+    status = &quot;Enabled&quot;
+
+    filter {}  # Replicate everything
+
+    destination {
+      bucket        = aws_s3_bucket.uploads_dr.arn
+      storage_class = &quot;STANDARD_IA&quot;  # Cheaper storage in DR region
+
+      encryption_configuration {
+        replica_kms_key_id = aws_kms_key.dr_region.arn
+      }
+    }
+
+    delete_marker_replication {
+      status = &quot;Enabled&quot;
+    }
+  }
+}</code></pre>
+<hr class="section-divider">
+<h2>4. Failover Architecture</h2>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────────────────┐
+│                    DNS Failover with Route 53                            │
+│                                                                          │
+│  Route 53: app.lmsht.com                                                │
+│  ┌─────────────────────────────────────────┐                            │
+│  │ Failover Routing Policy                  │                            │
+│  │                                          │                            │
+│  │ Primary → ALB us-east-1 (health check)  │                            │
+│  │ Secondary → ALB us-west-2 (standby)     │                            │
+│  └────────────┬───────────────┬─────────────┘                           │
+│               │               │                                          │
+│       ┌───────▼───────┐ ┌────▼────────────┐                            │
+│       │  us-east-1    │ │  us-west-2      │                            │
+│       │  (PRIMARY)    │ │  (DR STANDBY)   │                            │
+│       │               │ │                  │                            │
+│       │  ALB ──→ ECS  │ │  ALB ──→ ECS   │                            │
+│       │  (3 tasks)    │ │  (0 tasks, or   │                            │
+│       │               │ │   1 warm task)  │                            │
+│       │  RDS Primary  │ │  RDS Replica    │                            │
+│       │  (read/write) │ │  (read-only)    │                            │
+│       │               │ │                  │                            │
+│       │  Redis Primary│ │  Redis Replica  │                            │
+│       │               │ │  (or new)       │                            │
+│       └───────────────┘ └─────────────────┘                            │
+│                                                                          │
+│  On Failover:                                                            │
+│  1. Route 53 health check fails for us-east-1 ALB                       │
+│  2. DNS automatically routes to us-west-2 ALB                           │
+│  3. Scale up ECS tasks in us-west-2                                     │
+│  4. Promote RDS read replica to primary (manual)                        │
+│  5. Update application configs if needed                                │
+└─────────────────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Route 53 Health Check and Failover</h3>
+
+<pre class="code-block"><code>resource &quot;aws_route53_health_check&quot; &quot;primary&quot; {
+  fqdn              = &quot;primary-alb.us-east-1.elb.amazonaws.com&quot;
+  port               = 443
+  type               = &quot;HTTPS&quot;
+  resource_path      = &quot;/api/health&quot;
+  failure_threshold  = 3
+  request_interval   = 30
+  measure_latency    = true
+
+  tags = {
+    Name = &quot;${local.project}-primary-health-check&quot;
+  }
+}
+
+resource &quot;aws_route53_record&quot; &quot;app_primary&quot; {
+  zone_id         = aws_route53_zone.main.zone_id
+  name            = &quot;app.lmsht.com&quot;
+  type            = &quot;A&quot;
+  set_identifier  = &quot;primary&quot;
+
+  failover_routing_policy {
+    type = &quot;PRIMARY&quot;
+  }
+
+  alias {
+    name                   = aws_lb.primary.dns_name
+    zone_id                = aws_lb.primary.zone_id
+    evaluate_target_health = true
+  }
+
+  health_check_id = aws_route53_health_check.primary.id
+}
+
+resource &quot;aws_route53_record&quot; &quot;app_secondary&quot; {
+  zone_id         = aws_route53_zone.main.zone_id
+  name            = &quot;app.lmsht.com&quot;
+  type            = &quot;A&quot;
+  set_identifier  = &quot;secondary&quot;
+
+  failover_routing_policy {
+    type = &quot;SECONDARY&quot;
+  }
+
+  alias {
+    name                   = aws_lb.secondary.dns_name
+    zone_id                = aws_lb.secondary.zone_id
+    evaluate_target_health = true
+  }
+
+  provider = aws.dr_region
+}</code></pre>
+<hr class="section-divider">
+<h2>5. Failover Runbook</h2>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────────────────┐
+│                    FAILOVER RUNBOOK                                       │
+│                                                                          │
+│  Trigger: Primary region (us-east-1) is unavailable                     │
+│  Estimated RTO: 15-30 minutes (Pilot Light)                             │
+│                                                                          │
+│  STEP 1: Confirm Outage (2 min)                                        │
+│  ────────────────────────────                                           │
+│  □ Check AWS Health Dashboard for regional outage                       │
+│  □ Verify ALB health checks are failing                                 │
+│  □ Confirm application is unreachable from multiple locations           │
+│  □ Notify incident commander and stakeholders                           │
+│                                                                          │
+│  STEP 2: Promote Database (5-10 min)                                    │
+│  ────────────────────────────────                                       │
+│  □ Promote RDS cross-region read replica to standalone:                 │
+│    aws rds promote-read-replica-db-instance \                           │
+│      --db-instance-identifier myapp-dr-postgres \                       │
+│      --region us-west-2                                                  │
+│  □ Wait for instance to become &quot;available&quot;:                             │
+│    aws rds wait db-instance-available \                                  │
+│      --db-instance-identifier myapp-dr-postgres \                       │
+│      --region us-west-2                                                  │
+│  □ Update connection string in SSM Parameter Store (us-west-2)         │
+│                                                                          │
+│  STEP 3: Scale Up Compute (3-5 min)                                    │
+│  ────────────────────────────────                                       │
+│  □ Update ECS service desired count:                                    │
+│    aws ecs update-service \                                              │
+│      --cluster myapp-dr --service myapp-backend \                       │
+│      --desired-count 3 --region us-west-2                               │
+│  □ Wait for tasks to reach RUNNING state:                               │
+│    aws ecs wait services-stable \                                        │
+│      --cluster myapp-dr --services myapp-backend \                      │
+│      --region us-west-2                                                  │
+│                                                                          │
+│  STEP 4: Verify DR Environment (2-3 min)                               │
+│  ────────────────────────────────────                                    │
+│  □ Check ALB target health in us-west-2                                 │
+│  □ Hit health endpoint: curl https://dr-alb.us-west-2.elb/api/health  │
+│  □ Run smoke tests against DR environment                               │
+│  □ Verify database connectivity and data integrity                      │
+│                                                                          │
+│  STEP 5: Switch DNS (1-2 min)                                          │
+│  ──────────────────────────                                              │
+│  □ If Route 53 failover is automatic: verify DNS has switched          │
+│  □ If manual: update Route 53 to point to us-west-2 ALB               │
+│  □ Verify DNS propagation: dig app.lmsht.com                           │
+│                                                                          │
+│  STEP 6: Post-Failover                                                  │
+│  ─────────────────────                                                   │
+│  □ Monitor error rates in us-west-2                                     │
+│  □ Notify stakeholders that service is restored                         │
+│  □ Begin planning failback once primary region recovers                │
+│  □ Document the incident timeline                                       │
+│                                                                          │
+│  STEP 7: Failback (when primary recovers)                               │
+│  ─────────────────────────────────────                                   │
+│  □ Create new RDS replica in us-east-1 from DR primary                 │
+│  □ Wait for replica to catch up (check ReplicaLag metric)              │
+│  □ Promote us-east-1 replica, switch DNS back                          │
+│  □ Scale down us-west-2 to standby capacity                            │
+│  □ Re-establish cross-region replication                                │
+└─────────────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>6. DR Testing Schedule</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────────────┐
+│                    DR Testing Calendar                                 │
+│                                                                       │
+│  Test Type         │ Frequency   │ Scope              │ Duration     │
+│  ──────────────────────────────────────────────────────────────      │
+│  Backup restore    │ Monthly     │ Restore RDS snap   │ 2 hours      │
+│  test              │             │ to new instance    │              │
+│                    │             │ + verify data      │              │
+│  ──────────────────────────────────────────────────────────────      │
+│  Tabletop exercise │ Quarterly   │ Walk through       │ 1 hour       │
+│                    │             │ runbook verbally   │              │
+│  ──────────────────────────────────────────────────────────────      │
+│  Component         │ Quarterly   │ Failover single    │ 4 hours      │
+│  failover test     │             │ component (DB)     │              │
+│  ──────────────────────────────────────────────────────────────      │
+│  Full DR drill     │ Biannual    │ Full region fail   │ 8 hours      │
+│                    │             │ + failback         │              │
+│  ──────────────────────────────────────────────────────────────      │
+│  Chaos engineering │ Continuous  │ Random failures    │ Ongoing      │
+│  (optional)        │ (automated) │ in staging         │              │
+└──────────────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Monthly Backup Restore Test</h3>
+
+<pre class="code-block"><code>#!/bin/bash
+# monthly-backup-test.sh — Automated backup verification
+
+set -euo pipefail
+
+PROJECT=&quot;myapp&quot;
+ENVIRONMENT=&quot;production&quot;
+RESTORE_ID=&quot;${PROJECT}-backup-test-$(date +%Y%m%d)&quot;
+
+echo &quot;=== Monthly Backup Restore Test ===&quot;
+
+# Step 1: Find latest automated snapshot
+SNAPSHOT=$(aws rds describe-db-snapshots \
+  --db-instance-identifier &quot;${PROJECT}-${ENVIRONMENT}-postgres&quot; \
+  --snapshot-type automated \
+  --query &quot;DBSnapshots | sort_by(@, &amp;SnapshotCreateTime) | [-1].DBSnapshotIdentifier&quot; \
+  --output text)
+
+echo &quot;Restoring from snapshot: ${SNAPSHOT}&quot;
+
+# Step 2: Restore to a test instance
+aws rds restore-db-instance-from-db-snapshot \
+  --db-instance-identifier &quot;${RESTORE_ID}&quot; \
+  --db-snapshot-identifier &quot;${SNAPSHOT}&quot; \
+  --db-instance-class db.t4g.micro \
+  --db-subnet-group-name &quot;${PROJECT}-${ENVIRONMENT}-db-subnet-group&quot; \
+  --no-multi-az \
+  --no-publicly-accessible
+
+echo &quot;Waiting for restore to complete...&quot;
+aws rds wait db-instance-available \
+  --db-instance-identifier &quot;${RESTORE_ID}&quot;
+
+# Step 3: Run validation queries
+ENDPOINT=$(aws rds describe-db-instances \
+  --db-instance-identifier &quot;${RESTORE_ID}&quot; \
+  --query &quot;DBInstances[0].Endpoint.Address&quot; --output text)
+
+echo &quot;Validating data integrity on ${ENDPOINT}...&quot;
+PGPASSWORD=&lt;password&gt; psql -h &quot;${ENDPOINT}&quot; -U myapp_admin -d myapp -c &quot;
+  SELECT
+    (SELECT count(*) FROM users) as user_count,
+    (SELECT count(*) FROM tenants) as tenant_count,
+    (SELECT count(*) FROM courses) as course_count,
+    (SELECT max(created_at) FROM users) as latest_user
+;&quot; 2&gt;&amp;1
+
+# Step 4: Clean up test instance
+echo &quot;Cleaning up test instance...&quot;
+aws rds delete-db-instance \
+  --db-instance-identifier &quot;${RESTORE_ID}&quot; \
+  --skip-final-snapshot \
+  --delete-automated-backups
+
+echo &quot;=== Backup Restore Test Complete ===&quot;</code></pre>
+<hr class="section-divider">
+<h2>7. Cost Implications</h2>
+<div class="table-wrap"><table><thead><tr><th>DR Strategy</th><th>Additional Monthly Cost</th><th>Notes</th><th></th></tr></thead><tbody><tr><td>Backup & Restore</td><td>~$20-50</td><td>S3 snapshot storage + cross-region transfer</td><td></td></tr><tr><td>Pilot Light</td><td>~$200-400</td><td>RDS cross-region replica + minimal compute</td><td></td></tr><tr><td>Warm Standby</td><td>~$500-1000</td><td>Reduced capacity running in DR region</td><td></td></tr><tr><td>Multi-Site Active</td><td>~$1500-3000+</td><td>Full duplicate infrastructure</td><td></td></tr><tr><td>Route 53 Health Checks</td><td>$0.50/check/month</td><td>Per health check endpoint</td><td></td></tr><tr><td>S3 Cross-Region Replication</td><td>$0.02/GB transfer</td><td>+ destination storage</td><td></td></tr><tr><td>RDS Cross-Region Replica</td><td>Same as primary</td><td>Full instance cost in DR region</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>8. Security Considerations</h2>
+
+<ul class="skill-list"><li>Encrypt all backups and snapshots with KMS (use separate keys per region)</li>
+<li>Ensure DR region IAM roles follow same least-privilege model as primary</li>
+<li>Cross-region replication should use TLS in transit (default for AWS services)</li>
+<li>DR environment security groups must mirror primary configuration</li>
+<li>Test that DR environment has all required secrets in regional SSM/SecretsManager</li>
+<li>Audit DR access controls quarterly</li>
+<li>Ensure backup deletion requires MFA (S3 Object Lock, RDS deletion protection)</li>
+</ul><hr class="section-divider">
+<h2>9. Common Mistakes / Anti-Patterns</h2>
+<div class="table-wrap"><table><thead><tr><th>Mistake</th><th>Why It's Bad</th><th>Fix</th><th></th></tr></thead><tbody><tr><td>Never testing DR plan</td><td>Discover failures during real disaster</td><td>Test quarterly at minimum</td><td></td></tr><tr><td>No documented runbook</td><td>Engineers scramble during outage</td><td>Write step-by-step runbook with commands</td><td></td></tr><tr><td>RTO/RPO not defined</td><td>Cannot design appropriate DR strategy</td><td>Define per service tier with business input</td><td></td></tr><tr><td>Backup but no restore test</td><td>Backups may be corrupt or incomplete</td><td>Monthly automated restore validation</td><td></td></tr><tr><td>Same region for backups</td><td>Region outage loses backups too</td><td>Cross-region snapshot replication</td><td></td></tr><tr><td>No DNS failover</td><td>Manual DNS changes take 30+ minutes</td><td>Use Route 53 failover routing</td><td></td></tr><tr><td>DR environment drift</td><td>DR config doesn't match production</td><td>Use Terraform for both, keep in sync</td><td></td></tr><tr><td>No failback procedure</td><td>Stuck in DR region after recovery</td><td>Document failback steps in runbook</td><td></td></tr><tr><td>Ignoring application state</td><td>Stateful services (Redis, sessions) lost</td><td>Plan for session re-creation or replication</td><td></td></tr></tbody></table></div>| Single person knows DR plan | Bus factor risk during outage | Cross-train team, run tabletop exercises |
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="secrets-manage.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">Manage Secrets</span></span></a>
+    <a href="monitoring-setup.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Set Up CloudWatch Monitoring</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    66 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

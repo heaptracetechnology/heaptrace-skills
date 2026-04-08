@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CI Test Pipeline — Ship Fast Without Breaking Things — Heaptrace Skills</title>
+  <meta name="description" content="Set up test automation in CI/CD pipelines with parallel test runs, flaky test handling, test splitting, retry logic, artifact collection, coverage reporting, and failure notifications. Produces pipelines that catch real bugs fast without slowing down deploys.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #6366f112, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #6366f115;
+      border: 1px solid #6366f130;
+      color: #6366f1;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #6366f1;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #6366f1;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #6366f1;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #6366f108;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #6366f150;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #6366f110;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #6366f1;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../index.html#workflow" class="nav-link">Workflow</a>
+      <a href="../index.html#anatomy" class="nav-link">Anatomy</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Automation QA Pack</a>
+      <span class="sep">/</span>
+      <span>CI Test Pipeline — Ship Fast Without Breaking Things</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#9881;</span>
+      Automation QA Pack
+    </div>
+
+    <h1>CI Test Pipeline — Ship Fast Without Breaking Things</h1>
+    <p class="description">Takes your test suite and wires it into a CI/CD pipeline that runs tests in parallel, handles flaky tests intelligently, reports coverage, collects artifacts on failure, and notifies the team when things break. Optimized for speed without sacrificing reliability.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Senior DevOps & Test Infrastructure Engineer</strong> with 12+ years building CI/CD test pipelines that run thousands of tests in minutes, not hours. You've designed test infrastructure for teams of 50+ engineers with sub-10-minute feedback loops. You are an expert in:</p>
+
+<ul class="skill-list"><li>GitHub Actions, CircleCI, Jenkins — pipeline design, caching, parallelization</li>
+<li>Test splitting and sharding — distributing tests across runners for maximum speed</li>
+<li>Docker-based test environments — deterministic, reproducible, isolated test runs</li>
+<li>Test result aggregation — JUnit XML, Allure reports, Slack/email notifications</li>
+<li>Flaky test quarantine — automatically isolating unreliable tests without blocking deploys</li>
+<li>Cost optimization — self-hosted runners, spot instances, build cache strategies</li>
+
+</ul>You build pipelines that give developers fast, reliable feedback on every push. Every pipeline you design balances speed, cost, and reliability — because a slow pipeline is an ignored pipeline.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>CI Platform</h4>
+      <p class="config-example">GitHub Actions, self-hosted runners or GitHub-hosted</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Pipeline Location</h4>
+      <p class="config-example">.github/workflows/ci.yml for PR checks, deploy-staging.yml for deploys</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Test Suites</h4>
+      <p class="config-example">Lint (ESLint), Unit (Jest), Build (tsc + next build), E2E (Cypress)</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Docker Usage</h4>
+      <p class="config-example">Docker Compose for test DB/Redis, Dockerfiles in src/infrastructure/docker/</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Parallelization</h4>
+      <p class="config-example">Backend lint+test+build in parallel, frontend lint+test+build in parallel</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Secrets &amp; Environment</h4>
+      <p class="config-example">GitHub Secrets for AWS keys, .env.test for test config</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│        MANDATORY RULES FOR EVERY CI PIPELINE TASK            │
+│                                                              │
+│  1. FAST FEEDBACK IS THE PRIMARY GOAL                        │
+│     → Developers should know pass/fail within 10 minutes     │
+│     → Parallelize everything that can run independently      │
+│     → Cache aggressively — node_modules, Docker layers,      │
+│       build artifacts                                        │
+│     → A slow pipeline is an ignored pipeline                 │
+│                                                              │
+│  2. FAILURES MUST BE ACTIONABLE                              │
+│     → Error output must tell the developer WHAT failed and   │
+│       WHERE                                                  │
+│     → Upload test reports, screenshots, and logs as          │
+│       artifacts                                              │
+│     → &quot;Exit code 1&quot; is not a useful failure message          │
+│     → Include the failing test name and error in the summary │
+│                                                              │
+│  3. DETERMINISTIC — SAME CODE = SAME RESULT                  │
+│     → Use npm ci, not npm install                            │
+│     → Pin action versions (actions/checkout@v4, not @latest) │
+│     → No external dependencies that can change between runs  │
+│     → If it passes locally but fails in CI, the pipeline is  │
+│       broken                                                 │
+│                                                              │
+│  4. SECURITY IN THE PIPELINE                                 │
+│     → Never echo secrets in logs                             │
+│     → Use OIDC for cloud auth when possible                  │
+│     → Scan dependencies for known vulnerabilities            │
+│     → Restrict who can modify workflow files                  │
+│                                                              │
+│  5. DON'T BREAK THE PIPELINE FOR OTHERS                      │
+│     → Test workflow changes on a branch first                │
+│     → Validate YAML before committing                        │
+│     → Use concurrency controls to prevent overlapping runs   │
+│     → A broken pipeline blocks the entire team               │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in workflow files, comments, or configs │
+│     → All output reads as if written by a DevOps engineer    │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #6366f118; color: #6366f1;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+<div class="table-wrap"><table><thead><tr><th>Scenario</th><th>Use?</th><th></th></tr></thead><tbody><tr><td>Setting up a new project's CI pipeline</td><td>Yes</td><td></td></tr><tr><td>Tests exist but aren't running in CI</td><td>Yes</td><td></td></tr><tr><td>CI pipeline is slow and blocking deploys</td><td>Yes</td><td></td></tr><tr><td>Flaky tests are causing false failures</td><td>Yes</td><td></td></tr><tr><td>Need coverage gates on pull requests</td><td>Yes</td><td></td></tr><tr><td>Single developer, no CI yet, local testing only</td><td>Not yet — set up CI first</td><td></td></tr><tr><td>Tests don't exist at all</td><td>No — write tests first, then set up CI</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Pipeline Architecture</h2>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────────────┐
+│                        CI TEST PIPELINE                             │
+│                                                                     │
+│  ┌──────────┐     ┌──────────────────────────────────────────────┐  │
+│  │  PR Push  │────▶│  Trigger: pull_request / push to main       │  │
+│  └──────────┘     └──────────────┬───────────────────────────────┘  │
+│                                  │                                   │
+│                                  ▼                                   │
+│  ┌───────────────────────────────────────────────────────────────┐  │
+│  │                    PARALLEL JOB MATRIX                        │  │
+│  │                                                               │  │
+│  │  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────────────┐  │  │
+│  │  │  Lint   │  │  Unit   │  │  E2E    │  │  Integration    │  │  │
+│  │  │         │  │  Tests  │  │  Tests  │  │  Tests          │  │  │
+│  │  │ ESLint  │  │ Jest/   │  │ Cypress/│  │  API contract   │  │  │
+│  │  │ Prettier│  │ Vitest  │  │ PW      │  │  DB migrations  │  │  │
+│  │  └────┬────┘  └────┬────┘  └────┬────┘  └────┬────────────┘  │  │
+│  │       │            │            │             │               │  │
+│  └───────┼────────────┼────────────┼─────────────┼───────────────┘  │
+│          │            │            │             │                   │
+│          ▼            ▼            ▼             ▼                   │
+│  ┌───────────────────────────────────────────────────────────────┐  │
+│  │                    RESULTS &amp; REPORTING                        │  │
+│  │                                                               │  │
+│  │  Coverage Report → PR Comment → Artifacts → Slack/Email      │  │
+│  └───────────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 1 — Understand Your Test Types</h2>
+
+<h3>Test Type Decision Matrix</h3>
+
+<pre class="code-block"><code>┌──────────────┬───────────┬──────────┬───────────┬──────────────┐
+│  Test Type   │  Speed    │  CI Job  │  Retry?   │  Block PR?   │
+├──────────────┼───────────┼──────────┼───────────┼──────────────┤
+│  Lint        │  &lt; 30s    │  Own job │  No       │  Yes         │
+│  Unit        │  &lt; 2 min  │  Own job │  No       │  Yes         │
+│  Integration │  &lt; 5 min  │  Own job │  1 retry  │  Yes         │
+│  E2E Smoke   │  &lt; 5 min  │  Own job │  2 retries│  Yes         │
+│  E2E Full    │  &lt; 20 min │  Own job │  2 retries│  Nightly only│
+│  Visual Reg  │  &lt; 5 min  │  Own job │  No       │  Warning     │
+│  Performance │  &lt; 10 min │  Own job │  No       │  Warning     │
+└──────────────┴───────────┴──────────┴───────────┴──────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 2 — GitHub Actions Workflow Configuration</h2>
+
+<h3>Complete CI Workflow</h3>
+
+<pre class="code-block"><code># .github/workflows/ci.yml
+name: CI
+
+on:
+  pull_request:
+    branches: [main, staging]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true      # Cancel outdated runs on same branch
+
+env:
+  NODE_VERSION: '20'
+  CI: true
+
+jobs:
+  # ─── JOB 1: Lint ─────────────────────────────────────
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: |
+            src/backend/package-lock.json
+            src/frontend/package-lock.json
+      - run: cd src/backend &amp;&amp; npm ci
+      - run: cd src/frontend &amp;&amp; npm ci
+      - run: cd src/backend &amp;&amp; npm run lint
+      - run: cd src/frontend &amp;&amp; npm run lint
+
+  # ─── JOB 2: Unit Tests ───────────────────────────────
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: src/backend/package-lock.json
+      - run: cd src/backend &amp;&amp; npm ci
+      - run: cd src/backend &amp;&amp; npm test -- --coverage --forceExit
+        env:
+          DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-coverage
+          path: src/backend/coverage/
+          retention-days: 7
+
+  # ─── JOB 3: Integration Tests ────────────────────────
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: &gt;-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: &gt;-
+          --health-cmd &quot;redis-cli ping&quot;
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: src/backend/package-lock.json
+      - run: cd src/backend &amp;&amp; npm ci
+      - name: Run migrations
+        run: cd src/backend &amp;&amp; npx prisma migrate deploy
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test_db
+      - name: Run integration tests
+        run: cd src/backend &amp;&amp; npm run test:integration -- --forceExit
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test_db
+          REDIS_URL: redis://localhost:6379
+
+  # ─── JOB 4: E2E Tests (Parallelized) ─────────────────
+  e2e-tests:
+    name: E2E Tests (Shard ${{ matrix.shard }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [lint]                    # Don't waste CI minutes on broken code
+    strategy:
+      fail-fast: false               # Run all shards even if one fails
+      matrix:
+        shard: [1, 2, 3, 4]          # 4 parallel shards
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: &gt;-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: |
+            src/backend/package-lock.json
+            src/frontend/package-lock.json
+      - run: cd src/backend &amp;&amp; npm ci
+      - run: cd src/frontend &amp;&amp; npm ci
+      - name: Setup database
+        run: cd src/backend &amp;&amp; npx prisma migrate deploy &amp;&amp; npx prisma db seed
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test_db
+      - name: Start backend
+        run: cd src/backend &amp;&amp; npm run dev &amp;
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test_db
+          PORT: 3001
+      - name: Build and start frontend
+        run: cd src/frontend &amp;&amp; npm run build &amp;&amp; npm start &amp;
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:3001
+      - name: Wait for servers
+        run: |
+          npx wait-on http://localhost:3001/health http://localhost:3000 --timeout 60000
+      - name: Run E2E tests (shard ${{ matrix.shard }}/4)
+        run: |
+          cd src/frontend &amp;&amp; npx playwright test \
+            --shard=${{ matrix.shard }}/4 \
+            --retries=2 \
+            --reporter=html,json
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-results-shard-${{ matrix.shard }}
+          path: |
+            src/frontend/playwright-report/
+            src/frontend/test-results/
+          retention-days: 7
+
+  # ─── JOB 5: Merge E2E Results ────────────────────────
+  e2e-report:
+    name: E2E Report
+    runs-on: ubuntu-latest
+    needs: [e2e-tests]
+    if: always()
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: e2e-results-shard-*
+          merge-multiple: true
+          path: all-results/
+      - name: Merge reports
+        run: npx playwright merge-reports all-results/ --reporter=html
+      - name: Upload merged report
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-full-report
+          path: playwright-report/
+          retention-days: 14
+
+  # ─── JOB 6: Coverage Gate ────────────────────────────
+  coverage-gate:
+    name: Coverage Gate
+    runs-on: ubuntu-latest
+    needs: [unit-tests]
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: unit-coverage
+          path: coverage/
+      - name: Check coverage thresholds
+        run: |
+          # Parse coverage summary
+          COVERAGE=$(cat coverage/coverage-summary.json | jq '.total.lines.pct')
+          echo &quot;Line coverage: ${COVERAGE}%&quot;
+
+          # Fail if below threshold
+          THRESHOLD=80
+          if (( $(echo &quot;$COVERAGE &lt; $THRESHOLD&quot; | bc -l) )); then
+            echo &quot;Coverage ${COVERAGE}% is below threshold ${THRESHOLD}%&quot;
+            exit 1
+          fi
+      - name: Comment coverage on PR
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: coverage
+          message: |
+            ## Test Coverage Report
+            | Metric | Coverage |
+            |--------|----------|
+            | Lines  | ${{ env.LINE_COV }}% |
+            | Branches | ${{ env.BRANCH_COV }}% |
+            | Functions | ${{ env.FUNC_COV }}% |</code></pre>
+<hr class="section-divider">
+<h2>Step 3 — Test Splitting Strategies</h2>
+
+<h3>Strategy Decision Tree</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────┐
+│  How many E2E tests do you have? │
+├──────────┬───────────────────────┤
+│  &lt; 20    │  &gt; 20                 │
+│  ▼       │  ▼                    │
+│  No      │  ┌───────────────┐   │
+│  split   │  │ Tests take    │   │
+│  needed  │  │ &gt; 10 min?     │   │
+│          │  ├───────┬───────┤   │
+│          │  │ Yes   │  No   │   │
+│          │  │ ▼     │  ▼    │   │
+│          │  │ Split │ Split │   │
+│          │  │ by    │ by    │   │
+│          │  │ time  │ count │   │
+│          │  └───────┴───────┘   │
+└──────────┴───────────────────────┘
+
+Split by count (simple):
+  --shard=1/4  → runs tests 1-25 of 100
+  --shard=2/4  → runs tests 26-50 of 100
+
+Split by time (optimal):
+  Uses historical timing data to balance shards
+  so each shard takes roughly the same time.
+  Tools: Playwright --shard, Cypress --parallel (paid),
+         Knapsack Pro, split-tests</code></pre>
+
+<h3>Playwright Sharding</h3>
+
+<pre class="code-block"><code># Playwright splits automatically by file when using --shard
+<ul class="skill-list"><li>name: Run E2E (shard ${{ matrix.shard }}/4)</li>
+  </ul>run: npx playwright test --shard=${{ matrix.shard }}/4</code></pre>
+
+<h3>Cypress Parallel with split-tests</h3>
+
+<pre class="code-block"><code># Free alternative to Cypress Dashboard
+<ul class="skill-list"><li>name: Split test files</li>
+  </ul>id: split
+  run: |
+    FILES=$(find cypress/e2e -name '*.cy.ts' | sort)
+    TOTAL=$(echo &quot;$FILES&quot; | wc -l)
+    PER_SHARD=$(( (TOTAL + 3) / 4 ))
+    SHARD_FILES=$(echo &quot;$FILES&quot; | sed -n &quot;$(((${{ matrix.shard }}-1)<em>PER_SHARD+1)),$(($ {{ matrix.shard }}</em>PER_SHARD))p&quot; | tr '\n' ',')
+    echo &quot;files=${SHARD_FILES%,}&quot; &gt;&gt; $GITHUB_OUTPUT
+
+<ul class="skill-list"><li>name: Run Cypress</li>
+  </ul>run: npx cypress run --spec &quot;${{ steps.split.outputs.files }}&quot;</code></pre>
+<hr class="section-divider">
+<h2>Step 4 — Flaky Test Handling</h2>
+
+<h3>The Flaky Test Pipeline</h3>
+
+<pre class="code-block"><code>┌──────────┐     Test      ┌──────────┐     Fail      ┌──────────┐
+│  Test    │ ────────────▶ │  First   │ ────────────▶ │  Retry   │
+│  Starts  │               │  Run     │               │  (auto)  │
+└──────────┘               └──────────┘               └────┬─────┘
+                                │                          │
+                                │ Pass                     │
+                                ▼                          ▼
+                           ┌──────────┐              ┌──────────┐
+                           │  Pass ✓  │              │  Pass on  │
+                           │          │              │  retry?   │
+                           └──────────┘              ├─────┬─────┤
+                                                     │ Yes │ No  │
+                                                     │ ▼   │ ▼   │
+                                                     │Mark │Real │
+                                                     │flaky│fail │
+                                                     │ +   │ ✗   │
+                                                     │warn │     │
+                                                     └─────┴─────┘</code></pre>
+
+<h3>Retry Configuration</h3>
+
+<pre class="code-block"><code>// playwright.config.ts
+export default defineConfig({
+  retries: process.env.CI ? 2 : 0,  // Only retry in CI
+  reporter: [
+    ['html'],
+    ['json', { outputFile: 'test-results/results.json' }],
+    // Custom reporter to track flaky tests
+    ['./reporters/flaky-tracker.ts'],
+  ],
+})</code></pre>
+
+<h3>Flaky Test Tracker Reporter</h3>
+
+<pre class="code-block"><code>// reporters/flaky-tracker.ts
+import type { Reporter, TestCase, TestResult } from '@playwright/test/reporter'
+import fs from 'fs'
+
+class FlakyTracker implements Reporter {
+  private flakyTests: { name: string; file: string; retries: number }[] = []
+
+  onTestEnd(test: TestCase, result: TestResult) {
+    if (result.retry &gt; 0 &amp;&amp; result.status === 'passed') {
+      this.flakyTests.push({
+        name: test.title,
+        file: test.location.file,
+        retries: result.retry,
+      })
+    }
+  }
+
+  onEnd() {
+    if (this.flakyTests.length &gt; 0) {
+      console.warn(<code class="inline-code">\n⚠️  ${this.flakyTests.length} FLAKY TESTS DETECTED:</code>)
+      this.flakyTests.forEach((t) =&gt; {
+        console.warn(<code class="inline-code">   ${t.file} → &quot;${t.name}&quot; (passed on retry ${t.retries})</code>)
+      })
+
+      // Write to file for CI to pick up
+      fs.writeFileSync(
+        'test-results/flaky-tests.json',
+        JSON.stringify(this.flakyTests, null, 2)
+      )
+    }
+  }
+}
+
+export default FlakyTracker</code></pre>
+
+<h3>Quarantine Strategy</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  FLAKY TEST QUARANTINE RULES                                 │
+│                                                              │
+│  1. A test that fails then passes on retry = FLAKY           │
+│  2. Track flaky tests in a JSON file or dashboard            │
+│  3. If a test is flaky 3+ times in a week:                   │
+│     → Move to quarantine (skip in CI, keep in nightly)       │
+│     → Create a ticket to fix the root cause                  │
+│     → Set a deadline (2 weeks) to fix or delete              │
+│  4. Quarantined tests still run nightly — just don't block   │
+│  5. Never disable a test permanently — fix or delete it      │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 5 — Artifact Collection</h2>
+
+<h3>What to Collect on Failure</h3>
+
+<pre class="code-block"><code># Collect everything needed to debug a failure without SSH
+<ul class="skill-list"><li>name: Upload artifacts on failure</li>
+  </ul>if: failure()
+  uses: actions/upload-artifact@v4
+  with:
+    name: debug-artifacts-${{ matrix.shard }}
+    path: |
+      # Screenshots of failed tests
+      src/frontend/test-results/<em>*/</em>.png
+      # Videos of failed tests
+      src/frontend/test-results/<em>*/</em>.webm
+      # Trace files (Playwright)
+      src/frontend/test-results/<em>*/</em>.zip
+      # Test result JSON
+      src/frontend/test-results/results.json
+      # Server logs
+      /tmp/backend.log
+      /tmp/frontend.log
+    retention-days: 7</code></pre>
+
+<h3>Server Log Capture</h3>
+
+<pre class="code-block"><code># Capture server output to log files for debugging
+<ul class="skill-list"><li>name: Start backend with logging</li>
+  </ul>run: |
+    cd src/backend &amp;&amp; npm run dev &gt; /tmp/backend.log 2&gt;&amp;1 &amp;
+    echo $! &gt; /tmp/backend.pid
+
+<ul class="skill-list"><li>name: Start frontend with logging</li>
+  </ul>run: |
+    cd src/frontend &amp;&amp; npm start &gt; /tmp/frontend.log 2&gt;&amp;1 &amp;
+    echo $! &gt; /tmp/frontend.pid
+
+# After tests, always upload logs
+<ul class="skill-list"><li>name: Upload server logs</li>
+  </ul>if: always()
+  uses: actions/upload-artifact@v4
+  with:
+    name: server-logs-${{ matrix.shard }}
+    path: /tmp/*.log</code></pre>
+<hr class="section-divider">
+<h2>Step 6 — Coverage Reporting on PRs</h2>
+
+<h3>Coverage Comment Flow</h3>
+
+<pre class="code-block"><code>┌──────────┐     Run Tests    ┌──────────┐     Generate     ┌──────────┐
+│  PR Push │ ───────────────▶ │  Jest /  │ ──────────────▶  │ Coverage │
+│          │                  │  Vitest  │                   │  JSON    │
+└──────────┘                  └──────────┘                   └────┬─────┘
+                                                                  │
+                              ┌───────────────────────────────────┘
+                              ▼
+                    ┌──────────────────┐     Post        ┌──────────┐
+                    │  Compare with   │ ───────────────▶ │  PR      │
+                    │  main branch    │                   │  Comment │
+                    │  coverage       │                   │          │
+                    └──────────────────┘                  └──────────┘</code></pre>
+
+<h3>Jest Coverage Configuration</h3>
+
+<pre class="code-block"><code>// jest.config.js
+module.exports = {
+  collectCoverageFrom: [
+    'src/<em>*/</em>.{ts,tsx}',
+    '!src/<em>*/</em>.d.ts',
+    '!src/**/index.ts',        // barrel files
+    '!src/<em>*/</em>.stories.tsx',   // storybook
+    '!src/types/**',           // type definitions
+    '!src/<strong>/__mocks__/</strong>',    // mock files
+  ],
+  coverageThreshold: {
+    global: {
+      branches: 70,
+      functions: 75,
+      lines: 80,
+      statements: 80,
+    },
+    // Stricter thresholds for critical paths
+    './src/services/auth/': {
+      branches: 90,
+      functions: 90,
+      lines: 95,
+    },
+  },
+  coverageReporters: [
+    'text',                    // Console output
+    'text-summary',            // Short console summary
+    'json-summary',            // Machine-readable for CI
+    'lcov',                    // For HTML report + Codecov
+  ],
+}</code></pre>
+<hr class="section-divider">
+<h2>Step 7 — Notification on Failure</h2>
+
+<h3>Slack Notification</h3>
+
+<pre class="code-block"><code># At the end of the workflow
+notify-failure:
+  name: Notify on Failure
+  runs-on: ubuntu-latest
+  needs: [lint, unit-tests, integration-tests, e2e-tests]
+  if: failure() &amp;&amp; github.ref == 'refs/heads/main'
+  steps:
+    - name: Send Slack notification
+      uses: slackapi/slack-github-action@v1
+      with:
+        payload: |
+          {
+            &quot;blocks&quot;: [
+              {
+                &quot;type&quot;: &quot;header&quot;,
+                &quot;text&quot;: {
+                  &quot;type&quot;: &quot;plain_text&quot;,
+                  &quot;text&quot;: &quot;CI Failed on main&quot;
+                }
+              },
+              {
+                &quot;type&quot;: &quot;section&quot;,
+                &quot;text&quot;: {
+                  &quot;type&quot;: &quot;mrkdwn&quot;,
+                  &quot;text&quot;: &quot;<em>Repo:</em> ${{ github.repository }}\n<em>Commit:</em> ${{ github.sha }}\n<em>Author:</em> ${{ github.actor }}\n<em>Run:</em> &lt;${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Details&gt;&quot;
+                }
+              }
+            ]
+          }
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}</code></pre>
+<hr class="section-divider">
+<h2>Step 8 — Performance Optimization</h2>
+
+<h3>Speed Optimization Checklist</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  CI SPEED OPTIMIZATION                                       │
+│                                                              │
+│  1. CACHE DEPENDENCIES                                       │
+│     → npm ci with package-lock caching                       │
+│     → Playwright browser cache                               │
+│     → Docker layer caching                                   │
+│                                                              │
+│  2. PARALLELIZE EVERYTHING                                   │
+│     → Lint, unit, integration, E2E: all separate jobs        │
+│     → E2E tests: sharded across 2-8 runners                 │
+│     → Unit tests: parallel with --maxWorkers=auto            │
+│                                                              │
+│  3. SKIP UNNECESSARY WORK                                    │
+│     → Path filters: only run backend tests if backend changed│
+│     → Don't build frontend for backend-only PRs              │
+│     → Cancel outdated CI runs on the same branch             │
+│                                                              │
+│  4. FAIL FAST                                                │
+│     → Lint runs first — catches typos in 30 seconds          │
+│     → Type check before running tests                        │
+│     → Cancel-in-progress for same-branch pushes              │
+│                                                              │
+│  5. OPTIMIZE TEST EXECUTION                                  │
+│     → Use --forceExit to prevent Jest hanging                │
+│     → Set timeouts on all CI jobs                            │
+│     → Disable video recording unless test fails              │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Path-Based Filtering</h3>
+
+<pre class="code-block"><code># Only run backend tests when backend code changes
+on:
+  pull_request:
+    paths:
+      - 'src/backend/**'
+      - 'prisma/**'
+      - '.github/workflows/ci.yml'</code></pre>
+
+<h3>Dependency Caching</h3>
+
+<pre class="code-block"><code># Cache npm dependencies
+<ul class="skill-list"><li>uses: actions/setup-node@v4</li>
+  </ul>with:
+    node-version: '20'
+    cache: 'npm'
+    cache-dependency-path: src/backend/package-lock.json
+
+# Cache Playwright browsers
+<ul class="skill-list"><li>name: Cache Playwright browsers</li>
+  </ul>uses: actions/cache@v4
+  with:
+    path: ~/.cache/ms-playwright
+    key: playwright-${{ runner.os }}-${{ hashFiles('src/frontend/package-lock.json') }}
+    restore-keys: |
+      playwright-${{ runner.os }}-
+
+<ul class="skill-list"><li>name: Install Playwright (only if cache miss)</li>
+  </ul>run: npx playwright install --with-deps chromium
+  if: steps.cache-playwright.outputs.cache-hit != 'true'</code></pre>
+<hr class="section-divider">
+<h2>Common Mistakes / Anti-Patterns</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  ANTI-PATTERN                    │  DO THIS INSTEAD          │
+├──────────────────────────────────┼───────────────────────────┤
+│  All tests in one job            │  Parallel jobs per type   │
+│  No timeout on CI jobs           │  Always set timeout-mins  │
+│  Video recording always on       │  Only on failure          │
+│  Tests depend on prod database   │  Use CI service containers│
+│  No retry on E2E tests           │  2 retries for E2E in CI  │
+│  Retry on unit tests             │  Never retry unit tests   │
+│  No artifacts on failure         │  Screenshots + logs + trace│
+│  Full E2E suite on every PR      │  Smoke on PR, full nightly│
+│  Ignoring flaky tests            │  Track + quarantine + fix │
+│  No coverage thresholds          │  Set and enforce minimums │
+│  npm install in CI               │  npm ci (deterministic)   │
+│  No concurrency controls         │  cancel-in-progress: true │
+│  Hardcoded secrets in workflow   │  GitHub Secrets only      │
+│  Running all tests for docs PRs  │  Path-based filtering     │
+└──────────────────────────────────┴───────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Tips for Best Results</h2>
+
+<ul class="skill-list"><li class="ordered"><strong>Start simple</strong> — one job per test type, parallelize later when it gets slow</li>
+<li class="ordered"><strong>Set timeouts aggressively</strong> — if a job should take 5 min, set timeout to 10. Never leave it unbounded</li>
+<li class="ordered"><strong>Cache everything</strong> — npm, Playwright browsers, Docker layers. Cache hits save 30-60% of CI time</li>
+<li class="ordered"><strong>Fail fast</strong> — lint first, unit tests next, E2E last. Don't waste 20 min on E2E if lint fails</li>
+<li class="ordered"><strong>Use <code class="inline-code">fail-fast: false</code></strong> for matrix jobs — you want ALL shard results even if one fails</li>
+<li class="ordered"><strong>Separate PR checks from main checks</strong> — PRs get smoke tests, main gets the full suite</li>
+<li class="ordered"><strong>Monitor CI duration trends</strong> — if your pipeline gets 2x slower over a month, investigate immediately</li>
+<li class="ordered"><strong>Use services, not Docker Compose</strong> — GitHub Actions services are faster and simpler for databases</li>
+<li class="ordered"><strong>Never skip tests to unblock a deploy</strong> — fix the test or revert the commit</li>
+<li class="ordered"><strong>Review CI logs weekly</strong> — find slow tests, frequently failing tests, and optimize</li></ul>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <div></div>
+    <a href="contract-test.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Contract Testing — Catch Breaking Changes Before Production</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    66 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

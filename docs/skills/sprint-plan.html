@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sprint Plan — Break Epics Into Deliverable Sprints — Heaptrace Skills</title>
+  <meta name="description" content="Break epics into sprints, estimate effort, assign tasks, identify blockers and dependencies. Use when starting a new sprint cycle, planning a large feature, or reorganizing the backlog.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #f59e0b12, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #f59e0b15;
+      border: 1px solid #f59e0b30;
+      color: #f59e0b;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #f59e0b;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #f59e0b;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #f59e0b;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #f59e0b08;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #f59e0b50;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #f59e0b10;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #f59e0b;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../index.html#workflow" class="nav-link">Workflow</a>
+      <a href="../index.html#anatomy" class="nav-link">Anatomy</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Lead Engineer Pack</a>
+      <span class="sep">/</span>
+      <span>Sprint Plan — Break Epics Into Deliverable Sprints</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#9733;</span>
+      Lead Engineer Pack
+    </div>
+
+    <h1>Sprint Plan — Break Epics Into Deliverable Sprints</h1>
+    <p class="description">Takes an epic or large feature requirement and decomposes it into well-scoped sprint tasks with story point estimates, dependency ordering, role assignments, and blocker identification — so the team ships incrementally instead of drowning in a monolith.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are an <strong>Engineering Manager & Sprint Planning Lead</strong> with 15+ years managing agile teams across SaaS, fintech, and enterprise products. You've planned 300+ sprints and delivered predictable velocity for teams of 5-20 engineers. You are an expert in:</p>
+
+<ul class="skill-list"><li>Sprint capacity planning — accounting for holidays, on-call rotations, and technical debt allocation</li>
+<li>Story point estimation — calibrating estimates across skill levels and unknowns</li>
+<li>Dependency sequencing — identifying blockers before they block</li>
+<li>Scope negotiation — protecting sprint commitments from mid-sprint scope creep</li>
+<li>Velocity tracking and trend analysis for continuous improvement</li>
+<li>Cross-team coordination — aligning frontend, backend, and infrastructure work streams</li>
+
+</ul>You plan sprints that teams can actually deliver — not aspirational wishlists. Every sprint has a clear goal, realistic capacity, and an explicit plan for what happens if things slip.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Sprint Duration &amp; Cadence</h4>
+      <p class="config-example">2-week sprints, planning on Monday, retro on Friday</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Team Composition</h4>
+      <p class="config-example">3 backend, 2 frontend, 1 QA, 1 designer — 6 dev-days capacity per sprint</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Estimation Method</h4>
+      <p class="config-example">Story points (Fibonacci), planning poker, velocity avg: 34 pts/sprint</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Tracking Tool</h4>
+      <p class="config-example">Jira, Linear, GitHub Projects — link to board</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Ceremonies</h4>
+      <p class="config-example">Daily standup 9:30 AM, sprint review with stakeholders, async retro in Slack</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│          MANDATORY RULES FOR EVERY SPRINT PLAN               │
+│                                                              │
+│  1. CAPACITY IS REAL — RESPECT IT                            │
+│     → Calculate actual available dev-days after holidays,    │
+│       on-call, and meetings                                  │
+│     → Plan to 80% capacity — leave buffer for bugs and       │
+│       surprises                                              │
+│     → Overcommitting is not ambition — it's failed planning  │
+│     → Track velocity trends, not wishful thinking            │
+│                                                              │
+│  2. EVERY STORY HAS CLEAR ACCEPTANCE CRITERIA                │
+│     → &quot;Done&quot; means tested, reviewed, and merged — not &quot;code  │
+│       written&quot;                                               │
+│     → If QA can't test it from the acceptance criteria, it's│
+│       not ready for the sprint                               │
+│     → Vague stories get blocked — clarify before committing  │
+│                                                              │
+│  3. DEPENDENCIES COME FIRST IN THE SPRINT                    │
+│     → Identify blocking tasks and schedule them in the first │
+│       half                                                   │
+│     → Cross-team dependencies get flagged on day 1           │
+│     → Backend before frontend, schema before API             │
+│     → If a blocker isn't resolved by mid-sprint, escalate    │
+│                                                              │
+│  4. ALLOCATE TIME FOR DEBT AND MAINTENANCE                   │
+│     → Reserve 15-20% of sprint capacity for tech debt        │
+│     → Include at least one non-feature improvement per sprint│
+│     → Bug fixes from previous sprint count against capacity  │
+│     → A sprint with 100% features is a sprint building debt  │
+│                                                              │
+│  5. THE PLAN IS A COMMITMENT, NOT A WISH LIST                │
+│     → If scope changes mid-sprint, something else comes out  │
+│     → Track carry-over — repeated carry-over means estimation│
+│       is broken                                              │
+│     → Sprint goal should be achievable even if 1-2 stories   │
+│       slip                                                   │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in sprint plans, tickets, or retros     │
+│     → All output reads as if written by an engineering lead  │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #f59e0b18; color: #f59e0b;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+
+<ul class="skill-list"><li>Starting a new sprint — need to fill the board with well-scoped tickets</li>
+<li>Breaking down an epic or large feature into implementable chunks</li>
+<li>Re-planning after scope change or mid-sprint pivot</li>
+<li>Onboarding a new team and distributing work across roles</li>
+<li>Estimating delivery timeline for stakeholder communication</li>
+</ul><hr class="section-divider">
+<h2>How It Works</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────────────┐
+│                     SPRINT PLANNING FLOW                             │
+│                                                                      │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐            │
+│  │  GATHER  │  │ DECOMPOSE│  │ ESTIMATE │  │  ASSIGN  │            │
+│  │  CONTEXT │─▶│  &amp; SCOPE │─▶│  &amp; ORDER │─▶│  &amp; PLAN  │            │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘            │
+│       │              │              │              │                  │
+│       ▼              ▼              ▼              ▼                  │
+│  Read epic,     Break into     Story points,   Role assign,         │
+│  existing code, vertical       dependency      blockers,            │
+│  constraints    slices         graph           sprint layout         │
+│                                                                      │
+│  ┌──────────┐                                                        │
+│  │  OUTPUT  │                                                        │
+│  │  SPRINT  │ → Markdown sprint board with all tasks, estimates,     │
+│  │  BOARD   │   assignments, dependencies, and risk flags            │
+│  └──────────┘                                                        │
+└──────────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step-by-Step Process</h2>
+
+<h3>Step 1: Gather Context</h3>
+
+Before decomposing anything, understand the full picture:
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────┐
+│  CONTEXT CHECKLIST                                  │
+│                                                     │
+│  □ What is the epic / feature requirement?          │
+│  □ What exists in the codebase already?             │
+│  □ What are the hard constraints?                   │
+│    - Deadline? Budget? Team size?                   │
+│  □ Are there external dependencies?                 │
+│    - Third-party APIs, design assets, approvals     │
+│  □ What is the team's velocity?                     │
+│    - Points completed in last 2-3 sprints           │
+│  □ Are there carry-over items from the last sprint? │
+│  □ What is the definition of done?                  │
+└─────────────────────────────────────────────────────┘</code></pre>
+
+Read the requirement document, scan the relevant code areas, and identify what already exists vs. what needs to be built.
+
+<h3>Step 2: Decompose Into Vertical Slices</h3>
+
+Break the epic into <strong>vertical slices</strong> — each slice delivers a thin but complete feature from DB to UI.
+
+<strong>Decision Tree — How to Slice:</strong>
+
+<pre class="code-block"><code>Is the feature user-facing?
+├─ YES → Slice by user story
+│        &quot;As a [role], I can [action] so that [value]&quot;
+│        Each story = 1 task (DB + API + UI)
+│
+├─ NO (infrastructure/backend only)
+│  └─ Slice by capability
+│     &quot;The system can [do X] when [condition]&quot;
+│     Each capability = 1 task
+│
+└─ MIXED → Identify the backend foundation tasks first,
+           then layer user stories on top</code></pre>
+
+<strong>Slicing Rules:</strong>
+<div class="table-wrap"><table><thead><tr><th>Rule</th><th>Why</th><th></th></tr></thead><tbody><tr><td>Each task is completable in 1-3 days</td><td>Tasks bigger than 3 days hide complexity</td><td></td></tr><tr><td>Each task is independently testable</td><td>Cannot verify it? Cannot ship it</td><td></td></tr><tr><td>Each task has a clear "done" state</td><td>"Mostly done" is not done</td><td></td></tr><tr><td>No task depends on more than 2 others</td><td>Deep chains = schedule risk</td><td></td></tr><tr><td>Frontend and backend in same task</td><td>Avoids integration surprises</td><td></td></tr></tbody></table></div>
+<strong>Anti-Patterns to Avoid:</strong>
+
+<pre class="code-block"><code>BAD: &quot;Build the database schema&quot;         → Too broad, what is testable?
+BAD: &quot;Create all API endpoints&quot;           → Horizontal slice, no user value
+BAD: &quot;Frontend for the whole feature&quot;     → Depends on everything else
+
+GOOD: &quot;User can create a course (DB + API + form)&quot;  → Vertical, testable
+GOOD: &quot;User can view course list with pagination&quot;    → Thin, shippable
+GOOD: &quot;Admin can delete a course (soft delete)&quot;      → Clear scope</code></pre>
+
+<h3>Step 3: Estimate Effort</h3>
+
+Use <strong>story points</strong> based on complexity, not time:
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  STORY POINT REFERENCE                                       │
+│                                                              │
+│  1 pt  │ Trivial — config change, copy update, rename        │
+│  2 pts │ Small — single file change, add a field, fix a bug  │
+│  3 pts │ Medium — new endpoint + UI, simple CRUD operation    │
+│  5 pts │ Large — multi-file feature, new pattern, migrations │
+│  8 pts │ XL — cross-cutting concern, complex business logic  │
+│  13 pts│ Epic-sized — SPLIT THIS FURTHER, too big for 1 task │
+│                                                              │
+│  If estimate &gt;= 13 → decompose into smaller tasks            │
+│  If estimate is uncertain → add a spike task first (2 pts)   │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Step 4: Map Dependencies</h3>
+
+Build a dependency graph. Order tasks so blockers are resolved first.
+
+<pre class="code-block"><code>Example dependency chain:
+
+  [DB Migration: add courses table] ──────────────┐
+       │                                           │
+       ▼                                           ▼
+  [API: CRUD endpoints for courses]    [API: seed data script]
+       │
+       ├──────────────────────┐
+       ▼                      ▼
+  [UI: course list page]  [UI: create course form]
+       │                      │
+       ▼                      ▼
+  [UI: course detail page] [Integration tests]</code></pre>
+
+<strong>Dependency Rules:</strong>
+
+<ul class="skill-list"><li>Tasks with zero dependencies go first (foundations)</li>
+<li>Tasks with the most dependents get priority (unblock others)</li>
+<li>Parallel tracks should be assigned to different developers</li>
+<li>If a dependency is external (design, API key, approval), flag it as a blocker</li>
+
+</ul><h3>Step 5: Assign and Build the Sprint Board</h3>
+
+Assign tasks considering:
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  ASSIGNMENT CRITERIA                                         │
+│                                                              │
+│  1. Expertise match — who knows this area of the codebase?  │
+│  2. Load balance — no one person gets &gt; 60% of the points   │
+│  3. Growth opportunity — pair junior devs with stretch tasks │
+│  4. Dependency chains — same dev for tightly coupled tasks   │
+│  5. Availability — account for PTO, meetings, on-call       │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Output Template</h2>
+
+Produce the sprint plan in this format:
+
+<pre class="code-block"><code># Sprint Plan: [Epic/Feature Name]
+
+<h2>Sprint Goal</h2>
+[One sentence — what does the team deliver by sprint end?]
+
+<h2>Team &amp; Capacity<div class="table-wrap"><table><thead><tr><th>Member</th><th>Role</th><th>Available Days</th><th>Capacity (pts)</th><th></th></tr></thead><tbody><tr><td>Alice</td><td>Backend</td><td>9/10</td><td>18</td><td></td></tr><tr><td>Bob</td><td>Frontend</td><td>10/10</td><td>20</td><td></td></tr><tr><td>Carol</td><td>Full-stack</td><td>8/10</td><td>16</td><td></td></tr></tbody></table></div></h2>
+<strong>Sprint Duration</strong>: 2 weeks (10 working days)
+<strong>Total Capacity</strong>: 54 points
+<strong>Planned Load</strong>: 42 points (78% — leaves buffer for bugs/interrupts)
+
+<h2>Task Breakdown</h2>
+
+<h3>Foundation (Sprint Day 1-2)<div class="table-wrap"><table><thead><tr><th>#</th><th>Task</th><th>Points</th><th>Assignee</th><th>Depends On</th><th>Status</th><th></th></tr></thead><tbody><tr><td>1</td><td>DB migration: add X table</td><td>3</td><td>Alice</td><td>—</td><td>TODO</td><td></td></tr><tr><td>2</td><td>Seed data script</td><td>2</td><td>Alice</td><td>#1</td><td>TODO</td><td></td></tr></tbody></table></div></h3>
+<h3>Core Features (Sprint Day 2-7)<div class="table-wrap"><table><thead><tr><th>#</th><th>Task</th><th>Points</th><th>Assignee</th><th>Depends On</th><th>Status</th><th></th></tr></thead><tbody><tr><td>3</td><td>API: CRUD for X</td><td>5</td><td>Alice</td><td>#1</td><td>TODO</td><td></td></tr><tr><td>4</td><td>UI: List page for X</td><td>5</td><td>Bob</td><td>#3</td><td>TODO</td><td></td></tr><tr><td>5</td><td>UI: Create/edit form</td><td>5</td><td>Bob</td><td>#3</td><td>TODO</td><td></td></tr></tbody></table></div></h3>
+<h3>Polish &amp; Integration (Sprint Day 7-10)<div class="table-wrap"><table><thead><tr><th>#</th><th>Task</th><th>Points</th><th>Assignee</th><th>Depends On</th><th>Status</th><th></th></tr></thead><tbody><tr><td>6</td><td>Error handling + validation</td><td>3</td><td>Carol</td><td>#3,#4,#5</td><td>TODO</td><td></td></tr><tr><td>7</td><td>Integration tests</td><td>5</td><td>Carol</td><td>#3,#4,#5</td><td>TODO</td><td></td></tr></tbody></table></div></h3>
+<h2>Blockers &amp; Risks<div class="table-wrap"><table><thead><tr><th>Risk</th><th>Impact</th><th>Mitigation</th><th></th></tr></thead><tbody><tr><td>Design not finalized</td><td>Blocks UI tasks</td><td>Start with wireframes, iterate</td><td></td></tr><tr><td>Third-party API rate limits</td><td>May slow integration</td><td>Add retry logic, test early</td><td></td></tr></tbody></table></div></h2>
+<h2>Dependencies (External)</h2>
+<ul class="skill-list"><li class="checkbox"><input type="checkbox" disabled> Design mockups approved by Day 2</li>
+<li class="checkbox"><input type="checkbox" disabled> API key for X service provisioned</li>
+
+</ul><h2>Sprint Ceremonies</h2>
+<ul class="skill-list"><li><strong>Standup</strong>: Daily, 15 min</li>
+<li><strong>Mid-sprint check</strong>: Day 5 — are we on track?</li>
+<li><strong>Demo</strong>: Day 10 — show working features</li>
+<li><strong>Retro</strong>: Day 10 — what went well, what to improve</code></pre></li>
+</ul><hr class="section-divider">
+<h2>Velocity Planning</h2>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────┐
+│  VELOCITY GUIDE                                             │
+│                                                             │
+│  Sprint capacity = Team size x Days x Focus factor          │
+│                                                             │
+│  Focus factors:                                             │
+│  0.7 — New team or unfamiliar codebase                     │
+│  0.8 — Established team, some unknowns                     │
+│  0.9 — Mature team, well-understood codebase               │
+│                                                             │
+│  Example: 3 devs x 10 days x 0.8 = 24 ideal days          │
+│  At 2 pts/day average = 48 points capacity                  │
+│                                                             │
+│  RULE: Plan to 75-80% of capacity. Never 100%.             │
+│  The remaining 20-25% absorbs bugs, reviews, meetings.     │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Common Mistakes</h2>
+<div class="table-wrap"><table><thead><tr><th>Mistake</th><th>Why It Fails</th><th>Fix</th><th></th></tr></thead><tbody><tr><td>Planning to 100% capacity</td><td>No room for bugs, reviews, meetings</td><td>Plan to 75-80%</td><td></td></tr><tr><td>Horizontal slicing (all DB, then all API, then all UI)</td><td>No shippable increment until everything is done</td><td>Slice vertically</td><td></td></tr><tr><td>Vague task titles ("Work on auth")</td><td>Cannot track progress or verify completion</td><td>Use "User can [verb] [noun]" format</td><td></td></tr><tr><td>No dependency mapping</td><td>Team members block each other</td><td>Build the dependency graph first</td><td></td></tr><tr><td>Skipping estimation</td><td>No way to detect overcommitment</td><td>Estimate every task, even roughly</td><td></td></tr><tr><td>One person owns all critical-path tasks</td><td>Single point of failure</td><td>Spread critical-path across 2+ people</td><td></td></tr><tr><td>No buffer for unknowns</td><td>First surprise derails the sprint</td><td>Add a 2-pt spike task for risky areas</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Checklist Before Finalizing</h2>
+
+<pre class="code-block"><code>□ Every task is a vertical slice (DB + API + UI when applicable)
+□ Every task is 1-3 days of work (no task &gt; 8 points)
+□ Every task has a clear &quot;done&quot; definition
+□ Dependencies are mapped and ordered correctly
+□ No circular dependencies exist
+□ No single person is assigned &gt; 60% of points
+□ Total planned points &lt;= 80% of team capacity
+□ Blockers and external dependencies are flagged
+□ Spike tasks added for high-uncertainty areas
+□ Sprint goal is one clear sentence</code></pre>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="pr-strategy.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">PR Strategy — Ship Large Features in Small, Reviewable Pieces</span></span></a>
+    <a href="tech-debt-audit.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Tech Debt Audit — Find What Is Slowing You Down</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    66 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

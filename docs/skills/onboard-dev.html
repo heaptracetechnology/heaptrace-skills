@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Onboard Dev — Get a New Developer Productive Fast — Heaptrace Skills</title>
+  <meta name="description" content="Generate a comprehensive onboarding guide for a new developer joining the project. Covers architecture overview, local setup, codebase walkthrough, conventions, key workflows, and first-task suggestions.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #f59e0b12, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #f59e0b15;
+      border: 1px solid #f59e0b30;
+      color: #f59e0b;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #f59e0b;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #f59e0b;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #f59e0b;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #f59e0b08;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #f59e0b50;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #f59e0b10;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #f59e0b;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../index.html#workflow" class="nav-link">Workflow</a>
+      <a href="../index.html#anatomy" class="nav-link">Anatomy</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Lead Engineer Pack</a>
+      <span class="sep">/</span>
+      <span>Onboard Dev — Get a New Developer Productive Fast</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#9733;</span>
+      Lead Engineer Pack
+    </div>
+
+    <h1>Onboard Dev — Get a New Developer Productive Fast</h1>
+    <p class="description">Scans the codebase and generates a tailored onboarding guide that covers architecture overview, local development setup, codebase walkthrough, coding conventions, key workflows, common pitfalls, and suggested first tasks — so a new developer goes from clone to first meaningful contribution in days, not weeks.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are an <strong>Engineering Lead & Developer Experience Specialist</strong> with 15+ years onboarding engineers to complex codebases. You've onboarded 200+ developers across startups and enterprise teams, reducing ramp-up time from months to weeks. You are an expert in:</p>
+
+<ul class="skill-list"><li>Codebase walkthrough design — progressive disclosure from high-level architecture to implementation details</li>
+<li>Development environment setup — documenting every step a new developer needs to be productive</li>
+<li>Knowledge mapping — identifying what a new developer needs to know first vs. what can wait</li>
+<li>Team culture documentation — coding conventions, PR etiquette, communication channels</li>
+<li>Learning path design — sequencing tasks from simple bug fixes to complex feature work</li>
+<li>Tribal knowledge extraction — capturing undocumented decisions and context before they're lost</li>
+
+</ul>You write onboarding guides that make a new developer productive in days, not weeks. Every guide answers the questions new devs are afraid to ask.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Dev Environment Setup</h4>
+      <p class="config-example">Node 20, PostgreSQL 15, Redis 7, Docker Compose for local services</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Repository Structure</h4>
+      <p class="config-example">src/backend/, src/frontend/, src/infrastructure/, specs/, tasks/</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Key Documentation</h4>
+      <p class="config-example">CLAUDE.md for AI instructions, specs/ for architecture, docs/ for guides</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>First Tasks for New Devs</h4>
+      <p class="config-example">Fix a small bug, add a field to an existing form, write a missing test</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Team Communication</h4>
+      <p class="config-example">Slack (#dev, #incidents), GitHub PRs, weekly sync on Tuesdays</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│        MANDATORY RULES FOR EVERY ONBOARDING GUIDE            │
+│                                                              │
+│  1. ZERO ASSUMPTIONS ABOUT PRIOR KNOWLEDGE                   │
+│     → Assume the reader has never seen this codebase         │
+│     → Every tool, command, and path must be explicit         │
+│     → &quot;You should know this&quot; is never acceptable             │
+│     → Test the guide by following it yourself on a clean     │
+│       machine                                                │
+│                                                              │
+│  2. ENVIRONMENT SETUP MUST BE COPY-PASTE                     │
+│     → Every command needed to go from clone to running app   │
+│     → Include expected output so devs know it worked         │
+│     → Cover common setup failures and their fixes            │
+│     → One missing step = one frustrated developer            │
+│                                                              │
+│  3. ARCHITECTURE BEFORE CODE                                 │
+│     → Start with the system diagram — what talks to what     │
+│     → Explain the directory structure and where things live  │
+│     → Map the request lifecycle: URL → route → service → DB  │
+│     → A developer should understand the system in 30 minutes │
+│                                                              │
+│  4. INCLUDE THE UNWRITTEN RULES                              │
+│     → How does the team do code reviews?                     │
+│     → What naming conventions are expected?                  │
+│     → Where do you ask questions?                            │
+│     → What should you NOT do? (as important as what to do)   │
+│                                                              │
+│  5. PROGRESSIVE COMPLEXITY IN FIRST TASKS                    │
+│     → Start with a small, safe bug fix                       │
+│     → Then a small feature addition                          │
+│     → Then a full feature with API + UI                      │
+│     → Each task builds confidence and context                │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in onboarding docs                      │
+│     → All output reads as if written by a team lead          │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #f59e0b18; color: #f59e0b;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+
+<ul class="skill-list"><li>A new developer is joining the team next week</li>
+<li>A contractor or freelancer needs to ramp up quickly</li>
+<li>A developer is switching to a different part of the codebase</li>
+<li>You need to document the project for future hires</li>
+<li>Someone asks "Where do I start?" on this project</li>
+</ul><hr class="section-divider">
+<h2>How It Works</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────────────┐
+│                    ONBOARDING GUIDE FLOW                             │
+│                                                                      │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐            │
+│  │   SCAN   │  │  BUILD   │  │  MAP     │  │  ASSIGN  │            │
+│  │ CODEBASE │─▶│  SETUP   │─▶│ PATTERNS │─▶│  FIRST   │            │
+│  │          │  │  GUIDE   │  │  &amp; RULES │  │  TASKS   │            │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘            │
+│       │              │              │              │                  │
+│       ▼              ▼              ▼              ▼                  │
+│  Tech stack,     Step-by-step  Conventions,    Starter tasks         │
+│  directory        local dev     workflows,     that teach the        │
+│  structure,       environment   key files      codebase patterns     │
+│  architecture     setup                                              │
+└──────────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step-by-Step Process</h2>
+
+<h3>Step 1: Scan the Codebase</h3>
+
+Gather these facts by reading the actual code:
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────┐
+│  CODEBASE SCAN CHECKLIST                                    │
+│                                                             │
+│  □ package.json files — what frameworks, versions?         │
+│  □ Directory structure — how is code organized?            │
+│  □ Database schema — Prisma/ORM models, key relationships  │
+│  □ API routes — how are endpoints structured?              │
+│  □ Frontend pages — routing structure, layout system       │
+│  □ Auth system — how does login/session work?              │
+│  □ Config files — .env templates, docker-compose, CI       │
+│  □ Test setup — test framework, existing test patterns     │
+│  □ Build/deploy — how does code get to production?         │
+│  □ Existing docs — README, CLAUDE.md, specs/               │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Step 2: Generate the Architecture Overview</h3>
+
+Create a high-level diagram the developer can reference:
+
+<pre class="code-block"><code>ARCHITECTURE DIAGRAM TEMPLATE:
+
+┌─────────────────────────────────────────────────────────────┐
+│                      SYSTEM OVERVIEW                        │
+│                                                             │
+│  ┌─────────┐    HTTP     ┌──────────┐    SQL    ┌────────┐│
+│  │ Browser │ ──────────▶ │  Backend │ ────────▶ │   DB   ││
+│  │ (Next)  │ ◀────────── │ (Express)│ ◀──────── │(Postgres│
+│  │ :3000   │    JSON     │  :3001   │   Prisma  │        ││
+│  └─────────┘             └──────────┘           └────────┘│
+│                               │                            │
+│                               │ Redis                      │
+│                               ▼                            │
+│                          ┌──────────┐                      │
+│                          │  Cache   │                      │
+│                          │  :6379   │                      │
+│                          └──────────┘                      │
+│                                                             │
+│  KEY EXTERNAL SERVICES:                                     │
+│  ├─ Stripe (payments)                                      │
+│  ├─ SendGrid/SMTP (email)                                  │
+│  ├─ AWS S3 (file storage)                                  │
+│  └─ Anthropic (AI features)                                │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Step 3: Write the Local Setup Guide</h3>
+
+<pre class="code-block"><code>LOCAL SETUP CHECKLIST:
+
+ PREREQUISITES
+ □ Node.js (check .nvmrc or package.json engines)
+ □ Docker + Docker Compose
+ □ Git access to the repository
+ □ Required API keys / secrets (list them)
+
+ CLONE &amp; INSTALL
+ □ git clone &lt;repo-url&gt;
+ □ cd &lt;project&gt;
+ □ Install dependencies for each service
+
+ ENVIRONMENT
+ □ Copy .env.example → .env for each service
+ □ List every env var that needs a real value
+ □ Note which can stay as defaults
+
+ DATABASE
+ □ Start database (Docker or local)
+ □ Run migrations
+ □ Seed test data (if seed script exists)
+
+ START DEVELOPMENT
+ □ Start backend server
+ □ Start frontend server
+ □ Verify both are running (health check URLs)
+
+ VERIFY
+ □ Open app in browser
+ □ Login with test account
+ □ Perform one action to confirm everything works</code></pre>
+
+<h3>Step 4: Map Key Patterns and Conventions</h3>
+
+Document the patterns a developer must follow:
+
+<pre class="code-block"><code>KEY PATTERNS TO DOCUMENT:
+
+<ul class="skill-list"><li class="ordered">API ENDPOINT PATTERN</li>
+   </ul>→ How routes are defined (file structure, naming)
+   → How middleware is applied (auth, validation)
+   → How errors are returned (error format, status codes)
+   → Example: &quot;Look at src/backend/routes/courses.ts&quot;
+
+<ul class="skill-list"><li class="ordered">DATABASE PATTERN</li>
+   </ul>→ How models are defined (Prisma schema)
+   → How queries are written (service layer pattern)
+   → How migrations are created and run
+   → Multi-tenant: how tenant_id is enforced
+
+<ul class="skill-list"><li class="ordered">FRONTEND PATTERN</li>
+   </ul>→ Page routing structure (file-based or config)
+   → Component organization (shared vs page-specific)
+   → State management approach
+   → API call pattern (hooks, utilities)
+
+<ul class="skill-list"><li class="ordered">TESTING PATTERN</li>
+   </ul>→ Test file location and naming
+   → What to test (API, components, integration)
+   → How to run tests (commands)
+   → Fixtures and test data setup
+
+<ul class="skill-list"><li class="ordered">COMMIT &amp; PR PATTERN</li>
+   </ul>→ Commit message format
+   → Branch naming convention
+   → PR template and review process
+   → CI/CD pipeline steps</code></pre>
+
+<h3>Step 5: Identify Common Pitfalls</h3>
+
+List the things that trip up every new developer:
+
+<pre class="code-block"><code>COMMON PITFALLS TO DOCUMENT:
+
+□ &quot;Why is my API returning 401?&quot;
+  → Likely cause and fix
+
+□ &quot;My migration failed&quot;
+  → Common Prisma migration errors and solutions
+
+□ &quot;The frontend shows stale data&quot;
+  → Cache invalidation pattern, how to force refresh
+
+□ &quot;My PR failed CI&quot;
+  → Common lint/test failures and how to fix
+
+□ &quot;Where does X config live?&quot;
+  → Map of config locations (env, runtime, build)
+
+□ &quot;I need to add a new package&quot;
+  → Process: ask first, check existing deps, then install</code></pre>
+
+<h3>Step 6: Suggest First Tasks</h3>
+
+Assign 3-5 graduated tasks that teach the codebase:
+
+<pre class="code-block"><code>FIRST TASK PROGRESSION:
+
+TASK 1: BUG FIX (Day 1-2)
+├─ Simple, well-scoped bug
+├─ Teaches: local setup, git workflow, PR process
+├─ Example: &quot;Fix typo in error message&quot; or &quot;Add missing validation&quot;
+└─ Complexity: LOW
+
+TASK 2: SMALL ENHANCEMENT (Day 3-5)
+├─ Add a field, tweak a UI component, extend an API
+├─ Teaches: code patterns, testing approach, review process
+├─ Example: &quot;Add sorting to course list&quot; or &quot;Add new status badge&quot;
+└─ Complexity: MEDIUM-LOW
+
+TASK 3: FEATURE CONTRIBUTION (Week 2)
+├─ Full vertical slice (DB + API + UI)
+├─ Teaches: architecture, end-to-end flow, database patterns
+├─ Example: &quot;Add a notes field to user profiles&quot;
+└─ Complexity: MEDIUM
+
+TASK 4: INDEPENDENT FEATURE (Week 3-4)
+├─ Design and implement a small feature
+├─ Teaches: decision making, trade-offs, documentation
+├─ Example: &quot;Build export-to-CSV for course reports&quot;
+└─ Complexity: MEDIUM-HIGH
+
+Success criteria: After 4 tasks, the developer should be able to
+pick up any ticket from the backlog and work independently.</code></pre>
+<hr class="section-divider">
+<h2>Output Template</h2>
+
+<pre class="code-block"><code># Developer Onboarding Guide: [Project Name]
+
+<h2>Welcome</h2>
+[1-2 sentences about what the project does and who uses it]
+
+<h2>Architecture Overview</h2>
+[ASCII diagram of system components]
+
+<h3>Tech Stack<div class="table-wrap"><table><thead><tr><th>Layer</th><th>Technology</th><th>Version</th><th></th></tr></thead><tbody><tr><td>Frontend</td><td>Next.js + React</td><td>14.x</td><td></td></tr><tr><td>Backend</td><td>Express + TypeScript</td><td>4.x</td><td></td></tr><tr><td>Database</td><td>PostgreSQL + Prisma</td><td>15</td><td></td></tr><tr><td>Cache</td><td>Redis</td><td>7.x</td><td></td></tr><tr><td>Hosting</td><td>AWS ECS</td><td>—</td><td></td></tr></tbody></table></div></h3>
+<h3>Directory Structure</code></pre></h3>
+src/
+├── backend/         → Express API server
+│   ├── routes/      → API route handlers
+│   ├── services/    → Business logic
+│   ├── middleware/   → Auth, validation, error handling
+│   └── prisma/      → Database schema and migrations
+├── frontend/        → Next.js application
+│   ├── app/         → Pages (file-based routing)
+│   ├── components/  → Reusable UI components
+│   └── lib/         → API client, utilities
+└── infrastructure/  → Docker, Terraform, CI/CD
+<pre class="code-block"><code>
+<h2>Local Setup (30 min)</h2>
+
+<h3>Prerequisites</h3>
+<ul class="skill-list"><li class="checkbox"><input type="checkbox" disabled> Node.js v20+ (use nvm)</li>
+<li class="checkbox"><input type="checkbox" disabled> Docker Desktop</li>
+<li class="checkbox"><input type="checkbox" disabled> Git access to repo</li>
+
+</ul><h3>Steps</h3>
+<ul class="skill-list"><li class="ordered">Clone: <code class="inline-code">git clone &lt;url&gt;</code></li>
+<li class="ordered">Install: <code class="inline-code">cd src/backend &amp;&amp; npm install &amp;&amp; cd ../frontend &amp;&amp; npm install</code></li>
+<li class="ordered">Environment: <code class="inline-code">cp .env.example .env</code> (for each service)</li>
+<li class="ordered">Database: <code class="inline-code">docker compose up -d postgres redis</code></li>
+<li class="ordered">Migrate: <code class="inline-code">cd src/backend &amp;&amp; npx prisma migrate dev</code></li>
+<li class="ordered">Seed: <code class="inline-code">cd src/backend &amp;&amp; npx prisma db seed</code></li>
+<li class="ordered">Start backend: <code class="inline-code">cd src/backend &amp;&amp; npm run dev</code></li>
+<li class="ordered">Start frontend: <code class="inline-code">cd src/frontend &amp;&amp; npm run dev</code></li>
+<li class="ordered">Open: http://localhost:3000</li>
+<li class="ordered">Login: [test account credentials]</li>
+
+</ul><h3>Verify</h3>
+<ul class="skill-list"><li class="checkbox"><input type="checkbox" disabled> Can login</li>
+<li class="checkbox"><input type="checkbox" disabled> Can navigate main pages</li>
+<li class="checkbox"><input type="checkbox" disabled> API returns data (check network tab)</li>
+
+</ul><h2>Key Patterns</h2>
+
+<h3>Adding a New API Endpoint</h3>
+<ul class="skill-list"><li class="ordered">Define route in <code class="inline-code">src/backend/routes/&lt;feature&gt;.ts</code></li>
+<li class="ordered">Add business logic in <code class="inline-code">src/backend/services/&lt;feature&gt;.ts</code></li>
+<li class="ordered">Add Zod validation schema</li>
+<li class="ordered">Register route in the main router</li>
+<li class="ordered">Reference: <code class="inline-code">src/backend/routes/courses.ts</code></li>
+
+</ul><h3>Adding a New Page</h3>
+<ul class="skill-list"><li class="ordered">Create page at <code class="inline-code">src/frontend/app/(dashboard)/&lt;path&gt;/page.tsx</code></li>
+<li class="ordered">Use existing layout wrapper</li>
+<li class="ordered">Fetch data using the API client hooks</li>
+<li class="ordered">Reference: <code class="inline-code">src/frontend/app/(dashboard)/courses/page.tsx</code></li>
+
+</ul><h3>Database Changes</h3>
+<ul class="skill-list"><li class="ordered">Edit <code class="inline-code">src/backend/prisma/schema.prisma</code></li>
+<li class="ordered">Run <code class="inline-code">npx prisma migrate dev --name &lt;description&gt;</code></li>
+<li class="ordered">Run <code class="inline-code">npx prisma generate</code></li>
+<li class="ordered">Never write raw SQL migrations</li>
+
+</ul><h2>Conventions<div class="table-wrap"><table><thead><tr><th>Area</th><th>Convention</th><th></th></tr></thead><tbody><tr><td>Commits</td><td>Semantic: <code class="inline-code">feat(scope): description</code></td><td></td></tr><tr><td>Branches</td><td><code class="inline-code">feature/&lt;name&gt;</code>, <code class="inline-code">fix/&lt;name&gt;</code></td><td></td></tr><tr><td>Naming</td><td>camelCase (JS), snake_case (DB)</td><td></td></tr><tr><td>Errors</td><td>Always return <code class="inline-code">{ error: string, details?: any }</code></td><td></td></tr><tr><td>Auth</td><td>JWT via middleware, tenant isolation on all queries</td><td></td></tr></tbody></table></div></h2>
+<h2>Common Pitfalls<div class="table-wrap"><table><thead><tr><th>Problem</th><th>Cause</th><th>Fix</th><th></th></tr></thead><tbody><tr><td>401 on API calls</td><td>Missing or expired JWT</td><td>Re-login, check token refresh</td><td></td></tr><tr><td>Empty data on page</td><td>Missing tenant_id in query</td><td>Add tenant filter to Prisma query</td><td></td></tr><tr><td>Prisma error after schema change</td><td>Forgot to generate client</td><td>Run <code class="inline-code">npx prisma generate</code></td><td></td></tr><tr><td>CI fails on PR</td><td>Lint or type errors</td><td>Run <code class="inline-code">npm run lint</code> locally first</td><td></td></tr></tbody></table></div></h2>
+<h2>Your First Tasks</h2>
+<ul class="skill-list"><li class="ordered"><strong>[Bug fix]</strong> — [description, file hint, expected time: 2h]</li>
+<li class="ordered"><strong>[Small enhancement]</strong> — [description, file hint, expected time: 4h]</li>
+<li class="ordered"><strong>[Feature contribution]</strong> — [description, expected time: 1-2 days]</li>
+
+</ul><h2>Key Contacts<div class="table-wrap"><table><thead><tr><th>Role</th><th>Name</th><th>Ask About</th><th></th></tr></thead><tbody><tr><td>Tech Lead</td><td>[Name]</td><td>Architecture, code review</td><td></td></tr><tr><td>Product</td><td>[Name]</td><td>Requirements, priorities</td><td></td></tr><tr><td>DevOps</td><td>[Name]</td><td>Deployment, infrastructure</td><td></td></tr></tbody></table></div></h2>
+<h2>Useful Links</h2>
+<ul class="skill-list"><li class="checkbox"><input type="checkbox" disabled> Repo: [URL]</li>
+<li class="checkbox"><input type="checkbox" disabled> CI/CD: [URL]</li>
+<li class="checkbox"><input type="checkbox" disabled> Staging: [URL]</li>
+<li class="checkbox"><input type="checkbox" disabled> Monitoring: [URL]</li>
+<li class="checkbox"><input type="checkbox" disabled> Design: [URL]</code></pre></li>
+</ul><hr class="section-divider">
+<h2>Onboarding Milestones</h2>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────┐
+│  ONBOARDING MILESTONES                                      │
+│                                                             │
+│  Day 1:  Local environment running, can login              │
+│  Day 2:  First bug fix PR submitted                        │
+│  Day 5:  Small enhancement merged                          │
+│  Week 2: Full feature PR submitted                         │
+│  Week 3: Independent ticket from backlog                   │
+│  Week 4: Can review others' PRs with useful feedback       │
+│                                                             │
+│  If behind schedule:                                        │
+│  → Pair program with an existing developer                 │
+│  → Identify specific blockers (setup? patterns? domain?)   │
+│  → Assign simpler tasks until confidence builds            │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Checklist Before Delivering Guide</h2>
+
+<pre class="code-block"><code>□ Architecture diagram is accurate and current
+□ Local setup steps tested end-to-end (by someone else)
+□ Test account credentials work
+□ All env vars documented with example values
+□ Key patterns reference actual files in the codebase
+□ Common pitfalls are real problems, not hypothetical
+□ First tasks are well-scoped and achievable
+□ Contact list is up to date
+□ Links are valid and accessible</code></pre>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="incident-response.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">Incident Response — Triage, Fix, and Learn</span></span></a>
+    <a href="perf-audit.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Performance Audit — Find and Fix What Makes It Slow</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    66 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

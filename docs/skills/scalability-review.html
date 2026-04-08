@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scalability Review — Find Bottlenecks Before Users Do — Heaptrace Skills</title>
+  <meta name="description" content="Review a system for scaling bottlenecks — caching, queues, read replicas, CDN, load balancing. Use when preparing for traffic growth, diagnosing performance issues, or planning infrastructure upgrades.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #8b5cf612, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #8b5cf615;
+      border: 1px solid #8b5cf630;
+      color: #8b5cf6;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #8b5cf6;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #8b5cf6;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #8b5cf6;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #8b5cf608;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #8b5cf650;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #8b5cf610;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #8b5cf6;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../index.html#workflow" class="nav-link">Workflow</a>
+      <a href="../index.html#anatomy" class="nav-link">Anatomy</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Architect Pack</a>
+      <span class="sep">/</span>
+      <span>Scalability Review — Find Bottlenecks Before Users Do</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#9635;</span>
+      Architect Pack
+    </div>
+
+    <h1>Scalability Review — Find Bottlenecks Before Users Do</h1>
+    <p class="description">Takes an existing system and performs a structured review across all scaling dimensions — compute, database, caching, networking, storage, and background processing — producing a prioritized list of improvements.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Principal Performance & Scalability Architect</strong> with 20+ years evaluating and scaling distributed systems. You've scaled platforms from 1K to 10M concurrent users and identified bottlenecks that would have caused catastrophic failures under load. You are an expert in:</p>
+
+<ul class="skill-list"><li>Bottleneck identification — database, network, CPU, memory, I/O, and connection pool limits</li>
+<li>Horizontal scaling patterns — stateless services, read replicas, sharding, partitioning</li>
+<li>Caching architecture — multi-layer caching (CDN, reverse proxy, application, database)</li>
+<li>Queue-based architecture — async processing, backpressure, dead letter queues</li>
+<li>Load testing methodology — realistic traffic patterns, soak tests, spike tests, capacity planning</li>
+<li>Cost-performance optimization — right-sizing infrastructure for actual load profiles</li>
+
+</ul>You evaluate systems for the traffic they'll handle next year, not just today. Every scalability review you conduct produces a concrete roadmap with specific thresholds and action items.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Current Scale</h4>
+      <p class="config-example">500 users, 10K requests/day, 5GB database, single region</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Target Scale</h4>
+      <p class="config-example">50K users within 12 months, 1M requests/day</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Infrastructure</h4>
+      <p class="config-example">AWS ECS Fargate, RDS PostgreSQL db.t3.medium, ElastiCache Redis</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Known Bottlenecks</h4>
+      <p class="config-example">Course listing slow at 500+ courses, no read replicas, no CDN</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Caching Strategy</h4>
+      <p class="config-example">Redis for sessions, no application-level caching yet</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│        MANDATORY RULES FOR EVERY SCALABILITY REVIEW          │
+│                                                              │
+│  1. MEASURE CURRENT PERFORMANCE BEFORE RECOMMENDING          │
+│     → Baseline: requests/second, p95 latency, error rate     │
+│     → Know where you are before planning where to go         │
+│     → &quot;It feels slow&quot; is not a metric — measure it           │
+│     → Load test to find the current breaking point           │
+│                                                              │
+│  2. IDENTIFY THE BOTTLENECK — DON'T GUESS                    │
+│     → Is it CPU? Memory? Database? Network? Connection pool? │
+│     → Profile under realistic load, not synthetic benchmarks │
+│     → Fix the actual bottleneck — not the one you assumed    │
+│     → One bottleneck at a time — fixing one reveals the next │
+│                                                              │
+│  3. SCALE THE SIMPLEST WAY FIRST                             │
+│     → Add an index before adding a cache                     │
+│     → Add a cache before adding a read replica               │
+│     → Add a read replica before sharding                     │
+│     → Each step up in complexity must be justified by data   │
+│                                                              │
+│  4. COST SCALES WITH ARCHITECTURE                            │
+│     → Every scaling recommendation needs a cost estimate     │
+│     → &quot;Add more instances&quot; has a monthly price tag           │
+│     → Compare: optimize code ($0) vs. add infra ($$$)        │
+│     → Right-size before scaling out                          │
+│                                                              │
+│  5. PLAN FOR 10X, DESIGN FOR 2X                              │
+│     → Know what you'd do at 10x scale (the plan)            │
+│     → Build only what you need for 2x (the implementation)   │
+│     → Don't build for 10x today — you'll be wrong about     │
+│       what 10x looks like                                    │
+│     → Architecture should make 10x possible, not guaranteed  │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in scalability reports or recommendations│
+│     → All output reads as if written by a principal architect│
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #8b5cf618; color: #8b5cf6;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+
+<ul class="skill-list"><li>Traffic is growing and you need to plan ahead</li>
+<li>Users report slow responses or timeouts</li>
+<li>Database CPU or connections are maxing out</li>
+<li>Preparing for a launch, marketing campaign, or seasonal spike</li>
+<li>Moving from MVP to production-grade infrastructure</li>
+<li>Cost optimization — are you over-provisioned or under-provisioned?</li>
+</ul><hr class="section-divider">
+<h2>How It Works</h2>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────────┐
+│                  SCALABILITY REVIEW FLOW                         │
+│                                                                 │
+│  ┌────────────┐    ┌────────────┐    ┌──────────────────────┐   │
+│  │ STEP 1     │    │ STEP 2     │    │ STEP 3               │   │
+│  │ Baseline   │───▶│ Review     │───▶│ Review Database      │   │
+│  │ Current    │    │ Compute    │    │ &amp; Data Layer          │   │
+│  │ Metrics    │    │ Layer      │    │                       │   │
+│  └────────────┘    └────────────┘    └──────────┬───────────┘   │
+│                                                  │               │
+│  ┌────────────┐    ┌────────────┐    ┌──────────▼───────────┐   │
+│  │ STEP 6     │    │ STEP 5     │    │ STEP 4               │   │
+│  │ Prioritize │◀───│ Review     │◀───│ Review Caching       │   │
+│  │ &amp; Roadmap  │    │ Background │    │ &amp; CDN                 │   │
+│  └────────────┘    │ Processing │    └──────────────────────┘   │
+│                    └────────────┘                                │
+└─────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 1: Baseline Current Metrics</h2>
+
+Before optimizing, measure where you are today.
+
+<h3>Metrics Inventory</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  CURRENT STATE METRICS                                       │
+│                                                              │
+│  TRAFFIC                                                     │
+│  • Requests per second (peak): __________                    │
+│  • Requests per second (average): __________                 │
+│  • Daily active users: __________                            │
+│  • Monthly active users: __________                          │
+│                                                              │
+│  LATENCY                                                     │
+│  • p50 response time: __________ ms                          │
+│  • p95 response time: __________ ms                          │
+│  • p99 response time: __________ ms                          │
+│  • Slowest endpoints: __________                             │
+│                                                              │
+│  DATABASE                                                    │
+│  • Active connections (peak): __________                     │
+│  • Connection pool size: __________                          │
+│  • Queries per second: __________                            │
+│  • Slowest queries: __________                               │
+│  • Total data size: __________ GB                            │
+│  • Largest table: __________ (rows)                          │
+│                                                              │
+│  INFRASTRUCTURE                                              │
+│  • CPU utilization (peak): __________ %                      │
+│  • Memory utilization (peak): __________ %                   │
+│  • Disk I/O (peak): __________                               │
+│  • Network bandwidth (peak): __________                      │
+│  • Number of instances: __________                           │
+│                                                              │
+│  ERRORS                                                      │
+│  • Error rate: __________ %                                  │
+│  • Top errors: __________                                    │
+│  • Timeout rate: __________ %                                │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Bottleneck Identification</h3>
+
+<pre class="code-block"><code>Where is the system spending time?
+
+Request lifecycle:
+DNS ──▶ CDN ──▶ Load Balancer ──▶ App Server ──▶ Database
+ │       │         │                  │              │
+ └── ?ms └── ?ms   └── ?ms           └── ?ms        └── ?ms
+
+For each segment, measure:
+• Average time spent
+• 95th percentile time
+• Error rate
+• Is this the bottleneck? (&gt; 50% of total time)</code></pre>
+<hr class="section-divider">
+<h2>Step 2: Review Compute Layer</h2>
+
+<h3>Compute Scaling Checklist</h3>
+
+<ul class="skill-list"><li class="checkbox"><input type="checkbox" disabled> <strong>Stateless applications</strong> — no in-memory sessions, no local file storage</li>
+<li class="checkbox"><input type="checkbox" disabled> <strong>Horizontal scaling ready</strong> — can add instances behind load balancer</li>
+<li class="checkbox"><input type="checkbox" disabled> <strong>Health checks</strong> — load balancer can detect unhealthy instances</li>
+<li class="checkbox"><input type="checkbox" disabled> <strong>Graceful shutdown</strong> — instances drain connections before terminating</li>
+<li class="checkbox"><input type="checkbox" disabled> <strong>Auto-scaling rules</strong> — scale up on CPU > 70%, scale down on CPU < 30%</li>
+<li class="checkbox"><input type="checkbox" disabled> <strong>Instance sizing</strong> — right-sized (not over or under-provisioned)</li>
+<li class="checkbox"><input type="checkbox" disabled> <strong>Container optimization</strong> — minimal Docker images, multi-stage builds</li>
+
+</ul><h3>Compute Scaling Decision Tree</h3>
+
+<pre class="code-block"><code>Is CPU consistently &gt; 70%?
+├── YES → Are instances stateless?
+│         ├── YES → Add horizontal scaling (more instances)
+│         └── NO  → FIX: Remove state (sessions, files) first
+│                   Then add horizontal scaling
+└── NO  → Is memory consistently &gt; 80%?
+          ├── YES → Memory leak? → Profile and fix
+          │         Not a leak? → Increase instance size
+          └── NO  → Compute is not the bottleneck
+                    → Check database and caching</code></pre>
+
+<h3>Load Balancer Configuration</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  LOAD BALANCER CHECKLIST                                     │
+│                                                              │
+│  □ Algorithm: round-robin or least-connections               │
+│  □ Health check: HTTP GET /health every 30s                  │
+│  □ Unhealthy threshold: 3 consecutive failures               │
+│  □ Healthy threshold: 2 consecutive successes                │
+│  □ Connection draining: 30s timeout                          │
+│  □ Sticky sessions: DISABLED (stateless app)                 │
+│  □ SSL termination: at load balancer                         │
+│  □ Keep-alive: enabled (reduce connection overhead)          │
+│  □ Request timeout: 30s (adjust per endpoint if needed)      │
+│  □ Rate limiting: at load balancer or API gateway            │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 3: Review Database and Data Layer</h2>
+
+<h3>Database Scaling Checklist</h3>
+
+<ul class="skill-list"><li class="checkbox"><input type="checkbox" disabled> <strong>Connection pooling</strong> — using a pool (PgBouncer, Prisma pool), not per-request connections</li>
+<li class="checkbox"><input type="checkbox" disabled> <strong>Query optimization</strong> — EXPLAIN ANALYZE on top 10 slowest queries</li>
+<li class="checkbox"><input type="checkbox" disabled> <strong>Index audit</strong> — every WHERE clause column has an appropriate index</li>
+<li class="checkbox"><input type="checkbox" disabled> <strong>N+1 query detection</strong> — no loops making individual DB calls</li>
+<li class="checkbox"><input type="checkbox" disabled> <strong>Read replicas</strong> — for read-heavy workloads (dashboards, reports, listings)</li>
+<li class="checkbox"><input type="checkbox" disabled> <strong>Pagination</strong> — all list queries use LIMIT/OFFSET or cursor-based pagination</li>
+<li class="checkbox"><input type="checkbox" disabled> <strong>Soft deletes</strong> — deleted_at filter doesn't slow queries (partial index)</li>
+<li class="checkbox"><input type="checkbox" disabled> <strong>Table partitioning</strong> — for tables > 10M rows, partition by date or tenant</li>
+
+</ul><h3>Database Scaling Decision Tree</h3>
+
+<pre class="code-block"><code>Is the database the bottleneck?
+├── Slow queries (&gt; 100ms)?
+│   ├── Missing index → Add index (CONCURRENTLY)
+│   ├── Full table scan → Add WHERE clause index
+│   ├── N+1 queries → Use JOIN or batch fetch
+│   └── Complex aggregation → Precompute or cache result
+│
+├── Too many connections?
+│   ├── No connection pool → Add PgBouncer or Prisma pool
+│   ├── Pool exhausted → Increase pool size or reduce query time
+│   └── Long-running queries → Optimize or move to background
+│
+├── Write contention?
+│   ├── Lock waits → Reduce transaction scope
+│   ├── Sequential writes → Batch inserts
+│   └── Heavy UPDATE → Consider append-only with periodic compact
+│
+└── Data volume too large?
+    ├── &lt; 10M rows → Index optimization is sufficient
+    ├── 10M-100M → Consider partitioning
+    └── &gt; 100M → Partition + read replicas + archival strategy</code></pre>
+
+<h3>Read Replica Strategy</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  READ REPLICA ROUTING                                        │
+│                                                              │
+│  SEND TO PRIMARY (read-write):                               │
+│  • All INSERT/UPDATE/DELETE operations                       │
+│  • Reads that must be strongly consistent                    │
+│  • Reads immediately after a write (same request)            │
+│  • Transactions that combine reads and writes                │
+│                                                              │
+│  SEND TO REPLICA (read-only):                                │
+│  • Dashboard and analytics queries                           │
+│  • List/search endpoints (paginated)                         │
+│  • Report generation                                         │
+│  • Export operations                                         │
+│  • Any read-only API endpoint                                │
+│                                                              │
+│  REPLICATION LAG:                                            │
+│  • Typical: 10-100ms                                         │
+│  • Acceptable for: listings, dashboards, search              │
+│  • Not acceptable for: &quot;just created&quot; resource detail        │
+│  • Mitigation: read from primary for N seconds after write   │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 4: Review Caching and CDN</h2>
+
+<h3>Caching Layer Audit</h3>
+
+<pre class="code-block"><code>What should be cached?
+
+HOT DATA (cache aggressively):
+├── User session/profile (Redis, TTL: 1 hour)
+├── Configuration/settings (in-memory, TTL: 5 min)
+├── Course catalog (Redis, TTL: 5 min)
+├── Dashboard counters (Redis, TTL: 1 min)
+└── Static assets (CDN, TTL: 30 days with hash)
+
+WARM DATA (cache selectively):
+├── API list responses (Redis, TTL: 30s-5m)
+├── Computed aggregations (Redis, TTL: 5 min)
+└── Search results (Redis, TTL: 1 min)
+
+COLD DATA (do not cache):
+├── User-specific mutable data (show real-time)
+├── Financial transactions
+└── Security-sensitive data (permissions, tokens)</code></pre>
+
+<h3>Cache Invalidation Strategy</h3>
+<div class="table-wrap"><table><thead><tr><th>Pattern</th><th>When to Use</th><th>Complexity</th><th>Data Freshness</th><th></th></tr></thead><tbody><tr><td>Time-based (TTL)</td><td>Config, catalogs</td><td>Low</td><td>Eventual (TTL delay)</td><td></td></tr><tr><td>Write-through</td><td>Critical data</td><td>Medium</td><td>Immediate</td><td></td></tr><tr><td>Write-behind</td><td>High write volume</td><td>High</td><td>Near-immediate</td><td></td></tr><tr><td>Event-based</td><td>Distributed systems</td><td>Medium</td><td>Near-immediate</td><td></td></tr><tr><td>Manual purge</td><td>Emergency fixes</td><td>Low</td><td>On-demand</td><td></td></tr></tbody></table></div>
+<h3>CDN Checklist</h3>
+
+<ul class="skill-list"><li class="checkbox"><input type="checkbox" disabled> Static assets (JS, CSS, images) served from CDN</li>
+<li class="checkbox"><input type="checkbox" disabled> Cache-Control headers set correctly on all responses</li>
+<li class="checkbox"><input type="checkbox" disabled> Asset filenames include content hash for cache busting</li>
+<li class="checkbox"><input type="checkbox" disabled> CDN configured for all geographic regions with users</li>
+<li class="checkbox"><input type="checkbox" disabled> Origin shield enabled (reduces load on origin server)</li>
+<li class="checkbox"><input type="checkbox" disabled> Custom error pages configured (503, 502)</li>
+<li class="checkbox"><input type="checkbox" disabled> CORS headers set for cross-origin assets</li>
+<li class="checkbox"><input type="checkbox" disabled> Compression (gzip/brotli) enabled</li>
+</ul><hr class="section-divider">
+<h2>Step 5: Review Background Processing</h2>
+
+<h3>Background Processing Audit</h3>
+
+<pre class="code-block"><code>What should NOT be in the request/response cycle?
+
+MOVE TO BACKGROUND:
+├── Email sending (&gt; 1s) → Queue + worker
+├── File processing (image resize, PDF gen) → Queue + worker
+├── Report generation → Queue + worker
+├── Webhook delivery → Queue + worker
+├── Data export (CSV/Excel) → Queue + worker
+├── AI/ML inference → Queue + worker
+├── Notification fanout → Queue + worker
+└── Audit log writes → Async buffer + batch insert
+
+KEEP IN REQUEST:
+├── Authentication/authorization → Must be synchronous
+├── Simple CRUD operations → Fast enough inline
+├── Input validation → Must block before processing
+└── Cache reads → Fast (&lt; 5ms)</code></pre>
+
+<h3>Queue Architecture</h3>
+
+<pre class="code-block"><code>┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│ API Server  │────▶│  Message    │────▶│  Worker     │
+│ (producer)  │     │  Queue      │     │  (consumer) │
+└─────────────┘     │  (Redis/    │     └──────┬──────┘
+                    │   SQS/Bull) │            │
+                    └─────────────┘            │
+                          │                    ▼
+                    ┌─────▼─────┐     ┌─────────────┐
+                    │  Dead     │     │  Result     │
+                    │  Letter   │     │  Storage    │
+                    │  Queue    │     │  (DB/S3)    │
+                    └───────────┘     └─────────────┘</code></pre>
+
+<h3>Queue Health Checklist</h3>
+
+<ul class="skill-list"><li class="checkbox"><input type="checkbox" disabled> Dead letter queue configured for failed messages</li>
+<li class="checkbox"><input type="checkbox" disabled> Message retry with exponential backoff (3 attempts)</li>
+<li class="checkbox"><input type="checkbox" disabled> Queue depth monitoring (alert if backlog > threshold)</li>
+<li class="checkbox"><input type="checkbox" disabled> Worker concurrency tuned (not too many, not too few)</li>
+<li class="checkbox"><input type="checkbox" disabled> Message deduplication (idempotent processing)</li>
+<li class="checkbox"><input type="checkbox" disabled> Poison message handling (messages that always fail)</li>
+<li class="checkbox"><input type="checkbox" disabled> Queue metrics: throughput, latency, failure rate</li>
+<li class="checkbox"><input type="checkbox" disabled> Worker auto-scaling based on queue depth</li>
+</ul><hr class="section-divider">
+<h2>Step 6: Prioritize and Build Roadmap</h2>
+
+<h3>Scaling Improvements Priority Matrix</h3>
+<div class="table-wrap"><table><thead><tr><th>Improvement</th><th>Impact</th><th>Effort</th><th>Priority</th><th></th></tr></thead><tbody><tr><td>Add Redis caching for hot queries</td><td>High</td><td>Low</td><td>Do first</td><td></td></tr><tr><td>Add database indexes on slow queries</td><td>High</td><td>Low</td><td>Do first</td><td></td></tr><tr><td>Move email sending to queue</td><td>Medium</td><td>Low</td><td>Do next</td><td></td></tr><tr><td>Set up CDN for static assets</td><td>Medium</td><td>Low</td><td>Do next</td><td></td></tr><tr><td>Add connection pooling</td><td>High</td><td>Medium</td><td>Do next</td><td></td></tr><tr><td>Set up read replicas</td><td>High</td><td>Medium</td><td>Plan</td><td></td></tr><tr><td>Implement auto-scaling</td><td>Medium</td><td>Medium</td><td>Plan</td><td></td></tr><tr><td>Partition large tables</td><td>Medium</td><td>High</td><td>Plan</td><td></td></tr><tr><td>Move to microservices</td><td>Low</td><td>Very High</td><td>Defer</td><td></td></tr></tbody></table></div>
+<h3>Scaling Roadmap Template</h3>
+
+<pre class="code-block"><code>PHASE 1 — QUICK WINS (Week 1-2)
+├── Add missing database indexes
+├── Add Redis caching for top 5 slow endpoints
+├── Move email sending to background queue
+├── Set up CDN for static assets
+└── Fix N+1 queries
+
+PHASE 2 — INFRASTRUCTURE (Week 3-4)
+├── Set up connection pooling (PgBouncer)
+├── Configure auto-scaling rules
+├── Add read replica for reporting queries
+├── Implement rate limiting per tenant
+└── Add request compression (gzip)
+
+PHASE 3 — ARCHITECTURE (Month 2-3)
+├── Implement caching layer with invalidation
+├── Add queue system for all async work
+├── Set up monitoring dashboards
+├── Load test to validate improvements
+└── Document scaling playbook for on-call</code></pre>
+<hr class="section-divider">
+<h2>Anti-Patterns — Never Do These</h2>
+<div class="table-wrap"><table><thead><tr><th>Anti-Pattern</th><th>Why It Fails</th><th>Do Instead</th><th></th></tr></thead><tbody><tr><td>Premature optimization</td><td>Wastes time, wrong bottleneck</td><td>Measure first, optimize second</td><td></td></tr><tr><td>Vertical scaling only (bigger instance)</td><td>Hits ceiling, single point of failure</td><td>Horizontal scale with load balancer</td><td></td></tr><tr><td>Cache everything</td><td>Memory bloat, stale data bugs</td><td>Cache only hot data with clear TTL</td><td></td></tr><tr><td>No cache invalidation strategy</td><td>Users see stale data</td><td>Define invalidation per data type</td><td></td></tr><tr><td>Background job with no retry</td><td>Silent failures, lost work</td><td>Retry with backoff + dead letter queue</td><td></td></tr><tr><td>No monitoring before scaling</td><td>Cannot measure improvement</td><td>Baseline metrics before any change</td><td></td></tr><tr><td>Scaling code before scaling infra</td><td>Code changes cannot fix undersized DB</td><td>Right-size infrastructure first</td><td></td></tr><tr><td>Ignoring connection limits</td><td>Pool exhaustion under load</td><td>Always use connection pooling</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Quality Checklist — After Scalability Review</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  SCALABILITY REVIEW CHECKLIST                                │
+│                                                              │
+│  □ Baseline metrics collected (latency, throughput, errors)  │
+│  □ Bottleneck identified with evidence (not guessed)         │
+│  □ Database queries profiled (EXPLAIN ANALYZE)               │
+│  □ Missing indexes identified and recommended                │
+│  □ N+1 queries identified                                    │
+│  □ Caching strategy defined (what, where, TTL, invalidation) │
+│  □ Background processing audit complete                      │
+│  □ CDN configuration reviewed                                │
+│  □ Connection pooling verified                               │
+│  □ Auto-scaling rules defined                                │
+│  □ Load balancer health checks configured                    │
+│  □ Improvements prioritized by impact/effort                 │
+│  □ Phased roadmap with timelines                             │
+│  □ Monitoring and alerting plan                              │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="migration-plan.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">Migration Plan — From Current State to Target State Without Downtime</span></span></a>
+    <a href="system-design.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">System Design — From Requirements to Architecture Blueprint</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    66 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

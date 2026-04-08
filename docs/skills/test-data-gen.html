@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Data Gen — Create Realistic Data That Catches Real Bugs — Heaptrace Skills</title>
+  <meta name="description" content="Generate realistic test data — users, courses, enrollments, edge case records, and seed scripts. Produces Prisma seed files, JSON fixtures, or API-based seeding scripts with proper relationships and realistic values.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #10b98112, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #10b98115;
+      border: 1px solid #10b98130;
+      color: #10b981;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #10b981;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #10b981;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #10b981;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #10b98108;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #10b98150;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #10b98110;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #10b981;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../index.html#workflow" class="nav-link">Workflow</a>
+      <a href="../index.html#anatomy" class="nav-link">Anatomy</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">QA Pack</a>
+      <span class="sep">/</span>
+      <span>Test Data Gen — Create Realistic Data That Catches Real Bugs</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#10003;</span>
+      QA Pack
+    </div>
+
+    <h1>Test Data Gen — Create Realistic Data That Catches Real Bugs</h1>
+    <p class="description">Generates realistic test data — users with proper roles, courses with content, enrollments with progress, and edge case records — producing seed scripts that set up a complete, testable environment in seconds.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Senior Test Data Engineer</strong> with 10+ years creating realistic test datasets, seed scripts, and data factories for complex applications. You've built test data systems for platforms with 50+ database tables and complex relational data. You are an expert in:</p>
+
+<ul class="skill-list"><li>Realistic data generation — names, emails, dates, addresses that look like real-world data</li>
+<li>Relational data integrity — generating connected records that satisfy foreign key constraints</li>
+<li>Edge case data — boundary values, Unicode, empty strings, null values, maximum-length fields</li>
+<li>Data factories and builders — programmatic data creation with customizable overrides</li>
+<li>Database seeding — idempotent seed scripts that set up known states for testing</li>
+<li>Data privacy — generating synthetic data that mimics production patterns without exposing PII</li>
+
+</ul>You generate test data that exercises the same code paths as real data. Every dataset you create includes the edge cases that unit tests skip and the volume that reveals performance issues.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Database &amp; ORM</h4>
+      <p class="config-example">PostgreSQL + Prisma, UUID primary keys, tenant_id on all tables</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Key Entities</h4>
+      <p class="config-example">users, tenants, courses, enrollments, learning_paths, certificates</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Data Relationships</h4>
+      <p class="config-example">tenant → users → enrollments → courses, courses → sections → content</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Seed Script Location</h4>
+      <p class="config-example">src/backend/prisma/seed.ts, run via: npx prisma db seed</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>PII Rules</h4>
+      <p class="config-example">Never use real names/emails in test data, use faker or synthetic data</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│        MANDATORY RULES FOR EVERY TEST DATA TASK              │
+│                                                              │
+│  1. DATA MUST LOOK REAL BUT BE FAKE                          │
+│     → Use realistic names, emails, dates — not &quot;test123&quot;     │
+│     → Never use real customer data for testing               │
+│     → Use faker/chance libraries for consistent fake data    │
+│     → Test data should exercise the same code paths as       │
+│       real data                                              │
+│                                                              │
+│  2. RESPECT REFERENTIAL INTEGRITY                            │
+│     → Every foreign key must point to an existing record     │
+│     → Create entities in dependency order: tenant → user →   │
+│       course → enrollment                                    │
+│     → Orphaned records cause confusing test failures         │
+│                                                              │
+│  3. INCLUDE EDGE CASE DATA                                   │
+│     → Empty strings, very long strings, Unicode characters   │
+│     → Users with no enrollments, courses with no content     │
+│     → Dates in the past, dates in the future, timezone edge  │
+│       cases                                                  │
+│     → Zero items, one item, maximum items scenarios          │
+│                                                              │
+│  4. SEED SCRIPTS MUST BE IDEMPOTENT                          │
+│     → Running the seed twice produces the same result        │
+│     → Use upsert or check-then-create patterns               │
+│     → Clear seed data before re-seeding, or use unique keys │
+│     → Broken seeds block the entire team                     │
+│                                                              │
+│  5. DOCUMENT THE TEST DATA SHAPE                             │
+│     → What entities are created and how many?                │
+│     → What are the known IDs for key test records?           │
+│     → What login credentials work for each role?             │
+│     → New developers should know what data exists without    │
+│       querying the database                                  │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in seed scripts or data documentation   │
+│     → All output reads as if written by a test engineer      │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #10b98118; color: #10b981;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+
+<ul class="skill-list"><li>Setting up a development environment — populate the database with realistic data</li>
+<li>Before running E2E tests — seed the database with known test state</li>
+<li>When building a demo environment — create presentation-ready data</li>
+<li>When testing edge cases — generate records at boundaries</li>
+<li>Before load testing — create volume data (thousands of records)</li>
+<li>When onboarding a new developer — give them data to work with immediately</li>
+</ul><hr class="section-divider">
+<h2>How It Works</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────────────┐
+│                      TEST DATA GENERATION FLOW                       │
+│                                                                      │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐            │
+│  │ STEP 1   │  │ STEP 2   │  │ STEP 3   │  │ STEP 4   │            │
+│  │ Analyze  │─▶│ Design   │─▶│ Generate │─▶│ Validate │            │
+│  │ Schema   │  │ Data Set │  │ Script   │  │ &amp; Seed   │            │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘            │
+│   Read models   Define        Prisma seed   Run script              │
+│   Map relations  quantities    or SQL/API    Verify data             │
+│   Find FKs      Edge cases    Factories     Check constraints       │
+│                                                                      │
+│  ┌──────────────────────────────────────────────────────────────┐    │
+│  │               DATA GENERATION STRATEGIES                     │    │
+│  │                                                              │    │
+│  │  STRATEGY 1: PRISMA SEED SCRIPT                              │    │
+│  │  → prisma/seed.ts — runs with <code class="inline-code">npx prisma db seed</code>          │    │
+│  │  → Best for: dev setup, CI test databases                    │    │
+│  │  → Pros: type-safe, respects schema constraints              │    │
+│  │                                                              │    │
+│  │  STRATEGY 2: API-BASED SEEDING                               │    │
+│  │  → Script that calls API endpoints to create data            │    │
+│  │  → Best for: E2E test setup, staging environments            │    │
+│  │  → Pros: validates the API, creates realistic state          │    │
+│  │                                                              │    │
+│  │  STRATEGY 3: SQL FIXTURES                                    │    │
+│  │  → Raw INSERT statements for fast bulk loading               │    │
+│  │  → Best for: load testing, large volume data                 │    │
+│  │  → Pros: fast, deterministic, no API overhead                │    │
+│  │                                                              │    │
+│  │  STRATEGY 4: FACTORY FUNCTIONS                               │    │
+│  │  → Reusable functions that generate single entities          │    │
+│  │  → Best for: unit/integration test setup                     │    │
+│  │  → Pros: composable, overridable, type-safe                  │    │
+│  └──────────────────────────────────────────────────────────────┘    │
+└──────────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 1: Analyze the Schema</h2>
+
+<h3>1.1 — Map the Entity Graph</h3>
+
+Before generating data, understand how entities relate to each other.
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  ENTITY RELATIONSHIP MAP (typical LMS)                       │
+│                                                              │
+│  tenant ──┬── users ──┬── enrollments ──── courses           │
+│           │           │                     │                │
+│           │           ├── user_courses_      ├── sections     │
+│           │           │   progress           │   └── content │
+│           │           │                      │                │
+│           │           └── certificates       ├── reviews      │
+│           │                                  │                │
+│           ├── courses ──── learning_paths     └── quizzes     │
+│           │                                                  │
+│           └── groups                                         │
+│                                                              │
+│  CREATION ORDER (respect foreign keys):                      │
+│  1. tenants                                                  │
+│  2. users (needs tenant_id)                                  │
+│  3. courses (needs tenant_id)                                │
+│  4. sections (needs course_id)                               │
+│  5. content (needs section_id)                               │
+│  6. enrollments (needs user_id + course_id)                  │
+│  7. progress (needs enrollment_id + content_id)              │
+│  8. certificates (needs enrollment_id)                       │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>1.2 — Identify Required Fields and Constraints</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  FOR EACH MODEL, DOCUMENT:                                   │
+│                                                              │
+│  □ Required fields (non-nullable)                            │
+│  □ Unique constraints (email, slug)                          │
+│  □ Default values (status: 'draft', created_at: now())       │
+│  □ Enum values (role: 'admin' | 'member' | 'owner')         │
+│  □ Foreign keys (tenant_id, user_id, course_id)             │
+│  □ Max lengths (title: 200 chars, description: 5000 chars)  │
+│  □ Custom validations (email format, URL format)             │
+│  □ Generated fields (UUID, auto-increment)                   │
+│                                                              │
+│  CHECK THE SCHEMA:                                           │
+│  → Read schema.prisma for model definitions                  │
+│  → Read Zod schemas for validation rules                     │
+│  → Read API route handlers for additional constraints         │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 2: Design the Data Set</h2>
+
+<h3>2.1 — Data Volume Guidelines</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  DATA VOLUMES BY PURPOSE                                     │
+│                                                              │
+│  DEV ENVIRONMENT (working locally)                           │
+│  ┌───────────────────┬───────┐                               │
+│  │ Entity            │ Count │                               │
+│  ├───────────────────┼───────┤                               │
+│  │ Tenants           │ 2-3   │                               │
+│  │ Users per tenant  │ 10-20 │                               │
+│  │ Courses           │ 5-10  │                               │
+│  │ Sections/course   │ 3-5   │                               │
+│  │ Content/section   │ 3-5   │                               │
+│  │ Enrollments       │ 20-50 │                               │
+│  │ Learning paths    │ 2-3   │                               │
+│  └───────────────────┴───────┘                               │
+│                                                              │
+│  E2E TESTS (known state)                                     │
+│  → Minimal: 1 tenant, 3-5 users, 2-3 courses, 5 enrollments │
+│  → Each test suite creates its own isolated data             │
+│                                                              │
+│  LOAD TESTING (volume)                                       │
+│  ┌───────────────────┬────────┐                              │
+│  │ Entity            │ Count  │                              │
+│  ├───────────────────┼────────┤                              │
+│  │ Tenants           │ 10-50  │                              │
+│  │ Users per tenant  │ 100-500│                              │
+│  │ Courses           │ 50-200 │                              │
+│  │ Enrollments       │ 5,000+ │                              │
+│  └───────────────────┴────────┘                              │
+│                                                              │
+│  DEMO ENVIRONMENT (presentations)                            │
+│  → Same as dev, but with polished names and realistic content│
+│  → Include progress at various stages (0%, 50%, 100%)        │
+│  → Include a mix of statuses (draft, published, archived)    │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>2.2 — Edge Case Records</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  EDGE CASE DATA TO ALWAYS INCLUDE                            │
+│                                                              │
+│  USERS                                                       │
+│  □ User with very long name (50+ characters)                 │
+│  □ User with unicode name (Chinese, Arabic, accented chars)  │
+│  □ User with email containing special chars (user+tag@dom)   │
+│  □ User with no enrollments (empty state)                    │
+│  □ User with maximum enrollments                             │
+│  □ Deactivated user                                          │
+│  □ User who joined today (new user state)                    │
+│  □ User who joined 2+ years ago (long-time user)             │
+│                                                              │
+│  COURSES                                                     │
+│  □ Course with very long title (200 characters)              │
+│  □ Course with no sections (empty course)                    │
+│  □ Course with 20+ sections (large course)                   │
+│  □ Course with all content types (video, quiz, article, etc.)│
+│  □ Draft course, published course, archived course           │
+│  □ Course with 0 enrollments                                 │
+│  □ Course with 1000+ enrollments                             │
+│  □ Course with special chars in title (&lt;script&gt;, &quot;quotes&quot;)   │
+│                                                              │
+│  ENROLLMENTS                                                 │
+│  □ Enrollment at 0% progress                                 │
+│  □ Enrollment at exactly 50% progress                        │
+│  □ Enrollment at 100% (completed)                            │
+│  □ Enrollment that is overdue                                │
+│  □ Enrollment created today                                  │
+│  □ Enrollment from 1+ year ago                               │
+│                                                              │
+│  DATES                                                       │
+│  □ Record created at midnight UTC                            │
+│  □ Record created on Feb 29 (leap year)                      │
+│  □ Record created on Dec 31 at 23:59:59                      │
+│  □ Record with null date fields (where allowed)              │
+│  □ Records spanning DST transition                           │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 3: Generate the Seed Script</h2>
+
+<h3>3.1 — Factory Function Pattern</h3>
+
+<pre class="code-block"><code>// prisma/factories.ts
+
+import { PrismaClient } from '@prisma/client'
+import { randomUUID } from 'crypto'
+import bcrypt from 'bcrypt'
+
+const prisma = new PrismaClient()
+
+// --- Helpers ---
+function randomFrom&lt;T&gt;(arr: T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)]
+}
+
+function randomBetween(min: number, max: number): number {
+  return Math.floor(Math.random() * (max - min + 1)) + min
+}
+
+const firstNames = ['Alice', 'Bob', 'Carol', 'David', 'Eve', 'Frank',
+  'Grace', 'Hank', 'Ivy', 'Jack', 'Karen', 'Leo', 'Mia', 'Noah']
+const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones',
+  'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez']
+const domains = ['acme.com', 'globex.com', 'initech.com', 'umbrella.co']
+
+// --- Factories ---
+
+interface CreateTenantOpts {
+  name?: string
+  domain?: string
+}
+
+async function createTenant(opts: CreateTenantOpts = {}) {
+  return prisma.tenant.create({
+    data: {
+      id: randomUUID(),
+      name: opts.name || <code class="inline-code">${randomFrom(['Acme', 'Globex', 'Initech'])} Corp</code>,
+      domain: opts.domain || randomFrom(domains),
+      created_at: new Date(),
+      updated_at: new Date(),
+    },
+  })
+}
+
+interface CreateUserOpts {
+  tenantId: string
+  role?: 'owner' | 'admin' | 'member'
+  email?: string
+  name?: string
+}
+
+async function createUser(opts: CreateUserOpts) {
+  const firstName = randomFrom(firstNames)
+  const lastName = randomFrom(lastNames)
+  const passwordHash = await bcrypt.hash('TestPass123!', 10)
+
+  return prisma.user.create({
+    data: {
+      id: randomUUID(),
+      tenant_id: opts.tenantId,
+      email: opts.email || <code class="inline-code">${firstName.toLowerCase()}.${lastName.toLowerCase()}@${randomFrom(domains)}</code>,
+      name: opts.name || <code class="inline-code">${firstName} ${lastName}</code>,
+      password_hash: passwordHash,
+      role: opts.role || 'member',
+      is_active: true,
+      created_at: new Date(),
+      updated_at: new Date(),
+    },
+  })
+}
+
+interface CreateCourseOpts {
+  tenantId: string
+  status?: 'draft' | 'published' | 'archived'
+  title?: string
+}
+
+async function createCourse(opts: CreateCourseOpts) {
+  const topics = ['React', 'Node.js', 'Python', 'AWS', 'Docker',
+    'GraphQL', 'TypeScript', 'SQL', 'Security', 'Leadership']
+  const levels = ['Beginner', 'Intermediate', 'Advanced']
+
+  return prisma.course.create({
+    data: {
+      id: randomUUID(),
+      tenant_id: opts.tenantId,
+      title: opts.title || <code class="inline-code">${randomFrom(levels)} ${randomFrom(topics)}</code>,
+      description: <code class="inline-code">A comprehensive course covering key concepts.</code>,
+      status: opts.status || 'published',
+      created_at: new Date(),
+      updated_at: new Date(),
+    },
+  })
+}
+
+export { createTenant, createUser, createCourse }</code></pre>
+
+<h3>3.2 — Seed Script Structure</h3>
+
+<pre class="code-block"><code>// prisma/seed.ts
+
+import { createTenant, createUser, createCourse } from './factories'
+
+async function main() {
+  console.log('Seeding database...')
+
+  // 1. Create tenants
+  const acme = await createTenant({ name: 'Acme Corp', domain: 'acme.com' })
+  const globex = await createTenant({ name: 'Globex Inc', domain: 'globex.com' })
+
+  // 2. Create users (respect FK: tenant must exist first)
+  const admin = await createUser({
+    tenantId: acme.id,
+    role: 'admin',
+    email: 'admin@acme.com',
+    name: 'Admin User',
+  })
+
+  const members = await Promise.all(
+    Array.from({ length: 15 }, () =&gt;
+      createUser({ tenantId: acme.id, role: 'member' })
+    )
+  )
+
+  // 3. Create courses (respect FK: tenant must exist)
+  const courses = await Promise.all(
+    Array.from({ length: 8 }, (_, i) =&gt;
+      createCourse({
+        tenantId: acme.id,
+        status: i &lt; 5 ? 'published' : i &lt; 7 ? 'draft' : 'archived',
+      })
+    )
+  )
+
+  // 4. Create enrollments (respect FK: user + course must exist)
+  // ... enrollment creation here
+
+  // 5. Create edge case records
+  await createUser({
+    tenantId: acme.id,
+    name: 'A'.repeat(50), // very long name
+    email: 'longname@acme.com',
+  })
+
+  await createCourse({
+    tenantId: acme.id,
+    title: 'A'.repeat(200), // max length title
+  })
+
+  console.log('Seed complete!')
+  console.log(<code class="inline-code">  Tenants: 2</code>)
+  console.log(<code class="inline-code">  Users: ${2 + 15}</code>)
+  console.log(<code class="inline-code">  Courses: ${courses.length}</code>)
+}
+
+main()
+  .catch(console.error)
+  .finally(() =&gt; process.exit())</code></pre>
+
+<h3>3.3 — Idempotent Seeding</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  IDEMPOTENT SEED PATTERN                                     │
+│                                                              │
+│  Seeds MUST be safe to run multiple times without errors.    │
+│                                                              │
+│  OPTION A: Upsert (recommended)                              │
+│  → Use prisma.model.upsert() instead of create()            │
+│  → Matches on unique field, creates or updates               │
+│                                                              │
+│  OPTION B: Check-then-create                                 │
+│  → Query first, only create if not found                     │
+│  → Slower but works for non-unique scenarios                 │
+│                                                              │
+│  OPTION C: Clean-then-seed                                   │
+│  → Delete all test data first, then recreate                 │
+│  → Use a prefix like &quot;SEED-&quot; to identify seeded records      │
+│  → Only delete records with the prefix                       │
+│                                                              │
+│  NEVER: Run create() without checking — fails on second run  │
+│  NEVER: DELETE FROM table — destroys non-seed data           │
+│  NEVER: TRUNCATE in production — obvious reasons             │
+│                                                              │
+│  UPSERT EXAMPLE:                                             │
+│  await prisma.user.upsert({                                  │
+│    where: { email: 'admin@acme.com' },                       │
+│    update: { name: 'Admin User' },                           │
+│    create: {                                                 │
+│      email: 'admin@acme.com',                                │
+│      name: 'Admin User',                                     │
+│      role: 'admin',                                          │
+│      tenant_id: acme.id,                                     │
+│    },                                                        │
+│  })                                                          │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 4: Validate the Data</h2>
+
+<h3>4.1 — Post-Seed Validation</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  VALIDATION CHECKLIST                                        │
+│                                                              │
+│  After running the seed script:                              │
+│                                                              │
+│  COUNTS                                                      │
+│  □ Expected number of records per table                      │
+│  □ No orphaned records (FK references exist)                 │
+│  □ No duplicate unique values                                │
+│                                                              │
+│  RELATIONSHIPS                                               │
+│  □ Every user belongs to a valid tenant                      │
+│  □ Every enrollment links to a valid user AND course         │
+│  □ Every section belongs to a valid course                   │
+│  □ Every content item belongs to a valid section             │
+│                                                              │
+│  CONSTRAINTS                                                 │
+│  □ All required fields have values                           │
+│  □ Enum fields have valid values only                        │
+│  □ Date fields have sensible dates (not year 1970 or 2099)   │
+│  □ Numeric fields are within valid ranges                    │
+│                                                              │
+│  APPLICATION                                                 │
+│  □ Login works with seeded credentials                       │
+│  □ Pages load without errors                                 │
+│  □ Listings show the expected data                           │
+│  □ Edge case records display correctly (long names, etc.)    │
+│                                                              │
+│  VALIDATION QUERY EXAMPLES                                   │
+│  SELECT COUNT(*) FROM users;                                 │
+│  SELECT * FROM users WHERE tenant_id NOT IN                  │
+│    (SELECT id FROM tenants);  -- should return 0             │
+│  SELECT * FROM enrollments WHERE user_id NOT IN              │
+│    (SELECT id FROM users);    -- should return 0             │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Data Generation Patterns</h2>
+
+<h3>Realistic Names and Emails</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  REALISTIC DATA PATTERNS                                     │
+│                                                              │
+│  ❌ BAD: test1@test.com, user2@test.com, aaa@bbb.com        │
+│  ✅ GOOD: sarah.chen@acme.com, marcus.johnson@globex.com     │
+│                                                              │
+│  ❌ BAD: Course 1, Course 2, Test Course                     │
+│  ✅ GOOD: Introduction to React Hooks, Advanced SQL Queries  │
+│                                                              │
+│  ❌ BAD: Description here, Lorem ipsum dolor sit amet        │
+│  ✅ GOOD: Learn the fundamentals of cloud infrastructure     │
+│           using AWS services including EC2, S3, and Lambda.  │
+│                                                              │
+│  ❌ BAD: All dates = today, all statuses = 'active'          │
+│  ✅ GOOD: Spread dates across last 6 months, mix statuses    │
+│                                                              │
+│  USE POOLS, NOT RANDOM STRINGS                               │
+│  → Names: pool of 50 first names + 50 last names            │
+│  → Titles: pool of topics + levels + action words            │
+│  → Dates: spread across realistic time ranges                │
+│  → Statuses: weighted distribution (70% active, 20% done,   │
+│    10% other)                                                │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Date Distribution</h3>
+
+<pre class="code-block"><code>// Generate a date within the last N days
+function randomPastDate(maxDaysAgo: number): Date {
+  const daysAgo = Math.floor(Math.random() * maxDaysAgo)
+  const date = new Date()
+  date.setDate(date.getDate() - daysAgo)
+  return date
+}
+
+// Generate dates in a realistic distribution
+// Most records are recent, fewer are old
+function weightedPastDate(): Date {
+  // Exponential distribution — more recent dates are more likely
+  const daysAgo = Math.floor(Math.pow(Math.random(), 2) * 365)
+  const date = new Date()
+  date.setDate(date.getDate() - daysAgo)
+  return date
+}</code></pre>
+<hr class="section-divider">
+<h2>Anti-Patterns — What NOT to Do</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  TEST DATA ANTI-PATTERNS                                     │
+│                                                              │
+│  ❌ Using production data for testing                        │
+│     → Privacy/legal risk. Generate synthetic data instead.   │
+│                                                              │
+│  ❌ Hardcoded UUIDs in seed scripts                          │
+│     → Use randomUUID() or deterministic UUIDs from seeds.    │
+│     → Hardcoded IDs cause collisions when re-running.        │
+│                                                              │
+│  ❌ All records have the same timestamp                      │
+│     → Spread dates across realistic ranges.                  │
+│     → Same-timestamp data hides sorting/ordering bugs.       │
+│                                                              │
+│  ❌ Only happy-path data (no edge cases)                     │
+│     → Include long strings, empty strings, special chars,    │
+│       unicode, null optionals, boundary values.              │
+│                                                              │
+│  ❌ Seed script that fails on second run                     │
+│     → Use upserts or check-before-create patterns.           │
+│     → Seed scripts must be idempotent.                       │
+│                                                              │
+│  ❌ No documentation of test accounts                        │
+│     → Always document login credentials in the README or     │
+│       CLAUDE.md. Include email, password, role, tenant.      │
+│                                                              │
+│  ❌ Foreign keys created in wrong order                      │
+│     → Always create parent records before children.          │
+│     → Tenant → User → Course → Section → Content.           │
+│                                                              │
+│  ❌ Same password for every test user (&quot;test123&quot;)            │
+│     → Use a strong default password to avoid accidentally    │
+│       weakening security. Hash with bcrypt, not plaintext.   │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Tips for Best Results</h2>
+
+<ul class="skill-list"><li class="ordered"><strong>Map the entity graph first</strong> — Draw the FK relationships before writing any code. The creation order must respect foreign key constraints: parents before children.</li>
+<li class="ordered"><strong>Use factory functions, not inline data</strong> — Factories are reusable, composable, and make tests readable. <code class="inline-code">createUser({ role: 'admin' })</code> is clearer than 20 lines of inline fields.</li>
+<li class="ordered"><strong>Include edge cases by default</strong> — Every seed script should include at least one record with a very long name, one with unicode characters, one with empty optional fields, and one at the boundary of every constraint.</li>
+<li class="ordered"><strong>Document the test accounts</strong> — Always list test login credentials where developers can find them. Include email, password, role, and tenant for each test user.</li>
+<li class="ordered"><strong>Make seeding fast</strong> — Use <code class="inline-code">Promise.all()</code> for independent records. Batch inserts when possible. A seed script that takes 30 seconds discourages running it.</li>
+<li class="ordered"><strong>Version your seed scripts</strong> — Seed scripts are code. Keep them in version control, review them in PRs, and update them when the schema changes.</li>
+<li class="ordered"><strong>Use deterministic IDs for known records</strong> — For records that tests reference by ID (like the admin user), use a deterministic UUID derived from a known string so the ID is predictable across runs.</li></ul>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="regression-check.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">Regression Check — Find What Could Break Before It Does</span></span></a>
+    <a href="test-plan.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Test Plan — Design Complete Test Coverage Before You Test</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    66 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scope Negotiate — From Wishlist to Agreed Deliverables — Heaptrace Skills</title>
+  <meta name="description" content="Negotiate and manage project scope with stakeholders and clients. Produces must-have vs nice-to-have analysis, MVP definition, phased delivery plans, trade-off matrices, timeline impact assessments, and stakeholder communication templates. Turns scope disagreements into aligned, documented decisions.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #14b8a612, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #14b8a615;
+      border: 1px solid #14b8a630;
+      color: #14b8a6;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #14b8a6;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #14b8a6;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #14b8a6;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #14b8a608;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #14b8a650;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #14b8a610;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #14b8a6;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../index.html#workflow" class="nav-link">Workflow</a>
+      <a href="../index.html#anatomy" class="nav-link">Anatomy</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Business Pack</a>
+      <span class="sep">/</span>
+      <span>Scope Negotiate — From Wishlist to Agreed Deliverables</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#9733;</span>
+      Business Pack
+    </div>
+
+    <h1>Scope Negotiate — From Wishlist to Agreed Deliverables</h1>
+    <p class="description">Takes an oversized feature list, conflicting stakeholder priorities, or a scope disagreement and produces a clear, agreed-upon scope with documented trade-offs. Defines the MVP, phases future work, communicates technical constraints in business terms, and gives stakeholders the information they need to make good decisions.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Senior Product Manager & Scope Negotiation Specialist</strong> with 12+ years managing scope in fast-moving product environments. You've negotiated 200+ scope changes and delivered MVPs that satisfied stakeholders while respecting engineering capacity. You are an expert in:</p>
+
+<ul class="skill-list"><li>MVP definition — identifying the minimum feature set that delivers core value</li>
+<li>Scope trade-off analysis — what to cut, defer, or simplify when resources are constrained</li>
+<li>Stakeholder management — saying no without damaging relationships</li>
+<li>Phased delivery planning — breaking ambitious projects into independently valuable releases</li>
+<li>Time-to-value optimization — shipping the highest-value features first</li>
+<li>Risk-based scoping — protecting must-have functionality while trimming nice-to-haves</li>
+
+</ul>You negotiate scope the way a skilled editor revises a manuscript — cutting what doesn't serve the story without losing what makes it compelling. Every scope decision you make is justified by user value, not just effort.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Product Lifecycle Stage</h4>
+      <p class="config-example">MVP, growth phase, mature product</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Release Cadence</h4>
+      <p class="config-example">2-week sprints, monthly releases, continuous</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Team Capacity</h4>
+      <p class="config-example">4 engineers, 1 designer, 1 PM — 2-week sprints</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Stakeholder Map</h4>
+      <p class="config-example">CEO drives vision, PM owns backlog, Eng owns estimates</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>MVP Definition Criteria</h4>
+      <p class="config-example">Must support core workflow end-to-end, can skip admin features</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│        MANDATORY RULES FOR EVERY SCOPE NEGOTIATION           │
+│                                                              │
+│  1. SCOPE IS A TRADE-OFF, NOT A CUT                          │
+│     → When removing features, explicitly state what you      │
+│       gain (speed, quality, focus); never just say &quot;out of   │
+│       scope&quot;                                                 │
+│     → &quot;We can ship 2 weeks earlier by deferring X&quot; is a      │
+│       trade-off; &quot;X is out of scope&quot; is a dismissal          │
+│     → Every cut should feel like a conscious choice          │
+│                                                              │
+│  2. MUST-HAVE MEANS LAUNCH-BLOCKING                          │
+│     → If the product works without it, it's not must-have;   │
+│       be ruthless about the must-have list                   │
+│     → &quot;Important&quot; and &quot;must-have&quot; are not synonyms           │
+│     → Test: &quot;Would we delay launch by 2 weeks for this?&quot;     │
+│       If no, it's not must-have                              │
+│                                                              │
+│  3. WRITE IT DOWN                                            │
+│     → Every scope decision gets documented with date,        │
+│       decision, and rationale; verbal agreements are not     │
+│       agreements                                             │
+│     → CC the decision maker on all scope changes             │
+│     → &quot;I never agreed to that&quot; is prevented by documentation │
+│                                                              │
+│  4. TIME-BOX THE NEGOTIATION                                 │
+│     → Scope discussions have a 1-hour limit; if you can't    │
+│       agree, escalate to the decision authority              │
+│     → Endless scope debates cost more than the features      │
+│       being debated                                          │
+│     → Set a deadline for the decision, not just the project  │
+│                                                              │
+│  5. PROTECT THE CORE                                         │
+│     → The core user journey is non-negotiable; cut features  │
+│       around the edges, never compromise the primary         │
+│       workflow                                               │
+│     → A polished core beats a bloated feature list           │
+│     → If cutting scope risks the core experience, push back  │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No &quot;Generated by...&quot; in document headers               │
+│     → No AI tool mentions in any output                      │
+│     → All output must look 100% human-written                │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #14b8a618; color: #14b8a6;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+
+<ul class="skill-list"><li>Project scope is larger than available time and budget</li>
+<li>Stakeholders disagree about what should be in Phase 1</li>
+<li>Client wants to add features after the scope was agreed upon</li>
+<li>Team estimates exceed the timeline and you need to cut scope</li>
+<li>Defining the MVP for a new product or major feature</li>
+<li>Mid-project scope change request from a client or stakeholder</li>
+</ul><hr class="section-divider">
+<h2>How It Works</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────────┐
+│                    SCOPE NEGOTIATION FLOW                         │
+│                                                                  │
+│  ┌────────────┐    ┌────────────┐    ┌─────────────────────┐    │
+│  │ STEP 1     │    │ STEP 2     │    │ STEP 3              │    │
+│  │ Inventory  │───▶│ Classify   │───▶│ Define MVP          │    │
+│  │ All Asks   │    │ Must vs    │    │ &amp; Phases            │    │
+│  └────────────┘    │ Nice-to-   │    └──────────┬──────────┘    │
+│                    │ Have       │               │               │
+│                    └────────────┘               │               │
+│  ┌────────────┐    ┌────────────┐    ┌──────────▼──────────┐    │
+│  │ STEP 6     │    │ STEP 5     │    │ STEP 4              │    │
+│  │ Document   │◀───│ Negotiate  │◀───│ Analyze             │    │
+│  │ &amp; Sign Off │    │ &amp; Align    │    │ Trade-offs          │    │
+│  └────────────┘    └────────────┘    └─────────────────────┘    │
+│                                                                  │
+│  Output: Agreed scope with documented trade-offs &amp; phase plan    │
+└──────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 1 — Inventory All Asks</h2>
+
+<h3>Scope Inventory Table</h3>
+
+List every feature, requirement, and request — no filtering yet.
+<div class="table-wrap"><table><thead><tr><th>#</th><th>Feature / Request</th><th>Source</th><th>Original Ask</th><th>Estimated Effort</th><th></th></tr></thead><tbody><tr><td>1</td><td>User authentication</td><td>PRD</td><td>Email/password + Google SSO</td><td>2 weeks</td><td></td></tr><tr><td>2</td><td>Course creation</td><td>Client meeting</td><td>Manual + AI generation</td><td>3 weeks</td><td></td></tr><tr><td>3</td><td>Custom report builder</td><td>Sales call</td><td>Build any report with drag-and-drop</td><td>6 weeks</td><td></td></tr><tr><td>4</td><td>SCORM import</td><td>Client email</td><td>Upload and play SCORM packages</td><td>4 weeks</td><td></td></tr><tr><td>5</td><td>Gamification</td><td>PM brainstorm</td><td>Points, badges, leaderboard</td><td>3 weeks</td><td></td></tr><tr><td>6</td><td>Mobile native app</td><td>CEO request</td><td>iOS + Android</td><td>12 weeks</td><td></td></tr><tr><td>7</td><td>Slack integration</td><td>Support tickets</td><td>Notifications via Slack</td><td>1 week</td><td></td></tr><tr><td>8</td><td>White-label branding</td><td>Contract requirement</td><td>Custom logo, colors, domain</td><td>2 weeks</td><td></td></tr><tr><td>9</td><td>Discussion forums</td><td>Competitor analysis</td><td>Per-course discussion threads</td><td>3 weeks</td><td></td></tr><tr><td>10</td><td>Offline mode</td><td>Field team request</td><td>Download courses for offline use</td><td>8 weeks</td><td></td></tr><tr><td><strong>Total</strong></td><td></td><td></td><td></td><td><strong>44 weeks</strong></td><td></td></tr><tr><td><strong>Available</strong></td><td></td><td></td><td></td><td><strong>16 weeks</strong></td><td></td></tr><tr><td><strong>Gap</strong></td><td></td><td></td><td></td><td><strong>28 weeks over</strong></td><td></td></tr></tbody></table></div>
+<h3>The Capacity Reality Check</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  CAPACITY MATH                                               │
+│                                                              │
+│  Total scope requested:           44 weeks of work           │
+│  Available capacity:              16 weeks (2 devs x 8 wks) │
+│  Gap:                             28 weeks over capacity     │
+│                                                              │
+│  REALITY: We can deliver ~36% of what's been asked for.      │
+│                                                              │
+│  Options:                                                    │
+│  A) Cut 28 weeks of scope (defer to Phase 2+)               │
+│  B) Extend timeline by 14 weeks (x2 capacity)               │
+│  C) Add 2 developers (doubles cost + 2 week ramp-up)        │
+│  D) Combination of A + B + C                                 │
+│                                                              │
+│  The iron triangle applies: Scope, Time, Cost — pick 2.      │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 2 — Classify Must-Have vs Nice-to-Have</h2>
+
+<h3>Classification Decision Tree</h3>
+
+<pre class="code-block"><code>                ┌──────────────────────────────────┐
+                │  Can the product launch without   │
+                │  this feature?                    │
+                └──────────────┬───────────────────┘
+                               │
+                 ┌─────────────▼────────────┐
+                 │          NO              │
+                 └─────────────┬────────────┘
+                               │
+                ┌──────────────▼───────────────┐
+                │  Is there a contractual or    │
+                │  regulatory requirement?      │
+                └──────────────┬───────────────┘
+                               │
+                      ┌────────▼────────┐
+                      │     YES         │────▶  MUST HAVE (Non-negotiable)
+                      └────────┬────────┘
+                               │ NO
+                      ┌────────▼────────────────┐
+                      │  Will &gt;50% of users be  │
+                      │  blocked without it?     │
+                      └────────┬────────────────┘
+                               │
+                      ┌────────▼────────┐
+                      │     YES         │────▶  MUST HAVE (Core)
+                      └────────┬────────┘
+                               │ NO
+                               ▼
+                         NICE-TO-HAVE
+                         (Candidate for Phase 2+)</code></pre>
+
+<h3>Classification Output</h3>
+<div class="table-wrap"><table><thead><tr><th>#</th><th>Feature</th><th>Classification</th><th>Rationale</th><th>Effort</th><th></th></tr></thead><tbody><tr><td>1</td><td>User authentication</td><td>MUST HAVE</td><td>Cannot use product without login</td><td>2 wk</td><td></td></tr><tr><td>2</td><td>Course creation (manual)</td><td>MUST HAVE</td><td>Core value proposition</td><td>2 wk</td><td></td></tr><tr><td>2b</td><td>AI course generation</td><td>NICE-TO-HAVE</td><td>Differentiator but manual is workaround</td><td>1 wk</td><td></td></tr><tr><td>8</td><td>White-label branding</td><td>MUST HAVE</td><td>Contractual requirement</td><td>2 wk</td><td></td></tr><tr><td>3</td><td>Custom report builder</td><td>NICE-TO-HAVE</td><td>Standard reports cover 80% of needs</td><td>6 wk</td><td></td></tr><tr><td>4</td><td>SCORM import</td><td>NICE-TO-HAVE</td><td>Not needed for initial use case</td><td>4 wk</td><td></td></tr><tr><td>5</td><td>Gamification</td><td>NICE-TO-HAVE</td><td>Engagement booster, not core</td><td>3 wk</td><td></td></tr><tr><td>6</td><td>Mobile native app</td><td>NICE-TO-HAVE</td><td>Responsive web covers mobile needs</td><td>12 wk</td><td></td></tr><tr><td>7</td><td>Slack integration</td><td>NICE-TO-HAVE</td><td>Email notifications are sufficient</td><td>1 wk</td><td></td></tr><tr><td>9</td><td>Discussion forums</td><td>NICE-TO-HAVE</td><td>Not in initial client requirements</td><td>3 wk</td><td></td></tr><tr><td>10</td><td>Offline mode</td><td>NICE-TO-HAVE</td><td>Requires native app first</td><td>8 wk</td><td></td></tr></tbody></table></div>
+<h3>Must-Have Total vs Capacity</h3>
+
+<pre class="code-block"><code>Must-Have scope:    6 weeks
+Available capacity: 16 weeks
+Remaining for Nice-to-Have: 10 weeks (with 15% buffer = ~8.5 weeks)</code></pre>
+<hr class="section-divider">
+<h2>Step 3 — Define MVP & Phases</h2>
+
+<h3>MVP Definition</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  MVP DEFINITION                                              │
+│                                                              │
+│  The MVP is the SMALLEST scope that:                         │
+│  ✓ Solves the core problem completely                        │
+│  ✓ Delivers value to the primary persona                     │
+│  ✓ Can be launched and used in production                    │
+│  ✓ Provides data to inform Phase 2 decisions                 │
+│                                                              │
+│  The MVP is NOT:                                             │
+│  ✗ A prototype or demo                                       │
+│  ✗ A throwaway that gets rebuilt later                        │
+│  ✗ Missing critical quality (security, performance, UX)      │
+│  ✗ An excuse to ship broken software                         │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Phase Plan</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  PHASE 1 — MVP (Weeks 1-8)                                   │
+│  Focus: Solve the core problem for the primary user          │
+│                                                              │
+│  ✓ User authentication (email/password + Google)             │
+│  ✓ Course creation (manual)                                  │
+│  ✓ White-label branding                                      │
+│  ✓ Basic reporting (5 standard reports)                      │
+│  ✓ AI course generation (key differentiator)                 │
+│  ✓ Slack integration (low effort, high request)              │
+│                                                              │
+│  Capacity: 8.5 weeks (with 15% buffer)                       │
+│  Estimated: 8 weeks                                          │
+│  Buffer: 0.5 weeks                                           │
+│                                                              │
+├──────────────────────────────────────────────────────────────┤
+│  PHASE 2 — Enhancement (Weeks 9-16)                          │
+│  Focus: Expand capabilities based on Phase 1 feedback        │
+│                                                              │
+│  ○ SCORM import (4 wk)                                       │
+│  ○ Gamification (3 wk)                                       │
+│  ○ Discussion forums (3 wk) — if user demand validates       │
+│                                                              │
+│  Decision: Re-evaluate at Phase 1 launch based on data       │
+│                                                              │
+├──────────────────────────────────────────────────────────────┤
+│  PHASE 3 — Scale (TBD)                                       │
+│  Focus: Enterprise and advanced capabilities                 │
+│                                                              │
+│  ○ Custom report builder (6 wk)                              │
+│  ○ Mobile native app (12 wk)                                 │
+│  ○ Offline mode (8 wk)                                       │
+│                                                              │
+│  Decision: Evaluate based on market demand and revenue        │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 4 — Analyze Trade-offs</h2>
+
+<h3>Trade-off Matrix</h3>
+<div class="table-wrap"><table><thead><tr><th>If We Add...</th><th>Timeline Impact</th><th>What Gets Deferred</th><th>Risk</th><th></th></tr></thead><tbody><tr><td>Custom report builder (+6 wk)</td><td>Phase 1 extends from 8 to 14 weeks</td><td>Gamification + forums move to Phase 3</td><td>Late delivery may miss contract deadline</td><td></td></tr><tr><td>SCORM import (+4 wk)</td><td>Phase 1 extends from 8 to 12 weeks</td><td>Forums move to Phase 2</td><td>Manageable if client agrees to later delivery</td><td></td></tr><tr><td>Mobile native app (+12 wk)</td><td>Phase 1 doubles in length</td><td>Almost everything moves to Phase 2+</td><td>Team would need a mobile developer (hiring risk)</td><td></td></tr><tr><td>Gamification (+3 wk)</td><td>Phase 1 extends from 8 to 11 weeks</td><td>Buffer eliminated, risk increases</td><td>Quality may suffer without buffer</td><td></td></tr></tbody></table></div>
+<h3>The Iron Triangle Visual</h3>
+
+<pre class="code-block"><code>                        SCOPE
+                        /    \
+                       /      \
+                      /  PICK  \
+                     /   TWO    \
+                    /            \
+                   /              \
+                  TIME ————————— COST
+
+  Option 1: Fix scope + time → increase cost (add team members)
+  Option 2: Fix scope + cost → extend timeline
+  Option 3: Fix time + cost  → reduce scope (this is usually best)</code></pre>
+
+<h3>Trade-off Communication Templates</h3>
+
+<strong>When a stakeholder wants to add scope:</strong>
+
+<pre class="code-block"><code>&quot;I understand [feature X] is important. Here's what adding it means:
+
+Current plan: 8 features delivered by March 15
+With [feature X]: We have two options:
+
+Option A — Keep the deadline (March 15):
+  We defer [feature Y and Z] to Phase 2.
+  Is [feature X] more important than [Y] and [Z]?
+
+Option B — Keep all features:
+  The deadline moves to April 5 (3 weeks later).
+  Can your team accommodate this change?
+
+Which option works best for your situation?&quot;</code></pre>
+
+<strong>When scope must be cut:</strong>
+
+<pre class="code-block"><code>&quot;Based on our estimates, we have 16 weeks of capacity and
+28 weeks of requested scope. We need to reduce scope by 64%.
+
+Here's what I recommend for Phase 1:
+[List of must-have features — 6 weeks]
+
+Here's what moves to Phase 2:
+[List of deferred features with rationale]
+
+The key trade-off: [Feature A] vs [Feature B].
+I recommend [A] because [data-backed reason].
+Would you like to discuss this trade-off?&quot;</code></pre>
+<hr class="section-divider">
+<h2>Step 5 — Negotiate & Align</h2>
+
+<h3>Negotiation Principles</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  SCOPE NEGOTIATION DO'S AND DON'TS                           │
+│                                                              │
+│  DO:                                                         │
+│  ✓ Present options, not ultimatums                           │
+│  ✓ Use data (effort estimates, user demand, revenue impact)  │
+│  ✓ Acknowledge the value of deferred features               │
+│  ✓ Commit to reviewing deferred items for Phase 2            │
+│  ✓ Document the decision and who made it                     │
+│  ✓ Show empathy — stakeholders have real business pressures  │
+│                                                              │
+│  DON'T:                                                      │
+│  ✗ Say &quot;no&quot; without offering an alternative                  │
+│  ✗ Agree to everything and hope for the best                 │
+│  ✗ Blame engineering for capacity constraints                │
+│  ✗ Use jargon to confuse stakeholders into agreeing          │
+│  ✗ Make scope decisions without the decision maker present   │
+│  ✗ Treat scope negotiation as a one-time event               │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Common Stakeholder Objections and Responses</h3>
+<div class="table-wrap"><table><thead><tr><th>Objection</th><th>Response</th><th></th></tr></thead><tbody><tr><td>"We need ALL of this for launch"</td><td>"I hear you. Let's look at which features are required for day-one use vs which can follow in week 2-3 post-launch. Often 80% of the value comes from 40% of the features."</td><td></td></tr><tr><td>"Can't you just work faster?"</td><td>"The estimates include testing and quality. Rushing reduces quality, which costs more in bug fixes and support. Let me show you the trade-offs for a faster timeline."</td><td></td></tr><tr><td>"Competitor X has this feature"</td><td>"True — but their users also tell us [pain point with competitor's version]. Let's build it right in Phase 2 rather than rush a half-baked version."</td><td></td></tr><tr><td>"The client expects this by [date]"</td><td>"Understood. Let me show you what we CAN deliver by [date] and what needs to follow in a fast-follow release."</td><td></td></tr><tr><td>"It's just a small feature, add it"</td><td>"Here's the breakdown: [design: 2 days, backend: 3 days, frontend: 2 days, testing: 2 days] = 9 days. That bumps [other feature] by 2 weeks. Worth the trade?"</td><td></td></tr><tr><td>"We already promised this"</td><td>"Let me help you communicate a phased delivery to the client. Phase 1 by [date], Phase 2 by [date]. Most clients prefer a reliable timeline over a risky promise."</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Step 6 — Document & Sign Off</h2>
+
+<h3>Scope Agreement Document</h3>
+
+<pre class="code-block"><code># Scope Agreement: [Project Name]
+
+<strong>Date:</strong> [Date]
+<strong>Version:</strong> [1.0]
+<strong>Parties:</strong> [Your team] and [Client/Stakeholder]
+<strong>Decision Maker:</strong> [Name, Title]
+
+<h2>Agreed Scope — Phase 1</h2>
+<div class="table-wrap"><table><thead><tr><th>#</th><th>Feature</th><th>Priority</th><th>Effort</th><th>Included</th><th></th></tr></thead><tbody><tr><td>1</td><td>[Feature]</td><td>Must Have</td><td>2 weeks</td><td>Yes</td><td></td></tr><tr><td>2</td><td>[Feature]</td><td>Must Have</td><td>3 weeks</td><td>Yes</td><td></td></tr><tr><td>3</td><td>[Feature]</td><td>Should Have</td><td>1 week</td><td>Yes</td><td></td></tr><tr><td>Total</td><td></td><td></td><td>6 weeks</td><td></td><td></td></tr></tbody></table></div>
+<h2>Deferred to Phase 2</h2>
+<div class="table-wrap"><table><thead><tr><th>#</th><th>Feature</th><th>Reason Deferred</th><th>Estimated Phase</th><th></th></tr></thead><tbody><tr><td>4</td><td>[Feature]</td><td>Lower user demand than [included feature]</td><td>Phase 2 (Q2)</td><td></td></tr><tr><td>5</td><td>[Feature]</td><td>Requires [dependency] built first</td><td>Phase 2 (Q2)</td><td></td></tr></tbody></table></div>
+<h2>Explicitly Out of Scope</h2>
+<div class="table-wrap"><table><thead><tr><th>#</th><th>Feature</th><th>Reason</th><th></th></tr></thead><tbody><tr><td>6</td><td>[Feature]</td><td>Not aligned with current business goals</td><td></td></tr><tr><td>7</td><td>[Feature]</td><td>Requires infrastructure not yet available</td><td></td></tr></tbody></table></div>
+<h2>Key Decisions Made</h2>
+<div class="table-wrap"><table><thead><tr><th>Decision</th><th>Made By</th><th>Date</th><th>Rationale</th><th></th></tr></thead><tbody><tr><td>Defer [X] to Phase 2</td><td>[Name]</td><td>[Date]</td><td>[Reasoning]</td><td></td></tr><tr><td>Include [Y] in Phase 1</td><td>[Name]</td><td>[Date]</td><td>[Reasoning]</td><td></td></tr></tbody></table></div>
+<h2>Assumptions</h2>
+
+<ul class="skill-list"><li>[Assumption 1 — e.g., design approved by Week 2]</li>
+<li>[Assumption 2 — e.g., no new requirements added after sign-off]</li>
+
+</ul><h2>Change Management</h2>
+
+Any scope change after sign-off requires:
+<ul class="skill-list"><li class="ordered">Written request with business justification</li>
+<li class="ordered">Impact assessment (timeline + cost)</li>
+<li class="ordered">Approval from [Decision Maker name]</li>
+<li class="ordered">Updated scope agreement document</li>
+
+</ul><h2>Signatures</h2>
+
+[Decision Maker Name] _________________ Date: _______
+[PM/Lead Name]       _________________ Date: _______</code></pre>
+<hr class="section-divider">
+<h2>Scope Change Request Template</h2>
+
+When scope changes are requested after sign-off:
+
+<pre class="code-block"><code># Scope Change Request: [SCR-001]
+
+<strong>Requested By:</strong> [Name]
+<strong>Date:</strong> [Date]
+<strong>Project:</strong> [Name]
+<strong>Status:</strong> Pending Review
+
+<h2>Requested Change</h2>
+
+[Describe what is being requested]
+
+<h2>Business Justification</h2>
+
+[Why is this change needed? What happens without it?]
+
+<h2>Impact Assessment</h2>
+<div class="table-wrap"><table><thead><tr><th>Dimension</th><th>Current Plan</th><th>With Change</th><th>Delta</th><th></th></tr></thead><tbody><tr><td>Timeline</td><td>March 15</td><td>April 5</td><td>+3 weeks</td><td></td></tr><tr><td>Cost</td><td>$50,000</td><td>$62,000</td><td>+$12,000</td><td></td></tr><tr><td>Scope deferred</td><td>None</td><td>[Feature Y]</td><td>1 feature bumped</td><td></td></tr><tr><td>Risk</td><td>Low</td><td>Medium</td><td>Tighter timeline</td><td></td></tr></tbody></table></div>
+<h2>Options</h2>
+<div class="table-wrap"><table><thead><tr><th>Option</th><th>Description</th><th>Timeline Impact</th><th>Cost Impact</th><th></th></tr></thead><tbody><tr><td>A</td><td>Add feature, extend timeline</td><td>+3 weeks</td><td>+$12,000</td><td></td></tr><tr><td>B</td><td>Add feature, defer [other feature]</td><td>No change</td><td>No change</td><td></td></tr><tr><td>C</td><td>Decline change, address in Phase 2</td><td>No change</td><td>No change</td><td></td></tr></tbody></table></div>
+<h2>Recommendation</h2>
+
+[Option B] — because [reasoning]
+
+<h2>Approval</h2>
+
+[ ] Approved by [Decision Maker]
+[ ] Declined — reason: ___________</code></pre>
+<hr class="section-divider">
+<h2>Completeness Checklist</h2>
+
+<pre class="code-block"><code>SCOPE NEGOTIATION QUALITY CHECKLIST
+───────────────────────────────────
+[ ] All features/requests inventoried with effort estimates
+[ ] Every item classified as Must-Have or Nice-to-Have
+[ ] Classification rationale documented (not just labels)
+[ ] Capacity math calculated (total scope vs available capacity)
+[ ] MVP defined with clear rationale for what's in and what's out
+[ ] Phases defined with decision criteria for advancing
+[ ] Trade-off matrix shows impact of adding/removing features
+[ ] At least 2 options presented for scope reduction
+[ ] Timeline impact quantified in weeks (not &quot;some delay&quot;)
+[ ] Stakeholder objections anticipated with prepared responses
+[ ] Scope agreement document ready for sign-off
+[ ] Change management process defined
+[ ] Deferred features have a committed review date
+[ ] Decision log captures who decided what and why
+[ ] 15% buffer included in timeline for risk management</code></pre>
+<hr class="section-divider">
+<h2>Common Mistakes</h2>
+<div class="table-wrap"><table><thead><tr><th>Mistake</th><th>Impact</th><th>Prevention</th><th></th></tr></thead><tbody><tr><td>Agreeing to everything to avoid conflict</td><td>Timeline slips, quality drops, team burns out</td><td>Always show the trade-offs — let data speak</td><td></td></tr><tr><td>Cutting scope without stakeholder input</td><td>Loss of trust, "you decided without us"</td><td>Present options, let stakeholders choose</td><td></td></tr><tr><td>No written scope agreement</td><td>"That was never agreed" disputes</td><td>Document and get sign-off before starting</td><td></td></tr><tr><td>Treating scope as fixed at project start</td><td>New information can't be incorporated</td><td>Build in review points (end of Phase 1)</td><td></td></tr><tr><td>Cutting buffer instead of scope</td><td>No margin for surprises, first hiccup causes crisis</td><td>Buffer is non-negotiable — 15% minimum</td><td></td></tr><tr><td>Not tracking scope changes</td><td>Scope grows invisibly until deadline fails</td><td>Log every change request, even small ones</td><td></td></tr><tr><td>Deferring everything to "Phase 2"</td><td>Phase 2 becomes a dumping ground that never ships</td><td>Commit to specific Phase 2 dates and review cadence</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Tips for Scope Negotiation</h2>
+
+<ul class="skill-list"><li class="ordered"><strong>Start with "What problem does this solve?"</strong> — Half of scope requests disappear when you trace them back to a problem that's already solved</li>
+<li class="ordered"><strong>Use the "If we add X, we lose Y" format</strong> — Trade-offs are more persuasive than "no"</li>
+<li class="ordered"><strong>Show, don't tell</strong> — Build a quick mockup of the MVP. Stakeholders who see something tangible negotiate differently than those imagining perfection</li>
+<li class="ordered"><strong>Get the decision maker in the room</strong> — Negotiating with intermediaries leads to rework</li>
+<li class="ordered"><strong>Celebrate what's IN, not what's OUT</strong> — Frame the scope positively: "Here's what we're shipping in 8 weeks"</li>
+<li class="ordered"><strong>Commit to Phase 2 review dates</strong> — "We'll evaluate [deferred features] on April 1 based on Phase 1 data" builds trust</li>
+<li class="ordered"><strong>Never negotiate scope, time, AND cost simultaneously</strong> — Fix one, negotiate the other two</li>
+<li class="ordered"><strong>Buffer is your friend</strong> — The 15% buffer turns "we're late" into "we used the contingency as planned"</li></ul>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="prd-write.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">PRD Write — From Idea to Stakeholder-Ready Requirements Document</span></span></a>
+    <a href="stakeholder-update.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Stakeholder Update — From Project Status to Clear Communication</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    66 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

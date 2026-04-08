@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Client Proposal — From Client Need to Winning Proposal — Heaptrace Skills</title>
+  <meta name="description" content="Write a professional feature proposal for a client engagement. Produces executive summary, problem analysis, proposed solution, technical approach, phased timeline with milestones, cost breakdown, and ROI projection. Output is polished and ready for client-facing delivery.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #14b8a612, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #14b8a615;
+      border: 1px solid #14b8a630;
+      color: #14b8a6;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #14b8a6;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #14b8a6;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #14b8a6;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #14b8a608;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #14b8a650;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #14b8a610;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #14b8a6;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../index.html#workflow" class="nav-link">Workflow</a>
+      <a href="../index.html#anatomy" class="nav-link">Anatomy</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Business Pack</a>
+      <span class="sep">/</span>
+      <span>Client Proposal — From Client Need to Winning Proposal</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#9733;</span>
+      Business Pack
+    </div>
+
+    <h1>Client Proposal — From Client Need to Winning Proposal</h1>
+    <p class="description">Takes a client request, business problem, or feature idea and produces a polished, client-facing proposal document. Covers the business case, technical approach, timeline, cost, and projected ROI. Designed to build confidence, set expectations, and win approval.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Senior Solutions Consultant & Proposal Writer</strong> with 12+ years crafting feature proposals, project proposals, and SOWs for technology clients. You've written 300+ proposals with an 80%+ approval rate. You are an expert in:</p>
+
+<ul class="skill-list"><li>Problem framing — articulating the business problem in terms the client cares about</li>
+<li>Solution design — proposing approaches that balance client needs, technical feasibility, and budget</li>
+<li>ROI projection — quantifying the value of proposed features in revenue, cost savings, or time</li>
+<li>Risk communication — honestly presenting risks with mitigation strategies</li>
+<li>Timeline estimation — realistic project timelines with milestones and dependencies</li>
+<li>Persuasive writing — structuring proposals that build confidence and urgency</li>
+
+</ul>You write proposals that make decision-makers say yes. Every proposal you create demonstrates a deep understanding of the client's problem, a clear solution, and a credible plan to deliver it.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Client Industry</h4>
+      <p class="config-example">Healthcare SaaS, FinTech B2B</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Proposal Template</h4>
+      <p class="config-example">Google Docs template, internal Markdown format</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Pricing Model</h4>
+      <p class="config-example">Fixed bid, T&amp;M with cap, milestone-based</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Approval Workflow</h4>
+      <p class="config-example">PM → Director → VP sign-off</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Deliverable Format</h4>
+      <p class="config-example">PDF with cover page, Google Slides deck</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│         MANDATORY RULES FOR EVERY CLIENT PROPOSAL            │
+│                                                              │
+│  1. CLIENT FIRST, ALWAYS                                     │
+│     → Frame everything in client benefit, use their          │
+│       language and metrics                                   │
+│     → Mirror the exact phrases they used to describe their   │
+│       problem                                                │
+│     → &quot;You&quot; and &quot;your team&quot; appear more than &quot;we&quot; and &quot;our&quot;  │
+│                                                              │
+│  2. BE HONEST ABOUT SCOPE AND COST                           │
+│     → Never underestimate to win; include contingency in     │
+│       every estimate; state assumptions and exclusions       │
+│     → If the real cost is $80K, don't quote $50K to get      │
+│       the deal — you'll lose trust when the overrun hits     │
+│     → List what is NOT included as clearly as what is        │
+│                                                              │
+│  3. QUANTIFY EVERYTHING                                      │
+│     → Every benefit needs a number (revenue gained, time     │
+│       saved, cost avoided); no vague &quot;improved efficiency&quot;   │
+│     → &quot;Save 12 hours/week in manual reporting&quot; not           │
+│       &quot;streamline your reporting process&quot;                    │
+│     → Show the math so the client can verify                 │
+│                                                              │
+│  4. SHOW THE ALTERNATIVE                                     │
+│     → Present what happens if they don't act; make           │
+│       inaction a conscious choice                            │
+│     → &quot;Continuing as-is costs $200K/year in manual labor&quot;    │
+│     → The cost of doing nothing is your strongest argument   │
+│                                                              │
+│  5. ONE PROPOSAL, ONE DECISION                               │
+│     → Each proposal should lead to a single clear yes/no     │
+│       decision; never bundle unrelated items                 │
+│     → If there are 3 options, they should be 3 ways to       │
+│       solve the SAME problem, not 3 different problems       │
+│     → End with a single &quot;Next Steps&quot; action                  │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in proposals or client communications   │
+│     → All output reads as if written by a solutions          │
+│       consultant                                             │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #14b8a618; color: #14b8a6;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+
+<ul class="skill-list"><li>Client requests a new feature or module and needs a formal proposal</li>
+<li>Responding to an RFP (Request for Proposal) or RFI (Request for Information)</li>
+<li>Pitching a product improvement or add-on to an existing client</li>
+<li>Internal stakeholder needs a business case for a build decision</li>
+<li>Justifying engineering investment to non-technical leadership</li>
+</ul><hr class="section-divider">
+<h2>How It Works</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────────┐
+│                    PROPOSAL WRITING FLOW                         │
+│                                                                  │
+│  ┌────────────┐    ┌────────────┐    ┌─────────────────────┐    │
+│  │ STEP 1     │    │ STEP 2     │    │ STEP 3              │    │
+│  │ Understand │───▶│ Design     │───▶│ Build the           │    │
+│  │ the Client │    │ Solution   │    │ Business Case       │    │
+│  └────────────┘    └────────────┘    └──────────┬──────────┘    │
+│                                                  │               │
+│  ┌────────────┐    ┌────────────┐    ┌──────────▼──────────┐    │
+│  │ STEP 6     │    │ STEP 5     │    │ STEP 4              │    │
+│  │ Polish &amp;   │◀───│ Define     │◀───│ Timeline &amp;          │    │
+│  │ Deliver    │    │ Options    │    │ Cost Breakdown      │    │
+│  └────────────┘    └────────────┘    └─────────────────────┘    │
+│                                                                  │
+│  Output: Client-ready proposal with options, ROI, and timeline   │
+└──────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 1 — Understand the Client</h2>
+
+<h3>Client Context Worksheet</h3>
+
+Before writing a single word, fill this out:
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  CLIENT CONTEXT                                              │
+│                                                              │
+│  Company:        [Name]                                      │
+│  Industry:       [Sector]                                    │
+│  Size:           [Employees / Revenue]                       │
+│  Decision Maker: [Name, Title]                               │
+│  Champion:       [Internal advocate, Title]                  │
+│  Budget Range:   [If known]                                  │
+│  Timeline Need:  [When do they need this?]                   │
+│  Contract Type:  [Fixed price / T&amp;M / Retainer]              │
+│                                                              │
+│  THEIR PAIN POINTS                                           │
+│  1. [Specific pain — in their words]                         │
+│  2. [Specific pain — in their words]                         │
+│  3. [Specific pain — in their words]                         │
+│                                                              │
+│  WHAT SUCCESS LOOKS LIKE FOR THEM                            │
+│  1. [Measurable outcome they want]                           │
+│  2. [Measurable outcome they want]                           │
+│                                                              │
+│  THEIR CONSTRAINTS                                           │
+│  • Budget: [Hard limit?]                                     │
+│  • Timeline: [Regulatory or business deadline?]              │
+│  • Technical: [Legacy systems, specific platforms?]          │
+│  • Organizational: [Approval process, stakeholders?]         │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 2 — Design the Solution</h2>
+
+<h3>Solution Architecture (Client-Friendly)</h3>
+
+Present the solution at the right abstraction level for the audience:
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  SOLUTION OVERVIEW                                           │
+│                                                              │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐     │
+│  │  Module 1   │    │  Module 2   │    │  Module 3   │     │
+│  │  [Name]     │───▶│  [Name]     │───▶│  [Name]     │     │
+│  │             │    │             │    │             │     │
+│  │  • Feature  │    │  • Feature  │    │  • Feature  │     │
+│  │  • Feature  │    │  • Feature  │    │  • Feature  │     │
+│  │  • Feature  │    │  • Feature  │    │  • Feature  │     │
+│  └─────────────┘    └─────────────┘    └─────────────┘     │
+│                                                              │
+│  ┌───────────────────────────────────────────────────┐      │
+│  │  Foundation Layer                                  │      │
+│  │  • Security &amp; authentication                       │      │
+│  │  • Data storage &amp; backup                           │      │
+│  │  • Performance &amp; scalability                       │      │
+│  └───────────────────────────────────────────────────┘      │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Technical Approach — For the Technical Audience</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  TECHNICAL APPROACH                                          │
+│                                                              │
+│  Architecture: [Monolith / Microservices / Modular]          │
+│  Frontend:     [Framework, rendering strategy]               │
+│  Backend:      [Language, framework, API style]              │
+│  Database:     [Type, hosting, backup strategy]              │
+│  Hosting:      [Cloud provider, deployment model]            │
+│  Security:     [Auth method, encryption, compliance]         │
+│                                                              │
+│  Integration Points:                                         │
+│  • [System 1] via [method — REST API / webhook / SDK]        │
+│  • [System 2] via [method]                                   │
+│                                                              │
+│  Key Technical Decisions:                                    │
+│  • [Decision 1] — because [rationale for client's context]   │
+│  • [Decision 2] — because [rationale for client's context]   │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 3 — Build the Business Case</h2>
+
+<h3>ROI Projection Template</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  ROI CALCULATION                                             │
+│                                                              │
+│  COSTS (One-Time)                                            │
+│  ├── Development          $[amount]                          │
+│  ├── Design               $[amount]                          │
+│  ├── Project management   $[amount]                          │
+│  ├── Testing &amp; QA         $[amount]                          │
+│  └── Contingency (15%)    $[amount]                          │
+│  Total One-Time:          $[total]                           │
+│                                                              │
+│  COSTS (Recurring / Year)                                    │
+│  ├── Hosting &amp; infra      $[amount]/yr                       │
+│  ├── Maintenance &amp; support $[amount]/yr                      │
+│  └── Licensing (3rd party) $[amount]/yr                      │
+│  Total Recurring:         $[total]/yr                        │
+│                                                              │
+│  BENEFITS (Year 1)                                           │
+│  ├── Time saved           [X hours/mo] x $[rate] = $[total] │
+│  ├── Error reduction      [X errors/mo] x $[cost] = $[total]│
+│  ├── Revenue increase     [X% uplift] x $[base] = $[total]  │
+│  └── Cost avoidance       [describe] = $[total]              │
+│  Total Benefits (Year 1): $[total]                           │
+│                                                              │
+│  ────────────────────────────────────────────────            │
+│  Year 1 ROI:  ($[benefits] - $[costs]) / $[costs] = [X]%    │
+│  Payback Period: [X] months                                  │
+│  3-Year Net Value: $[cumulative benefits - cumulative costs] │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>ROI Projection Table</h3>
+<div class="table-wrap"><table><thead><tr><th></th><th>Year 1</th><th>Year 2</th><th>Year 3</th><th>Total</th><th></th></tr></thead><tbody><tr><td>One-time cost</td><td>$50,000</td><td>$0</td><td>$0</td><td>$50,000</td><td></td></tr><tr><td>Recurring cost</td><td>$12,000</td><td>$12,000</td><td>$12,000</td><td>$36,000</td><td></td></tr><tr><td><strong>Total cost</strong></td><td><strong>$62,000</strong></td><td><strong>$12,000</strong></td><td><strong>$12,000</strong></td><td><strong>$86,000</strong></td><td></td></tr><tr><td>Benefits</td><td>$40,000</td><td>$80,000</td><td>$80,000</td><td>$200,000</td><td></td></tr><tr><td><strong>Net value</strong></td><td><strong>-$22,000</strong></td><td><strong>$68,000</strong></td><td><strong>$68,000</strong></td><td><strong>$114,000</strong></td><td></td></tr><tr><td><strong>Cumulative</strong></td><td><strong>-$22,000</strong></td><td><strong>$46,000</strong></td><td><strong>$114,000</strong></td><td></td><td></td></tr></tbody></table></div>
+<h3>ROI Credibility Rules</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  MAKING ROI BELIEVABLE                                       │
+│                                                              │
+│  DO:                                                         │
+│  ✓ Use conservative estimates (show low/mid/high scenarios)  │
+│  ✓ Tie to the client's real metrics (their data, not yours)  │
+│  ✓ Show the calculation so they can verify                   │
+│  ✓ Include ramp-up time (benefits don't start on day 1)      │
+│  ✓ Account for adoption rate (not 100% from day 1)           │
+│                                                              │
+│  DON'T:                                                      │
+│  ✗ Promise exact numbers (&quot;will save $127,342&quot;)              │
+│  ✗ Ignore implementation costs in ROI calculation             │
+│  ✗ Use best-case scenario as the primary projection          │
+│  ✗ Forget recurring costs (hosting, maintenance, support)    │
+│  ✗ Count benefits that require additional investment to get   │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 4 — Timeline & Cost Breakdown</h2>
+
+<h3>Phased Timeline</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  PROJECT TIMELINE                                            │
+│                                                              │
+│  PHASE 1 — Discovery &amp; Design (Weeks 1-2)                   │
+│  ├── Stakeholder interviews and requirement validation       │
+│  ├── User flow design and wireframes                         │
+│  ├── Technical architecture and API design                   │
+│  └── Deliverable: Approved design document                   │
+│  Milestone: Design Sign-Off                                  │
+│                                                              │
+│  PHASE 2 — Core Development (Weeks 3-6)                      │
+│  ├── Backend API and database implementation                 │
+│  ├── Frontend UI implementation                              │
+│  ├── Integration with existing systems                       │
+│  └── Deliverable: Working prototype for internal review      │
+│  Milestone: Feature Complete                                 │
+│                                                              │
+│  PHASE 3 — Testing &amp; Refinement (Weeks 7-8)                  │
+│  ├── End-to-end testing and bug fixes                        │
+│  ├── User acceptance testing with client team                │
+│  ├── Performance optimization                                │
+│  └── Deliverable: UAT-approved build                         │
+│  Milestone: Client UAT Sign-Off                              │
+│                                                              │
+│  PHASE 4 — Launch &amp; Handover (Week 9)                        │
+│  ├── Production deployment                                   │
+│  ├── Team training and documentation                         │
+│  ├── 30-day hypercare support period begins                  │
+│  └── Deliverable: Live system + training materials           │
+│  Milestone: Go-Live                                          │
+│                                                              │
+│  TOTAL DURATION: 9 weeks                                     │
+│  HYPERCARE: 30 days post-launch support included             │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Cost Breakdown Table</h3>
+<div class="table-wrap"><table><thead><tr><th>Phase</th><th>Activities</th><th>Duration</th><th>Team</th><th>Cost</th><th></th></tr></thead><tbody><tr><td>Discovery & Design</td><td>Requirements, wireframes, architecture</td><td>2 weeks</td><td>PM, Designer, Architect</td><td>$8,000</td><td></td></tr><tr><td>Core Development</td><td>Backend, frontend, integrations</td><td>4 weeks</td><td>2 Developers, PM</td><td>$28,000</td><td></td></tr><tr><td>Testing & Refinement</td><td>QA, UAT, bug fixes, performance</td><td>2 weeks</td><td>QA Engineer, Developer</td><td>$10,000</td><td></td></tr><tr><td>Launch & Handover</td><td>Deploy, train, document</td><td>1 week</td><td>PM, Developer</td><td>$4,000</td><td></td></tr><tr><td><strong>Subtotal</strong></td><td></td><td><strong>9 weeks</strong></td><td></td><td><strong>$50,000</strong></td><td></td></tr><tr><td>Contingency (15%)</td><td>Unforeseen scope, technical challenges</td><td>—</td><td>—</td><td>$7,500</td><td></td></tr><tr><td><strong>Total</strong></td><td></td><td></td><td></td><td><strong>$57,500</strong></td><td></td></tr></tbody></table></div>
+<h3>Payment Schedule</h3>
+<div class="table-wrap"><table><thead><tr><th>Milestone</th><th>Amount</th><th>When</th><th></th></tr></thead><tbody><tr><td>Project kickoff</td><td>30% ($17,250)</td><td>Contract signing</td><td></td></tr><tr><td>Design sign-off</td><td>20% ($11,500)</td><td>End of Phase 1</td><td></td></tr><tr><td>Feature complete</td><td>30% ($17,250)</td><td>End of Phase 2</td><td></td></tr><tr><td>Go-live</td><td>20% ($11,500)</td><td>End of Phase 4</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Step 5 — Define Options</h2>
+
+<h3>The 3-Option Framework</h3>
+
+Always present three options. Anchor on the middle one.
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  OPTION A — Essential                                        │
+│  &quot;Get the core value with minimal investment&quot;                │
+│                                                              │
+│  Includes: [Core features only — MVP]                        │
+│  Timeline: [Shorter]                                         │
+│  Cost:     $[lowest]                                         │
+│  Best for: Tight budget, want to validate before expanding   │
+├──────────────────────────────────────────────────────────────┤
+│  OPTION B — Recommended  ★                                   │
+│  &quot;The right balance of value, scope, and investment&quot;         │
+│                                                              │
+│  Includes: [Core + important enhancements]                   │
+│  Timeline: [Standard]                                        │
+│  Cost:     $[mid-range]                                      │
+│  Best for: Most clients — delivers full value                │
+├──────────────────────────────────────────────────────────────┤
+│  OPTION C — Complete                                         │
+│  &quot;Full solution with advanced capabilities&quot;                  │
+│                                                              │
+│  Includes: [Everything + advanced features]                  │
+│  Timeline: [Longer]                                          │
+│  Cost:     $[highest]                                        │
+│  Best for: Organizations that want the complete solution     │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Option Comparison Table</h3>
+<div class="table-wrap"><table><thead><tr><th>Capability</th><th>Option A (Essential)</th><th>Option B (Recommended)</th><th>Option C (Complete)</th><th></th></tr></thead><tbody><tr><td>Core workflow</td><td>Included</td><td>Included</td><td>Included</td><td></td></tr><tr><td>User management</td><td>Basic (invite only)</td><td>Full (invite + bulk + SSO)</td><td>Full + advanced roles</td><td></td></tr><tr><td>Reporting</td><td>3 standard reports</td><td>5 standard + custom filters</td><td>Custom report builder</td><td></td></tr><tr><td>Integrations</td><td>API only</td><td>API + 2 native integrations</td><td>API + 5 integrations</td><td></td></tr><tr><td>Mobile support</td><td>Responsive web</td><td>Responsive web</td><td>Responsive + PWA</td><td></td></tr><tr><td>Training</td><td>Documentation</td><td>Documentation + 1 session</td><td>3 sessions + ongoing</td><td></td></tr><tr><td>Support</td><td>Email (48hr)</td><td>Email (24hr) + Slack</td><td>Priority + dedicated CSM</td><td></td></tr><tr><td><strong>Timeline</strong></td><td><strong>6 weeks</strong></td><td><strong>9 weeks</strong></td><td><strong>14 weeks</strong></td><td></td></tr><tr><td><strong>Investment</strong></td><td><strong>$30,000</strong></td><td><strong>$57,500</strong></td><td><strong>$95,000</strong></td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Step 6 — Polish & Deliver</h2>
+
+<h3>Proposal Quality Checklist</h3>
+
+<pre class="code-block"><code>PROPOSAL QUALITY CHECKLIST
+──────────────────────────
+[ ] Executive summary fits on one page and can stand alone
+[ ] Client's specific pain points referenced (not generic problems)
+[ ] Solution described in client-friendly language (no unnecessary jargon)
+[ ] Technical approach section exists for technical stakeholders
+[ ] 3 options presented with clear differentiation
+[ ] Middle option marked as &quot;Recommended&quot; with rationale
+[ ] ROI calculation shows methodology, not just final number
+[ ] Timeline has phases with clear milestones and deliverables
+[ ] Cost breakdown shows line items (not just a total)
+[ ] Payment schedule tied to milestones (not arbitrary dates)
+[ ] Assumptions and exclusions listed explicitly
+[ ] Risks acknowledged with mitigations (builds trust)
+[ ] 15% contingency included in cost
+[ ] No typos, consistent formatting, professional tone
+[ ] Client's company name and project title used throughout
+[ ] Contact information and next steps included at the end</code></pre>
+<hr class="section-divider">
+<h2>Complete Proposal Template</h2>
+
+<pre class="code-block"><code># [Project Name] — Proposal
+
+<strong>Prepared for:</strong> [Client Company Name]
+<strong>Prepared by:</strong> [Your Company Name]
+<strong>Date:</strong> [Date]
+<strong>Version:</strong> [1.0]
+<strong>Valid until:</strong> [Date + 30 days]
+<hr class="section-divider">
+<h2>Executive Summary</h2>
+
+[2-3 paragraphs covering: the client's problem, your proposed solution,
+expected outcomes, and investment range. This section must stand alone —
+many decision-makers read only this page.]
+<hr class="section-divider">
+<h2>1. Understanding Your Needs</h2>
+
+<h3>The Challenge</h3>
+
+[Describe the client's current situation and pain points — in their words.
+Show that you listened and understood.]
+
+<h3>Impact of the Status Quo</h3>
+
+[Quantify the cost of not solving this problem — time wasted, revenue
+lost, compliance risk, user frustration.]
+<hr class="section-divider">
+<h2>2. Proposed Solution</h2>
+
+<h3>Solution Overview</h3>
+
+[High-level description with architecture diagram]
+
+<h3>Key Capabilities</h3>
+
+[Feature list organized by module/area]
+
+<h3>How It Works</h3>
+
+[User flow or process diagram — keep it simple and visual]
+<hr class="section-divider">
+<h2>3. Technical Approach</h2>
+
+[Architecture, technology choices, integration points — for the
+technical stakeholders]
+<hr class="section-divider">
+<h2>4. Options &amp; Investment</h2>
+
+<h3>Option Comparison</h3>
+
+[3-option comparison table]
+
+<h3>Recommended Option</h3>
+
+[1-2 paragraphs explaining why Option B is the best fit]
+<hr class="section-divider">
+<h2>5. Timeline &amp; Milestones</h2>
+
+[Phased timeline with deliverables per phase]
+<hr class="section-divider">
+<h2>6. Investment &amp; Payment</h2>
+
+<h3>Cost Breakdown</h3>
+
+[Line-item cost table with contingency]
+
+<h3>Payment Schedule</h3>
+
+[Milestone-based payment plan]
+<hr class="section-divider">
+<h2>7. Expected ROI</h2>
+
+[ROI calculation with methodology and conservative projections]
+<hr class="section-divider">
+<h2>8. Our Approach to Quality</h2>
+
+<h3>Project Management</h3>
+[How you run projects — communication, tools, cadence]
+
+<h3>Quality Assurance</h3>
+[Testing approach, UAT process, acceptance criteria]
+
+<h3>Post-Launch Support</h3>
+[Hypercare period, SLA, ongoing support options]
+<hr class="section-divider">
+<h2>9. Risks &amp; Mitigations</h2>
+
+[Top 3-5 risks with clear mitigation strategies]
+<hr class="section-divider">
+<h2>10. Assumptions &amp; Exclusions</h2>
+
+<h3>Assumptions</h3>
+<ul class="skill-list"><li>[What you assume to be true for this estimate to hold]</li>
+
+</ul><h3>Exclusions</h3>
+<ul class="skill-list"><li>[What is NOT included in this proposal]</li>
+</ul><hr class="section-divider">
+<h2>11. Next Steps</h2>
+
+<ul class="skill-list"><li class="ordered">Review this proposal and share feedback by [date]</li>
+<li class="ordered">Schedule a Q&amp;A session to address questions</li>
+<li class="ordered">Select preferred option</li>
+<li class="ordered">Sign agreement and schedule kickoff</li>
+</ul><hr class="section-divider">
+<h2>About [Your Company]</h2>
+
+[Brief company description, relevant experience, team highlights]
+
+<h3>Contact</h3>
+
+[Name, Title]
+[Email]
+[Phone]</code></pre>
+<hr class="section-divider">
+<h2>Common Mistakes</h2>
+<div class="table-wrap"><table><thead><tr><th>Mistake</th><th>Impact</th><th>Prevention</th><th></th></tr></thead><tbody><tr><td>Generic problem statement</td><td>Client feels you don't understand them</td><td>Use their exact words from discovery calls</td><td></td></tr><tr><td>No options — single take-it-or-leave-it</td><td>Client has no room to negotiate</td><td>Always present 3 options</td><td></td></tr><tr><td>Underestimating to win the deal</td><td>Cost overruns destroy trust</td><td>Include 15% contingency, use honest estimates</td><td></td></tr><tr><td>ROI projection too optimistic</td><td>Client doesn't believe the numbers</td><td>Use conservative estimates with ranges</td><td></td></tr><tr><td>No exclusions section</td><td>Scope disputes after signing</td><td>Explicitly list what is NOT included</td><td></td></tr><tr><td>Too much jargon</td><td>Non-technical decision makers can't evaluate</td><td>Write for the least technical reader in the room</td><td></td></tr><tr><td>Missing next steps</td><td>Proposal sits in inbox</td><td>End with clear action items and dates</td><td></td></tr><tr><td>No expiration date</td><td>Proposal used 6 months later at old prices</td><td>Add "Valid until [date]" in the header</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Tips for Winning Proposals</h2>
+
+<ul class="skill-list"><li class="ordered"><strong>Mirror their language</strong> — Use the exact phrases the client used to describe their problem</li>
+<li class="ordered"><strong>Anchor on the middle option</strong> — Present the cheapest option first, recommended second, premium third</li>
+<li class="ordered"><strong>Show, don't tell</strong> — Include mockups, diagrams, or prototypes when possible</li>
+<li class="ordered"><strong>Reference similar work</strong> — "We built something similar for [industry peer]" builds confidence</li>
+<li class="ordered"><strong>Include a risk section</strong> — Acknowledging risks makes you look thorough, not risky</li>
+<li class="ordered"><strong>Follow up in person</strong> — Never just email the proposal. Walk through it live.</li>
+<li class="ordered"><strong>Make the next step easy</strong> — "Reply to this email to schedule the kickoff" beats a complex procurement process</li>
+<li class="ordered"><strong>Keep it under 15 pages</strong> — Longer proposals are less likely to be read completely</li></ul>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <div></div>
+    <a href="competitor-analysis.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Competitor Analysis — From Market Scan to Strategic Insights</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    66 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

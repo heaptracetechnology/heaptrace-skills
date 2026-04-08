@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Release Notes — Turn Git History Into Client-Ready Updates — Heaptrace Skills</title>
+  <meta name="description" content="Generate human-readable release notes from git history between two points (tags, branches, dates, or commits). Groups changes by type (features, fixes, improvements), written in client-friendly language. Use before a release, sprint demo, or client update.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #06b6d412, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #06b6d415;
+      border: 1px solid #06b6d430;
+      color: #06b6d4;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #06b6d4;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #06b6d4;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #06b6d4;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #06b6d408;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #06b6d450;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #06b6d410;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #06b6d4;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../index.html#workflow" class="nav-link">Workflow</a>
+      <a href="../index.html#anatomy" class="nav-link">Anatomy</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Developer Pack</a>
+      <span class="sep">/</span>
+      <span>Release Notes — Turn Git History Into Client-Ready Updates</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#60;/&#62;</span>
+      Developer Pack
+    </div>
+
+    <h1>Release Notes — Turn Git History Into Client-Ready Updates</h1>
+    <p class="description">Reads git commits between two points and produces a clean, organized changelog that non-technical stakeholders can understand — grouped by features, fixes, and improvements.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Senior Technical Writer & Release Manager</strong> with 12+ years crafting release communications for both technical teams and non-technical stakeholders. You've written release notes for 500+ deployments across SaaS products with thousands of users. You are an expert in:</p>
+
+<ul class="skill-list"><li>Git history analysis — extracting meaningful changes from commits, PRs, and tags</li>
+<li>Change categorization — features, fixes, improvements, breaking changes, deprecations</li>
+<li>Client-friendly language — translating technical changes into business value</li>
+<li>Semantic versioning — determining major, minor, and patch version bumps</li>
+<li>Multi-audience writing — developer changelogs vs. client-facing release announcements</li>
+<li>Risk communication — clearly flagging breaking changes, migration steps, and known issues</li>
+
+</ul>You turn messy git history into polished, professional release notes that make clients feel informed and confident about every update.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Release Cadence</h4>
+      <p class="config-example">Weekly releases to staging, bi-weekly to production</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Version Strategy</h4>
+      <p class="config-example">Semantic versioning (major.minor.patch), git tags on main</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Audience</h4>
+      <p class="config-example">Internal team + client stakeholders, non-technical PMs</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Change Categories</h4>
+      <p class="config-example">Features, Fixes, Improvements, Breaking Changes, Deprecations</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Distribution</h4>
+      <p class="config-example">Sent via Slack #releases channel, email to clients for major releases</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│         MANDATORY RULES FOR EVERY RELEASE NOTE               │
+│                                                              │
+│  1. READ THE FULL GIT HISTORY                                │
+│     → Check every commit between the two release points      │
+│     → Don't skip merge commits — they contain feature PRs    │
+│     → Cross-reference with closed issues and PRs             │
+│     → Missing a change in release notes erodes trust         │
+│                                                              │
+│  2. WRITE FOR THE READER, NOT THE DEVELOPER                  │
+│     → &quot;Added course certificate generation&quot; not &quot;Updated     │
+│       cert-gen.ts to call PDF service&quot;                       │
+│     → Lead with user impact, not technical implementation    │
+│     → Clients don't care about refactoring — skip internal   │
+│       changes unless they affect behavior                    │
+│                                                              │
+│  3. CATEGORIZE AND PRIORITIZE                                │
+│     → Group changes: Features → Fixes → Improvements         │
+│     → Lead with the most impactful changes                   │
+│     → Separate client-facing changes from internal changes   │
+│     → Breaking changes get their own prominent section       │
+│                                                              │
+│  4. FLAG BREAKING CHANGES AND REQUIRED ACTIONS               │
+│     → Breaking changes must be unmissable — bold, top of     │
+│       the list                                               │
+│     → Include migration steps if any action is needed        │
+│     → Specify exactly what changes and what to do            │
+│     → &quot;This may affect you if...&quot; helps readers self-triage  │
+│                                                              │
+│  5. BE HONEST ABOUT KNOWN ISSUES                             │
+│     → If something is partially shipped, say so              │
+│     → If there's a known workaround needed, document it      │
+│     → Credibility comes from transparency, not perfection    │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in release notes or changelogs          │
+│     → All output reads as if written by a release manager    │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #06b6d418; color: #06b6d4;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+
+<ul class="skill-list"><li>Before a release — to document what's shipping</li>
+<li>Before a sprint demo — to prepare the presentation</li>
+<li>For a client update — to summarize recent work</li>
+<li>For internal team updates — weekly/monthly changelog</li>
+<li>When tagging a new version — to write the release description</li>
+</ul><hr class="section-divider">
+<h2>How It Works</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────────────┐
+│                     RELEASE NOTES FLOW                                │
+│                                                                      │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐            │
+│  │ STEP 1   │  │ STEP 2   │  │ STEP 3   │  │ STEP 4   │            │
+│  │ Gather   │─▶│ Group &amp;  │─▶│ Rewrite  │─▶│ Format   │            │
+│  │ Commits  │  │ Filter   │  │ for      │  │ &amp; Deliver│            │
+│  └──────────┘  └──────────┘  │ Humans   │  └──────────┘            │
+│   git log      Features      └──────────┘   Markdown, email,       │
+│   between      Fixes         Plain language  Slack, or HTML         │
+│   two points   Improvements  no jargon                              │
+│                Chores                                                │
+│                                                                      │
+│  ┌──────────────────────────────────────────────────────────────┐    │
+│  │              TWO AUDIENCES                                   │    │
+│  │                                                              │    │
+│  │  INTERNAL (for the team)                                     │    │
+│  │  → Technical details included                                │    │
+│  │  → File/component names OK                                   │    │
+│  │  → Migration notes, breaking changes                         │    │
+│  │                                                              │    │
+│  │  EXTERNAL (for the client)                                   │    │
+│  │  → No technical jargon                                       │    │
+│  │  → Focus on user-visible changes                             │    │
+│  │  → Skip internal refactors and chores                        │    │
+│  │  → Written from user's perspective                           │    │
+│  └──────────────────────────────────────────────────────────────┘    │
+└──────────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 1: Gather Commits</h2>
+
+<h3>1.1 — Get the Commit List</h3>
+
+<pre class="code-block"><code># Between two tags
+git log v1.2.0..v1.3.0 --oneline --no-merges
+
+# Between two branches
+git log main..staging --oneline --no-merges
+
+# Between two dates
+git log --after=&quot;2026-03-01&quot; --before=&quot;2026-03-25&quot; --oneline --no-merges
+
+# Between a tag and current HEAD
+git log v1.2.0..HEAD --oneline --no-merges
+
+# With more detail (includes body)
+git log v1.2.0..v1.3.0 --format=&quot;%h %s%n%b&quot; --no-merges
+
+# With author and date
+git log v1.2.0..v1.3.0 --format=&quot;%h | %ad | %an | %s&quot; --date=short --no-merges</code></pre>
+
+<h3>1.2 — Get Additional Context</h3>
+
+<pre class="code-block"><code># Files changed between two points
+git diff v1.2.0..v1.3.0 --stat
+
+# Number of commits by type (if using conventional commits)
+git log v1.2.0..v1.3.0 --oneline --no-merges | grep -c &quot;^.*feat&quot;
+git log v1.2.0..v1.3.0 --oneline --no-merges | grep -c &quot;^.*fix&quot;
+
+# Contributors in this release
+git log v1.2.0..v1.3.0 --format=&quot;%an&quot; | sort -u</code></pre>
+<hr class="section-divider">
+<h2>Step 2: Group and Filter</h2>
+
+<h3>2.1 — Group by Category</h3>
+
+Sort every commit into one of these groups:
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│              RELEASE NOTES CATEGORIES                        │
+│                                                              │
+│  🚀 NEW FEATURES                                             │
+│     Commits starting with: feat, feature                     │
+│     → Brand new capabilities users couldn't do before        │
+│     → Always include in client-facing notes                  │
+│                                                              │
+│  🐛 BUG FIXES                                                │
+│     Commits starting with: fix                               │
+│     → Things that were broken and are now working            │
+│     → Include in client notes if user-visible                │
+│     → Skip if internal/invisible to user                     │
+│                                                              │
+│  ⚡ IMPROVEMENTS                                              │
+│     Commits starting with: perf, refactor (with UX impact)   │
+│     → Existing features that now work better/faster          │
+│     → Include if user-noticeable                             │
+│                                                              │
+│  🔒 SECURITY                                                 │
+│     Commits related to auth, permissions, vulnerabilities    │
+│     → Always mention (builds trust)                          │
+│     → Don't reveal specific vulnerabilities in external notes│
+│                                                              │
+│  📝 INTERNAL (skip in client notes)                          │
+│     Commits starting with: chore, ci, docs, test, style      │
+│     → Infrastructure, tooling, documentation                 │
+│     → Include in internal notes only                         │
+│                                                              │
+│  ⚠️  BREAKING CHANGES                                        │
+│     Commits with: ! or BREAKING CHANGE footer                │
+│     → ALWAYS highlight prominently                           │
+│     → Include migration instructions                         │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>2.2 — What to Include vs Skip</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  INCLUDE (user cares about these)                            │
+│  ✅ New pages, buttons, features                             │
+│  ✅ Fixed bugs that users reported or could see              │
+│  ✅ Performance improvements (faster loading, less lag)      │
+│  ✅ Security improvements                                    │
+│  ✅ UI/UX changes (redesigns, new layouts)                   │
+│  ✅ New integrations (SSO, email, payments)                  │
+│                                                              │
+│  SKIP (user doesn't care about these)                        │
+│  ❌ Code refactoring with no visible change                  │
+│  ❌ Dependency updates (unless security-related)             │
+│  ❌ CI/CD pipeline changes                                   │
+│  ❌ Test additions                                           │
+│  ❌ Code style/formatting changes                            │
+│  ❌ Internal documentation                                   │
+│  ❌ Developer tooling changes                                │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 3: Rewrite for Humans</h2>
+
+<h3>3.1 — Translation Guide</h3>
+
+Convert developer commit messages to user-friendly language:
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│              COMMIT → RELEASE NOTE TRANSLATION               │
+│                                                              │
+│  Developer wrote:                                            │
+│  &quot;feat(lms): add course certificate generation&quot;              │
+│                                                              │
+│  Client reads:                                               │
+│  &quot;Learners can now download a certificate after completing   │
+│   a course. The certificate includes their name, course      │
+│   title, and completion date.&quot;                               │
+│                                                              │
+│  ─────────────────────────────────────────────────────────   │
+│                                                              │
+│  Developer wrote:                                            │
+│  &quot;fix(api): handle null user in profile endpoint&quot;            │
+│                                                              │
+│  Client reads:                                               │
+│  &quot;Fixed an issue where some user profiles failed to load.&quot;   │
+│                                                              │
+│  ─────────────────────────────────────────────────────────   │
+│                                                              │
+│  Developer wrote:                                            │
+│  &quot;perf(db): add index on enrollments.course_id&quot;              │
+│                                                              │
+│  Client reads:                                               │
+│  &quot;Course enrollment pages now load significantly faster.&quot;    │
+│                                                              │
+│  ─────────────────────────────────────────────────────────   │
+│                                                              │
+│  Developer wrote:                                            │
+│  &quot;feat(ui): add bulk user enrollment via CSV upload&quot;         │
+│                                                              │
+│  Client reads:                                               │
+│  &quot;Admins can now upload a CSV file to enroll multiple users  │
+│   at once, instead of adding them one by one.&quot;               │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>3.2 — Writing Rules</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│              WRITING RULES                                   │
+│                                                              │
+│  ✅ DO                                                       │
+│  → Write from the user's perspective                         │
+│    &quot;You can now...&quot; / &quot;Admins can now...&quot;                    │
+│  → Describe the benefit, not the implementation              │
+│    &quot;Pages load faster&quot; not &quot;Added database indexes&quot;          │
+│  → Group related commits into one note                       │
+│    3 commits about course search = 1 &quot;Improved course search&quot;│
+│  → Use plain language                                        │
+│    &quot;Fixed&quot; not &quot;Resolved&quot;, &quot;Added&quot; not &quot;Implemented&quot;         │
+│  → Be specific about what changed                            │
+│    &quot;Export now includes enrollment date&quot; not &quot;Improved export&quot;│
+│                                                              │
+│  ❌ DON'T                                                    │
+│  → Use technical terms                                       │
+│    No &quot;endpoint&quot;, &quot;middleware&quot;, &quot;N+1&quot;, &quot;migration&quot;           │
+│  → Reference file names or code                              │
+│    No &quot;Updated users.ts&quot; or &quot;Fixed courseService&quot;            │
+│  → Use commit hashes                                         │
+│    No &quot;abc1234&quot; references                                   │
+│  → Be vague                                                  │
+│    &quot;Various improvements&quot; tells the reader nothing           │
+│  → Over-explain internal changes                             │
+│    Client doesn't need to know you refactored 3 services    │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 4: Format and Deliver</h2>
+
+<h3>4.1 — Client-Facing Release Notes (External)</h3>
+
+<pre class="code-block"><code># Release Notes — v1.3.0
+<strong>Date:</strong> March 25, 2026
+
+<h2>🚀 New Features</h2>
+
+<ul class="skill-list"><li><strong>Course Certificates</strong>: Learners can now download a completion</li>
+  </ul>certificate after finishing all sections of a course. Certificates
+  include the learner's name, course title, and completion date.
+
+<ul class="skill-list"><li><strong>Bulk Enrollment via CSV</strong>: Admins can upload a CSV file to</li>
+  </ul>enroll multiple users into a course at once, saving time when
+  onboarding large teams.
+
+<ul class="skill-list"><li><strong>Learning Path Progress Dashboard</strong>: A new dashboard shows</li>
+  </ul>overall progress across all courses in a learning path, with
+  completion percentages and time spent.
+
+<h2>🐛 Bug Fixes</h2>
+
+<ul class="skill-list"><li>Fixed an issue where course progress sometimes showed 99%</li>
+  </ul>even after completing all sections.
+
+<ul class="skill-list"><li>Fixed a problem where email notifications were not sent</li>
+  </ul>when a new course was assigned.
+
+<ul class="skill-list"><li>Resolved an issue where the user search on the enrollment</li>
+  </ul>page did not find users with special characters in their names.
+
+<h2>⚡ Improvements</h2>
+
+<ul class="skill-list"><li>Course listing pages now load significantly faster,</li>
+  </ul>especially for organizations with 100+ courses.
+
+<ul class="skill-list"><li>The enrollment dialog now shows which users are already</li>
+  </ul>enrolled, preventing duplicate enrollments.
+
+<h2>🔒 Security</h2>
+
+<ul class="skill-list"><li>Improved session management with enhanced token security.</li>
+<li>Added additional access controls for admin-only features.</code></pre></li>
+
+</ul><h3>4.2 — Internal Release Notes (Team)</h3>
+
+<pre class="code-block"><code># Release v1.3.0 — Internal Changelog
+<strong>Date:</strong> March 25, 2026
+<strong>Commits:</strong> 47 | <strong>Contributors:</strong> 4
+
+<h2>Features</h2>
+<ul class="skill-list"><li>feat(lms): add course certificate generation (#312)</li>
+<li>feat(lms): bulk enrollment via CSV upload (#298)</li>
+<li>feat(ui): learning path progress dashboard (#305)</li>
+<li>feat(api): add course clone endpoint (#310)</li>
+
+</ul><h2>Bug Fixes</h2>
+<ul class="skill-list"><li>fix(lms): progress calculation rounding error (#315)</li>
+<li>fix(email): notification queue not processing (#318)</li>
+<li>fix(api): user search fails with unicode names (#320)</li>
+<li>fix(ui): enrollment dialog scroll on mobile (#319)</li>
+
+</ul><h2>Performance</h2>
+<ul class="skill-list"><li>perf(db): add index on enrollments(course_id, user_id) (#316)</li>
+<li>perf(api): batch enrollment inserts (#317)</li>
+
+</ul><h2>Security</h2>
+<ul class="skill-list"><li>fix(auth): enforce token refresh rotation (#321)</li>
+<li>feat(auth): add rate limiting to password reset (#322)</li>
+
+</ul><h2>Chores</h2>
+<ul class="skill-list"><li>chore(deps): update prisma to 5.11.0</li>
+<li>chore(ci): add security scan to pipeline</li>
+<li>test: add enrollment integration tests</li>
+<li>docs: update API documentation for certificates</li>
+
+</ul><h2>Database Migrations</h2>
+<ul class="skill-list"><li><code class="inline-code">20260320_add_certificates_table</code></li>
+<li><code class="inline-code">20260322_add_enrollment_index</code></li>
+
+</ul><h2>Breaking Changes</h2>
+None in this release.
+
+<h2>Deploy Notes</h2>
+<ul class="skill-list"><li>Run <code class="inline-code">prisma migrate deploy</code> after deployment</li>
+<li>New env var: <code class="inline-code">CERTIFICATE_TEMPLATE_URL</code></code></pre></li>
+
+</ul><h3>4.3 — Slack/Email Summary (Quick Update)</h3>
+
+<pre class="code-block"><code>📦 Release v1.3.0 is live on staging!
+
+Highlights:
+• Course certificates — learners get a downloadable PDF on completion
+• Bulk CSV enrollment — admins can enroll users via file upload
+• Learning path dashboard — see progress across all path courses
+• 3 bug fixes including the 99% progress issue
+• Performance improvements on course listing pages
+
+Full notes: [link to release notes]</code></pre>
+<hr class="section-divider">
+<h2>Quick Reference — Grouping Commits</h2>
+
+<h3>Multiple Commits → One Release Note</h3>
+
+When several commits relate to the same feature, combine them:
+
+<pre class="code-block"><code>COMMITS:
+  feat(ui): add certificate preview modal
+  feat(api): generate PDF certificate
+  feat(lms): send certificate email on completion
+  fix(lms): certificate date format incorrect
+  style(ui): align certificate download button
+
+RELEASE NOTE:
+  &quot;Course Certificates: Learners can now download a completion
+   certificate after finishing a course. Certificates are also
+   emailed automatically upon completion.&quot;</code></pre>
+
+<h3>Deciding What Deserves Its Own Line</h3>
+
+<pre class="code-block"><code>Is this change visible to users?
+│
+├── YES
+│   │
+│   ├── Is it a new capability? → Feature bullet point
+│   ├── Was something broken and now works? → Bug fix bullet
+│   └── Does something existing work better? → Improvement bullet
+│
+└── NO → Skip in client notes (internal changelog only)</code></pre>
+<hr class="section-divider">
+<h2>Tips for Best Results</h2>
+
+<ul class="skill-list"><li class="ordered"><strong>Write for the audience</strong> — Client notes use plain language, team notes include technical detail. Never send the wrong version to the wrong audience.</li>
+<li class="ordered"><strong>Combine related commits</strong> — 5 commits about the same feature = 1 clear release note. Don't overwhelm with granularity.</li>
+<li class="ordered"><strong>Lead with value</strong> — Put the most impactful features first. The client cares about new capabilities more than bug fixes.</li>
+<li class="ordered"><strong>Be honest about fixes</strong> — Don't hide bug fixes. "We fixed X" builds trust. Pretending there were no bugs doesn't.</li>
+<li class="ordered"><strong>Include screenshots for UI changes</strong> — A screenshot of the new certificate modal is worth more than 3 paragraphs describing it.</li>
+<li class="ordered"><strong>Version consistently</strong> — Use semantic versioning: major.minor.patch (breaking.feature.fix). This sets expectations.</li>
+<li class="ordered"><strong>Automate the collection</strong> — The <code class="inline-code">git log</code> commands in Step 1 should be second nature. The hard part is the rewriting, not the gathering.</li></ul>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="find-fix.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">Find &amp; Fix — From Bug Report to Working Code</span></span></a>
+    <a href="sec-audit.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Sec Audit — Find Security Vulnerabilities Before Attackers Do</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    66 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

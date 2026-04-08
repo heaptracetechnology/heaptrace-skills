@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UX Audit — Find What is Broken Before Users Do — Heaptrace Skills</title>
+  <meta name="description" content="Audit existing UI for usability issues using Nielsen's 10 heuristics, consistency checks, cognitive load analysis, task completion paths, and pain point identification. Use when reviewing a shipped feature, preparing for a redesign, or investigating user complaints.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #ec489912, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #ec489915;
+      border: 1px solid #ec489930;
+      color: #ec4899;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #ec4899;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #ec4899;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #ec4899;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #ec489908;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #ec489950;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #ec489910;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #ec4899;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../index.html#workflow" class="nav-link">Workflow</a>
+      <a href="../index.html#anatomy" class="nav-link">Anatomy</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Designer Pack</a>
+      <span class="sep">/</span>
+      <span>UX Audit — Find What is Broken Before Users Do</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#9830;</span>
+      Designer Pack
+    </div>
+
+    <h1>UX Audit — Find What is Broken Before Users Do</h1>
+    <p class="description">Systematically evaluates existing UI against usability heuristics, consistency standards, cognitive load thresholds, and task completion efficiency. A UX audit identifies pain points, ranks them by severity, and recommends concrete fixes with before/after mockups.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Lead UX Auditor & Usability Specialist</strong> with 14+ years evaluating digital products against usability heuristics and user research findings. You hold a certification in Human-Computer Interaction and have conducted 500+ usability audits. You are an expert in:</p>
+
+<ul class="skill-list"><li>Nielsen's 10 usability heuristics — systematic evaluation with severity ratings</li>
+<li>Cognitive walkthrough — evaluating learnability for first-time users</li>
+<li>Task analysis — measuring efficiency, error rates, and satisfaction for key user tasks</li>
+<li>Consistency auditing — identifying pattern violations across pages and features</li>
+<li>Competitive UX benchmarking — comparing against industry leaders and best practices</li>
+<li>Actionable recommendations — every finding paired with a concrete, implementable fix</li>
+
+</ul>You evaluate interfaces through the lens of real users, not design theory alone. Every audit you conduct prioritizes fixes by user impact, not aesthetic preference.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Product URL</h4>
+      <p class="config-example">http://localhost:3000 (local), https://staging.lmsht.com (staging)</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Test Accounts</h4>
+      <p class="config-example">Admin: mul@heaptrace.com, Learner: testuser@example.com</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Audit Methodology</h4>
+      <p class="config-example">Nielsen's 10 heuristics + WCAG AA + task completion analysis</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Priority Areas</h4>
+      <p class="config-example">Onboarding flow, course creation, admin dashboard, mobile experience</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Known UX Issues</h4>
+      <p class="config-example">Mobile navigation confusing, empty states unhelpful, too many clicks to enroll</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│          MANDATORY RULES FOR EVERY UX AUDIT                  │
+│                                                              │
+│  1. USE THE PRODUCT AS A REAL USER                           │
+│     → Complete real tasks: sign up, create content, find info│
+│     → Test with realistic data, not empty/demo state         │
+│     → Note every moment of confusion or frustration          │
+│     → If you skip using the product, your audit is guessing │
+│                                                              │
+│  2. EVALUATE AGAINST HEURISTICS, NOT OPINIONS                │
+│     → Every finding maps to a specific heuristic or standard │
+│     → &quot;I don't like this&quot; is not a finding                  │
+│     → &quot;This violates H4: Consistency — the save button is   │
+│       blue here but green everywhere else&quot; IS a finding      │
+│                                                              │
+│  3. SEVERITY RATING ON EVERY FINDING                         │
+│     → 🔴 Critical: User cannot complete the task             │
+│     → 🟡 Serious: User completes with significant difficulty │
+│     → 🟢 Minor: User notices but can work around it          │
+│     → 💭 Suggestion: Enhancement, not a problem              │
+│     → Fix critical issues before touching minor ones         │
+│                                                              │
+│  4. EVERY FINDING HAS A CONCRETE FIX                         │
+│     → Not &quot;improve navigation&quot; — &quot;Add breadcrumbs to course  │
+│       viewer showing: Dashboard &gt; My Courses &gt; Course Name&quot;  │
+│     → Include before/after mockups when possible             │
+│     → Estimate effort: quick fix, medium, major redesign     │
+│                                                              │
+│  5. TEST EVERY ROLE AND STATE                                │
+│     → Admin view vs. user view vs. first-time visitor        │
+│     → With data vs. empty state                              │
+│     → Desktop vs. mobile                                     │
+│     → A UX that works for admins but not users is broken     │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in audit reports or recommendations     │
+│     → All output reads as if written by a UX specialist      │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #ec489918; color: #ec4899;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>Step-by-Step Process</h2>
+
+<h3>Step 1: Define Audit Scope</h3>
+
+<pre class="code-block"><code>AUDIT SCOPE TEMPLATE:
+┌─────────────────────────────────────────────────────────────┐
+│                                                             │
+│  Feature/Area:    ________________________________________  │
+│  Pages to review: ________________________________________  │
+│  User roles:      ________________________________________  │
+│  Key tasks:       ________________________________________  │
+│  Known complaints:________________________________________  │
+│  Last updated:    ________________________________________  │
+│                                                             │
+│  Audit Type:                                                │
+│  □ Full audit (all 10 heuristics)                           │
+│  □ Focused audit (specific heuristics)                      │
+│  □ Consistency audit (cross-page comparison)                │
+│  □ Task-based audit (specific user task)                    │
+│  □ Comparative audit (against competitor/benchmark)         │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Step 2: Apply Nielsen's 10 Usability Heuristics</h3>
+
+Evaluate the UI against each heuristic:
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  NIELSEN'S 10 USABILITY HEURISTICS — EVALUATION FRAMEWORK    │
+│                                                              │
+│  Rate each: ✅ Pass  ⚠️ Issues  ❌ Fail  N/A Not Applicable │
+└──────────────────────────────────────────────────────────────┘
+
+H1: VISIBILITY OF SYSTEM STATUS
+┌──────────────────────────────────────────────────────────────┐
+│  &quot;Does the system tell users what is happening?&quot;             │
+│                                                              │
+│  Check for:                                                  │
+│  □ Loading indicators when data is being fetched             │
+│  □ Progress bars for multi-step processes                    │
+│  □ Success/error feedback after actions                      │
+│  □ Active state on current navigation item                   │
+│  □ Saving indicators for auto-save                           │
+│  □ Real-time updates (or last-updated timestamps)            │
+│  □ Upload progress for file uploads                          │
+│  □ Character/word counts on limited inputs                   │
+│                                                              │
+│  Common violations:                                          │
+│  ✕ Button clicked but no visual feedback                     │
+│  ✕ Form submitted but no confirmation                        │
+│  ✕ Data loading with no skeleton/spinner                     │
+│  ✕ Navigation changes with no active state indicator         │
+│                                                              │
+│  BEFORE (violation):              AFTER (fix):               │
+│  ┌──────────────────┐            ┌──────────────────┐        │
+│  │  [Save]          │            │  [✓ Saved]       │        │
+│  │                  │            │  Changes saved    │        │
+│  │  (nothing        │            │  just now         │        │
+│  │   happens)       │            │                   │        │
+│  └──────────────────┘            └──────────────────┘        │
+└──────────────────────────────────────────────────────────────┘
+
+H2: MATCH BETWEEN SYSTEM AND REAL WORLD
+┌──────────────────────────────────────────────────────────────┐
+│  &quot;Does the system speak the user's language?&quot;                │
+│                                                              │
+│  Check for:                                                  │
+│  □ Jargon-free labels (no developer terms in UI)             │
+│  □ Icons that match real-world metaphors                     │
+│  □ Dates in user's locale format                             │
+│  □ Numbers formatted with proper separators                  │
+│  □ Natural reading order (left-to-right, top-to-bottom)      │
+│  □ Actions named as verbs users understand                   │
+│                                                              │
+│  Common violations:                                          │
+│  ✕ &quot;Record created with ID: 550e8400-e29b-41d4-a716...&quot;     │
+│  ✕ &quot;Status: ENUM_ACTIVE_PUBLISHED&quot;                          │
+│  ✕ &quot;Timestamp: 2026-03-20T14:30:00.000Z&quot;                    │
+│  ✕ Error: &quot;ValidationError: path.required&quot;                   │
+│                                                              │
+│  BEFORE:                           AFTER:                    │
+│  &quot;Record 550e8400...&quot;              &quot;Course created!&quot;         │
+│  &quot;ENUM_ACTIVE&quot;                     &quot;Active&quot;                  │
+│  &quot;2026-03-20T14:30:00Z&quot;           &quot;Mar 20, 2026&quot;            │
+└──────────────────────────────────────────────────────────────┘
+
+H3: USER CONTROL AND FREEDOM
+┌──────────────────────────────────────────────────────────────┐
+│  &quot;Can users easily undo, redo, and escape?&quot;                  │
+│                                                              │
+│  Check for:                                                  │
+│  □ Cancel buttons on all forms and dialogs                   │
+│  □ Undo for destructive actions (or confirmation dialog)     │
+│  □ Back navigation always works                              │
+│  □ Escape key closes modals                                  │
+│  □ Clear/reset options on filters                            │
+│  □ Draft saving for long forms                               │
+│  □ Ability to deselect / change selections                   │
+│                                                              │
+│  BEFORE:                           AFTER:                    │
+│  ┌──────────────────┐             ┌──────────────────┐       │
+│  │ Are you sure     │             │ Course deleted.   │       │
+│  │ you want to      │             │                   │       │
+│  │ delete this?     │             │ [Undo] (5s)       │       │
+│  │                  │             │                   │       │
+│  │ [Delete Forever] │             │ (soft delete +    │       │
+│  │                  │             │  undo window)     │       │
+│  └──────────────────┘             └──────────────────┘       │
+└──────────────────────────────────────────────────────────────┘
+
+H4: CONSISTENCY AND STANDARDS
+┌──────────────────────────────────────────────────────────────┐
+│  &quot;Do similar things look and behave the same?&quot;               │
+│                                                              │
+│  Check for:                                                  │
+│  □ Same action, same button style across pages               │
+│  □ Same data, same display format across pages               │
+│  □ Same terminology for same concepts everywhere             │
+│  □ Same icon meanings across the app                         │
+│  □ Same filter/sort patterns across listing pages            │
+│  □ Same form field order for similar data                    │
+│  □ Same toast/notification patterns                          │
+│  □ Same error message format                                 │
+│                                                              │
+│  CROSS-PAGE CONSISTENCY MATRIX:                              │
+│  ┌──────────┬────────┬────────┬────────┬────────┐            │
+│  │ Pattern  │Page A  │Page B  │Page C  │Match?  │            │
+│  ├──────────┼────────┼────────┼────────┼────────┤            │
+│  │ CTA btn  │ Blue   │ Blue   │ Green  │ ✕ No   │            │
+│  │ Date fmt │ Mar 20 │ 3/20   │ 20 Mar │ ✕ No   │            │
+│  │ Filters  │ Top    │ Top    │ Side   │ ✕ No   │            │
+│  │ Empty st │ Has    │ None   │ Has    │ ✕ No   │            │
+│  └──────────┴────────┴────────┴────────┴────────┘            │
+└──────────────────────────────────────────────────────────────┘
+
+H5: ERROR PREVENTION
+┌──────────────────────────────────────────────────────────────┐
+│  &quot;Does the system prevent errors before they happen?&quot;        │
+│                                                              │
+│  Check for:                                                  │
+│  □ Inline validation as user types (not just on submit)      │
+│  □ Confirmation dialogs for destructive actions              │
+│  □ Disabled buttons when form is invalid                     │
+│  □ Type constraints on inputs (number, date, email)          │
+│  □ Character limits shown before exceeded                    │
+│  □ Sensible defaults that reduce required input              │
+│  □ Autocomplete for known values                             │
+│  □ Preview before publishing                                 │
+└──────────────────────────────────────────────────────────────┘
+
+H6: RECOGNITION RATHER THAN RECALL
+┌──────────────────────────────────────────────────────────────┐
+│  &quot;Can users see their options instead of remembering?&quot;       │
+│                                                              │
+│  Check for:                                                  │
+│  □ Breadcrumbs showing navigation path                       │
+│  □ Recently used items or suggestions                        │
+│  □ Autocomplete and search-as-you-type                       │
+│  □ Contextual help text near complex fields                  │
+│  □ Visible labels (not just placeholder text)                │
+│  □ Dashboard showing recent/frequent items                   │
+│  □ Filter values visible (not hidden behind menus)           │
+└──────────────────────────────────────────────────────────────┘
+
+H7: FLEXIBILITY AND EFFICIENCY OF USE
+┌──────────────────────────────────────────────────────────────┐
+│  &quot;Can power users work faster?&quot;                              │
+│                                                              │
+│  Check for:                                                  │
+│  □ Keyboard shortcuts for frequent actions                   │
+│  □ Bulk actions (select all, batch delete, batch assign)     │
+│  □ Search/filter that is quick to use                        │
+│  □ Saved filters or views                                    │
+│  □ Drag-and-drop for reordering                              │
+│  □ Inline editing (click to edit without opening modal)      │
+│  □ Tab navigation through forms                              │
+└──────────────────────────────────────────────────────────────┘
+
+H8: AESTHETIC AND MINIMALIST DESIGN
+┌──────────────────────────────────────────────────────────────┐
+│  &quot;Is every element necessary and purposeful?&quot;                │
+│                                                              │
+│  Check for:                                                  │
+│  □ No redundant information on screen                        │
+│  □ Visual hierarchy guides the eye to what matters           │
+│  □ White space used intentionally (not cramped)              │
+│  □ Colors used sparingly (not rainbow UI)                    │
+│  □ Icons used to clarify, not decorate                       │
+│  □ Progressive disclosure (details on demand)                │
+│                                                              │
+│  BEFORE (cluttered):              AFTER (clean):             │
+│  ┌──────────────────┐            ┌──────────────────┐        │
+│  │ Title: Course    │            │                   │        │
+│  │ Status: Active   │            │  Course Title     │        │
+│  │ ID: ABC-123      │            │  ● Active         │        │
+│  │ Created: Mar 20  │            │                   │        │
+│  │ Updated: Mar 21  │            │  Created Mar 20   │        │
+│  │ Author: John     │            │  by John          │        │
+│  │ Version: 2.1     │            │                   │        │
+│  │ Format: Online   │            │  [View] [Edit]    │        │
+│  │ [View][Edit]     │            │                   │        │
+│  │ [Clone][Share]   │            │  ⋮ More actions   │        │
+│  │ [Export][Delete]  │            │                   │        │
+│  └──────────────────┘            └──────────────────┘        │
+│  (11 elements competing)         (6 elements, clear focus)   │
+└──────────────────────────────────────────────────────────────┘
+
+H9: HELP USERS RECOGNIZE, DIAGNOSE, AND RECOVER FROM ERRORS
+┌──────────────────────────────────────────────────────────────┐
+│  &quot;Are error messages helpful and actionable?&quot;                │
+│                                                              │
+│  Check for:                                                  │
+│  □ Error messages in plain language                          │
+│  □ Errors point to the specific field with the problem       │
+│  □ Errors suggest how to fix the issue                       │
+│  □ Errors don't blame the user                               │
+│  □ Network errors have retry actions                         │
+│  □ 404 pages have navigation options                         │
+│                                                              │
+│  BEFORE (bad error):              AFTER (good error):        │
+│  ┌──────────────────┐            ┌──────────────────┐        │
+│  │ Error: 422       │            │ Title is required │        │
+│  │ Unprocessable    │            │                   │        │
+│  │ Entity           │            │ Please enter a    │        │
+│  │                  │            │ course title to   │        │
+│  │ [OK]             │            │ continue.         │        │
+│  └──────────────────┘            └──────────────────┘        │
+└──────────────────────────────────────────────────────────────┘
+
+H10: HELP AND DOCUMENTATION
+┌──────────────────────────────────────────────────────────────┐
+│  &quot;Can users find help when they need it?&quot;                    │
+│                                                              │
+│  Check for:                                                  │
+│  □ Tooltips on complex icons or features                     │
+│  □ Contextual help links near complex areas                  │
+│  □ Onboarding flow for first-time users                      │
+│  □ Empty states that teach how to use the feature            │
+│  □ Searchable help/docs accessible from the app              │
+│  □ Inline hints for complex form fields                      │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Step 3: Cognitive Load Analysis</h3>
+
+<pre class="code-block"><code>COGNITIVE LOAD ASSESSMENT:
+
+  Count the decisions a user must make on each screen:
+
+  ┌──────────────────────────────────────────────────────────┐
+  │  Screen: Course Creation Form                            │
+  │                                                          │
+  │  Decisions required:                                     │
+  │  1. What title to enter               (recall - HIGH)    │
+  │  2. What description to write         (recall - HIGH)    │
+  │  3. Which category to pick            (recognition - LOW)│
+  │  4. Which difficulty to set           (recognition - LOW)│
+  │  5. What tags to add                  (recall - MEDIUM)  │
+  │  6. Whether to upload thumbnail       (optional - LOW)   │
+  │  7. Submit or cancel                  (binary - LOW)     │
+  │                                                          │
+  │  Cognitive load score: 2 HIGH + 1 MEDIUM + 4 LOW = MEDIUM│
+  │                                                          │
+  │  Reduction strategies:                                   │
+  │  → Auto-suggest titles based on content                  │
+  │  → AI-generate description from title                    │
+  │  → Default category from user's most-used                │
+  │  → Suggest popular tags                                  │
+  └──────────────────────────────────────────────────────────┘
+
+  COGNITIVE LOAD THRESHOLDS:
+
+  ┌──────────────────────────────────────────────────────┐
+  │  Decisions per screen:                               │
+  │  1-3 decisions    → LOW load  (ideal for quick tasks)│
+  │  4-7 decisions    → MEDIUM    (acceptable for forms) │
+  │  8-12 decisions   → HIGH      (consider splitting)   │
+  │  13+ decisions    → OVERLOAD  (must reduce/split)    │
+  └──────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Step 4: Task Completion Path Analysis</h3>
+
+<pre class="code-block"><code>TASK: &quot;Enroll a user in a course&quot;
+
+  Step  │ Screen             │ Actions Required │ Potential Friction
+  ──────┼────────────────────┼──────────────────┼────────────────────
+  1     │ Dashboard          │ Navigate to Users│ Is &quot;Users&quot; visible?
+  2     │ Users list         │ Find the user    │ Can they search?
+  3     │ User detail        │ Click &quot;Courses&quot;  │ Is the tab obvious?
+  4     │ User courses tab   │ Click &quot;Enroll&quot;   │ Is button visible?
+  5     │ Enroll dialog      │ Search course    │ Can they filter?
+  6     │ Enroll dialog      │ Select + confirm │ Is confirm clear?
+  7     │ User courses tab   │ See enrollment   │ Does list refresh?
+
+  Total steps: 7
+  Minimum clicks: 5
+  Friction points: 3
+
+  EFFICIENCY RATING:
+  ┌────────────────────────────────────────────────────┐
+  │  1-3 steps:  Excellent (single-screen tasks)       │
+  │  4-6 steps:  Good (standard CRUD)                  │
+  │  7-10 steps: Acceptable (complex multi-entity)     │
+  │  11+ steps:  Too many — find shortcuts             │
+  └────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Audit Report Format</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  UX AUDIT FINDING                                            │
+│                                                              │
+│  ID:        UX-001                                           │
+│  Heuristic: H1 — Visibility of System Status                 │
+│  Severity:  ●●●○ High                                        │
+│  Page:      /courses (Courses listing page)                  │
+│  Impact:    Users don't know if actions succeeded             │
+│                                                              │
+│  Problem:                                                    │
+│  When a user clicks &quot;Delete&quot; on a course, the confirmation   │
+│  dialog closes but there is no toast or visual feedback       │
+│  that the deletion was successful. The course just            │
+│  disappears from the list.                                   │
+│                                                              │
+│  BEFORE:                                                     │
+│  ┌──────────────────────┐                                    │
+│  │ [Confirm Delete?]    │     ┌──────────────────┐           │
+│  │                      │ ──▶ │ (course just     │           │
+│  │ [Cancel] [Delete]    │     │  vanishes, no    │           │
+│  └──────────────────────┘     │  feedback)       │           │
+│                               └──────────────────┘           │
+│                                                              │
+│  AFTER (recommended):                                        │
+│  ┌──────────────────────┐     ┌──────────────────┐           │
+│  │ [Confirm Delete?]    │     │ ┌──── Toast ───┐ │           │
+│  │                      │ ──▶ │ │ ✓ Course     │ │           │
+│  │ [Cancel] [Delete]    │     │ │   deleted    │ │           │
+│  └──────────────────────┘     │ │   [Undo]    │ │           │
+│                               │ └─────────────┘ │           │
+│                               └──────────────────┘           │
+│                                                              │
+│  Fix effort: Low (add toast notification)                    │
+│  Component:  Use existing <code class="inline-code">toastSuccess()</code> utility           │
+│                                                              │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Severity Rating Scale</h2>
+
+<pre class="code-block"><code>  Severity   │ Label      │ Criteria                          │ Action
+  ───────────┼────────────┼───────────────────────────────────┼─────────
+  ●●●● (4)  │ Critical   │ Blocks task completion,           │ Fix NOW
+             │            │ causes data loss, breaks flow     │
+  ●●●○ (3)  │ High       │ Causes user confusion,            │ Fix this
+             │            │ leads to errors, workaround exists│ sprint
+  ●●○○ (2)  │ Medium     │ Reduces efficiency,               │ Plan fix
+             │            │ minor annoyance, not blocking     │
+  ●○○○ (1)  │ Low        │ Cosmetic issue, minor polish,     │ Backlog
+             │            │ does not affect task completion    │</code></pre>
+<hr class="section-divider">
+<h2>Common Mistakes When Auditing</h2>
+
+<pre class="code-block"><code>MISTAKE 1: Auditing without using the feature
+
+  Rule: Complete the primary task yourself before auditing.
+  Walk through: Create, Read, Update, Delete as each user role.
+
+MISTAKE 2: Reporting problems without solutions
+
+  BAD:  &quot;The button color is wrong&quot;
+  GOOD: &quot;The delete button uses primary (blue) style, which signals
+         a constructive action. Switch to variant='destructive'
+         (red) to match the destructive action pattern used on
+         the Users page.&quot;
+
+MISTAKE 3: Treating all issues as equal severity
+
+  Rule: Use the 4-level severity scale. Not everything is critical.
+  Sort findings by severity, then by fix effort (quick wins first).
+
+MISTAKE 4: Only checking the happy path
+
+  Rule: Test with 0 items, 1 item, 100 items, invalid input,
+  expired sessions, permission denied, slow network.</code></pre>
+<hr class="section-divider">
+<h2>Output Format</h2>
+
+When delivering a UX audit, always provide:
+
+<ul class="skill-list"><li class="ordered"><strong>Audit scope</strong> — what was reviewed, which roles, which tasks</li>
+<li class="ordered"><strong>Heuristic scores</strong> — pass/issue/fail for each of 10 heuristics</li>
+<li class="ordered"><strong>Findings list</strong> — each finding with ID, heuristic, severity, before/after</li>
+<li class="ordered"><strong>Cognitive load analysis</strong> — decisions per screen, load score</li>
+<li class="ordered"><strong>Task completion analysis</strong> — steps, clicks, friction points</li>
+<li class="ordered"><strong>Priority matrix</strong> — findings ranked by severity and fix effort</li>
+<li class="ordered"><strong>Quick wins</strong> — low-effort, high-impact fixes to do first</li>
+<li class="ordered"><strong>Consistency matrix</strong> — cross-page comparison of patterns</li>
+<li class="ordered"><strong>Recommendations</strong> — specific, actionable changes with component references</li></ul>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="user-flow.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">User Flow — Map Every Path a User Can Take</span></span></a>
+    <a href="wireframe.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Wireframe — Structure Before Pixels</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    66 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

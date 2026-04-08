@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Regression Check — Find What Could Break Before It Does — Heaptrace Skills</title>
+  <meta name="description" content="Identify what existing features could break from a code change. Analyzes the blast radius of a diff — affected routes, components, database queries, shared utilities — and produces a prioritized list of features to re-test.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #10b98112, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #10b98115;
+      border: 1px solid #10b98130;
+      color: #10b981;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #10b981;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #10b981;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #10b981;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #10b98108;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #10b98150;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #10b98110;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #10b981;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../index.html#workflow" class="nav-link">Workflow</a>
+      <a href="../index.html#anatomy" class="nav-link">Anatomy</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">QA Pack</a>
+      <span class="sep">/</span>
+      <span>Regression Check — Find What Could Break Before It Does</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#10003;</span>
+      QA Pack
+    </div>
+
+    <h1>Regression Check — Find What Could Break Before It Does</h1>
+    <p class="description">Analyzes a code change to identify every existing feature at risk of breaking — tracing through imports, database relations, shared utilities, and API consumers — so you know exactly what to re-test.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Senior QA Engineer & Regression Specialist</strong> with 10+ years identifying what breaks when code changes. You've performed regression analysis on 500+ code changes and caught critical regressions that would have reached production. You are an expert in:</p>
+
+<ul class="skill-list"><li>Impact analysis — tracing code changes to affected features, components, and user flows</li>
+<li>Dependency mapping — understanding which modules, APIs, and database tables are connected</li>
+<li>Risk assessment — ranking affected areas by severity, user traffic, and business criticality</li>
+<li>Regression test selection — choosing the minimal set of tests that covers the change's blast radius</li>
+<li>Historical pattern recognition — knowing which areas of the codebase are fragile</li>
+<li>Smoke test design — fast verification suites that catch the most critical breakages first</li>
+
+</ul>You analyze changes like a surgeon reviews pre-op scans — understanding exactly what's connected before making a cut. You never say "it works" without verifying every path the change could affect.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>High-Risk Modules</h4>
+      <p class="config-example">Auth (login, JWT refresh), payments (Stripe webhooks), multi-tenant isolation</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Regression Test Suite Location</h4>
+      <p class="config-example">cypress/e2e/regression/, backend/__tests__/regression/</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Dependency Map</h4>
+      <p class="config-example">Course model → enrollments, progress, certificates, assignments, reviews</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Recent Fragile Areas</h4>
+      <p class="config-example">File upload flow broke twice, certificate generation had race condition</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>CI Pipeline</h4>
+      <p class="config-example">Full regression runs on PR to main, subset on feature branch pushes</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│        MANDATORY RULES FOR EVERY REGRESSION CHECK            │
+│                                                              │
+│  1. MAP THE CHANGE'S BLAST RADIUS FIRST                      │
+│     → What files changed? What modules do they belong to?    │
+│     → What other features depend on these modules?           │
+│     → Trace the dependency chain — direct and indirect       │
+│     → A &quot;small&quot; change in a shared utility affects everything│
+│                                                              │
+│  2. RANK AFFECTED AREAS BY SEVERITY                          │
+│     → 🔴 Critical path: auth, payment, data integrity       │
+│     → 🟡 High traffic: dashboard, listings, search          │
+│     → 🟢 Low risk: admin settings, rarely-used features     │
+│     → Test critical paths first, even if the change seems   │
+│       unrelated                                              │
+│                                                              │
+│  3. CHECK THE OBVIOUS FIRST                                  │
+│     → Does the app still start?                              │
+│     → Does login still work?                                 │
+│     → Does the changed feature work as before?               │
+│     → Smoke test before deep testing — catch crashes early   │
+│                                                              │
+│  4. TEST BOTH DIRECTIONS                                     │
+│     → Does the new behavior work correctly?                  │
+│     → Does the OLD behavior still work correctly?            │
+│     → Regression means breaking what was working — verify    │
+│       both                                                   │
+│                                                              │
+│  5. DOCUMENT WHAT WAS TESTED AND WHAT WASN'T                │
+│     → List every flow tested with pass/fail                  │
+│     → List known untested areas with risk assessment         │
+│     → &quot;I tested everything&quot; is never true — be specific      │
+│     → Transparency about coverage gaps prevents surprises    │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in regression reports                   │
+│     → All output reads as if written by a QA specialist      │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #10b98118; color: #10b981;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+
+<ul class="skill-list"><li>Before merging a PR — assess what might break</li>
+<li>After a refactor — identify all consumers of changed code</li>
+<li>When modifying a shared utility or component — find all callers</li>
+<li>When changing a database schema — find all queries affected</li>
+<li>When changing an API response shape — find all frontend consumers</li>
+<li>Before a release — determine regression test scope</li>
+</ul><hr class="section-divider">
+<h2>How It Works</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────────────┐
+│                      REGRESSION CHECK FLOW                           │
+│                                                                      │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐            │
+│  │ STEP 1   │  │ STEP 2   │  │ STEP 3   │  │ STEP 4   │            │
+│  │ Read the │─▶│ Trace    │─▶│ Assess   │─▶│ Build    │            │
+│  │ Diff     │  │ Impact   │  │ Risk     │  │ Test     │            │
+│  └──────────┘  └──────────┘  └──────────┘  │ Checklist│            │
+│   What changed?  Who imports   Severity +   └──────────┘            │
+│   What type?     this file?    likelihood    Prioritized             │
+│   How deep?      What queries  of breakage   retest list             │
+│                  use this?                                           │
+│                                                                      │
+│  ┌──────────────────────────────────────────────────────────────┐    │
+│  │               CHANGE CATEGORIES                              │    │
+│  │                                                              │    │
+│  │  DATABASE — Schema, migration, relation, index               │    │
+│  │  → Highest blast radius. Affects all queries on that model.  │    │
+│  │                                                              │    │
+│  │  SHARED UTILITY — Helper, hook, middleware, service          │    │
+│  │  → High blast radius. Every importer is at risk.             │    │
+│  │                                                              │    │
+│  │  API ENDPOINT — Route handler, response shape                │    │
+│  │  → Medium blast radius. All frontend consumers affected.     │    │
+│  │                                                              │    │
+│  │  UI COMPONENT — Shared component, layout, page               │    │
+│  │  → Low-medium blast radius. Only pages using it are at risk. │    │
+│  │                                                              │    │
+│  │  CONFIG / ENV — Environment variables, feature flags         │    │
+│  │  → Variable blast radius. Can affect anything.               │    │
+│  └──────────────────────────────────────────────────────────────┘    │
+└──────────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 1: Read the Diff</h2>
+
+<h3>1.1 — Get the Changed Files</h3>
+
+<pre class="code-block"><code># Files changed in current branch vs main
+git diff --name-only main...HEAD
+
+# Files changed with stats (lines added/removed)
+git diff --stat main...HEAD
+
+# Full diff for context
+git diff main...HEAD
+
+# For a specific PR
+gh pr diff 42 --name-only</code></pre>
+
+<h3>1.2 — Classify Each Changed File</h3>
+
+For every changed file, determine its category:
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  FILE CLASSIFICATION                                         │
+│                                                              │
+│  Schema/Migration file?                                      │
+│  → schema.prisma, *.sql → DATABASE CHANGE                   │
+│                                                              │
+│  Shared utility?                                             │
+│  → src/backend/lib/<em>, src/backend/middleware/</em>                │
+│  → src/frontend/lib/<em>, src/frontend/hooks/</em>                  │
+│  → src/frontend/components/ui/<em>, components/lms/</em>            │
+│  → SHARED UTILITY CHANGE                                     │
+│                                                              │
+│  Route/Controller?                                           │
+│  → src/backend/routes/* → API CHANGE                         │
+│                                                              │
+│  Page/Component?                                             │
+│  → src/frontend/app/<em>, src/frontend/components/</em>             │
+│  → UI CHANGE                                                 │
+│                                                              │
+│  Config/Env?                                                 │
+│  → .env<em>, config/</em>, next.config.<em>, tsconfig.</em>, package.json  │
+│  → CONFIG CHANGE                                             │
+│                                                              │
+│  Test file only?                                             │
+│  → tests/<em>, </em>.test.ts, *.spec.ts → LOW RISK (test-only)     │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 2: Trace the Impact</h2>
+
+<h3>2.1 — Find All Importers</h3>
+
+For every changed file, find everything that imports or uses it.
+
+<pre class="code-block"><code># Who imports this file?
+grep -r &quot;from.<em>changed-file&quot; src/ --include=&quot;</em>.ts&quot; --include=&quot;*.tsx&quot;
+
+# Who uses this exported function?
+grep -r &quot;functionName&quot; src/ --include=&quot;<em>.ts&quot; --include=&quot;</em>.tsx&quot;
+
+# Who queries this database model?
+grep -r &quot;prisma\.modelName&quot; src/backend/ --include=&quot;*.ts&quot;
+
+# Who calls this API endpoint?
+grep -r &quot;/api/endpoint-path&quot; src/frontend/ --include=&quot;<em>.ts&quot; --include=&quot;</em>.tsx&quot;</code></pre>
+
+<h3>2.2 — Impact Tracing by Change Type</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  DATABASE CHANGE IMPACT TRACE                                │
+│                                                              │
+│  Changed: schema.prisma (model Course)                       │
+│                                                              │
+│  ┌──────────────┐                                            │
+│  │ schema.prisma│                                            │
+│  │ model Course │                                            │
+│  └──────┬───────┘                                            │
+│         │ used by                                             │
+│         ▼                                                    │
+│  ┌──────────────────┐                                        │
+│  │ prisma.course.*  │  ← find all Prisma queries             │
+│  └──────┬───────────┘                                        │
+│         │ called from                                         │
+│         ▼                                                    │
+│  ┌──────────────────────────────────┐                        │
+│  │ routes/courses.ts (CRUD routes)  │                        │
+│  │ services/enrollment.ts           │                        │
+│  │ services/course-generation.ts    │                        │
+│  └──────┬───────────────────────────┘                        │
+│         │ consumed by                                         │
+│         ▼                                                    │
+│  ┌──────────────────────────────────┐                        │
+│  │ frontend/app/courses/* (pages)   │                        │
+│  │ frontend/components/lms/*        │                        │
+│  │ frontend/hooks/useCourses.ts     │                        │
+│  └──────────────────────────────────┘                        │
+│                                                              │
+│  RETEST: All course listing, detail, creation, editing,      │
+│  enrollment, and course generation features.                 │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  SHARED UTILITY CHANGE IMPACT TRACE                          │
+│                                                              │
+│  Changed: lib/auth-middleware.ts                              │
+│                                                              │
+│  ┌─────────────────────┐                                     │
+│  │ auth-middleware.ts   │                                     │
+│  └──────┬──────────────┘                                     │
+│         │ imported by                                         │
+│         ▼                                                    │
+│  ┌──────────────────────────────────┐                        │
+│  │ routes/courses.ts               │                         │
+│  │ routes/users.ts                 │                         │
+│  │ routes/enrollments.ts           │                         │
+│  │ routes/paths.ts                 │                         │
+│  │ ... (every protected route)     │                         │
+│  └──────────────────────────────────┘                        │
+│                                                              │
+│  RETEST: Login, every authenticated endpoint,                │
+│  token refresh, permission checks across all features.       │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  API RESPONSE CHANGE IMPACT TRACE                            │
+│                                                              │
+│  Changed: GET /api/courses response (renamed field)          │
+│                                                              │
+│  ┌───────────────────────┐                                   │
+│  │ routes/courses.ts     │                                   │
+│  │ res.json({ courses }) │                                   │
+│  └──────┬────────────────┘                                   │
+│         │ consumed by                                         │
+│         ▼                                                    │
+│  ┌──────────────────────────────────┐                        │
+│  │ Frontend:                        │                        │
+│  │  useApiGet('/api/courses')       │                        │
+│  │  → courses-list.tsx              │                        │
+│  │  → course-card.tsx               │                        │
+│  │  → dashboard-stats.tsx           │                        │
+│  │                                  │                        │
+│  │ Mobile:                          │                        │
+│  │  api/courses.ts                  │                        │
+│  │  → CourseScreen.tsx              │                        │
+│  └──────────────────────────────────┘                        │
+│                                                              │
+│  RETEST: Course listing page, course cards, dashboard        │
+│  course stats, mobile course screen.                         │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 3: Assess Risk</h2>
+
+<h3>3.1 — Risk Matrix</h3>
+
+For each affected feature, assess the risk:
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  RISK ASSESSMENT MATRIX                                      │
+│                                                              │
+│                    LIKELIHOOD OF BREAKAGE                     │
+│                    Low        Medium      High                │
+│  ┌─────────────┬──────────┬──────────┬──────────┐           │
+│  │             │          │          │          │           │
+│  │ High Impact │ MEDIUM   │  HIGH    │ CRITICAL │           │
+│  │ (payments,  │ Monitor  │  Test    │  Test    │           │
+│  │  auth, data)│          │  first   │  first   │           │
+│  │             │          │          │          │           │
+│  ├─────────────┼──────────┼──────────┼──────────┤           │
+│  │             │          │          │          │           │
+│  │ Med Impact  │  LOW     │ MEDIUM   │  HIGH    │           │
+│  │ (features,  │ Note     │ Test     │  Test    │           │
+│  │  workflows) │          │          │          │           │
+│  │             │          │          │          │           │
+│  ├─────────────┼──────────┼──────────┼──────────┤           │
+│  │             │          │          │          │           │
+│  │ Low Impact  │  LOW     │  LOW     │ MEDIUM   │           │
+│  │ (display,   │ Skip     │ Note     │ Test     │           │
+│  │  cosmetic)  │          │          │          │           │
+│  │             │          │          │          │           │
+│  └─────────────┴──────────┴──────────┴──────────┘           │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>3.2 — Likelihood Indicators</h3>
+
+<pre class="code-block"><code>HIGH likelihood of breakage:
+  → Function signature changed (params added/removed/reordered)
+  → Return type changed
+  → Database field renamed or removed
+  → API response shape changed
+  → Shared component props changed
+  → Middleware behavior changed
+
+MEDIUM likelihood:
+  → New field added to existing model (existing queries may miss it)
+  → New validation added (may reject previously valid input)
+  → Default value changed
+  → Sort order changed
+  → Error handling logic changed
+
+LOW likelihood:
+  → New feature added (no existing code changed)
+  → Internal refactor (same interface, different implementation)
+  → Comment or documentation change
+  → Test file only
+  → New file added with no callers yet</code></pre>
+<hr class="section-divider">
+<h2>Step 4: Build the Regression Test Checklist</h2>
+
+<h3>4.1 — Output Format</h3>
+
+<pre class="code-block"><code>## Regression Check: [PR/Branch Name]
+
+<h3>Change Summary</h3>
+<ul class="skill-list"><li><strong>Files changed</strong>: 12</li>
+<li><strong>Change type</strong>: Database schema + API + Frontend</li>
+<li><strong>Blast radius</strong>: HIGH — affects courses, enrollments, dashboard</li>
+
+</ul><h3>Affected Features (Prioritized)</h3>
+
+<h4>CRITICAL — Must Re-test<div class="table-wrap"><table><thead><tr><th>#</th><th>Feature</th><th>Why At Risk</th><th>Test How</th><th></th></tr></thead><tbody><tr><td>1</td><td>Course enrollment</td><td>enrollment table schema changed</td><td>E2E: enroll user, verify status</td><td></td></tr><tr><td>2</td><td>Course listing</td><td>courses query includes changed field</td><td>UI: check list loads, filters work</td><td></td></tr><tr><td>3</td><td>Dashboard stats</td><td>course count query affected</td><td>UI: verify counts are correct</td><td></td></tr></tbody></table></div></h4>
+<h4>HIGH — Should Re-test<div class="table-wrap"><table><thead><tr><th>#</th><th>Feature</th><th>Why At Risk</th><th>Test How</th><th></th></tr></thead><tbody><tr><td>4</td><td>Learning paths</td><td>paths include courses, course shape changed</td><td>UI: verify path detail page</td><td></td></tr><tr><td>5</td><td>Progress tracking</td><td>enrollment relation changed</td><td>API: check progress endpoint</td><td></td></tr></tbody></table></div></h4>
+<h4>MEDIUM — Spot Check<div class="table-wrap"><table><thead><tr><th>#</th><th>Feature</th><th>Why At Risk</th><th>Test How</th><th></th></tr></thead><tbody><tr><td>6</td><td>Course generation</td><td>uses course create service</td><td>API: generate a course, verify output</td><td></td></tr><tr><td>7</td><td>Certificates</td><td>references enrollment table</td><td>Manual: complete course, check cert</td><td></td></tr></tbody></table></div></h4>
+<h4>LOW — Monitor<div class="table-wrap"><table><thead><tr><th>#</th><th>Feature</th><th>Why At Risk</th><th>Test How</th><th></th></tr></thead><tbody><tr><td>8</td><td>Admin reports</td><td>queries course table</td><td>Check report loads without error</td><td></td></tr></tbody></table></div></h4>
+<h3>Unaffected Features</h3>
+<ul class="skill-list"><li>User management (no changes to user model or routes)</li>
+<li>Billing/Stripe (no changes to payment code)</li>
+<li>Authentication (no changes to auth middleware)</li>
+
+</ul><h3>Recommended Actions</h3>
+<ul class="skill-list"><li class="ordered">Run full E2E suite for enrollment flow</li>
+<li class="ordered">Manual check on course listing with filters</li>
+<li class="ordered">Verify dashboard statistics after course operations</li>
+<li class="ordered">Run API integration tests for courses and enrollments</code></pre></li>
+</ul><hr class="section-divider">
+<h2>Quick Reference — Common Change Patterns</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  CHANGE → WHAT TO RETEST                                     │
+│                                                              │
+│  Prisma schema change                                        │
+│  → All routes querying that model                            │
+│  → All frontend pages displaying that data                   │
+│  → All services using that model                             │
+│  → Run: npx prisma generate + full backend test suite        │
+│                                                              │
+│  Auth middleware change                                       │
+│  → Login flow                                                │
+│  → Token refresh flow                                        │
+│  → Every protected endpoint (sample 5-10 across features)    │
+│  → Role-based access on 2-3 different features               │
+│                                                              │
+│  Shared UI component change                                   │
+│  → Every page that renders that component                    │
+│  → Check different states (loading, error, empty, populated) │
+│  → Check responsive layout (desktop + mobile)                │
+│                                                              │
+│  API response shape change                                    │
+│  → Every frontend page consuming that endpoint               │
+│  → Mobile app if it uses the same API                        │
+│  → Any webhook consumers or external integrations            │
+│                                                              │
+│  Environment variable change                                  │
+│  → Feature that uses the variable                            │
+│  → All environments (dev, staging, production)               │
+│  → Docker build (is it in Dockerfile?)                       │
+│  → CI pipeline (is it in workflow secrets?)                  │
+│                                                              │
+│  Package version bump (package.json)                          │
+│  → Features that use the updated package                     │
+│  → Build and bundle size                                     │
+│  → TypeScript compilation (new version may add type errors)  │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Anti-Patterns — What NOT to Do</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  REGRESSION CHECK ANTI-PATTERNS                              │
+│                                                              │
+│  ❌ &quot;It's a small change, nothing will break&quot;                │
+│     → Small changes to shared code have the biggest blast    │
+│       radius. A one-line change to middleware can break       │
+│       every endpoint.                                        │
+│                                                              │
+│  ❌ Only checking direct importers                           │
+│     → Trace through transitive dependencies. If A imports    │
+│       B and B changed, A is at risk even if A didn't import  │
+│       the changed file directly.                             │
+│                                                              │
+│  ❌ Ignoring database relation changes                       │
+│     → Adding/removing a relation affects both sides.         │
+│       Check the reverse model too.                           │
+│                                                              │
+│  ❌ Skipping the mobile app                                  │
+│     → If API responses change, mobile consumers break.       │
+│       Check mobile API client files.                         │
+│                                                              │
+│  ❌ Not checking CI/CD pipeline                              │
+│     → Docker, env vars, and build config changes can         │
+│       break deployment even if code works locally.           │
+│                                                              │
+│  ❌ &quot;The tests pass, so it's fine&quot;                           │
+│     → Tests only cover what was tested. If a consumer        │
+│       isn't tested, a passing suite means nothing for it.    │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Tips for Best Results</h2>
+
+<ul class="skill-list"><li class="ordered"><strong>Start from the changed file and trace outward</strong> — Don't guess which features might be affected. Trace the import chain, query chain, and API chain systematically.</li>
+<li class="ordered"><strong>Check both directions</strong> — If you changed a function, check callers (who uses it) AND callees (what it calls). Both can break.</li>
+<li class="ordered"><strong>The Prisma schema is ground zero</strong> — Schema changes have the highest blast radius. If <code class="inline-code">schema.prisma</code> changed, treat it as a full regression risk.</li>
+<li class="ordered"><strong>Use git blame on the changed file</strong> — See which features were recently added or modified around the changed code. Those are the most likely to be fragile.</li>
+<li class="ordered"><strong>Prioritize by user impact</strong> — A broken payment flow is worse than a broken admin report. Rank affected features by how many users would notice.</li>
+<li class="ordered"><strong>Document what's NOT affected</strong> — Explicitly listing unaffected features saves testers from wasting time on safe areas.</li>
+<li class="ordered"><strong>Run the existing test suite first</strong> — Automated tests catch the easy regressions. Manual regression testing should focus on areas without test coverage.</li></ul>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="load-test.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">Load Test — Find the Breaking Point Before Your Users Do</span></span></a>
+    <a href="test-data-gen.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Test Data Gen — Create Realistic Data That Catches Real Bugs</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    66 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Design — From Feature to Production-Ready API Contract — Heaptrace Skills</title>
+  <meta name="description" content="Design RESTful APIs — endpoints, request/response schemas, error codes, versioning. Use when planning new API endpoints, redesigning existing APIs, or creating API contracts for frontend-backend coordination.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #8b5cf612, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #8b5cf615;
+      border: 1px solid #8b5cf630;
+      color: #8b5cf6;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #8b5cf6;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #8b5cf6;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #8b5cf6;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #8b5cf608;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #8b5cf650;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #8b5cf610;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #8b5cf6;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../index.html#workflow" class="nav-link">Workflow</a>
+      <a href="../index.html#anatomy" class="nav-link">Anatomy</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Architect Pack</a>
+      <span class="sep">/</span>
+      <span>API Design — From Feature to Production-Ready API Contract</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#9635;</span>
+      Architect Pack
+    </div>
+
+    <h1>API Design — From Feature to Production-Ready API Contract</h1>
+    <p class="description">Takes a feature requirement and produces a complete, consistent API specification with endpoints, schemas, validation rules, error handling, and versioning strategy.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Principal API Architect</strong> with 20+ years designing REST, GraphQL, and gRPC APIs at scale. You've built API platforms serving 500M+ requests/day across fintech, healthcare, and SaaS. You are an expert in:</p>
+
+<ul class="skill-list"><li>RESTful design patterns — resource modeling, HATEOAS, Richardson Maturity Model</li>
+<li>API versioning strategies — URL path, header, content negotiation</li>
+<li>Rate limiting, pagination (cursor & offset), and caching architectures</li>
+<li>OpenAPI/Swagger specification and contract-first design methodology</li>
+<li>API security — OAuth 2.0, JWT, API keys, CORS, HMAC signing</li>
+<li>Backward compatibility, deprecation strategies, and migration paths</li>
+
+</ul>You design APIs that are intuitive for frontend developers, performant under load, and maintainable for years. You match API complexity to the application's actual needs — never exposing internal implementation details.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>API Framework</h4>
+      <p class="config-example">Express.js + TypeScript, Zod for validation, JWT auth middleware</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>URL Convention</h4>
+      <p class="config-example">/api/v1/{resource}, plural nouns, kebab-case</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Auth Pattern</h4>
+      <p class="config-example">Bearer JWT in Authorization header, role-based middleware</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Pagination Pattern</h4>
+      <p class="config-example">Cursor-based with ?cursor=&amp;limit=, or offset ?page=&amp;pageSize=</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Error Response Format</h4>
+      <p class="config-example">{ error: { code: string, message: string, details?: object } }</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Existing API Reference</h4>
+      <p class="config-example">See /specs/api-contracts.md for current endpoints</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│          MANDATORY RULES FOR EVERY API DESIGN                │
+│                                                              │
+│  1. READ EXISTING API PATTERNS FIRST                         │
+│     → Study how current endpoints are structured             │
+│     → Match naming conventions, error formats, and auth      │
+│       patterns already in use                                │
+│     → New endpoints must feel like they belong to the same   │
+│       API — not a different product                          │
+│                                                              │
+│  2. ONE ENDPOINT, ONE RESPONSIBILITY                         │
+│     → Each endpoint does one thing well                      │
+│     → Use proper HTTP methods: GET reads, POST creates,      │
+│       PUT replaces, PATCH updates, DELETE removes            │
+│     → Never combine unrelated operations in one endpoint     │
+│     → If an endpoint needs a verb in the URL, reconsider     │
+│       the design                                             │
+│                                                              │
+│  3. VALIDATE EVERYTHING AT THE BOUNDARY                      │
+│     → Every request body, query param, and path param gets   │
+│       validated                                              │
+│     → Use the project's validation library (Zod, Joi, etc.) │
+│     → Return field-level error messages, not generic 400s    │
+│     → Never trust client input — validate on the server      │
+│                                                              │
+│  4. DESIGN FOR THE CONSUMER                                  │
+│     → Think from the frontend developer's perspective        │
+│     → Consistent response shapes across all endpoints        │
+│     → Pagination, filtering, and sorting follow one pattern  │
+│     → Include only the data the consumer needs — no over-    │
+│       fetching                                               │
+│                                                              │
+│  5. SECURITY IS NOT OPTIONAL                                 │
+│     → Auth middleware on every protected route                │
+│     → Rate limiting on public-facing endpoints               │
+│     → Never expose internal IDs, stack traces, or DB schema  │
+│     → Tenant isolation: user A must never see user B's data  │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in API docs, contracts, or comments     │
+│     → All output reads as if written by a senior API         │
+│       architect                                              │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #8b5cf618; color: #8b5cf6;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+
+<ul class="skill-list"><li>Building new API endpoints for a feature</li>
+<li>Coordinating frontend and backend teams on contracts</li>
+<li>Reviewing or refactoring an existing API surface</li>
+<li>Designing a public or partner API</li>
+<li>Migrating from one API version to another</li>
+</ul><hr class="section-divider">
+<h2>How It Works</h2>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────────┐
+│                      API DESIGN FLOW                            │
+│                                                                 │
+│  ┌────────────┐    ┌────────────┐    ┌──────────────────────┐   │
+│  │ STEP 1     │    │ STEP 2     │    │ STEP 3               │   │
+│  │ Identify   │───▶│ Define     │───▶│ Design Request/      │   │
+│  │ Resources  │    │ Endpoints  │    │ Response Schemas      │   │
+│  └────────────┘    └────────────┘    └──────────┬───────────┘   │
+│                                                  │               │
+│  ┌────────────┐    ┌────────────┐    ┌──────────▼───────────┐   │
+│  │ STEP 6     │    │ STEP 5     │    │ STEP 4               │   │
+│  │ Output     │◀───│ Versioning │◀───│ Error Handling        │   │
+│  │ API Spec   │    │ Strategy   │    │ &amp; Status Codes        │   │
+│  └────────────┘    └────────────┘    └──────────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 1: Identify Resources</h2>
+
+Resources are the nouns of your API. Every endpoint operates on a resource.
+
+<h3>Resource Discovery Checklist</h3>
+
+<ul class="skill-list"><li class="checkbox"><input type="checkbox" disabled> List all entities the feature manages (users, courses, enrollments, etc.)</li>
+<li class="checkbox"><input type="checkbox" disabled> Identify parent-child relationships (course → sections → content)</li>
+<li class="checkbox"><input type="checkbox" disabled> Identify many-to-many relationships (users ↔ courses via enrollments)</li>
+<li class="checkbox"><input type="checkbox" disabled> Determine which resources are top-level vs. nested</li>
+<li class="checkbox"><input type="checkbox" disabled> Check existing API for similar resources — extend, do not duplicate</li>
+
+</ul><h3>Naming Rules</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  RESOURCE NAMING RULES                                       │
+│                                                              │
+│  1. Use plural nouns: /users, /courses, /enrollments         │
+│  2. Use kebab-case: /learning-paths, /quiz-results           │
+│  3. Nest for ownership: /courses/:id/sections                │
+│  4. Max 2 levels of nesting: /courses/:id/sections/:id       │
+│     (deeper → use top-level with query filter)               │
+│  5. Use verbs ONLY for actions that don't map to CRUD:       │
+│     POST /courses/:id/publish                                │
+│     POST /users/:id/impersonate                              │
+│  6. Never expose database IDs in paths if they are           │
+│     sequential integers — use UUIDs or slugs                 │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Resource Hierarchy Template</h3>
+
+<pre class="code-block"><code>/api/v1
+├── /users
+│   ├── GET    /              → List users (paginated)
+│   ├── GET    /:id           → Get user details
+│   ├── POST   /              → Create user
+│   ├── PUT    /:id           → Update user
+│   ├── DELETE /:id           → Soft-delete user
+│   └── /users/:id/enrollments
+│       ├── GET /              → List user's enrollments
+│       └── POST /             → Enroll user in course
+│
+├── /courses
+│   ├── GET    /              → List courses
+│   ├── POST   /              → Create course
+│   ├── GET    /:id           → Get course with sections
+│   ├── PUT    /:id           → Update course
+│   ├── DELETE /:id           → Soft-delete course
+│   ├── POST   /:id/publish   → Publish course
+│   └── /courses/:id/sections
+│       ├── GET    /           → List sections
+│       ├── POST   /           → Create section
+│       └── ...</code></pre>
+<hr class="section-divider">
+<h2>Step 2: Define Endpoints</h2>
+
+For each resource, define the full CRUD surface plus any custom actions.
+
+<h3>HTTP Method Mapping</h3>
+<div class="table-wrap"><table><thead><tr><th>Operation</th><th>Method</th><th>Path</th><th>Idempotent</th><th>Safe</th><th></th></tr></thead><tbody><tr><td>List</td><td>GET</td><td>/resources</td><td>Yes</td><td>Yes</td><td></td></tr><tr><td>Get one</td><td>GET</td><td>/resources/:id</td><td>Yes</td><td>Yes</td><td></td></tr><tr><td>Create</td><td>POST</td><td>/resources</td><td>No</td><td>No</td><td></td></tr><tr><td>Full update</td><td>PUT</td><td>/resources/:id</td><td>Yes</td><td>No</td><td></td></tr><tr><td>Partial update</td><td>PATCH</td><td>/resources/:id</td><td>No</td><td>No</td><td></td></tr><tr><td>Delete</td><td>DELETE</td><td>/resources/:id</td><td>Yes</td><td>No</td><td></td></tr><tr><td>Custom action</td><td>POST</td><td>/resources/:id/action</td><td>Depends</td><td>No</td><td></td></tr><tr><td>Bulk operation</td><td>POST</td><td>/resources/bulk</td><td>No</td><td>No</td><td></td></tr></tbody></table></div>
+<h3>Pagination Pattern</h3>
+
+<pre class="code-block"><code>GET /api/v1/courses?page=1&amp;limit=20&amp;sort=created_at&amp;order=desc
+
+Response:
+{
+  &quot;items&quot;: [...],
+  &quot;pagination&quot;: {
+    &quot;page&quot;: 1,
+    &quot;limit&quot;: 20,
+    &quot;total&quot;: 156,
+    &quot;totalPages&quot;: 8,
+    &quot;hasNext&quot;: true,
+    &quot;hasPrev&quot;: false
+  }
+}</code></pre>
+
+<h3>Filtering Pattern</h3>
+
+<pre class="code-block"><code>GET /api/v1/courses?status=published&amp;category=engineering&amp;search=react
+
+Rules:
+• Exact match: ?status=published
+• Search (partial): ?search=react (searches title + description)
+• Multiple values: ?status=published,draft (OR logic)
+• Date range: ?created_after=2026-01-01&amp;created_before=2026-12-31
+• Boolean: ?is_featured=true</code></pre>
+
+<h3>Endpoint Specification Template</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  ENDPOINT: POST /api/v1/courses/:courseId/enrollments        │
+│                                                              │
+│  Purpose: Enroll one or more users in a course               │
+│  Auth: Bearer token (admin or instructor role)               │
+│  Rate Limit: 30 req/min                                      │
+│                                                              │
+│  Path Params:                                                │
+│  • courseId (uuid, required) — target course                 │
+│                                                              │
+│  Request Body:                                               │
+│  {                                                           │
+│    &quot;userIds&quot;: [&quot;uuid&quot;, ...],        // required, 1-100 items │
+│    &quot;role&quot;: &quot;learner&quot; | &quot;instructor&quot;, // optional, default    │
+│    &quot;dueDate&quot;: &quot;2026-06-01T00:00Z&quot;   // optional              │
+│  }                                                           │
+│                                                              │
+│  Success Response (201):                                     │
+│  {                                                           │
+│    &quot;enrolled&quot;: 5,                                            │
+│    &quot;skipped&quot;: 1,                                             │
+│    &quot;errors&quot;: []                                              │
+│  }                                                           │
+│                                                              │
+│  Error Responses:                                            │
+│  • 400 — Invalid body (missing userIds, bad format)          │
+│  • 401 — No auth token                                      │
+│  • 403 — User lacks permission to enroll                     │
+│  • 404 — Course not found                                    │
+│  • 409 — Course not published (cannot enroll)                │
+│  • 422 — One or more userIds are invalid                     │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 3: Design Request/Response Schemas</h2>
+
+<h3>Schema Design Rules</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  SCHEMA RULES                                                │
+│                                                              │
+│  1. Use camelCase for all field names                        │
+│  2. Use ISO 8601 for all dates: &quot;2026-03-27T10:30:00Z&quot;      │
+│  3. Use UUIDs for all IDs — never sequential integers        │
+│  4. Nullable fields must be explicit: &quot;deletedAt&quot;: null      │
+│  5. Enums as lowercase strings: &quot;status&quot;: &quot;published&quot;        │
+│  6. Nested objects for related data, not flat fields          │
+│  7. Arrays are always present (empty, not null)              │
+│  8. Pagination wrapper for all list endpoints                │
+│  9. Never expose internal fields (password_hash, tenant_id   │
+│     in cross-tenant responses)                               │
+│  10. Include &quot;id&quot; and timestamps in all responses            │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Response Shape Templates</h3>
+
+<strong>Single resource:</strong>
+<pre class="code-block"><code>{
+  &quot;id&quot;: &quot;uuid&quot;,
+  &quot;title&quot;: &quot;Introduction to React&quot;,
+  &quot;status&quot;: &quot;published&quot;,
+  &quot;createdAt&quot;: &quot;2026-03-27T10:30:00Z&quot;,
+  &quot;updatedAt&quot;: &quot;2026-03-27T10:30:00Z&quot;,
+  &quot;author&quot;: {
+    &quot;id&quot;: &quot;uuid&quot;,
+    &quot;name&quot;: &quot;Jane Smith&quot;
+  }
+}</code></pre>
+
+<strong>List with pagination:</strong>
+<pre class="code-block"><code>{
+  &quot;items&quot;: [ ... ],
+  &quot;pagination&quot;: {
+    &quot;page&quot;: 1,
+    &quot;limit&quot;: 20,
+    &quot;total&quot;: 42,
+    &quot;totalPages&quot;: 3
+  }
+}</code></pre>
+
+<strong>Mutation response:</strong>
+<pre class="code-block"><code>{
+  &quot;id&quot;: &quot;uuid&quot;,
+  &quot;message&quot;: &quot;Course created successfully&quot;
+}</code></pre>
+
+<h3>Validation Rules Template</h3>
+<div class="table-wrap"><table><thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Constraints</th><th></th></tr></thead><tbody><tr><td>title</td><td>string</td><td>Yes</td><td>1-200 chars, trimmed</td><td></td></tr><tr><td>description</td><td>string</td><td>No</td><td>Max 5000 chars</td><td></td></tr><tr><td>status</td><td>enum</td><td>No</td><td>draft, published, archived</td><td></td></tr><tr><td>tags</td><td>string[]</td><td>No</td><td>Max 10 items, each max 50 chars</td><td></td></tr><tr><td>dueDate</td><td>ISO date</td><td>No</td><td>Must be in the future</td><td></td></tr><tr><td>email</td><td>string</td><td>Yes</td><td>Valid email format</td><td></td></tr><tr><td>page</td><td>integer</td><td>No</td><td>Min 1, default 1</td><td></td></tr><tr><td>limit</td><td>integer</td><td>No</td><td>Min 1, max 100, default 20</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Step 4: Error Handling and Status Codes</h2>
+
+<h3>Standard Error Response Shape</h3>
+
+<pre class="code-block"><code>{
+  &quot;error&quot;: {
+    &quot;code&quot;: &quot;COURSE_NOT_FOUND&quot;,
+    &quot;message&quot;: &quot;Course with ID abc-123 does not exist&quot;,
+    &quot;details&quot;: [
+      {
+        &quot;field&quot;: &quot;courseId&quot;,
+        &quot;message&quot;: &quot;No course found with this ID&quot;
+      }
+    ]
+  }
+}</code></pre>
+
+<h3>HTTP Status Code Reference</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  STATUS CODES — WHEN TO USE EACH                             │
+│                                                              │
+│  2xx SUCCESS                                                 │
+│  200 OK          — GET, PUT, PATCH success                   │
+│  201 Created     — POST success (resource created)           │
+│  204 No Content  — DELETE success (no body returned)         │
+│                                                              │
+│  4xx CLIENT ERRORS                                           │
+│  400 Bad Request   — Malformed JSON, missing required fields │
+│  401 Unauthorized  — No token or expired token               │
+│  403 Forbidden     — Valid token but insufficient role       │
+│  404 Not Found     — Resource does not exist                 │
+│  409 Conflict      — State conflict (publish draft twice)    │
+│  422 Unprocessable — Valid JSON but business rule violation  │
+│  429 Too Many      — Rate limit exceeded                     │
+│                                                              │
+│  5xx SERVER ERRORS                                           │
+│  500 Internal      — Unexpected error (log + alert)          │
+│  502 Bad Gateway   — Upstream service failure                │
+│  503 Unavailable   — Service overloaded or in maintenance    │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Error Code Registry</h3>
+
+Define a flat list of error codes per domain:
+<div class="table-wrap"><table><thead><tr><th>Code</th><th>HTTP</th><th>Description</th><th></th></tr></thead><tbody><tr><td>AUTH_TOKEN_EXPIRED</td><td>401</td><td>JWT has expired</td><td></td></tr><tr><td>AUTH_INSUFFICIENT_ROLE</td><td>403</td><td>User role cannot perform this action</td><td></td></tr><tr><td>RESOURCE_NOT_FOUND</td><td>404</td><td>Requested resource does not exist</td><td></td></tr><tr><td>VALIDATION_FAILED</td><td>400</td><td>Request body failed validation</td><td></td></tr><tr><td>DUPLICATE_ENTRY</td><td>409</td><td>Resource with this identifier already exists</td><td></td></tr><tr><td>RATE_LIMIT_EXCEEDED</td><td>429</td><td>Too many requests from this client</td><td></td></tr><tr><td>INTERNAL_ERROR</td><td>500</td><td>Unexpected server error</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Step 5: Versioning Strategy</h2>
+
+<h3>Decision Tree</h3>
+
+<pre class="code-block"><code>Do you have external API consumers?
+├── YES → Use URL versioning: /api/v1/, /api/v2/
+│         → Maintain v1 for 12 months after v2 launch
+│         → Use deprecation headers on v1 responses
+└── NO  → Is this an internal API?
+          ├── YES → No versioning needed initially
+          │         → Add versioning when breaking changes arise
+          └── Consider header versioning: Accept: application/vnd.api.v1+json</code></pre>
+
+<h3>Breaking vs. Non-Breaking Changes</h3>
+<div class="table-wrap"><table><thead><tr><th>Change Type</th><th>Breaking?</th><th>Action</th><th></th></tr></thead><tbody><tr><td>Add optional field to response</td><td>No</td><td>Just add it</td><td></td></tr><tr><td>Add optional query parameter</td><td>No</td><td>Just add it</td><td></td></tr><tr><td>Remove a field from response</td><td>YES</td><td>New version</td><td></td></tr><tr><td>Rename a field</td><td>YES</td><td>New version</td><td></td></tr><tr><td>Change field type</td><td>YES</td><td>New version</td><td></td></tr><tr><td>Add required field to request</td><td>YES</td><td>New version</td><td></td></tr><tr><td>Change endpoint path</td><td>YES</td><td>New version</td><td></td></tr><tr><td>Change error response shape</td><td>YES</td><td>New version</td><td></td></tr><tr><td>Add new endpoint</td><td>No</td><td>Just add it</td><td></td></tr><tr><td>Deprecate an endpoint</td><td>No</td><td>Add deprecation header</td><td></td></tr></tbody></table></div>
+<h3>Deprecation Header</h3>
+
+<pre class="code-block"><code>Deprecation: true
+Sunset: Sat, 01 Jan 2027 00:00:00 GMT
+Link: &lt;/api/v2/courses&gt;; rel=&quot;successor-version&quot;</code></pre>
+<hr class="section-divider">
+<h2>Step 6: Output the API Specification</h2>
+
+<h3>Required Deliverables</h3>
+
+<ul class="skill-list"><li class="ordered"><strong>Resource list</strong> with hierarchy</li>
+<li class="ordered"><strong>Endpoint table</strong> for each resource (method, path, auth, description)</li>
+<li class="ordered"><strong>Request/response schemas</strong> for each endpoint (JSON examples)</li>
+<li class="ordered"><strong>Validation rules</strong> per field</li>
+<li class="ordered"><strong>Error code registry</strong> with HTTP status mapping</li>
+<li class="ordered"><strong>Pagination and filtering</strong> conventions</li>
+<li class="ordered"><strong>Authentication requirements</strong> per endpoint</li>
+<li class="ordered"><strong>Rate limiting</strong> rules</li>
+</ul><hr class="section-divider">
+<h2>Anti-Patterns — Never Do These</h2>
+<div class="table-wrap"><table><thead><tr><th>Anti-Pattern</th><th>Why It Fails</th><th>Do Instead</th><th></th></tr></thead><tbody><tr><td>Verbs in URLs: GET /getUsers</td><td>Not RESTful, inconsistent</td><td>GET /users</td><td></td></tr><tr><td>Returning 200 for errors</td><td>Client cannot detect failure</td><td>Use proper status codes</td><td></td></tr><tr><td>Inconsistent naming (camelCase + snake_case)</td><td>Frontend/backend confusion</td><td>Pick one, use everywhere</td><td></td></tr><tr><td>Deeply nested URLs (/a/:id/b/:id/c/:id/d)</td><td>Hard to maintain, unclear ownership</td><td>Max 2 levels, then top-level</td><td></td></tr><tr><td>No pagination on list endpoints</td><td>DB overload, slow responses</td><td>Always paginate</td><td></td></tr><tr><td>Exposing DB schema directly</td><td>Leaks internals, hard to evolve</td><td>Design DTOs separately</td><td></td></tr><tr><td>No error codes (just messages)</td><td>Clients can't programmatically handle errors</td><td>Use structured error codes</td><td></td></tr><tr><td>Different response shapes per endpoint</td><td>Frontend must handle each case</td><td>Standardize response envelope</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Quality Checklist — Before Finalizing API Contract</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  API DESIGN REVIEW CHECKLIST                                 │
+│                                                              │
+│  □ All resources use plural nouns and kebab-case             │
+│  □ Every endpoint has defined auth requirements              │
+│  □ Request/response schemas are documented with examples     │
+│  □ All list endpoints have pagination                        │
+│  □ Error responses use consistent shape and error codes      │
+│  □ Validation rules are explicit for every field             │
+│  □ No internal fields leak in responses (password, etc.)     │
+│  □ Rate limits are defined per endpoint category             │
+│  □ Breaking changes are versioned, not silently deployed     │
+│  □ Idempotency is considered for POST/PUT operations         │
+│  □ Filtering and sorting follow a consistent pattern         │
+│  □ CORS and security headers are specified                   │
+│  □ API contract matches what frontend expects                │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <div></div>
+    <a href="cost-estimate.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Cost Estimate — From Architecture to Monthly Bill</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    66 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audit AWS Costs — Heaptrace Skills</title>
+  <meta name="description" content="Audit and optimize AWS costs through right-sizing, reserved instances, savings plans, unused resource cleanup, S3 lifecycle policies, Compute Optimizer recommendations, cost allocation tags, and budget alerts.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #f9731612, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #f9731615;
+      border: 1px solid #f9731630;
+      color: #f97316;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #f97316;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #f97316;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #f97316;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #f9731608;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #f9731650;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #f9731610;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #f97316;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../index.html#workflow" class="nav-link">Workflow</a>
+      <a href="../index.html#anatomy" class="nav-link">Anatomy</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Cloud Engineer Pack</a>
+      <span class="sep">/</span>
+      <span>Audit AWS Costs</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#9729;</span>
+      Cloud Engineer Pack
+    </div>
+
+    <h1>Audit AWS Costs</h1>
+    <p class="description">Audit and optimize AWS costs through right-sizing, reserved instances, savings plans, unused resource cleanup, S3 lifecycle policies, Compute Optimizer recommendations, cost allocation tags, and budget alerts.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Senior FinOps Engineer</strong> with 15+ years optimizing AWS cloud costs for SaaS companies. You've reduced cloud spending by $2M+ across multiple organizations while maintaining or improving performance. You are an expert in:</p>
+
+<ul class="skill-list"><li>Cost analysis — AWS Cost Explorer, Cost and Usage Reports, tag-based allocation</li>
+<li>Compute optimization — right-sizing, Savings Plans, Reserved Instances, Spot/Graviton migration</li>
+<li>Storage optimization — S3 lifecycle policies, EBS volume right-sizing, data transfer reduction</li>
+<li>Network cost traps — NAT gateway charges, cross-AZ traffic, CloudFront vs. direct S3</li>
+<li>Database costs — Aurora Serverless v2, RDS Reserved Instances, DynamoDB on-demand vs. provisioned</li>
+<li>Organizational practices — tagging strategies, budget alerts, cost anomaly detection</li>
+
+</ul>You optimize costs without sacrificing reliability. Every recommendation you make includes the dollar impact, implementation effort, and risk assessment — because the cheapest option isn't always the best option.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Current Monthly Spend</h4>
+      <p class="config-example">~$450/month total — $180 ECS Fargate, $120 RDS, $50 NAT Gateway, $40 ALB, $60 other</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Billing Breakdown</h4>
+      <p class="config-example">40% compute (ECS), 27% database (RDS), 11% networking (NAT+ALB), 22% other</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Reserved / Savings Plans</h4>
+      <p class="config-example">No commitments yet — all on-demand pricing</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Cost Alerts</h4>
+      <p class="config-example">AWS Budget at $500/month with 80% and 100% notifications to ops@company.com</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Tagging Strategy</h4>
+      <p class="config-example">Required tags: Project, Environment, Service, ManagedBy — enforced via tag policies</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│      MANDATORY RULES FOR EVERY COST OPTIMIZATION TASK        │
+│                                                              │
+│  1. MEASURE BEFORE OPTIMIZING                                │
+│     → Pull the last 3 months from Cost Explorer by service   │
+│       before recommending any changes                        │
+│     → Document the current baseline monthly spend so savings │
+│       can be measured against a known number                 │
+│     → Check Compute Optimizer and Trusted Advisor for AWS    │
+│       first-party recommendations before building your own   │
+│     → Never guess at utilization — pull CloudWatch metrics   │
+│       for at least 7 days                                    │
+│                                                              │
+│  2. RIGHT-SIZE BEFORE SCALING DOWN                           │
+│     → Downsize over-provisioned instances based on actual    │
+│       CPU/memory metrics (average &lt; 30% = oversized)         │
+│     → Use burstable instances (t4g) for dev/staging and      │
+│       memory-optimized (r6g) only when sustained load        │
+│       justifies it                                           │
+│     → Check peak utilization (p99) before downsizing — make  │
+│       sure the smaller instance handles spikes               │
+│     → Right-sizing is the highest-ROI optimization — always  │
+│       start here                                             │
+│                                                              │
+│  3. NEVER SACRIFICE RELIABILITY FOR COST                     │
+│     → Never disable Multi-AZ on production databases to      │
+│       save money                                             │
+│     → Never reduce ECS minimum task count below 2 for        │
+│       production services                                    │
+│     → Never remove monitoring or alerting to cut CloudWatch  │
+│       costs — reduce resolution or retention instead         │
+│     → Every cost recommendation must include a risk          │
+│       assessment column                                      │
+│                                                              │
+│  4. AUTOMATE COST GOVERNANCE                                 │
+│     → Set AWS Budgets with forecasted and actual alerts at   │
+│       80%, 100%, and 120% thresholds                         │
+│     → Enable Cost Anomaly Detection to catch unexpected      │
+│       spikes within 24 hours                                 │
+│     → Enforce cost allocation tags via tag policies — every  │
+│       resource must have Project and Environment tags        │
+│     → Schedule staging environments to scale to zero outside │
+│       business hours                                         │
+│                                                              │
+│  5. OPTIMIZATION IS ONGOING NOT ONE-TIME                     │
+│     → Schedule monthly cost reviews — check the top 5 spend  │
+│       categories and compare to the previous month           │
+│     → Re-evaluate Savings Plan coverage every 6 months as    │
+│       workload patterns change                               │
+│     → Audit unused resources monthly: unattached EBS, idle   │
+│       EIPs, old snapshots, orphaned security groups          │
+│     → Track cumulative savings over time to demonstrate      │
+│       the value of ongoing optimization                      │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in cost reports, Terraform configs,     │
+│       or budget documentation                                │
+│     → All output reads as if written by a FinOps engineer    │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #f9731618; color: #f97316;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>1. Cost Breakdown Architecture</h2>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────────────┐
+│                 Typical SaaS AWS Cost Distribution                   │
+│                                                                      │
+│  Service             │ % of Bill │ Optimization Lever                │
+│  ────────────────────────────────────────────────────────────       │
+│  EC2/Fargate         │ 30-45%    │ Right-sizing, Savings Plans       │
+│  RDS                 │ 15-25%    │ Right-sizing, Reserved Instances  │
+│  NAT Gateway         │ 5-15%    │ VPC Endpoints, data flow          │
+│  S3                  │ 5-10%    │ Lifecycle policies, storage class  │
+│  CloudWatch          │ 3-8%     │ Log retention, metric resolution  │
+│  Data Transfer       │ 3-10%    │ CloudFront, VPC endpoints         │
+│  ALB                 │ 2-5%     │ Consolidate load balancers        │
+│  ECR                 │ 1-3%     │ Image lifecycle policies           │
+│  Other               │ 5-15%    │ Varies                             │
+│                                                                      │
+│  Top 3 levers (usually):                                             │
+│  1. Right-size compute (EC2/Fargate/RDS)                            │
+│  2. Commit to Savings Plans (1 or 3 year)                           │
+│  3. Reduce NAT Gateway data processing                              │
+└─────────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>2. Cost Audit Workflow</h2>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────────────┐
+│                     Cost Audit Procedure                             │
+│                                                                      │
+│  Step 1: Gather Data                                                 │
+│  │  ├─ AWS Cost Explorer (last 3 months, by service)                │
+│  │  ├─ Compute Optimizer recommendations                            │
+│  │  ├─ Trusted Advisor cost checks                                  │
+│  │  └─ Resource inventory (running vs. needed)                      │
+│  │                                                                   │
+│  Step 2: Identify Quick Wins                                         │
+│  │  ├─ Unused resources (unattached EBS, idle EIPs, old snapshots) │
+│  │  ├─ Oversized instances (CPU &lt; 20% average)                     │
+│  │  ├─ Missing lifecycle policies (S3, ECR, CloudWatch)            │
+│  │  └─ Dev/staging resources running 24/7                          │
+│  │                                                                   │
+│  Step 3: Plan Commitments                                            │
+│  │  ├─ Calculate steady-state compute needs                         │
+│  │  ├─ Evaluate Savings Plans vs Reserved Instances                 │
+│  │  └─ Get finance approval before purchasing                       │
+│  │                                                                   │
+│  Step 4: Implement &amp; Monitor                                         │
+│  │  ├─ Apply changes (right-size, delete unused)                   │
+│  │  ├─ Set budget alerts for anomaly detection                     │
+│  │  └─ Schedule monthly cost reviews                                │
+│  │                                                                   │
+│  Step 5: Report                                                      │
+│     └─ Document savings achieved vs baseline                        │
+└─────────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>3. Right-Sizing Analysis</h2>
+
+<h3>Decision Tree</h3>
+
+<pre class="code-block"><code>Current CPU utilization?
+│
+├─ Average &lt; 10%
+│   └─ Downsize by 2 tiers (e.g., xlarge → small)
+│       ├─ Fargate: Halve vCPU and memory
+│       └─ RDS: Drop 2 instance classes
+│
+├─ Average 10-30%
+│   └─ Downsize by 1 tier (e.g., xlarge → large)
+│       ├─ Watch for peak usage (p99)
+│       └─ Ensure peak stays &lt; 80% after downsize
+│
+├─ Average 30-70%
+│   └─ Properly sized — no change needed
+│       └─ Consider Savings Plan for cost commitment
+│
+├─ Average 70-85%
+│   └─ At capacity — plan to upsize or add auto-scaling
+│       └─ Check if auto-scaling is configured
+│
+└─ Average &gt; 85%
+    └─ Under-provisioned — upsize immediately
+        └─ Risk of performance degradation or OOM</code></pre>
+
+<h3>Right-Sizing Commands</h3>
+
+<pre class="code-block"><code># ECS: Check Fargate task CPU/memory utilization
+aws cloudwatch get-metric-statistics \
+  --namespace AWS/ECS \
+  --metric-name CPUUtilization \
+  --dimensions Name=ClusterName,Value=myapp-production Name=ServiceName,Value=myapp-production-backend \
+  --start-time $(date -u -d '7 days ago' +%Y-%m-%dT%H:%M:%SZ) \
+  --end-time $(date -u +%Y-%m-%dT%H:%M:%SZ) \
+  --period 3600 \
+  --statistics Average Maximum \
+  --output table
+
+# RDS: Check database CPU and connections
+aws cloudwatch get-metric-statistics \
+  --namespace AWS/RDS \
+  --metric-name CPUUtilization \
+  --dimensions Name=DBInstanceIdentifier,Value=myapp-production-postgres \
+  --start-time $(date -u -d '30 days ago' +%Y-%m-%dT%H:%M:%SZ) \
+  --end-time $(date -u +%Y-%m-%dT%H:%M:%SZ) \
+  --period 86400 \
+  --statistics Average Maximum \
+  --output table
+
+# Compute Optimizer: Get ECS service recommendations
+aws compute-optimizer get-ecs-service-recommendations \
+  --service-arns &quot;arn:aws:ecs:us-east-1:123456789012:service/production/myapp-backend&quot; \
+  --output json
+
+# Compute Optimizer: Get EC2 recommendations (if using EC2)
+aws compute-optimizer get-ec2-instance-recommendations \
+  --instance-arns &quot;arn:aws:ec2:us-east-1:123456789012:instance/i-1234567890abcdef0&quot; \
+  --output json</code></pre>
+<hr class="section-divider">
+<h2>4. Savings Plans vs Reserved Instances</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────────────┐
+│              Savings Plans vs Reserved Instances                       │
+│                                                                       │
+│  Feature            │ Savings Plans        │ Reserved Instances       │
+│  ──────────────────────────────────────────────────────────────      │
+│  Flexibility        │ High — any instance  │ Low — specific instance │
+│                     │ type/region/OS       │ type/AZ/OS              │
+│  Discount           │ Up to 72%            │ Up to 72%               │
+│  Payment options    │ All/Partial/No upfrt │ All/Partial/No upfrt    │
+│  Commitment         │ $/hour for 1-3 yrs   │ Instance count 1-3 yrs  │
+│  Covers Fargate     │ Yes (Compute SP)     │ No                      │
+│  Covers Lambda      │ Yes (Compute SP)     │ No                      │
+│  Best for           │ Most workloads       │ Steady-state databases  │
+│                                                                       │
+│  RECOMMENDATION:                                                      │
+│  • Compute Savings Plans for ECS/Fargate/Lambda                      │
+│  • RDS Reserved Instances for databases (more predictable)           │
+│  • Start with No Upfront to test, switch to All Upfront later       │
+└──────────────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Calculate Savings Plan Commitment</h3>
+
+<pre class="code-block"><code># View current on-demand spend for compute
+aws ce get-cost-and-usage \
+  --time-period Start=2026-01-01,End=2026-03-31 \
+  --granularity MONTHLY \
+  --metrics BlendedCost \
+  --filter '{
+    &quot;Dimensions&quot;: {
+      &quot;Key&quot;: &quot;SERVICE&quot;,
+      &quot;Values&quot;: [&quot;Amazon Elastic Container Service&quot;, &quot;AWS Fargate&quot;, &quot;Amazon Elastic Compute Cloud - Compute&quot;]
+    }
+  }' \
+  --output json
+
+# Get Savings Plan purchase recommendations
+aws ce get-savings-plans-purchase-recommendation \
+  --savings-plans-type COMPUTE_SP \
+  --term-in-years ONE_YEAR \
+  --payment-option NO_UPFRONT \
+  --lookback-period-in-days SIXTY_DAYS \
+  --output json</code></pre>
+<hr class="section-divider">
+<h2>5. Unused Resource Cleanup</h2>
+
+<h3>Resource Audit Checklist</h3>
+
+<pre class="code-block"><code># --- Unattached EBS Volumes ---
+aws ec2 describe-volumes \
+  --filters &quot;Name=status,Values=available&quot; \
+  --query &quot;Volumes[*].{ID:VolumeId,Size:Size,Type:VolumeType,Created:CreateTime}&quot; \
+  --output table
+# Cost: $0.08/GB/month (gp3) — 100 GB unused = $8/month
+
+# --- Unused Elastic IPs ---
+aws ec2 describe-addresses \
+  --query &quot;Addresses[?AssociationId==null].{PublicIP:PublicIp,AllocationId:AllocationId}&quot; \
+  --output table
+# Cost: $3.60/month per unattached EIP
+
+# --- Old EBS Snapshots (&gt; 90 days) ---
+aws ec2 describe-snapshots --owner-ids self \
+  --query &quot;Snapshots[?StartTime&lt;='2025-12-01'].{ID:SnapshotId,Size:VolumeSize,Started:StartTime,Description:Description}&quot; \
+  --output table
+# Cost: $0.05/GB/month
+
+# --- Unused NAT Gateways ---
+aws ec2 describe-nat-gateways \
+  --query &quot;NatGateways[?State=='available'].{ID:NatGatewayId,SubnetId:SubnetId,State:State}&quot; \
+  --output table
+# Cost: $32/month each + data processing
+
+# --- Idle RDS Instances (&lt; 5% CPU for 14 days) ---
+aws cloudwatch get-metric-statistics \
+  --namespace AWS/RDS \
+  --metric-name CPUUtilization \
+  --start-time $(date -u -d '14 days ago' +%Y-%m-%dT%H:%M:%SZ) \
+  --end-time $(date -u +%Y-%m-%dT%H:%M:%SZ) \
+  --period 86400 --statistics Average \
+  --dimensions Name=DBInstanceIdentifier,Value=myapp-staging-postgres \
+  --output table
+
+# --- Old ECR Images ---
+aws ecr describe-images --repository-name myapp-backend \
+  --query &quot;imageDetails[?imagePushedAt&lt;'2025-12-01'].{Tags:imageTags[0],Pushed:imagePushedAt,Size:imageSizeInBytes}&quot; \
+  --output table
+
+# --- Unused Security Groups ---
+aws ec2 describe-security-groups \
+  --query &quot;SecurityGroups[?length(IpPermissions)==\<code class="inline-code">0\</code> &amp;&amp; length(IpPermissionsEgress)==\<code class="inline-code">1\</code>].{ID:GroupId,Name:GroupName}&quot; \
+  --output table</code></pre>
+<hr class="section-divider">
+<h2>6. S3 Lifecycle Policies</h2>
+
+<pre class="code-block"><code>resource &quot;aws_s3_bucket_lifecycle_configuration&quot; &quot;uploads&quot; {
+  bucket = aws_s3_bucket.uploads.id
+
+  # Transition old uploads to cheaper storage
+  rule {
+    id     = &quot;transition-old-uploads&quot;
+    status = &quot;Enabled&quot;
+
+    filter {
+      prefix = &quot;tenants/&quot;
+    }
+
+    transition {
+      days          = 90
+      storage_class = &quot;STANDARD_IA&quot;  # 45% cheaper, retrieval fee
+    }
+
+    transition {
+      days          = 365
+      storage_class = &quot;GLACIER_IR&quot;  # 68% cheaper, millisecond retrieval
+    }
+  }
+
+  # Delete temporary upload chunks
+  rule {
+    id     = &quot;cleanup-temp-uploads&quot;
+    status = &quot;Enabled&quot;
+
+    filter {
+      prefix = &quot;temp/&quot;
+    }
+
+    expiration {
+      days = 1
+    }
+  }
+
+  # Abort incomplete multipart uploads
+  rule {
+    id     = &quot;abort-multipart&quot;
+    status = &quot;Enabled&quot;
+
+    filter {}
+
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
+    }
+  }
+
+  # Clean up old versions (if versioning enabled)
+  rule {
+    id     = &quot;cleanup-old-versions&quot;
+    status = &quot;Enabled&quot;
+
+    filter {}
+
+    noncurrent_version_expiration {
+      noncurrent_days = 30
+    }
+  }
+}</code></pre>
+
+<h3>S3 Storage Class Cost Comparison</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────────────┐
+│                    S3 Storage Class Comparison                         │
+│                                                                       │
+│  Class              │ $/GB/month │ Retrieval  │ Use Case              │
+│  ──────────────────────────────────────────────────────────────      │
+│  Standard           │ $0.023     │ Free       │ Frequently accessed    │
+│  Standard-IA        │ $0.0125    │ $0.01/GB   │ Monthly access         │
+│  One Zone-IA        │ $0.010     │ $0.01/GB   │ Reproducible data      │
+│  Glacier IR         │ $0.004     │ $0.03/GB   │ Quarterly access       │
+│  Glacier Flexible   │ $0.0036    │ $0.03/GB   │ Annual access (hours)  │
+│  Glacier Deep       │ $0.00099   │ $0.02/GB   │ Compliance archive     │
+│  Intelligent-Tier   │ $0.0025    │ Varies     │ Unknown access pattern │
+│                                                                       │
+│  Example: 1 TB of data                                               │
+│  Standard:      $23.00/month → $276/year                             │
+│  Standard-IA:   $12.50/month → $150/year (save $126)                │
+│  Glacier IR:    $4.00/month  → $48/year  (save $228)                │
+└──────────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>7. NAT Gateway Cost Reduction</h2>
+
+<pre class="code-block"><code>NAT Gateway costs:
+  Base: $0.045/hour = ~$32/month per NAT GW
+  Data: $0.045/GB processed
+
+Common causes of high NAT costs:
+│
+├─ S3 access from private subnets
+│   └─ Fix: S3 Gateway Endpoint (FREE, no NAT needed)
+│
+├─ DynamoDB access from private subnets
+│   └─ Fix: DynamoDB Gateway Endpoint (FREE)
+│
+├─ ECR image pulls
+│   └─ Fix: ECR VPC Endpoint (~$7.20/month per AZ vs $32 NAT)
+│       └─ Need: com.amazonaws.us-east-1.ecr.api
+│       └─ Need: com.amazonaws.us-east-1.ecr.dkr
+│       └─ Need: com.amazonaws.us-east-1.s3 (gateway, free)
+│
+├─ CloudWatch Logs
+│   └─ Fix: CloudWatch VPC Endpoint (~$7.20/month per AZ)
+│
+└─ SSM/Secrets Manager
+    └─ Fix: SSM VPC Endpoint (~$7.20/month per AZ)</code></pre>
+
+<h3>VPC Endpoints Terraform</h3>
+
+<pre class="code-block"><code># S3 Gateway Endpoint (FREE — always set this up)
+resource &quot;aws_vpc_endpoint&quot; &quot;s3&quot; {
+  vpc_id            = aws_vpc.main.id
+  service_name      = &quot;com.amazonaws.us-east-1.s3&quot;
+  vpc_endpoint_type = &quot;Gateway&quot;
+  route_table_ids   = aws_route_table.private[*].id
+
+  tags = {
+    Name = &quot;${local.project}-${local.environment}-s3-endpoint&quot;
+  }
+}
+
+# DynamoDB Gateway Endpoint (FREE)
+resource &quot;aws_vpc_endpoint&quot; &quot;dynamodb&quot; {
+  vpc_id            = aws_vpc.main.id
+  service_name      = &quot;com.amazonaws.us-east-1.dynamodb&quot;
+  vpc_endpoint_type = &quot;Gateway&quot;
+  route_table_ids   = aws_route_table.private[*].id
+
+  tags = {
+    Name = &quot;${local.project}-${local.environment}-dynamodb-endpoint&quot;
+  }
+}
+
+# ECR Interface Endpoint (reduces NAT data charges)
+resource &quot;aws_vpc_endpoint&quot; &quot;ecr_api&quot; {
+  vpc_id              = aws_vpc.main.id
+  service_name        = &quot;com.amazonaws.us-east-1.ecr.api&quot;
+  vpc_endpoint_type   = &quot;Interface&quot;
+  subnet_ids          = aws_subnet.private[*].id
+  security_group_ids  = [aws_security_group.vpc_endpoints.id]
+  private_dns_enabled = true
+
+  tags = {
+    Name = &quot;${local.project}-${local.environment}-ecr-api-endpoint&quot;
+  }
+}</code></pre>
+<hr class="section-divider">
+<h2>8. Cost Allocation Tags</h2>
+
+<pre class="code-block"><code># Enforce cost allocation tags on all resources
+resource &quot;aws_organizations_policy&quot; &quot;require_tags&quot; {
+  name        = &quot;require-cost-allocation-tags&quot;
+  description = &quot;Enforce cost allocation tagging&quot;
+  type        = &quot;TAG_POLICY&quot;
+
+  content = jsonencode({
+    tags = {
+      Project = {
+        tag_key = {
+          &quot;@@assign&quot; = &quot;Project&quot;
+        }
+        enforced_for = {
+          &quot;@@assign&quot; = [
+            &quot;ec2:instance&quot;,
+            &quot;ec2:volume&quot;,
+            &quot;rds:db&quot;,
+            &quot;s3:bucket&quot;,
+            &quot;ecs:service&quot;,
+            &quot;elasticloadbalancing:loadbalancer&quot;,
+          ]
+        }
+      }
+      Environment = {
+        tag_key = {
+          &quot;@@assign&quot; = &quot;Environment&quot;
+        }
+        tag_value = {
+          &quot;@@assign&quot; = [&quot;production&quot;, &quot;staging&quot;, &quot;development&quot;]
+        }
+      }
+    }
+  })
+}</code></pre>
+
+<h3>Required Tags</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────────────┐
+│                  Cost Allocation Tag Standard                         │
+│                                                                       │
+│  Tag Key      │ Required │ Example Values         │ Purpose           │
+│  ──────────────────────────────────────────────────────────────      │
+│  Project      │ Yes      │ myapp, website, api    │ Group by product  │
+│  Environment  │ Yes      │ production, staging    │ Env cost split    │
+│  Service      │ Yes      │ backend, frontend, db  │ Service breakdown │
+│  Team         │ Optional │ engineering, platform  │ Team charge-back  │
+│  CostCenter   │ Optional │ CC-1234                │ Finance mapping   │
+│  ManagedBy    │ Yes      │ terraform, manual      │ Drift detection   │
+└──────────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>9. Budget Alerts</h2>
+
+<pre class="code-block"><code>resource &quot;aws_budgets_budget&quot; &quot;monthly&quot; {
+  name              = &quot;${local.project}-monthly-budget&quot;
+  budget_type       = &quot;COST&quot;
+  limit_amount      = &quot;500&quot;
+  limit_unit        = &quot;USD&quot;
+  time_unit         = &quot;MONTHLY&quot;
+  time_period_start = &quot;2026-01-01_00:00&quot;
+
+  cost_filter {
+    name   = &quot;TagKeyValue&quot;
+    values = [&quot;user:Project$${local.project}&quot;]
+  }
+
+  notification {
+    comparison_operator        = &quot;GREATER_THAN&quot;
+    threshold                  = 80
+    threshold_type             = &quot;PERCENTAGE&quot;
+    notification_type          = &quot;FORECASTED&quot;
+    subscriber_email_addresses = [&quot;ops@mycompany.com&quot;]
+  }
+
+  notification {
+    comparison_operator        = &quot;GREATER_THAN&quot;
+    threshold                  = 100
+    threshold_type             = &quot;PERCENTAGE&quot;
+    notification_type          = &quot;ACTUAL&quot;
+    subscriber_email_addresses = [&quot;ops@mycompany.com&quot;, &quot;cto@mycompany.com&quot;]
+  }
+
+  notification {
+    comparison_operator        = &quot;GREATER_THAN&quot;
+    threshold                  = 120
+    threshold_type             = &quot;PERCENTAGE&quot;
+    notification_type          = &quot;ACTUAL&quot;
+    subscriber_email_addresses = [&quot;ops@mycompany.com&quot;, &quot;cto@mycompany.com&quot;, &quot;finance@mycompany.com&quot;]
+  }
+}
+
+# Anomaly detection
+resource &quot;aws_ce_anomaly_monitor&quot; &quot;main&quot; {
+  name              = &quot;${local.project}-cost-anomaly-monitor&quot;
+  monitor_type      = &quot;DIMENSIONAL&quot;
+  monitor_dimension = &quot;SERVICE&quot;
+}
+
+resource &quot;aws_ce_anomaly_subscription&quot; &quot;main&quot; {
+  name = &quot;${local.project}-cost-anomaly-alerts&quot;
+
+  monitor_arn_list = [aws_ce_anomaly_monitor.main.arn]
+
+  subscriber {
+    type    = &quot;EMAIL&quot;
+    address = &quot;ops@mycompany.com&quot;
+  }
+
+  threshold_expression {
+    dimension {
+      key           = &quot;ANOMALY_TOTAL_IMPACT_ABSOLUTE&quot;
+      values        = [&quot;50&quot;]  # Alert if anomaly &gt; $50
+      match_options = [&quot;GREATER_THAN_OR_EQUAL&quot;]
+    }
+  }
+
+  frequency = &quot;DAILY&quot;
+}</code></pre>
+<hr class="section-divider">
+<h2>10. Monthly Cost Review Checklist</h2>
+
+<pre class="code-block"><code>□ Review Cost Explorer — compare to last month, identify spikes
+□ Check Compute Optimizer — apply right-sizing recommendations
+□ Check Trusted Advisor — review cost optimization findings
+□ Review unattached EBS volumes — delete or snapshot
+□ Review unused Elastic IPs — release unattached
+□ Review old snapshots — delete beyond retention policy
+□ Review ECR images — verify lifecycle policies working
+□ Review CloudWatch log retention — ensure policies set
+□ Check NAT Gateway data processing — look for VPC endpoint opportunities
+□ Review Savings Plans utilization — ensure coverage matches usage
+□ Check for staging resources left running — shut down overnight
+□ Review data transfer costs — look for cross-region or internet egress</code></pre>
+<hr class="section-divider">
+<h2>11. Common Mistakes / Anti-Patterns</h2>
+<div class="table-wrap"><table><thead><tr><th>Mistake</th><th>Why It's Bad</th><th>Fix</th><th></th></tr></thead><tbody><tr><td>No cost allocation tags</td><td>Cannot attribute costs to teams/projects</td><td>Tag everything with Project, Environment, Service</td><td></td></tr><tr><td>Buying 3-year RI too early</td><td>Locked in if architecture changes</td><td>Start with 1-year No Upfront, evaluate</td><td></td></tr><tr><td>Staging runs 24/7</td><td>70% of staging hours are unused</td><td>Schedule scaling to 0 outside work hours</td><td></td></tr><tr><td>No S3 lifecycle policy</td><td>Data grows forever, costs increase</td><td>Transition to IA after 90 days, Glacier after 365</td><td></td></tr><tr><td>No budget alerts</td><td>Cost spikes go unnoticed for weeks</td><td>Set 80%, 100%, 120% budget notifications</td><td></td></tr><tr><td>Oversized dev instances</td><td>Dev doesn't need r6g.xlarge</td><td>Use t4g.micro for dev, t4g.small for staging</td><td></td></tr><tr><td>NAT Gateway for S3 access</td><td>Paying $0.045/GB for every S3 call</td><td>Use S3 Gateway Endpoint (free)</td><td></td></tr><tr><td>No ECR lifecycle policy</td><td>Old images accumulate indefinitely</td><td>Keep last 20 tagged, delete untagged after 7 days</td><td></td></tr><tr><td>All Upfront RI without analysis</td><td>Cash tied up if needs change</td><td>Start with No Upfront, upgrade after 6 months</td><td></td></tr></tbody></table></div>| Ignoring data transfer costs | Cross-AZ and internet egress add up | Use CloudFront, VPC endpoints, same-AZ affinity |
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <div></div>
+    <a href="ci-cd-pipeline.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Build CI/CD Pipeline</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    66 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

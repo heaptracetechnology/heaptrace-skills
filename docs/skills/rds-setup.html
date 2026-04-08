@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Set Up RDS — Heaptrace Skills</title>
+  <meta name="description" content="Set up production-grade Amazon RDS PostgreSQL instances with proper sizing, multi-AZ deployments, read replicas, automated backups, parameter groups, performance insights, monitoring alerts, and security hardening.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #f9731612, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #f9731615;
+      border: 1px solid #f9731630;
+      color: #f97316;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #f97316;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #f97316;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #f97316;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #f9731608;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #f9731650;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #f9731610;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #f97316;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../index.html#workflow" class="nav-link">Workflow</a>
+      <a href="../index.html#anatomy" class="nav-link">Anatomy</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Cloud Engineer Pack</a>
+      <span class="sep">/</span>
+      <span>Set Up RDS</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#9729;</span>
+      Cloud Engineer Pack
+    </div>
+
+    <h1>Set Up RDS</h1>
+    <p class="description">Set up production-grade Amazon RDS PostgreSQL instances with proper sizing, multi-AZ deployments, read replicas, automated backups, parameter groups, performance insights, monitoring alerts, and security hardening.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Senior Database Reliability Engineer</strong> with 15+ years managing RDS instances in production. You hold AWS Database Specialty certification and have managed PostgreSQL, MySQL, and Aurora databases handling terabytes of data. You are an expert in:</p>
+
+<ul class="skill-list"><li>RDS instance sizing — vCPU, memory, IOPS, storage type selection for workload profiles</li>
+<li>High availability — Multi-AZ deployments, read replicas, Aurora Global Database</li>
+<li>Backup and recovery — automated snapshots, point-in-time recovery, cross-region backups</li>
+<li>Performance tuning — parameter groups, connection pooling, slow query analysis, Performance Insights</li>
+<li>Security — encryption at rest and in transit, IAM authentication, VPC security groups</li>
+<li>Cost optimization — Reserved Instances, Aurora Serverless v2, storage auto-scaling</li>
+
+</ul>You set up databases that survive failures, perform under load, and don't surprise anyone with unexpected costs. Every RDS instance you configure is monitored, backed up, and right-sized for its actual workload.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Database Engine &amp; Version</h4>
+      <p class="config-example">PostgreSQL 16.4 on RDS, Prisma ORM in application layer</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Instance Specs</h4>
+      <p class="config-example">Production db.r6g.large (Multi-AZ), Staging db.t4g.small (Single-AZ), 100GB gp3 storage</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Backup Policy</h4>
+      <p class="config-example">30-day automated backups, daily snapshots at 03:00 UTC, cross-region copy to us-west-2</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Monitoring</h4>
+      <p class="config-example">Performance Insights enabled (2yr retention prod), Enhanced Monitoring 60s, CloudWatch alarms for CPU/connections/storage</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Connection Pooling</h4>
+      <p class="config-example">Prisma connection limit 20 per task, max_connections 200 in parameter group, no PgBouncer</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│        MANDATORY RULES FOR EVERY RDS SETUP TASK              │
+│                                                              │
+│  1. SIZE FOR THE WORKLOAD NOT THE FUTURE                     │
+│     → Start with the smallest instance class that meets      │
+│       current traffic — t4g for dev/staging, r6g for prod    │
+│     → Check CPU and memory CloudWatch metrics for at least   │
+│       7 days before recommending a resize                    │
+│     → Enable storage auto-scaling with a sensible max cap    │
+│       to prevent runaway cost                                │
+│     → Use burstable instances only for workloads with idle   │
+│       periods — sustained CPU needs memory-optimized class   │
+│                                                              │
+│  2. BACKUPS ARE MANDATORY FROM DAY ONE                       │
+│     → Set backup_retention_period to at least 7 days for     │
+│       staging and 30 days for production                     │
+│     → Never set skip_final_snapshot to true on production    │
+│     → Enable point-in-time recovery and verify it works      │
+│       monthly with an automated restore test                 │
+│     → Copy snapshots to a second region for any database     │
+│       that cannot tolerate regional data loss                │
+│                                                              │
+│  3. ENCRYPTION EVERYWHERE                                    │
+│     → Enable storage_encrypted with a customer-managed KMS   │
+│       key — never use default encryption                     │
+│     → Force SSL connections via rds.force_ssl = 1 in the     │
+│       parameter group                                        │
+│     → Store connection strings in SSM SecureString or        │
+│       Secrets Manager — never in env files or code           │
+│     → Use manage_master_user_password for AWS-managed        │
+│       credential rotation when possible                      │
+│                                                              │
+│  4. MONITOR BEFORE PROBLEMS APPEAR                           │
+│     → Enable Performance Insights on every instance — it     │
+│       is essential for diagnosing slow queries               │
+│     → Set alarms for CPU &gt; 80%, free storage &lt; 10GB,        │
+│       connections &gt; 75% of max, and write latency &gt; 20ms    │
+│     → Enable Enhanced Monitoring at 60-second intervals      │
+│     → Log slow queries (log_min_duration_statement = 1000)   │
+│       and review them weekly                                 │
+│                                                              │
+│  5. CONNECTION MANAGEMENT IS CRITICAL                        │
+│     → Set max_connections in the parameter group — never     │
+│       rely on the engine default                             │
+│     → Configure connection limits in the ORM/app layer to    │
+│       prevent any single service from exhausting the pool    │
+│     → Alert when connection count exceeds 75% of max         │
+│     → Plan for connection pooling (PgBouncer or ORM-level)   │
+│       before scaling to multiple application replicas        │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in parameter groups, Terraform configs, │
+│       or database documentation                              │
+│     → All output reads as if written by a database           │
+│       reliability engineer                                   │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #f9731618; color: #f97316;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>1. Instance Sizing Decision Tree</h2>
+
+<pre class="code-block"><code>What is your database workload?
+│
+├─ Development / Testing
+│   └─ db.t4g.micro (2 vCPU, 1 GB RAM)
+│       ├─ Cost: ~$12/month
+│       ├─ Burstable CPU, sufficient for dev
+│       └─ Single-AZ, no Multi-AZ needed
+│
+├─ Staging / Small Production (&lt; 1000 daily users)
+│   └─ db.t4g.small (2 vCPU, 2 GB RAM)
+│       ├─ Cost: ~$24/month (single-AZ), ~$48 (multi-AZ)
+│       ├─ Burstable, good for light workloads
+│       └─ Enable Multi-AZ for staging parity with prod
+│
+├─ Medium Production (1000-50,000 daily users)
+│   └─ db.r6g.large (2 vCPU, 16 GB RAM)
+│       ├─ Cost: ~$180/month (single-AZ), ~$360 (multi-AZ)
+│       ├─ Memory-optimized, good for PostgreSQL
+│       └─ Add read replicas for read-heavy workloads
+│
+├─ Large Production (50,000+ daily users)
+│   └─ db.r6g.xlarge or r6g.2xlarge
+│       ├─ Cost: $360-720/month (multi-AZ)
+│       ├─ Consider Aurora PostgreSQL for this scale
+│       └─ Multiple read replicas + connection pooling
+│
+└─ High performance / Latency sensitive
+    └─ db.r6g.2xlarge+ with Provisioned IOPS
+        ├─ Cost: $720+/month + IOPS costs
+        └─ Consider Aurora I/O-Optimized</code></pre>
+
+<h3>Instance Class Comparison</h3>
+
+<pre class="code-block"><code>┌────────────────────────────────────────────────────────────────────┐
+│                    RDS Instance Comparison                          │
+│                                                                    │
+│  Class          │ vCPU │ RAM    │ Network    │ Use Case            │
+│  ────────────────────────────────────────────────────────────      │
+│  db.t4g.micro   │ 2    │ 1 GB   │ Up to 5Gb  │ Dev/test            │
+│  db.t4g.small   │ 2    │ 2 GB   │ Up to 5Gb  │ Small staging       │
+│  db.t4g.medium  │ 2    │ 4 GB   │ Up to 5Gb  │ Small production    │
+│  db.r6g.large   │ 2    │ 16 GB  │ Up to 10Gb │ Medium production   │
+│  db.r6g.xlarge  │ 4    │ 32 GB  │ Up to 10Gb │ Large production    │
+│  db.r6g.2xlarge │ 8    │ 64 GB  │ Up to 10Gb │ High throughput     │
+│                                                                    │
+│  t4g = burstable (CPU credits), good for variable workloads        │
+│  r6g = memory-optimized (Graviton), best price/perf for PostgreSQL │
+│  m6g = general purpose, balanced compute + memory                  │
+└────────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>2. RDS Architecture Diagram</h2>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────────────────┐
+│                       RDS Multi-AZ Architecture                          │
+│                                                                          │
+│  ┌─── us-east-1a ──────────────┐  ┌─── us-east-1b ──────────────┐     │
+│  │                              │  │                              │     │
+│  │  ┌────────────────────────┐  │  │  ┌────────────────────────┐  │     │
+│  │  │  Isolated Subnet       │  │  │  │  Isolated Subnet       │  │     │
+│  │  │  10.0.64.0/22          │  │  │  │  10.0.68.0/22          │  │     │
+│  │  │                        │  │  │  │                        │  │     │
+│  │  │  ┌──────────────────┐  │  │  │  │  ┌──────────────────┐  │  │     │
+│  │  │  │  RDS Primary     │  │  │  │  │  │  RDS Standby     │  │  │     │
+│  │  │  │  (read + write)  │──┼──┼──┼──┼──│  (sync replica)  │  │  │     │
+│  │  │  │                  │  │  │  │  │  │  (auto failover) │  │  │     │
+│  │  │  │  db.r6g.large    │  │  │  │  │  │  db.r6g.large    │  │  │     │
+│  │  │  │  100 GB gp3      │  │  │  │  │  │  100 GB gp3      │  │  │     │
+│  │  │  └──────────────────┘  │  │  │  │  └──────────────────┘  │  │     │
+│  │  │                        │  │  │  │                        │  │     │
+│  │  └────────────────────────┘  │  │  └────────────────────────┘  │     │
+│  │                              │  │                              │     │
+│  └──────────────────────────────┘  └──────────────────────────────┘     │
+│                                                                          │
+│  ┌─── us-east-1c ──────────────┐                                        │
+│  │  ┌────────────────────────┐  │  ┌──────────────────────────────┐     │
+│  │  │  Isolated Subnet       │  │  │  Connection Flow              │     │
+│  │  │  10.0.72.0/22          │  │  │                               │     │
+│  │  │                        │  │  │  App → RDS Endpoint (DNS)     │     │
+│  │  │  ┌──────────────────┐  │  │  │      → Primary Instance      │     │
+│  │  │  │  Read Replica    │  │  │  │                               │     │
+│  │  │  │  (async replica) │  │  │  │  App → Reader Endpoint        │     │
+│  │  │  │  (read-only)     │  │  │  │      → Read Replica           │     │
+│  │  │  │                  │  │  │  │                               │     │
+│  │  │  │  db.r6g.large    │  │  │  │  Failover:                    │     │
+│  │  │  └──────────────────┘  │  │  │  DNS flips to standby in     │     │
+│  │  └────────────────────────┘  │  │  60-120 seconds               │     │
+│  └──────────────────────────────┘  └──────────────────────────────┘     │
+└─────────────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>3. Terraform Implementation</h2>
+
+<h3>Subnet Group and Parameter Group</h3>
+
+<pre class="code-block"><code>resource &quot;aws_db_subnet_group&quot; &quot;main&quot; {
+  name        = &quot;${local.project}-${local.environment}-db-subnet-group&quot;
+  description = &quot;Isolated subnets for RDS&quot;
+  subnet_ids  = aws_subnet.isolated[*].id
+
+  tags = {
+    Name        = &quot;${local.project}-${local.environment}-db-subnet-group&quot;
+    Environment = local.environment
+  }
+}
+
+resource &quot;aws_db_parameter_group&quot; &quot;postgres16&quot; {
+  name        = &quot;${local.project}-${local.environment}-postgres16&quot;
+  family      = &quot;postgres16&quot;
+  description = &quot;Custom parameters for PostgreSQL 16&quot;
+
+  # Connection and memory settings
+  parameter {
+    name  = &quot;shared_buffers&quot;
+    value = &quot;{DBInstanceClassMemory/4}&quot;  # 25% of RAM (dynamic)
+  }
+
+  parameter {
+    name  = &quot;effective_cache_size&quot;
+    value = &quot;{DBInstanceClassMemory*3/4}&quot;  # 75% of RAM (dynamic)
+  }
+
+  parameter {
+    name  = &quot;work_mem&quot;
+    value = &quot;65536&quot;  # 64MB per sort/hash operation
+  }
+
+  parameter {
+    name  = &quot;maintenance_work_mem&quot;
+    value = &quot;524288&quot;  # 512MB for VACUUM, CREATE INDEX
+  }
+
+  # WAL and checkpoint settings
+  parameter {
+    name  = &quot;wal_buffers&quot;
+    value = &quot;16384&quot;  # 16MB
+  }
+
+  parameter {
+    name  = &quot;checkpoint_completion_target&quot;
+    value = &quot;0.9&quot;
+  }
+
+  parameter {
+    name  = &quot;max_wal_size&quot;
+    value = &quot;4096&quot;  # 4GB
+  }
+
+  # Query performance
+  parameter {
+    name  = &quot;random_page_cost&quot;
+    value = &quot;1.1&quot;  # Low for SSD storage (gp3/io2)
+  }
+
+  parameter {
+    name  = &quot;effective_io_concurrency&quot;
+    value = &quot;200&quot;  # High for SSD storage
+  }
+
+  # Logging
+  parameter {
+    name  = &quot;log_min_duration_statement&quot;
+    value = &quot;1000&quot;  # Log queries slower than 1 second
+  }
+
+  parameter {
+    name  = &quot;log_connections&quot;
+    value = &quot;1&quot;
+  }
+
+  parameter {
+    name  = &quot;log_disconnections&quot;
+    value = &quot;1&quot;
+  }
+
+  parameter {
+    name  = &quot;log_lock_waits&quot;
+    value = &quot;1&quot;
+  }
+
+  # Connection limits
+  parameter {
+    name  = &quot;max_connections&quot;
+    value = &quot;200&quot;  # Override default; use connection pooling
+  }
+
+  # SSL enforcement
+  parameter {
+    name  = &quot;rds.force_ssl&quot;
+    value = &quot;1&quot;
+  }
+
+  tags = {
+    Name = &quot;${local.project}-${local.environment}-postgres16-params&quot;
+  }
+}</code></pre>
+
+<h3>RDS Instance</h3>
+
+<pre class="code-block"><code>resource &quot;aws_db_instance&quot; &quot;main&quot; {
+  identifier = &quot;${local.project}-${local.environment}-postgres&quot;
+
+  # Engine
+  engine               = &quot;postgres&quot;
+  engine_version       = &quot;16.4&quot;
+  instance_class       = local.environment == &quot;production&quot; ? &quot;db.r6g.large&quot; : &quot;db.t4g.small&quot;
+  parameter_group_name = aws_db_parameter_group.postgres16.name
+
+  # Storage
+  allocated_storage     = 100
+  max_allocated_storage = 500  # Autoscaling up to 500 GB
+  storage_type          = &quot;gp3&quot;
+  storage_encrypted     = true
+  kms_key_id            = aws_kms_key.rds.arn
+
+  # gp3 performance (free tier: 3000 IOPS, 125 MB/s)
+  iops                  = 3000   # Baseline (included free with gp3)
+  storage_throughput    = 125    # MB/s (included free with gp3)
+
+  # Credentials
+  db_name  = &quot;myapp&quot;
+  username = &quot;myapp_admin&quot;
+  manage_master_user_password = true  # AWS manages password in Secrets Manager
+
+  # Networking
+  db_subnet_group_name   = aws_db_subnet_group.main.name
+  vpc_security_group_ids = [aws_security_group.db.id]
+  publicly_accessible    = false
+  port                   = 5432
+
+  # High Availability
+  multi_az = local.environment == &quot;production&quot; ? true : false
+
+  # Backup
+  backup_retention_period   = local.environment == &quot;production&quot; ? 30 : 7
+  backup_window             = &quot;03:00-04:00&quot;  # 3-4 AM UTC
+  copy_tags_to_snapshot     = true
+  delete_automated_backups  = false
+  final_snapshot_identifier = &quot;${local.project}-${local.environment}-final-${formatdate(&quot;YYYY-MM-DD&quot;, timestamp())}&quot;
+  skip_final_snapshot       = false
+
+  # Maintenance
+  maintenance_window        = &quot;sun:04:00-sun:05:00&quot;  # Sunday 4-5 AM UTC
+  auto_minor_version_upgrade = true
+  allow_major_version_upgrade = false
+
+  # Monitoring
+  monitoring_interval          = 60  # Enhanced monitoring every 60 seconds
+  monitoring_role_arn          = aws_iam_role.rds_monitoring.arn
+  performance_insights_enabled = true
+  performance_insights_retention_period = local.environment == &quot;production&quot; ? 731 : 7  # 2 years prod, 7 days staging
+
+  # Deletion protection
+  deletion_protection = local.environment == &quot;production&quot; ? true : false
+
+  # CloudWatch log exports
+  enabled_cloudwatch_logs_exports = [&quot;postgresql&quot;, &quot;upgrade&quot;]
+
+  tags = {
+    Name        = &quot;${local.project}-${local.environment}-postgres&quot;
+    Environment = local.environment
+    ManagedBy   = &quot;terraform&quot;
+  }
+
+  lifecycle {
+    prevent_destroy = true  # Extra safety for production
+  }
+}</code></pre>
+
+<h3>Read Replica (Production Only)</h3>
+
+<pre class="code-block"><code>resource &quot;aws_db_instance&quot; &quot;read_replica&quot; {
+  count = local.environment == &quot;production&quot; ? 1 : 0
+
+  identifier          = &quot;${local.project}-${local.environment}-postgres-replica&quot;
+  replicate_source_db = aws_db_instance.main.identifier
+  instance_class      = &quot;db.r6g.large&quot;
+
+  # Storage inherits from source
+  storage_encrypted = true
+  kms_key_id        = aws_kms_key.rds.arn
+
+  # Networking — can be in different AZ
+  vpc_security_group_ids = [aws_security_group.db.id]
+  publicly_accessible    = false
+
+  # Replica-specific settings
+  multi_az                     = false  # Replicas don't need Multi-AZ
+  backup_retention_period      = 0     # Backups from primary only
+  auto_minor_version_upgrade   = true
+  performance_insights_enabled = true
+
+  # Monitoring
+  monitoring_interval = 60
+  monitoring_role_arn = aws_iam_role.rds_monitoring.arn
+
+  tags = {
+    Name        = &quot;${local.project}-${local.environment}-postgres-replica&quot;
+    Environment = local.environment
+    Role        = &quot;read-replica&quot;
+  }
+}</code></pre>
+<hr class="section-divider">
+<h2>4. Connection String Management</h2>
+
+<pre class="code-block"><code># Store connection strings in SSM Parameter Store
+resource &quot;aws_ssm_parameter&quot; &quot;database_url&quot; {
+  name        = &quot;/${local.project}/${local.environment}/DATABASE_URL&quot;
+  type        = &quot;SecureString&quot;
+  description = &quot;Primary database connection string&quot;
+
+  # Format: postgresql://user:password@host:port/dbname?sslmode=require
+  value = &quot;postgresql://${aws_db_instance.main.username}:${random_password.db.result}@${aws_db_instance.main.endpoint}/${aws_db_instance.main.db_name}?sslmode=require&amp;connection_limit=20&quot;
+
+  tags = {
+    Name        = &quot;${local.project}-${local.environment}-database-url&quot;
+    Environment = local.environment
+  }
+}
+
+resource &quot;aws_ssm_parameter&quot; &quot;database_url_readonly&quot; {
+  count = local.environment == &quot;production&quot; ? 1 : 0
+
+  name        = &quot;/${local.project}/${local.environment}/DATABASE_URL_READONLY&quot;
+  type        = &quot;SecureString&quot;
+  description = &quot;Read replica connection string&quot;
+
+  value = &quot;postgresql://${aws_db_instance.main.username}:${random_password.db.result}@${aws_db_instance.read_replica[0].endpoint}/${aws_db_instance.main.db_name}?sslmode=require&amp;connection_limit=30&quot;
+
+  tags = {
+    Name = &quot;${local.project}-${local.environment}-database-url-readonly&quot;
+  }
+}</code></pre>
+<hr class="section-divider">
+<h2>5. Monitoring and Alerts</h2>
+
+<pre class="code-block"><code># CPU utilization alarm
+resource &quot;aws_cloudwatch_metric_alarm&quot; &quot;rds_cpu&quot; {
+  alarm_name          = &quot;${local.project}-${local.environment}-rds-cpu-high&quot;
+  comparison_operator = &quot;GreaterThanThreshold&quot;
+  evaluation_periods  = 3
+  metric_name         = &quot;CPUUtilization&quot;
+  namespace           = &quot;AWS/RDS&quot;
+  period              = 300  # 5 minutes
+  statistic           = &quot;Average&quot;
+  threshold           = 80
+  alarm_description   = &quot;RDS CPU utilization exceeds 80% for 15 minutes&quot;
+
+  dimensions = {
+    DBInstanceIdentifier = aws_db_instance.main.identifier
+  }
+
+  alarm_actions = [aws_sns_topic.alerts.arn]
+  ok_actions    = [aws_sns_topic.alerts.arn]
+}
+
+# Free storage space alarm
+resource &quot;aws_cloudwatch_metric_alarm&quot; &quot;rds_storage&quot; {
+  alarm_name          = &quot;${local.project}-${local.environment}-rds-storage-low&quot;
+  comparison_operator = &quot;LessThanThreshold&quot;
+  evaluation_periods  = 1
+  metric_name         = &quot;FreeStorageSpace&quot;
+  namespace           = &quot;AWS/RDS&quot;
+  period              = 300
+  statistic           = &quot;Average&quot;
+  threshold           = 10737418240  # 10 GB in bytes
+  alarm_description   = &quot;RDS free storage space below 10 GB&quot;
+
+  dimensions = {
+    DBInstanceIdentifier = aws_db_instance.main.identifier
+  }
+
+  alarm_actions = [aws_sns_topic.alerts.arn]
+}
+
+# Database connections alarm
+resource &quot;aws_cloudwatch_metric_alarm&quot; &quot;rds_connections&quot; {
+  alarm_name          = &quot;${local.project}-${local.environment}-rds-connections-high&quot;
+  comparison_operator = &quot;GreaterThanThreshold&quot;
+  evaluation_periods  = 2
+  metric_name         = &quot;DatabaseConnections&quot;
+  namespace           = &quot;AWS/RDS&quot;
+  period              = 300
+  statistic           = &quot;Average&quot;
+  threshold           = 150  # 75% of max_connections (200)
+  alarm_description   = &quot;RDS connection count exceeds 150&quot;
+
+  dimensions = {
+    DBInstanceIdentifier = aws_db_instance.main.identifier
+  }
+
+  alarm_actions = [aws_sns_topic.alerts.arn]
+}
+
+# Read replica lag alarm
+resource &quot;aws_cloudwatch_metric_alarm&quot; &quot;rds_replica_lag&quot; {
+  count = local.environment == &quot;production&quot; ? 1 : 0
+
+  alarm_name          = &quot;${local.project}-${local.environment}-rds-replica-lag&quot;
+  comparison_operator = &quot;GreaterThanThreshold&quot;
+  evaluation_periods  = 3
+  metric_name         = &quot;ReplicaLag&quot;
+  namespace           = &quot;AWS/RDS&quot;
+  period              = 60
+  statistic           = &quot;Average&quot;
+  threshold           = 30  # 30 seconds of lag
+  alarm_description   = &quot;RDS read replica lag exceeds 30 seconds&quot;
+
+  dimensions = {
+    DBInstanceIdentifier = aws_db_instance.read_replica[0].identifier
+  }
+
+  alarm_actions = [aws_sns_topic.alerts.arn]
+}
+
+# Write latency alarm
+resource &quot;aws_cloudwatch_metric_alarm&quot; &quot;rds_write_latency&quot; {
+  alarm_name          = &quot;${local.project}-${local.environment}-rds-write-latency&quot;
+  comparison_operator = &quot;GreaterThanThreshold&quot;
+  evaluation_periods  = 3
+  metric_name         = &quot;WriteLatency&quot;
+  namespace           = &quot;AWS/RDS&quot;
+  period              = 300
+  statistic           = &quot;Average&quot;
+  threshold           = 0.020  # 20ms average write latency
+  alarm_description   = &quot;RDS write latency exceeds 20ms&quot;
+
+  dimensions = {
+    DBInstanceIdentifier = aws_db_instance.main.identifier
+  }
+
+  alarm_actions = [aws_sns_topic.alerts.arn]
+}</code></pre>
+<hr class="section-divider">
+<h2>6. Backup Strategy</h2>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────────┐
+│                    Backup Strategy Matrix                         │
+│                                                                  │
+│  Type              │ Frequency     │ Retention │ RPO             │
+│  ───────────────────────────────────────────────────────────     │
+│  Automated backup  │ Daily (3 AM)  │ 30 days   │ 5 min (PITR)   │
+│  Manual snapshot   │ Before deploy │ 90 days   │ Point-in-time  │
+│  Cross-region      │ Daily         │ 7 days    │ 24 hours        │
+│  Logical dump      │ Weekly        │ 30 days   │ 7 days          │
+│                                                                  │
+│  PITR = Point-in-Time Recovery (restore to any second)           │
+│  RPO  = Recovery Point Objective (max acceptable data loss)      │
+└─────────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Manual Snapshot Before Deployments</h3>
+
+<pre class="code-block"><code># Create pre-deployment snapshot
+aws rds create-db-snapshot \
+  --db-instance-identifier myapp-production-postgres \
+  --db-snapshot-identifier &quot;myapp-prod-pre-deploy-$(date +%Y%m%d-%H%M%S)&quot;
+
+# Wait for snapshot to complete
+aws rds wait db-snapshot-available \
+  --db-snapshot-identifier &quot;myapp-prod-pre-deploy-20260327-143000&quot;
+
+# Restore from snapshot (creates new instance)
+aws rds restore-db-instance-from-db-snapshot \
+  --db-instance-identifier myapp-production-postgres-restored \
+  --db-snapshot-identifier &quot;myapp-prod-pre-deploy-20260327-143000&quot; \
+  --db-subnet-group-name myapp-production-db-subnet-group \
+  --vpc-security-group-ids sg-xxxxxxxx
+
+# Point-in-time recovery (restore to specific second)
+aws rds restore-db-instance-to-point-in-time \
+  --source-db-instance-identifier myapp-production-postgres \
+  --target-db-instance-identifier myapp-production-postgres-pitr \
+  --restore-time &quot;2026-03-27T14:30:00Z&quot; \
+  --db-subnet-group-name myapp-production-db-subnet-group</code></pre>
+<hr class="section-divider">
+<h2>7. Performance Insights Queries</h2>
+
+<pre class="code-block"><code># View top SQL by load (Performance Insights API)
+aws pi get-resource-metrics \
+  --service-type RDS \
+  --identifier db-XXXXXXXXXXXXXXXXXXXX \
+  --metric-queries '[{&quot;Metric&quot;:&quot;db.load.avg&quot;,&quot;GroupBy&quot;:{&quot;Group&quot;:&quot;db.sql&quot;,&quot;Limit&quot;:10}}]' \
+  --start-time $(date -u -d '1 hour ago' +%Y-%m-%dT%H:%M:%SZ) \
+  --end-time $(date -u +%Y-%m-%dT%H:%M:%SZ) \
+  --period-in-seconds 300
+
+# View top waits
+aws pi get-resource-metrics \
+  --service-type RDS \
+  --identifier db-XXXXXXXXXXXXXXXXXXXX \
+  --metric-queries '[{&quot;Metric&quot;:&quot;db.load.avg&quot;,&quot;GroupBy&quot;:{&quot;Group&quot;:&quot;db.wait_event&quot;,&quot;Limit&quot;:10}}]' \
+  --start-time $(date -u -d '1 hour ago' +%Y-%m-%dT%H:%M:%SZ) \
+  --end-time $(date -u +%Y-%m-%dT%H:%M:%SZ) \
+  --period-in-seconds 300</code></pre>
+<hr class="section-divider">
+<h2>8. Cost Implications</h2>
+<div class="table-wrap"><table><thead><tr><th>Resource</th><th>Monthly Cost (us-east-1)</th><th>Notes</th><th></th></tr></thead><tbody><tr><td>db.t4g.micro (single-AZ)</td><td>~$12</td><td>Dev/test only</td><td></td></tr><tr><td>db.t4g.small (multi-AZ)</td><td>~$48</td><td>Staging</td><td></td></tr><tr><td>db.r6g.large (multi-AZ)</td><td>~$360</td><td>Production</td><td></td></tr><tr><td>db.r6g.large (read replica)</td><td>~$180</td><td>Single-AZ</td><td></td></tr><tr><td>gp3 storage (100 GB)</td><td>~$11.50</td><td>$0.115/GB</td><td></td></tr><tr><td>Automated backups (100 GB)</td><td>Free</td><td>Up to DB size</td><td></td></tr><tr><td>Extra backup storage</td><td>$0.095/GB</td><td>Beyond free tier</td><td></td></tr><tr><td>Perf Insights (2 year retention)</td><td>~$0</td><td>Free for 7 days</td><td></td></tr><tr><td>Enhanced monitoring (60s)</td><td>~$3</td><td>CloudWatch metrics</td><td></td></tr><tr><td>Cross-region snapshot copy</td><td>~$0.02/GB</td><td>S3 storage + transfer</td><td></td></tr></tbody></table></div>
+<h3>Cost Optimization Tips</h3>
+
+<ul class="skill-list"><li>Use <code class="inline-code">db.t4g</code> burstable instances for dev/staging (60-80% cheaper than r6g)</li>
+<li>Reserve instances for 1 or 3 years (up to 60% savings on production)</li>
+<li>Use gp3 instead of io2 unless you need > 16,000 IOPS</li>
+<li>Set <code class="inline-code">max_allocated_storage</code> to prevent runaway autoscaling</li>
+<li>Enable storage autoscaling but set a reasonable max</li>
+<li>Delete old manual snapshots (they are billed at $0.095/GB/month)</li>
+</ul><hr class="section-divider">
+<h2>9. Security Considerations</h2>
+
+<ul class="skill-list"><li>Always place RDS in isolated subnets (no internet route)</li>
+<li>Enable <code class="inline-code">rds.force_ssl = 1</code> in parameter group</li>
+<li>Use <code class="inline-code">manage_master_user_password = true</code> for AWS-managed rotation</li>
+<li>Never use <code class="inline-code">publicly_accessible = true</code> in any environment</li>
+<li>Enable storage encryption with customer-managed KMS key</li>
+<li>Restrict security group to only allow connections from app tier</li>
+<li>Enable CloudWatch log exports for <code class="inline-code">postgresql</code> and <code class="inline-code">upgrade</code></li>
+<li>Set <code class="inline-code">deletion_protection = true</code> for production instances</li>
+<li>Use IAM database authentication for temporary credentials when possible</li>
+</ul><hr class="section-divider">
+<h2>10. Common Mistakes / Anti-Patterns</h2>
+<div class="table-wrap"><table><thead><tr><th>Mistake</th><th>Why It's Bad</th><th>Fix</th><th></th></tr></thead><tbody><tr><td><code class="inline-code">publicly_accessible = true</code></td><td>Database exposed to internet</td><td>Always <code class="inline-code">false</code>, use VPN/bastion for access</td><td></td></tr><tr><td>No Multi-AZ for production</td><td>Single point of failure, ~2 min downtime</td><td>Enable Multi-AZ for production</td><td></td></tr><tr><td>Default parameter group</td><td>Cannot tune PostgreSQL settings</td><td>Create custom parameter group</td><td></td></tr><tr><td><code class="inline-code">skip_final_snapshot = true</code> in prod</td><td>Lose all data on terraform destroy</td><td>Always create final snapshot</td><td></td></tr><tr><td>Hardcoded credentials in code</td><td>Security breach risk</td><td>Use SSM/Secrets Manager</td><td></td></tr><tr><td>No storage encryption</td><td>Compliance violation</td><td>Enable <code class="inline-code">storage_encrypted = true</code></td><td></td></tr><tr><td>Backup retention = 1 day</td><td>Minimal recovery options</td><td>30 days for production</td><td></td></tr><tr><td>No connection pooling</td><td>Exhausts max_connections</td><td>Use PgBouncer or Prisma connection limit</td><td></td></tr><tr><td>Oversized instance</td><td>Wasting money</td><td>Start with t4g, upgrade based on metrics</td><td></td></tr><tr><td>No slow query logging</td><td>Cannot identify performance issues</td><td>Set <code class="inline-code">log_min_duration_statement = 1000</code></td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>11. Verification Commands</h2>
+
+<pre class="code-block"><code># Check RDS instance status
+aws rds describe-db-instances \
+  --db-instance-identifier myapp-production-postgres \
+  --query &quot;DBInstances[0].{Status:DBInstanceStatus,Class:DBInstanceClass,Engine:Engine,Version:EngineVersion,MultiAZ:MultiAZ,Storage:AllocatedStorage,Encrypted:StorageEncrypted}&quot; \
+  --output table
+
+# Check backup status
+aws rds describe-db-snapshots \
+  --db-instance-identifier myapp-production-postgres \
+  --query &quot;DBSnapshots[-5:].{Snapshot:DBSnapshotIdentifier,Status:Status,Created:SnapshotCreateTime,Size:AllocatedStorage}&quot; \
+  --output table
+
+# Check parameter group values
+aws rds describe-db-parameters \
+  --db-parameter-group-name myapp-production-postgres16 \
+  --query &quot;Parameters[?Source=='user'].{Name:ParameterName,Value:ParameterValue,ApplyMethod:ApplyMethod}&quot; \
+  --output table
+
+# Check replica lag
+aws cloudwatch get-metric-statistics \
+  --namespace AWS/RDS \
+  --metric-name ReplicaLag \
+  --dimensions Name=DBInstanceIdentifier,Value=myapp-production-postgres-replica \
+  --start-time $(date -u -d '1 hour ago' +%Y-%m-%dT%H:%M:%SZ) \
+  --end-time $(date -u +%Y-%m-%dT%H:%M:%SZ) \
+  --period 300 \
+  --statistics Average \
+  --output table
+
+# Test SSL connection
+psql &quot;postgresql://myapp_admin@myapp-production-postgres.xxxx.us-east-1.rds.amazonaws.com:5432/myapp?sslmode=verify-full&amp;sslrootcert=global-bundle.pem&quot; -c &quot;SELECT ssl_is_used();&quot;</code></pre>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="monitoring-setup.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">Set Up CloudWatch Monitoring</span></span></a>
+    <a href="iam-policy.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Write IAM Policies</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    66 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

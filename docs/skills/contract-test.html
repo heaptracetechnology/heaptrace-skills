@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contract Testing — Catch Breaking Changes Before Production — Heaptrace Skills</title>
+  <meta name="description" content="Write contract tests between services using Pact or schema validation to ensure API compatibility. Covers consumer-driven contracts, provider verification, schema evolution strategies, breaking change detection, and integration with CI/CD. Prevents integration failures before deployment.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #6366f112, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #6366f115;
+      border: 1px solid #6366f130;
+      color: #6366f1;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #6366f1;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #6366f1;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #6366f1;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #6366f108;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #6366f150;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #6366f110;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #6366f1;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../index.html#workflow" class="nav-link">Workflow</a>
+      <a href="../index.html#anatomy" class="nav-link">Anatomy</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Automation QA Pack</a>
+      <span class="sep">/</span>
+      <span>Contract Testing — Catch Breaking Changes Before Production</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#9881;</span>
+      Automation QA Pack
+    </div>
+
+    <h1>Contract Testing — Catch Breaking Changes Before Production</h1>
+    <p class="description">Takes a set of service dependencies (frontend-to-backend, service-to-service, or service-to-third-party) and sets up contract tests that detect API breaking changes before they reach production. Covers consumer-driven contracts with Pact, schema validation with Zod/JSON Schema, and OpenAPI contract verification.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Senior Contract Testing Specialist</strong> with 12+ years ensuring API contracts between services don't break during independent deployments. You've implemented contract testing for microservice architectures with 20+ services. You are an expert in:</p>
+
+<ul class="skill-list"><li>Pact and PactFlow — consumer-driven contract testing methodology</li>
+<li>Provider verification — ensuring APIs fulfill all consumer expectations</li>
+<li>Schema evolution — handling backward-compatible and breaking changes</li>
+<li>Contract testing vs. integration testing — knowing when each is appropriate</li>
+<li>CI/CD integration — can-i-deploy checks, contract broker, version tagging</li>
+<li>Cross-team contract negotiation — aligning consumers and providers on API boundaries</li>
+
+</ul>You prevent the most dangerous class of bugs — the ones where Service A deploys a change that breaks Service B, and nobody finds out until production. Every contract you write is a guarantee that services can deploy independently without fear.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Contract Testing Framework</h4>
+      <p class="config-example">Pact (JavaScript), or schema validation with Zod</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Services &amp; Consumers</h4>
+      <p class="config-example">Frontend consumes Backend API, Mobile app consumes Backend API</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>API Specification</h4>
+      <p class="config-example">/specs/api-contracts.md, or OpenAPI spec at /api/docs</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Contract Broker</h4>
+      <p class="config-example">PactFlow, or self-hosted Pact Broker, or file-based for small teams</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Deployment Checks</h4>
+      <p class="config-example">Can-I-Deploy check before staging/production deploys</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│        MANDATORY RULES FOR EVERY CONTRACT TEST               │
+│                                                              │
+│  1. CONSUMER DEFINES THE CONTRACT                            │
+│     → The frontend (consumer) describes what it expects from │
+│       the API (provider)                                     │
+│     → Contracts test the shape the consumer actually uses,   │
+│       not the entire API response                            │
+│     → Provider verifies it can fulfill consumer expectations │
+│                                                              │
+│  2. TEST THE INTERFACE, NOT THE IMPLEMENTATION               │
+│     → Contract tests verify: field names, types, status codes│
+│     → They do NOT verify: business logic, data values,       │
+│       database state                                         │
+│     → Contracts are about structure and compatibility, not   │
+│       correctness                                            │
+│                                                              │
+│  3. CONTRACTS MUST BE VERSIONED                              │
+│     → Tag contracts with the consumer/provider version       │
+│     → Run can-i-deploy before deploying either side          │
+│     → A contract without a version is a contract waiting to  │
+│       cause confusion                                        │
+│                                                              │
+│  4. HANDLE BREAKING CHANGES EXPLICITLY                       │
+│     → Removing a field = breaking change                     │
+│     → Changing a field type = breaking change                │
+│     → Adding a required field = breaking change              │
+│     → Only additive, optional changes are safe               │
+│     → When breaking changes are needed, version the API      │
+│                                                              │
+│  5. CONTRACT TESTS RUN IN CI — NOT JUST LOCALLY              │
+│     → Publish contracts from consumer CI                     │
+│     → Verify contracts in provider CI                        │
+│     → can-i-deploy gates production deploys                  │
+│     → Local-only contract tests give false confidence        │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in contract tests or configurations     │
+│     → All output reads as if written by a test automation    │
+│       specialist                                             │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #6366f118; color: #6366f1;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+<div class="table-wrap"><table><thead><tr><th>Scenario</th><th>Use?</th><th></th></tr></thead><tbody><tr><td>Frontend depends on a backend API you own</td><td>Yes</td><td></td></tr><tr><td>Two microservices communicate via REST/gRPC</td><td>Yes</td><td></td></tr><tr><td>Your app integrates with a third-party API (Stripe, SendGrid)</td><td>Yes — validate their responses</td><td></td></tr><tr><td>Monolith with internal function calls</td><td>No — use unit/integration tests</td><td></td></tr><tr><td>Service communicates via message queue (Kafka, SQS)</td><td>Yes — message format is a contract</td><td></td></tr><tr><td>You have an OpenAPI spec but no tests validating it</td><td>Yes — OpenAPI validation</td><td></td></tr><tr><td>Breaking changes have caused production incidents</td><td>Yes — contract tests prevent this</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>What is a Contract Test?</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  CONTRACT TEST = an agreement between two services about     │
+│  the shape and behavior of their API communication.          │
+│                                                              │
+│  Consumer: &quot;I will send you this request shape and expect    │
+│            this response shape.&quot;                             │
+│                                                              │
+│  Provider: &quot;I will always return data matching that shape    │
+│            for that request.&quot;                                │
+│                                                              │
+│  The CONTRACT is the documented agreement between them.      │
+│  The CONTRACT TEST verifies both sides still honor it.       │
+│                                                              │
+│  ┌──────────┐       Contract        ┌──────────┐            │
+│  │ Consumer │ ◄───────────────────▶ │ Provider │            │
+│  │ (Frontend│   &quot;GET /api/courses    │ (Backend)│            │
+│  │  or svc) │    returns Course[]&quot;   │          │            │
+│  └──────────┘                       └──────────┘            │
+│       │                                    │                 │
+│       ▼                                    ▼                 │
+│  Consumer Test:                      Provider Test:          │
+│  &quot;When I call GET /courses,          &quot;When someone calls     │
+│   I expect an array of objects        GET /courses, I return │
+│   with id, title, status fields&quot;      objects with id, title,│
+│                                       status fields&quot;         │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Approach Comparison</h2>
+
+<pre class="code-block"><code>┌────────────────┬───────────────────┬───────────────────┬──────────────────┐
+│  Approach      │  Tool             │  Best For         │  Complexity      │
+├────────────────┼───────────────────┼───────────────────┼──────────────────┤
+│  Consumer-     │  Pact             │  Microservices    │  High — needs    │
+│  Driven        │                   │  with multiple    │  broker, both    │
+│  Contracts     │                   │  consumers        │  sides write     │
+│                │                   │                   │  tests           │
+├────────────────┼───────────────────┼───────────────────┼──────────────────┤
+│  Schema        │  Zod, Joi,        │  Frontend-backend │  Low — just      │
+│  Validation    │  JSON Schema      │  in same repo     │  validate        │
+│                │                   │  (monorepo)       │  response shape  │
+├────────────────┼───────────────────┼───────────────────┼──────────────────┤
+│  OpenAPI       │  Prism, Dredd,    │  API-first teams  │  Medium — need   │
+│  Contract      │  Schemathesis     │  with OpenAPI     │  up-to-date      │
+│  Validation    │                   │  spec             │  spec file       │
+├────────────────┼───────────────────┼───────────────────┼──────────────────┤
+│  Snapshot      │  Jest snapshots   │  Quick &quot;did it    │  Very Low —      │
+│  Contract      │                   │  change?&quot; check   │  but fragile     │
+└────────────────┴───────────────────┴───────────────────┴──────────────────┘</code></pre>
+
+<h3>Decision Tree</h3>
+
+<pre class="code-block"><code>┌────────────────────────────────────┐
+│  How many services consume        │
+│  this API?                         │
+├──────────┬─────────────────────────┤
+│  1       │  2+                     │
+│  ▼       │  ▼                      │
+│ ┌────────────────┐ ┌────────────┐  │
+│ │ Same repo?     │ │ Use Pact   │  │
+│ ├──────┬─────────┤ │ (consumer  │  │
+│ │ Yes  │   No    │ │  driven)   │  │
+│ │ ▼    │   ▼     │ └────────────┘  │
+│ │Schema│ Schema  │                 │
+│ │valid-│ valid + │                 │
+│ │ation │ Pact    │                 │
+│ └──────┴─────────┘                 │
+└────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Approach 1 — Schema Validation Contracts (Recommended Start)</h2>
+
+The simplest and most practical approach for monorepos and teams just starting with contracts.
+
+<h3>Shared Schema Definition</h3>
+
+<pre class="code-block"><code>// src/shared/contracts/courses.ts
+// This file is the SINGLE SOURCE OF TRUTH for the Course API contract
+import { z } from 'zod'
+
+// ─── Response Schemas ──────────────────────────────────────
+export const CourseSchema = z.object({
+  id: z.string().uuid(),
+  title: z.string().min(1),
+  description: z.string().nullable(),
+  status: z.enum(['draft', 'published', 'archived']),
+  category: z.string().nullable(),
+  thumbnail_url: z.string().url().nullable(),
+  sections_count: z.number().int().min(0),
+  enrolled_count: z.number().int().min(0),
+  created_at: z.string().datetime(),
+  updated_at: z.string().datetime(),
+  created_by: z.string().uuid(),
+})
+
+export const CourseListResponseSchema = z.object({
+  items: z.array(CourseSchema),
+  total: z.number().int().min(0),
+  page: z.number().int().min(1),
+  limit: z.number().int().min(1).max(100),
+  totalPages: z.number().int().min(0),
+})
+
+// ─── Request Schemas ───────────────────────────────────────
+export const CreateCourseRequestSchema = z.object({
+  title: z.string().min(1).max(200),
+  description: z.string().max(5000).optional(),
+  category: z.string().max(100).optional(),
+  tags: z.array(z.string()).max(10).optional(),
+})
+
+export const UpdateCourseRequestSchema = CreateCourseRequestSchema.partial()
+
+// ─── TypeScript Types (derived from schemas) ───────────────
+export type Course = z.infer&lt;typeof CourseSchema&gt;
+export type CourseListResponse = z.infer&lt;typeof CourseListResponseSchema&gt;
+export type CreateCourseRequest = z.infer&lt;typeof CreateCourseRequestSchema&gt;</code></pre>
+
+<h3>Consumer-Side Contract Test (Frontend)</h3>
+
+<pre class="code-block"><code>// src/frontend/tests/contracts/courses.contract.test.ts
+import { CourseListResponseSchema, CourseSchema } from '@shared/contracts/courses'
+
+describe('Course API Contract — Consumer Side', () =&gt; {
+  const API_URL = process.env.API_URL || 'http://localhost:3001'
+
+  describe('GET /api/courses', () =&gt; {
+    it('response matches the CourseListResponse contract', async () =&gt; {
+      const response = await fetch(<code class="inline-code">${API_URL}/api/courses?page=1&amp;limit=10</code>, {
+        headers: { Authorization: <code class="inline-code">Bearer ${testToken}</code> },
+      })
+
+      expect(response.status).toBe(200)
+
+      const body = await response.json()
+
+      // This is the contract test — validate the response shape
+      const result = CourseListResponseSchema.safeParse(body)
+
+      if (!result.success) {
+        // Show exactly which fields violated the contract
+        console.error('Contract violation:', result.error.format())
+      }
+
+      expect(result.success).toBe(true)
+    })
+
+    it('each course item matches the Course contract', async () =&gt; {
+      const response = await fetch(<code class="inline-code">${API_URL}/api/courses?page=1&amp;limit=5</code>, {
+        headers: { Authorization: <code class="inline-code">Bearer ${testToken}</code> },
+      })
+
+      const body = await response.json()
+
+      // Validate each individual course
+      for (const course of body.items) {
+        const result = CourseSchema.safeParse(course)
+        if (!result.success) {
+          console.error(<code class="inline-code">Course ${course.id} violates contract:</code>, result.error.format())
+        }
+        expect(result.success).toBe(true)
+      }
+    })
+  })
+
+  describe('GET /api/courses/:id', () =&gt; {
+    it('returns a single course matching the Course contract', async () =&gt; {
+      const response = await fetch(<code class="inline-code">${API_URL}/api/courses/${testCourseId}</code>, {
+        headers: { Authorization: <code class="inline-code">Bearer ${testToken}</code> },
+      })
+
+      expect(response.status).toBe(200)
+
+      const body = await response.json()
+      const result = CourseSchema.safeParse(body)
+
+      expect(result.success).toBe(true)
+    })
+
+    it('returns 404 with error contract for non-existent course', async () =&gt; {
+      const response = await fetch(<code class="inline-code">${API_URL}/api/courses/nonexistent-id</code>, {
+        headers: { Authorization: <code class="inline-code">Bearer ${testToken}</code> },
+      })
+
+      expect(response.status).toBe(404)
+
+      const body = await response.json()
+      expect(body).toHaveProperty('error')
+      expect(typeof body.error).toBe('string')
+    })
+  })
+})</code></pre>
+
+<h3>Provider-Side Contract Test (Backend)</h3>
+
+<pre class="code-block"><code>// src/backend/tests/contracts/courses.contract.test.ts
+import request from 'supertest'
+import { app } from '../../app'
+import { CourseListResponseSchema, CourseSchema } from '@shared/contracts/courses'
+
+describe('Course API Contract — Provider Side', () =&gt; {
+  let authToken: string
+
+  beforeAll(async () =&gt; {
+    authToken = await getTestAuthToken()
+    await seedTestCourses()
+  })
+
+  afterAll(async () =&gt; {
+    await cleanupTestCourses()
+  })
+
+  describe('GET /api/courses', () =&gt; {
+    it('response matches CourseListResponse contract', async () =&gt; {
+      const response = await request(app)
+        .get('/api/courses')
+        .set('Authorization', <code class="inline-code">Bearer ${authToken}</code>)
+        .expect(200)
+
+      const result = CourseListResponseSchema.safeParse(response.body)
+
+      if (!result.success) {
+        // Log detailed field-level violations
+        const errors = result.error.issues.map((i) =&gt; ({
+          path: i.path.join('.'),
+          message: i.message,
+          received: i.code,
+        }))
+        console.error('Contract violations:', errors)
+      }
+
+      expect(result.success).toBe(true)
+    })
+  })
+
+  describe('POST /api/courses', () =&gt; {
+    it('created course matches Course contract', async () =&gt; {
+      const response = await request(app)
+        .post('/api/courses')
+        .set('Authorization', <code class="inline-code">Bearer ${authToken}</code>)
+        .send({ title: 'Contract Test Course' })
+        .expect(201)
+
+      const result = CourseSchema.safeParse(response.body)
+      expect(result.success).toBe(true)
+    })
+
+    it('rejects invalid request body per contract', async () =&gt; {
+      const response = await request(app)
+        .post('/api/courses')
+        .set('Authorization', <code class="inline-code">Bearer ${authToken}</code>)
+        .send({ title: '' })  // Empty title violates min(1)
+        .expect(400)
+
+      expect(response.body).toHaveProperty('error')
+    })
+  })
+})</code></pre>
+<hr class="section-divider">
+<h2>Approach 2 — Consumer-Driven Contracts with Pact</h2>
+
+<h3>Pact Flow</h3>
+
+<pre class="code-block"><code>┌───────────────────────────────────────────────────────────────────┐
+│                     PACT WORKFLOW                                 │
+│                                                                   │
+│  CONSUMER SIDE:                                                   │
+│  ┌──────────┐   Generates    ┌──────────┐   Publishes    ┌─────┐│
+│  │ Consumer │ ─────────────▶ │  Pact    │ ────────────▶  │Pact ││
+│  │ Test     │                │  File    │                │Broker││
+│  │          │                │ (JSON)   │                │     ││
+│  └──────────┘                └──────────┘                └──┬──┘│
+│                                                              │    │
+│  PROVIDER SIDE:                                              │    │
+│  ┌──────────┐   Downloads    ┌──────────┐                   │    │
+│  │ Provider │ ◄──────────────│  Pact    │ ◄─────────────────┘    │
+│  │ Verifies │                │  File    │                        │
+│  │ against  │                │          │                        │
+│  │ real API │                └──────────┘                        │
+│  └──────────┘                                                    │
+│       │                                                          │
+│       ▼                                                          │
+│  ┌──────────┐                                                    │
+│  │ Pass/Fail│ → Reports back to broker → Blocks/allows deploy    │
+│  └──────────┘                                                    │
+└───────────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Consumer Test (Pact)</h3>
+
+<pre class="code-block"><code>// src/frontend/tests/pact/course-consumer.pact.test.ts
+import { PactV4, MatchersV3 } from '@pact-foundation/pact'
+import { CourseApiClient } from '../../api/courses'
+
+const { like, eachLike, uuid, iso8601DateTimeWithMillis, integer } = MatchersV3
+
+const provider = new PactV4({
+  consumer: 'lms-frontend',
+  provider: 'lms-backend',
+  logLevel: 'warn',
+})
+
+describe('Course API Consumer Pact', () =&gt; {
+  describe('GET /api/courses', () =&gt; {
+    it('returns a list of courses', async () =&gt; {
+      await provider
+        .addInteraction()
+        .given('courses exist')
+        .uponReceiving('a request for courses')
+        .withRequest('GET', '/api/courses', (builder) =&gt; {
+          builder.query({ page: '1', limit: '20' })
+          builder.headers({ Authorization: like('Bearer token123') })
+        })
+        .willRespondWith(200, (builder) =&gt; {
+          builder.headers({ 'Content-Type': 'application/json' })
+          builder.jsonBody({
+            items: eachLike({
+              id: uuid(),
+              title: like('Introduction to Testing'),
+              description: like('Learn testing fundamentals'),
+              status: like('published'),
+              category: like('Engineering'),
+              sections_count: integer(5),
+              enrolled_count: integer(12),
+              created_at: iso8601DateTimeWithMillis(),
+              updated_at: iso8601DateTimeWithMillis(),
+            }),
+            total: integer(47),
+            page: integer(1),
+            limit: integer(20),
+            totalPages: integer(3),
+          })
+        })
+        .executeTest(async (mockServer) =&gt; {
+          const client = new CourseApiClient(mockServer.url)
+          const result = await client.listCourses({ page: 1, limit: 20 })
+
+          expect(result.items).toHaveLength(1)  // Pact returns 1 for eachLike
+          expect(result.items[0]).toHaveProperty('id')
+          expect(result.items[0]).toHaveProperty('title')
+          expect(result.items[0]).toHaveProperty('status')
+          expect(result.total).toBe(47)
+        })
+    })
+  })
+
+  describe('POST /api/courses', () =&gt; {
+    it('creates a new course', async () =&gt; {
+      await provider
+        .addInteraction()
+        .given('user is authenticated as admin')
+        .uponReceiving('a request to create a course')
+        .withRequest('POST', '/api/courses', (builder) =&gt; {
+          builder.headers({
+            'Content-Type': 'application/json',
+            Authorization: like('Bearer token123'),
+          })
+          builder.jsonBody({
+            title: like('New Course'),
+            description: like('Course description'),
+          })
+        })
+        .willRespondWith(201, (builder) =&gt; {
+          builder.jsonBody({
+            id: uuid(),
+            title: like('New Course'),
+            status: like('draft'),
+            created_at: iso8601DateTimeWithMillis(),
+          })
+        })
+        .executeTest(async (mockServer) =&gt; {
+          const client = new CourseApiClient(mockServer.url)
+          const course = await client.createCourse({
+            title: 'New Course',
+            description: 'Course description',
+          })
+
+          expect(course.id).toBeDefined()
+          expect(course.status).toBe('draft')
+        })
+    })
+  })
+})</code></pre>
+
+<h3>Provider Verification (Pact)</h3>
+
+<pre class="code-block"><code>// src/backend/tests/pact/course-provider.pact.test.ts
+import { Verifier } from '@pact-foundation/pact'
+import { app } from '../../app'
+
+describe('Course API Provider Pact Verification', () =&gt; {
+  let server: any
+
+  beforeAll(async () =&gt; {
+    // Start the real backend server
+    server = app.listen(3333)
+    // Seed required test data
+    await seedTestData()
+  })
+
+  afterAll(async () =&gt; {
+    server.close()
+    await cleanupTestData()
+  })
+
+  it('verifies the provider against consumer contracts', async () =&gt; {
+    const verifier = new Verifier({
+      providerBaseUrl: 'http://localhost:3333',
+      // Pact files from broker or local directory
+      pactBrokerUrl: process.env.PACT_BROKER_URL,
+      provider: 'lms-backend',
+      // OR local pact files:
+      // pactUrls: ['./pacts/lms-frontend-lms-backend.json'],
+
+      // State handlers — set up data for each test scenario
+      stateHandlers: {
+        'courses exist': async () =&gt; {
+          await seedPublishedCourses(5)
+        },
+        'user is authenticated as admin': async () =&gt; {
+          // Auth is handled by middleware, but ensure test user exists
+          await ensureTestAdminExists()
+        },
+        'course with id exists': async (params) =&gt; {
+          await seedSpecificCourse(params?.courseId)
+        },
+      },
+
+      // Request filters — add auth headers that Pact doesn't have
+      requestFilter: (req, res, next) =&gt; {
+        req.headers.authorization = <code class="inline-code">Bearer ${getTestAdminToken()}</code>
+        next()
+      },
+
+      // Publish results back to broker
+      publishVerificationResult: process.env.CI === 'true',
+      providerVersion: process.env.GITHUB_SHA || 'local',
+    })
+
+    await verifier.verifyProvider()
+  })
+})</code></pre>
+<hr class="section-divider">
+<h2>Breaking Change Detection</h2>
+
+<h3>What Counts as a Breaking Change</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  BREAKING CHANGES (will fail contract tests):                │
+│                                                              │
+│  ❌ Removing a required field from a response                │
+│     { id, title, status } → { id, title }  (status removed) │
+│                                                              │
+│  ❌ Changing a field's type                                   │
+│     { count: 5 } → { count: &quot;5&quot; }  (number → string)        │
+│                                                              │
+│  ❌ Renaming a field                                          │
+│     { created_at: &quot;...&quot; } → { createdAt: &quot;...&quot; }            │
+│                                                              │
+│  ❌ Changing enum values                                      │
+│     status: &quot;draft&quot;|&quot;published&quot; → &quot;pending&quot;|&quot;live&quot;           │
+│                                                              │
+│  ❌ Making an optional field required in requests             │
+│     { title: string, desc?: string } → { title, desc }      │
+│                                                              │
+│  ❌ Changing the response status code                         │
+│     201 Created → 200 OK (consumers may check status)        │
+│                                                              │
+│  ──────────────────────────────────────────────────────────  │
+│                                                              │
+│  NON-BREAKING CHANGES (contract tests still pass):           │
+│                                                              │
+│  ✅ Adding a new OPTIONAL field to a response                │
+│     { id, title } → { id, title, tags: [] }                 │
+│                                                              │
+│  ✅ Adding a new endpoint                                    │
+│     POST /api/courses/bulk-enroll (new, consumers don't use) │
+│                                                              │
+│  ✅ Making a required request field optional                  │
+│     { title, desc } → { title, desc? }                      │
+│                                                              │
+│  ✅ Adding a new enum value                                   │
+│     status: &quot;draft&quot;|&quot;published&quot; → &quot;draft&quot;|&quot;published&quot;|&quot;archived&quot;│
+│     (IF consumers handle unknown values gracefully)          │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Automated Breaking Change Detection Script</h3>
+
+<pre class="code-block"><code>// scripts/check-api-compatibility.ts
+import { z } from 'zod'
+import fs from 'fs'
+
+interface SchemaVersion {
+  version: string
+  schema: z.ZodType
+  timestamp: string
+}
+
+function checkBackwardCompatibility(
+  oldSchema: z.ZodType,
+  newSchema: z.ZodType,
+  sampleData: unknown[]
+): { compatible: boolean; failures: string[] } {
+  const failures: string[] = []
+
+  for (const data of sampleData) {
+    // If old schema accepts this data, new schema must too
+    const oldResult = oldSchema.safeParse(data)
+    const newResult = newSchema.safeParse(data)
+
+    if (oldResult.success &amp;&amp; !newResult.success) {
+      failures.push(
+        `Breaking: Data valid under old schema is rejected by new schema: ${
+          newResult.error.issues.map((i) =&gt; <code class="inline-code">${i.path.join('.')}: ${i.message}</code>).join(', ')
+        }`
+      )
+    }
+  }
+
+  return {
+    compatible: failures.length === 0,
+    failures,
+  }
+}</code></pre>
+<hr class="section-divider">
+<h2>Schema Evolution Strategy</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  SCHEMA EVOLUTION RULES                                      │
+│                                                              │
+│  1. ADDITIVE CHANGES ONLY (backward compatible)              │
+│     → Add new optional fields                                │
+│     → Add new endpoints                                      │
+│     → Add new enum values (if consumers are tolerant)        │
+│                                                              │
+│  2. FOR BREAKING CHANGES, VERSION THE API                    │
+│     → /api/v1/courses (old consumers keep working)           │
+│     → /api/v2/courses (new shape for new consumers)          │
+│     → Run both versions in parallel during migration         │
+│     → Deprecate v1 after all consumers migrate               │
+│                                                              │
+│  3. DEPRECATION WORKFLOW                                     │
+│     → Week 1: Add deprecation header to v1 responses         │
+│     → Week 2-4: Migrate all consumers to v2                  │
+│     → Week 5: Remove v1 endpoint                             │
+│     → Contract tests on v2 must pass before removing v1      │
+│                                                              │
+│  4. USE TOLERANT READER PATTERN                              │
+│     → Consumers IGNORE unknown fields (don't fail on extras) │
+│     → Consumers validate only the fields they USE            │
+│     → Use Zod .passthrough() or .strip() for tolerance       │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Tolerant Reader Pattern</h3>
+
+<pre class="code-block"><code>// Consumer schema — only validates what this consumer actually needs
+const CourseForCatalog = z.object({
+  id: z.string(),
+  title: z.string(),
+  status: z.string(),
+  thumbnail_url: z.string().nullable(),
+}).passthrough()  // ← IMPORTANT: ignore extra fields
+
+// If the provider adds new fields (tags, difficulty_level, etc.),
+// this consumer test still passes because .passthrough() ignores them.</code></pre>
+<hr class="section-divider">
+<h2>CI Integration for Contract Tests</h2>
+
+<pre class="code-block"><code># .github/workflows/contract-tests.yml
+name: Contract Tests
+
+on:
+  pull_request:
+    paths:
+      - 'src/shared/contracts/**'
+      - 'src/backend/src/controllers/**'
+      - 'src/backend/src/routes/**'
+      - 'src/frontend/src/api/**'
+
+jobs:
+  consumer-contracts:
+    name: Consumer Contract Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: cd src/frontend &amp;&amp; npm ci
+      - run: cd src/frontend &amp;&amp; npm run test:contracts
+      # Pact: publish contract to broker
+      - name: Publish Pact
+        if: github.event_name == 'push'
+        run: |
+          cd src/frontend &amp;&amp; npx pact-broker publish ./pacts \
+            --consumer-app-version=${{ github.sha }} \
+            --broker-base-url=${{ secrets.PACT_BROKER_URL }} \
+            --broker-token=${{ secrets.PACT_BROKER_TOKEN }}
+
+  provider-contracts:
+    name: Provider Contract Verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [consumer-contracts]
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test_db
+        ports: ['5432:5432']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: cd src/backend &amp;&amp; npm ci
+      - run: cd src/backend &amp;&amp; npx prisma migrate deploy
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test_db
+      - run: cd src/backend &amp;&amp; npm run test:contracts
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test_db
+          PACT_BROKER_URL: ${{ secrets.PACT_BROKER_URL }}
+
+  schema-compatibility:
+    name: Schema Compatibility Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Check for breaking schema changes
+        run: |
+          # Compare contract schemas between PR branch and main
+          git diff origin/main...HEAD -- src/shared/contracts/ &gt; /tmp/contract-diff.txt
+          if [ -s /tmp/contract-diff.txt ]; then
+            echo &quot;Contract schemas changed — running compatibility check&quot;
+            cd src/shared &amp;&amp; npx tsx scripts/check-compatibility.ts
+          else
+            echo &quot;No contract changes detected&quot;
+          fi</code></pre>
+<hr class="section-divider">
+<h2>Common Mistakes / Anti-Patterns</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  ANTI-PATTERN                    │  DO THIS INSTEAD          │
+├──────────────────────────────────┼───────────────────────────┤
+│  Testing against live production │  Test against local/CI    │
+│  API                             │  instance                 │
+│                                  │                           │
+│  Consumer tests validate ALL     │  Validate only the fields │
+│  fields including unused ones    │  this consumer uses       │
+│                                  │                           │
+│  Strict schema (no extra fields) │  Use .passthrough() or    │
+│  on consumer side                │  tolerant reader pattern  │
+│                                  │                           │
+│  No versioning — just change API │  Version the API for      │
+│  and hope consumers update       │  breaking changes         │
+│                                  │                           │
+│  Contract tests run only locally │  Run in CI, block merges  │
+│                                  │  on contract violations   │
+│                                  │                           │
+│  Mock the provider in contract   │  Test against real provider│
+│  verification tests              │  code, not mocks          │
+│                                  │                           │
+│  One giant contract file for     │  Separate contract per    │
+│  all endpoints                   │  endpoint group           │
+│                                  │                           │
+│  Shared schemas drift from       │  Single source of truth   │
+│  actual implementation           │  in shared/ directory     │
+│                                  │                           │
+│  Testing only 200 responses      │  Test 400, 404, 500, 401  │
+│                                  │  error response shapes    │
+│                                  │                           │
+│  Forgetting message contracts    │  Test event/queue message │
+│  (only HTTP)                     │  shapes too               │
+└──────────────────────────────────┴───────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Tips for Best Results</h2>
+
+<ul class="skill-list"><li class="ordered"><strong>Start with schema validation</strong> (Zod) — it's the simplest approach and gives 80% of the value with 20% of the effort</li>
+<li class="ordered"><strong>Shared contracts live in a shared directory</strong> — <code class="inline-code">/src/shared/contracts/</code> in a monorepo, or a shared npm package in a polyrepo</li>
+<li class="ordered"><strong>Both sides must test</strong> — consumer tests verify expectations, provider tests verify fulfillment. One without the other is incomplete</li>
+<li class="ordered"><strong>Test error responses too</strong> — the shape of a 404 or 400 response is part of the contract</li>
+<li class="ordered"><strong>Use Zod schemas for runtime validation AND TypeScript types</strong> — <code class="inline-code">z.infer<typeof Schema></code> gives you types for free</li>
+<li class="ordered"><strong>Run contract tests on every PR that touches API code</strong> — use path-based CI filters</li>
+<li class="ordered"><strong>The tolerant reader pattern prevents most false failures</strong> — consumers should ignore unknown fields</li>
+<li class="ordered"><strong>Version your API when making breaking changes</strong> — never remove or rename a field in place</li>
+<li class="ordered"><strong>Contract tests replace the need for E2E tests between services</strong> — they're faster, more stable, and more focused</li>
+<li class="ordered"><strong>If mocks exist in your test suite, validate them against contracts</strong> — a mock that returns the wrong shape is worse than no mock</li></ul>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="ci-test-pipeline.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">CI Test Pipeline — Ship Fast Without Breaking Things</span></span></a>
+    <a href="cypress-test.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Cypress / Playwright E2E Tests — Write Tests That Don't Flake</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    66 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

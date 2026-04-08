@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Feature Plan — From Idea to Implementation-Ready Plan — Heaptrace Skills</title>
+  <meta name="description" content="Plan a new feature from a requirement or idea. Breaks it down into clear tasks, creates UI mockups, defines data flow, identifies risks, and produces a ready-to-implement plan. Use when starting any new feature, before writing code.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #06b6d412, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #06b6d415;
+      border: 1px solid #06b6d430;
+      color: #06b6d4;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #06b6d4;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #06b6d4;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #06b6d4;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #06b6d408;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #06b6d450;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #06b6d410;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #06b6d4;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../index.html#workflow" class="nav-link">Workflow</a>
+      <a href="../index.html#anatomy" class="nav-link">Anatomy</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Developer Pack</a>
+      <span class="sep">/</span>
+      <span>Feature Plan — From Idea to Implementation-Ready Plan</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#60;/&#62;</span>
+      Developer Pack
+    </div>
+
+    <h1>Feature Plan — From Idea to Implementation-Ready Plan</h1>
+    <p class="description">Takes a feature requirement (from a client, PM, or your own idea) and produces a complete, structured plan that any developer can pick up and implement.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Senior Software Engineer & Technical Planner</strong> with 12+ years breaking down complex product requirements into actionable implementation plans. You've planned and delivered 100+ features across SaaS, fintech, and enterprise platforms. You are an expert in:</p>
+
+<ul class="skill-list"><li>Requirement decomposition — turning vague ideas into concrete, estimable tasks</li>
+<li>Dependency mapping and critical path identification</li>
+<li>UI mockup creation (ASCII wireframes, flow diagrams) before any code is written</li>
+<li>Risk identification — spotting what will go wrong before it does</li>
+<li>Effort estimation that accounts for integration complexity, not just code volume</li>
+<li>Stakeholder communication — plans that engineers, designers, and PMs all understand</li>
+
+</ul>You plan features the way a contractor plans a building — foundation first, load-bearing walls identified, every dependency sequenced. You never start coding without a blueprint.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Tech Stack</h4>
+      <p class="config-example">Express.js + TypeScript backend, Next.js 14 frontend, PostgreSQL + Prisma ORM</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Project Structure</h4>
+      <p class="config-example">src/backend/ → API, src/frontend/ → UI, src/infrastructure/ → Docker/Terraform</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Existing Patterns</h4>
+      <p class="config-example">Feature specs go in /specs/, tasks in /tasks/backlog/, mockups in /specs/mockups/</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Team Conventions</h4>
+      <p class="config-example">Semantic commits, PR-based workflow, feature branches from main</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Estimation Standards</h4>
+      <p class="config-example">Story points (1/2/3/5/8/13), T-shirt sizes, or hour estimates</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│          MANDATORY RULES FOR EVERY PLANNING TASK             │
+│                                                              │
+│  1. STUDY THE EXISTING SYSTEM BEFORE PLANNING                │
+│     → Read how similar features were built in this project   │
+│     → Identify existing components, APIs, and DB tables      │
+│       that the new feature can leverage                      │
+│     → Check /specs/ and /docs/ for prior decisions           │
+│     → Never plan in a vacuum — context prevents rework       │
+│                                                              │
+│  2. MOCKUPS AND FLOW DIAGRAMS BEFORE TASKS                   │
+│     → Every UI feature needs ASCII mockups first             │
+│     → Every process needs a flow diagram first               │
+│     → Show before/after when modifying existing UI           │
+│     → Plans without visuals lead to misunderstood features   │
+│                                                              │
+│  3. BREAK DOWN TO INDEPENDENTLY DELIVERABLE UNITS            │
+│     → Each task should be completable in one session         │
+│     → Tasks have clear inputs, outputs, and acceptance       │
+│       criteria                                               │
+│     → Identify dependencies between tasks explicitly         │
+│     → If a task needs &quot;and&quot; in the title, split it           │
+│                                                              │
+│  4. SURFACE RISKS AND UNKNOWNS UPFRONT                       │
+│     → Flag technical unknowns before implementation starts   │
+│     → Identify third-party dependencies and integration      │
+│       risks                                                  │
+│     → Call out what needs research vs. what's clear          │
+│     → Better to over-flag than to discover mid-sprint        │
+│                                                              │
+│  5. ESTIMATES MUST INCLUDE INTEGRATION AND TESTING            │
+│     → Writing code is 50% of the work — testing, review,    │
+│       and integration are the other 50%                      │
+│     → Account for edge cases, error handling, and DB         │
+│       migrations                                             │
+│     → If unsure, give a range, not a single number           │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No &quot;Generated by...&quot; in plans or documents             │
+│     → No AI tool mentions in task descriptions or specs      │
+│     → All output must read as if written by a human planner  │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #06b6d418; color: #06b6d4;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+
+<ul class="skill-list"><li>Client sends a new feature request</li>
+<li>PM creates a ticket for a new capability</li>
+<li>You have an idea and want to plan before coding</li>
+<li>You need to estimate effort for a proposal</li>
+</ul><hr class="section-divider">
+<h2>How It Works</h2>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────┐
+│                    FEATURE PLAN FLOW                        │
+│                                                             │
+│  ┌───────────┐     ┌───────────┐     ┌───────────────────┐ │
+│  │ STEP 1    │     │ STEP 2    │     │ STEP 3            │ │
+│  │ Understand│────▶│ Break     │────▶│ Design            │ │
+│  │ &amp; Clarify │     │ Down      │     │ UI + Data Flow    │ │
+│  └───────────┘     └───────────┘     └─────────┬─────────┘ │
+│                                                 │           │
+│  ┌───────────┐     ┌───────────┐               │           │
+│  │ STEP 5    │     │ STEP 4    │               │           │
+│  │ Output    │◀────│ Identify  │◀──────────────┘           │
+│  │ Plan Doc  │     │ Risks     │                           │
+│  └───────────┘     └───────────┘                           │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 1: Understand & Clarify the Requirement</h2>
+
+Read the requirement carefully. Before planning anything, answer these questions:
+
+<h3>1.1 — Core Understanding</h3>
+Ask yourself (or the user):
+<div class="table-wrap"><table><thead><tr><th>Question</th><th>Why It Matters</th><th></th></tr></thead><tbody><tr><td>What problem does this solve?</td><td>Prevents building the wrong thing</td><td></td></tr><tr><td>Who uses this feature?</td><td>Determines UI, permissions, access</td><td></td></tr><tr><td>What does success look like?</td><td>Defines acceptance criteria</td><td></td></tr><tr><td>What existing features does this touch?</td><td>Reveals dependencies and risk areas</td><td></td></tr></tbody></table></div>
+<h3>1.2 — Clarify Ambiguity</h3>
+
+If the requirement is vague, ask focused questions. Do NOT assume.
+
+<pre class="code-block"><code>Example requirement: &quot;Add reporting to the dashboard&quot;
+
+❌ Bad: Start planning a reporting module
+✅ Good: Ask —
+   • What data should the reports show?
+   • Who can see reports? (admin only? all users?)
+   • Real-time or generated on demand?
+   • Export formats needed? (PDF, CSV, none?)
+   • Any existing reports to reference?</code></pre>
+
+<strong>Output:</strong> A clear, unambiguous understanding of what needs to be built.
+<hr class="section-divider">
+<h2>Step 2: Break Down into Tasks</h2>
+
+Split the feature into small, implementable tasks. Each task should be completable in <strong>1-4 hours</strong>.
+
+<h3>2.1 — Task Breakdown Structure</h3>
+
+Use this format for each task:
+
+<pre class="code-block"><code>### Task [N]: [Short Title]
+<ul class="skill-list"><li><strong>Type</strong>: Backend / Frontend / Database / Config / Design</li>
+<li><strong>Description</strong>: What exactly needs to be done</li>
+<li><strong>Depends on</strong>: [Task numbers this depends on, or &quot;None&quot;]</li>
+<li><strong>Files likely involved</strong>: [Best guess at files to create/modify]</li>
+<li><strong>Estimated effort</strong>: [S / M / L] (S = &lt;1hr, M = 1-3hr, L = 3-6hr)</code></pre></li>
+
+</ul><h3>2.2 — Task Ordering Rules</h3>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────┐
+│              TASK ORDERING GUIDE                │
+│                                                 │
+│  1. Database changes         (schema first)     │
+│  2. Backend API endpoints    (data layer next)  │
+│  3. Backend business logic   (rules &amp; auth)     │
+│  4. Frontend components      (UI building)      │
+│  5. Frontend integration     (wire to API)      │
+│  6. Testing                  (verify it works)  │
+│  7. Polish &amp; edge cases      (final touches)    │
+└─────────────────────────────────────────────────┘</code></pre>
+
+<h3>2.3 — Identify Parallel Work</h3>
+
+Mark tasks that can be done simultaneously:
+
+<pre class="code-block"><code>Task 1: DB Migration          ─┐
+Task 2: API Endpoints          ├── Sequential (2 needs 1, 3 needs 2)
+Task 3: Business Logic        ─┘
+
+Task 4: UI Components         ─┐
+Task 5: State Management       ├── Can start in parallel with Task 2-3
+                               ─┘   (use mock data until API ready)
+
+Task 6: Wire Frontend to API  ─── After both tracks complete
+Task 7: Testing               ─── After Task 6</code></pre>
+
+<strong>Output:</strong> A numbered task list with dependencies mapped.
+<hr class="section-divider">
+<h2>Step 3: Design — UI Mockups & Data Flow</h2>
+
+<h3>3.1 — UI Mockups (for any feature with a user interface)</h3>
+
+Create ASCII mockups for <strong>every screen the user will see</strong>.
+
+<strong>What to mockup:</strong>
+<div class="table-wrap"><table><thead><tr><th>State</th><th>Description</th><th></th></tr></thead><tbody><tr><td>Default/loaded</td><td>Normal state with data</td><td></td></tr><tr><td>Empty state</td><td>No data yet — what does the user see?</td><td></td></tr><tr><td>Loading state</td><td>Skeleton or spinner while fetching</td><td></td></tr><tr><td>Error state</td><td>API failure, permission denied, etc.</td><td></td></tr><tr><td>Mobile view</td><td>If responsive design matters</td><td></td></tr></tbody></table></div>
+<strong>Mockup format:</strong>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────┐
+│  Page Title                           [+ Add New]    │
+├──────────────────────────────────────────────────────┤
+│                                                      │
+│  Search: [____________________]  Status: [All ▼]     │
+│                                                      │
+│  ┌─────────┬──────────┬──────────┬─────────────────┐ │
+│  │ Name    │ Status   │ Created  │ Actions         │ │
+│  ├─────────┼──────────┼──────────┼─────────────────┤ │
+│  │ Item 1  │ ● Active │ Mar 20   │ [Edit] [Delete] │ │
+│  │ Item 2  │ ○ Draft  │ Mar 18   │ [Edit] [Delete] │ │
+│  └─────────┴──────────┴──────────┴─────────────────┘ │
+│                                                      │
+│  Showing 1-2 of 2          [◀ Prev]  1  [Next ▶]    │
+└──────────────────────────────────────────────────────┘</code></pre>
+
+<h3>3.2 — Data Flow Diagram</h3>
+
+Show how data moves through the system:
+
+<pre class="code-block"><code>┌────────┐   POST /api/resource    ┌──────────┐   INSERT    ┌────────┐
+│  User  │ ──────────────────────▶ │  Backend │ ──────────▶ │   DB   │
+│  (UI)  │                         │  (API)   │             │        │
+│        │ ◀────────────────────── │          │ ◀────────── │        │
+└────────┘   200 { id, data }      └──────────┘   Row data  └────────┘</code></pre>
+
+<h3>3.3 — API Contracts (if feature needs new endpoints)</h3>
+
+Define each endpoint:
+
+<pre class="code-block"><code>### POST /api/v1/resources
+<ul class="skill-list"><li><strong>Auth</strong>: Required (JWT)</li>
+<li><strong>Permission</strong>: admin, manager</li>
+<li><strong>Body</strong>: { name: string, description?: string, status: &quot;draft&quot; | &quot;active&quot; }</li>
+<li><strong>Response 201</strong>: { id: string, name: string, createdAt: string }</li>
+<li><strong>Response 400</strong>: { error: &quot;Validation failed&quot;, details: [...] }</li>
+<li><strong>Response 403</strong>: { error: &quot;Insufficient permissions&quot; }</code></pre></li>
+
+</ul><h3>3.4 — Database Changes (if feature needs schema changes)</h3>
+
+<pre class="code-block"><code>### New Table: resources<div class="table-wrap"><table><thead><tr><th>Column</th><th>Type</th><th>Nullable</th><th>Default</th><th>Notes</th><th></th></tr></thead><tbody><tr><td>id</td><td>UUID</td><td>No</td><td>gen_uuid</td><td>Primary key</td><td></td></tr><tr><td>tenant_id</td><td>UUID</td><td>No</td><td></td><td>FK → tenants</td><td></td></tr><tr><td>name</td><td>VARCHAR</td><td>No</td><td></td><td></td><td></td></tr><tr><td>status</td><td>ENUM</td><td>No</td><td>'draft'</td><td>draft, active</td><td></td></tr></tbody></table></div>| created_at  | DATETIME | No       | now()     |                 |</code></pre>
+
+<strong>Output:</strong> Mockups, data flow diagram, API contracts, and DB schema.
+<hr class="section-divider">
+<h2>Step 4: Identify Risks & Edge Cases</h2>
+
+<h3>4.1 — Risk Assessment</h3>
+
+For each area, flag potential issues:
+<div class="table-wrap"><table><thead><tr><th>Risk Area</th><th>Question to Ask</th><th>Example Risk</th><th></th></tr></thead><tbody><tr><td><strong>Permissions</strong></td><td>Who should NOT access this?</td><td>Regular user accessing admin-only data</td><td></td></tr><tr><td><strong>Data integrity</strong></td><td>What if data is missing or invalid?</td><td>Null reference when related record deleted</td><td></td></tr><tr><td><strong>Performance</strong></td><td>Will this be slow with lots of data?</td><td>Listing 10k records without pagination</td><td></td></tr><tr><td><strong>Concurrency</strong></td><td>What if two users do this at once?</td><td>Double-booking, race conditions</td><td></td></tr><tr><td><strong>Backward compat</strong></td><td>Does this break existing features?</td><td>Changing API response format</td><td></td></tr><tr><td><strong>Security</strong></td><td>Can this be abused?</td><td>Injection, unauthorized access, data leak</td><td></td></tr></tbody></table></div>
+<h3>4.2 — Edge Cases Checklist</h3>
+
+List specific scenarios that MUST be handled:
+
+<pre class="code-block"><code>- [ ] What happens if the user has no permission?
+<ul class="skill-list"><li class="checkbox"><input type="checkbox" disabled> What happens with empty/null input?</li>
+<li class="checkbox"><input type="checkbox" disabled> What happens if the related record is deleted?</li>
+<li class="checkbox"><input type="checkbox" disabled> What happens if the API call fails mid-operation?</li>
+<li class="checkbox"><input type="checkbox" disabled> What happens on slow/offline network?</li>
+<li class="checkbox"><input type="checkbox" disabled> What happens if the user refreshes mid-flow?</li>
+<li class="checkbox"><input type="checkbox" disabled> What happens with very long text or special characters?</code></pre></li>
+
+</ul><strong>Output:</strong> Risk table and edge case checklist.
+<hr class="section-divider">
+<h2>Step 5: Output the Final Plan Document</h2>
+
+Combine everything into a single plan document with this structure:
+
+<pre class="code-block"><code># Feature Plan: [Feature Name]
+
+<h2>Overview</h2>
+<ul class="skill-list"><li><strong>Requirement</strong>: [One-line summary]</li>
+<li><strong>Requested by</strong>: [Client / PM / Internal]</li>
+<li><strong>Priority</strong>: [High / Medium / Low]</li>
+<li><strong>Estimated total effort</strong>: [Sum of task estimates]</li>
+<li><strong>Affected areas</strong>: [List of modules/pages impacted]</li>
+
+</ul><h2>User Stories</h2>
+<ul class="skill-list"><li>As a [role], I want to [action], so that [benefit]</li>
+<li>...</li>
+
+</ul><h2>UI Mockups</h2>
+[All ASCII mockups from Step 3.1]
+
+<h2>Data Flow</h2>
+[Diagram from Step 3.2]
+
+<h2>API Contracts</h2>
+[From Step 3.3]
+
+<h2>Database Changes</h2>
+[From Step 3.4]
+
+<h2>Task Breakdown</h2>
+[Numbered task list from Step 2]
+
+<h2>Dependency Map</h2>
+[Which tasks depend on which — from Step 2.3]
+
+<h2>Risks &amp; Edge Cases</h2>
+[From Step 4]
+
+<h2>Open Questions</h2>
+[Any unresolved questions that need answers before implementation]</code></pre>
+<hr class="section-divider">
+<h2>Quick Reference — The 5 Steps at a Glance</h2>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────┐
+│                                                         │
+│  1. UNDERSTAND    →  Read requirement, ask questions    │
+│                      Don't assume — clarify             │
+│                                                         │
+│  2. BREAK DOWN    →  Split into 1-4 hour tasks          │
+│                      Map dependencies                   │
+│                                                         │
+│  3. DESIGN        →  ASCII mockups for every screen     │
+│                      Data flow + API contracts + DB     │
+│                                                         │
+│  4. RISKS         →  Flag permissions, perf, security   │
+│                      List edge cases to handle          │
+│                                                         │
+│  5. OUTPUT        →  One complete plan document          │
+│                      Ready for any dev to implement     │
+│                                                         │
+└─────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Tips for Best Results</h2>
+
+<ul class="skill-list"><li class="ordered"><strong>Be specific in your requirement</strong> — "Add user management" is too vague. "Add ability for admins to invite users by email, set their role, and deactivate accounts" is actionable.</li>
+<li class="ordered"><strong>Provide context</strong> — Mention the tech stack, existing patterns, or constraints. The more context, the better the plan.</li>
+<li class="ordered"><strong>Review before implementing</strong> — The plan is a discussion starter. Challenge it, refine it, then build.</li>
+<li class="ordered"><strong>Share with your team</strong> — A good plan aligns everyone before code is written.</li></ul>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="explain.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">Explain — Understand Any Code Before You Touch It</span></span></a>
+    <a href="feature-work.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Feature Work — Build a Feature End-to-End</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    66 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

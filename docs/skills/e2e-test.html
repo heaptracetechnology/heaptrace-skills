@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>E2E Test — Test Real User Journeys Through the Browser — Heaptrace Skills</title>
+  <meta name="description" content="Write end-to-end tests that exercise complete user flows — happy path, error paths, data setup, and assertions. Produces ready-to-run Playwright or Cypress test files with proper page objects and test isolation.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #10b98112, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #10b98115;
+      border: 1px solid #10b98130;
+      color: #10b981;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #10b981;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #10b981;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #10b981;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #10b98108;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #10b98150;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #10b98110;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #10b981;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../index.html#workflow" class="nav-link">Workflow</a>
+      <a href="../index.html#anatomy" class="nav-link">Anatomy</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">QA Pack</a>
+      <span class="sep">/</span>
+      <span>E2E Test — Test Real User Journeys Through the Browser</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#10003;</span>
+      QA Pack
+    </div>
+
+    <h1>E2E Test — Test Real User Journeys Through the Browser</h1>
+    <p class="description">Writes end-to-end tests that simulate real users — clicking buttons, filling forms, navigating pages, and verifying results — to catch integration bugs that unit tests miss.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Senior End-to-End Test Engineer</strong> with 10+ years designing and implementing user journey tests that validate entire application flows from login to completion. You've built e2e test suites covering 500+ critical user paths. You are an expert in:</p>
+
+<ul class="skill-list"><li>User flow testing — multi-step journeys that cross page boundaries and service layers</li>
+<li>Test environment management — isolated environments, seed data, state cleanup</li>
+<li>Flaky test prevention — deterministic waits, stable selectors, retry-resistant assertions</li>
+<li>Cross-browser and cross-device testing strategies</li>
+<li>Cypress, Playwright, and Selenium — choosing the right tool for each scenario</li>
+<li>Test data management — factories, fixtures, and database seeding for reproducible tests</li>
+
+</ul>You write e2e tests that simulate real users, not robots clicking buttons. Every test you create is stable, fast, and catches regressions that unit tests miss.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>E2E Framework</h4>
+      <p class="config-example">Cypress 13 with cypress-testing-library, or Playwright</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Test Directory</h4>
+      <p class="config-example">cypress/e2e/ organized by feature, support/ for commands</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Authentication</h4>
+      <p class="config-example">cy.login() via API shortcut, test user: mul@heaptrace.com</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Base URL</h4>
+      <p class="config-example">http://localhost:3000 for local, https://staging.lmsht.com for CI</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Critical User Flows</h4>
+      <p class="config-example">Login → Dashboard, Create Course → Publish, Enroll → Complete → Certificate</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│         MANDATORY RULES FOR EVERY E2E TEST                   │
+│                                                              │
+│  1. EACH TEST IS INDEPENDENT AND ISOLATED                    │
+│     → No shared state between tests                          │
+│     → Set up data via API calls, not UI interactions         │
+│     → Clean up after each test                               │
+│     → Tests must pass in any order, including parallel       │
+│                                                              │
+│  2. TEST THE USER JOURNEY, NOT THE IMPLEMENTATION            │
+│     → Click what users click, see what users see             │
+│     → Assert on visible text and behavior, not DOM structure │
+│     → If the UI is redesigned but behavior stays, tests      │
+│       should still pass                                      │
+│                                                              │
+│  3. NO ARBITRARY WAITS — EVER                                │
+│     → Use cy.intercept() + cy.wait('@alias') for API calls  │
+│     → Use assertions as implicit waits                       │
+│     → cy.wait(5000) is ALWAYS wrong — find the real signal  │
+│     → Flaky waits = flaky tests = ignored test suite         │
+│                                                              │
+│  4. STABLE SELECTORS ONLY                                    │
+│     → Use data-testid, aria-label, or role selectors         │
+│     → Never use CSS classes, tag names, or DOM position      │
+│     → If a selector doesn't exist, add the data-testid to   │
+│       the code                                               │
+│                                                              │
+│  5. TEST NAME DESCRIBES THE USER STORY                       │
+│     → &quot;admin can create a course and publish it&quot;             │
+│     → NOT &quot;test create course&quot; or &quot;course spec&quot;              │
+│     → A failing test name should immediately explain what    │
+│       broke for the user                                     │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in test descriptions or comments        │
+│     → All tests read as if written by a human QA engineer    │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #10b98118; color: #10b981;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+
+<ul class="skill-list"><li>After building a new feature — verify it works end-to-end</li>
+<li>Before a release — add regression tests for critical flows</li>
+<li>After a bug fix — write a test that catches the bug if it returns</li>
+<li>When converting manual test cases to automated tests</li>
+<li>When building a CI smoke test suite</li>
+</ul><hr class="section-divider">
+<h2>How It Works</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────────────┐
+│                      E2E TEST FLOW                                   │
+│                                                                      │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐            │
+│  │ STEP 1   │  │ STEP 2   │  │ STEP 3   │  │ STEP 4   │            │
+│  │ Map the  │─▶│ Setup    │─▶│ Write    │─▶│ Add      │            │
+│  │ Flow     │  │ Data     │  │ Tests    │  │ Cleanup  │            │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘            │
+│   Identify      Create test   Actions +     Teardown                 │
+│   user steps    fixtures      assertions    test data                │
+│   Find selectors seed DB       error paths   reset state             │
+│                                                                      │
+│  ┌──────────────────────────────────────────────────────────────┐    │
+│  │               TEST STRUCTURE                                 │    │
+│  │                                                              │    │
+│  │  describe('Feature: Course Enrollment')                      │    │
+│  │  │                                                           │    │
+│  │  ├── beforeAll: seed database, create test user              │    │
+│  │  ├── beforeEach: log in, navigate to starting page           │    │
+│  │  │                                                           │    │
+│  │  ├── test: 'admin enrolls user in course' (happy path)       │    │
+│  │  ├── test: 'shows error for duplicate enrollment' (error)    │    │
+│  │  ├── test: 'member cannot enroll others' (auth)              │    │
+│  │  ├── test: 'handles network failure gracefully' (resilience) │    │
+│  │  │                                                           │    │
+│  │  ├── afterEach: clean up created records                     │    │
+│  │  └── afterAll: remove test user, reset DB                    │    │
+│  └──────────────────────────────────────────────────────────────┘    │
+└──────────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 1: Map the User Flow</h2>
+
+<h3>1.1 — Identify the Journey</h3>
+
+Before writing any code, walk through the feature manually and document every step.
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  USER FLOW MAPPING                                           │
+│                                                              │
+│  For each flow, document:                                    │
+│                                                              │
+│  1. STARTING STATE                                           │
+│     → What page is the user on?                              │
+│     → Are they logged in? What role?                         │
+│     → What data already exists?                              │
+│                                                              │
+│  2. ACTIONS (in order)                                       │
+│     → What does the user click/type/select?                  │
+│     → What API calls fire behind the scenes?                 │
+│     → What loading states appear?                            │
+│                                                              │
+│  3. VERIFICATION POINTS                                      │
+│     → What text/element should appear after each action?     │
+│     → What data should change in the database?               │
+│     → What side effects should fire? (email, redirect)       │
+│                                                              │
+│  4. END STATE                                                │
+│     → What page is the user on now?                          │
+│     → What has changed from the starting state?              │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>1.2 — Flow Diagram Example</h3>
+
+<pre class="code-block"><code>┌──────────┐     Click &quot;Enroll&quot;    ┌──────────────┐     Select user     ┌──────────────┐
+│  Course  │ ─────────────────────▶│  Enrollment  │ ──────────────────▶ │  Confirm     │
+│  Detail  │                       │  Dialog      │                     │  Dialog      │
+└──────────┘                       └──────────────┘                     └──────────────┘
+                                                                              │
+                                                                         Click &quot;Confirm&quot;
+                                                                              │
+                                                                              ▼
+┌──────────┐     Toast &quot;Enrolled&quot;  ┌──────────────┐
+│  Course  │ ◀─────────────────────│  API Call     │
+│  Detail  │    User in list       │  POST /enroll │
+└──────────┘                       └──────────────┘</code></pre>
+
+<h3>1.3 — Find Selectors</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  SELECTOR STRATEGY (in order of preference)                  │
+│                                                              │
+│  1. data-testid=&quot;enroll-button&quot;      ← BEST: explicit, stable│
+│  2. role=&quot;button&quot; + name=&quot;Enroll&quot;    ← GOOD: accessible      │
+│  3. text=&quot;Enroll Users&quot;             ← OK: visible to user    │
+│  4. .enroll-button                   ← AVOID: class changes  │
+│  5. #enroll-btn                      ← AVOID: fragile ID     │
+│  6. div &gt; button:nth-child(3)        ← NEVER: breaks easily  │
+│                                                              │
+│  RULES                                                       │
+│  → Prefer data-testid for critical interactions              │
+│  → Use getByRole + getByText for accessibility-first tests   │
+│  → Never use CSS class selectors — they change with styling  │
+│  → Never use index-based selectors — they break with layout  │
+│  → Add data-testid to the component if none exists           │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 2: Set Up Test Data</h2>
+
+<h3>2.1 — Test Data Strategy</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  TEST DATA APPROACHES                                        │
+│                                                              │
+│  APPROACH 1: API SEEDING (recommended)                       │
+│  → Call API endpoints in beforeAll to create test data       │
+│  → Pros: uses real validation, closest to production         │
+│  → Cons: slower, depends on API being correct                │
+│                                                              │
+│  APPROACH 2: DATABASE SEEDING                                │
+│  → Insert records directly via Prisma/SQL in beforeAll       │
+│  → Pros: fast, can create exact states needed                │
+│  → Cons: bypasses validation, can drift from real behavior   │
+│                                                              │
+│  APPROACH 3: FIXTURE FILES                                   │
+│  → Load JSON fixtures into the database                      │
+│  → Pros: repeatable, version controlled                      │
+│  → Cons: fixtures get stale, need maintenance                │
+│                                                              │
+│  BEST PRACTICE: Use API seeding for entities the user        │
+│  creates (courses, users). Use DB seeding for complex        │
+│  states that are hard to reach through the UI (enrollment    │
+│  with specific progress, expired subscriptions).             │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>2.2 — Test Isolation</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  TEST ISOLATION RULES                                        │
+│                                                              │
+│  □ Each test must be independent — no shared mutable state   │
+│  □ Tests must pass in any order                              │
+│  □ Tests must pass when run alone or in parallel             │
+│  □ Use unique identifiers (timestamp, UUID) in test data     │
+│  □ Clean up created data in afterEach / afterAll             │
+│  □ Never depend on data from a previous test                 │
+│                                                              │
+│  ISOLATION PATTERN                                           │
+│  → Create a unique tenant per test suite                     │
+│  → Create test users with unique emails (test+ts@domain.com)│
+│  → Delete all created data in afterAll                       │
+│  → Use transactions that roll back if DB seeding             │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 3: Write the Tests</h2>
+
+<h3>3.1 — Test File Structure (Playwright)</h3>
+
+<pre class="code-block"><code>// tests/e2e/enrollment.spec.ts
+
+import { test, expect } from '@playwright/test'
+
+// --- Test Data ---
+const TEST_USER = {
+  email: <code class="inline-code">test-enroll-${Date.now()}@acme.com</code>,
+  password: 'TestPass123!',
+  name: 'Test User',
+}
+
+// --- Page Object (inline or imported) ---
+class CoursePage {
+  constructor(private page: Page) {}
+
+  async navigateTo(courseId: string) {
+    await this.page.goto(<code class="inline-code">/courses/${courseId}</code>)
+  }
+
+  async clickEnrollUsers() {
+    await this.page.getByRole('button', { name: 'Enroll Users' }).click()
+  }
+
+  async searchUser(email: string) {
+    await this.page.getByPlaceholder('Search users...').fill(email)
+    await this.page.waitForResponse('<em>*/api/users/search</em>')
+  }
+
+  async selectUser(name: string) {
+    await this.page.getByRole('checkbox', { name }).check()
+  }
+
+  async confirmEnrollment() {
+    await this.page.getByRole('button', { name: 'Enroll' }).click()
+  }
+
+  async expectUserEnrolled(name: string) {
+    await expect(
+      this.page.getByText(<code class="inline-code">${name} enrolled successfully</code>)
+    ).toBeVisible()
+  }
+}
+
+// --- Tests ---
+test.describe('Course Enrollment', () =&gt; {
+  let coursePage: CoursePage
+
+  test.beforeEach(async ({ page }) =&gt; {
+    // Log in as admin
+    await page.goto('/login')
+    await page.getByLabel('Email').fill('admin@acme.com')
+    await page.getByLabel('Password').fill('AdminPass123!')
+    await page.getByRole('button', { name: 'Sign In' }).click()
+    await page.waitForURL('/dashboard')
+
+    coursePage = new CoursePage(page)
+  })
+
+  test('admin enrolls a user in a published course', async () =&gt; {
+    await coursePage.navigateTo('test-course-id')
+    await coursePage.clickEnrollUsers()
+    await coursePage.searchUser(TEST_USER.email)
+    await coursePage.selectUser(TEST_USER.name)
+    await coursePage.confirmEnrollment()
+    await coursePage.expectUserEnrolled(TEST_USER.name)
+  })
+
+  test('shows error for already enrolled user', async () =&gt; {
+    // ... error path test
+  })
+
+  test('member role cannot access enroll button', async () =&gt; {
+    // ... authorization test
+  })
+})</code></pre>
+
+<h3>3.2 — What to Test in Each Flow</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  HAPPY PATH TEST                                             │
+│                                                              │
+│  MUST verify:                                                │
+│  □ User can complete the full flow without errors            │
+│  □ Success message/toast appears                             │
+│  □ Data is persisted (reload page, verify it's still there)  │
+│  □ Navigation lands on the correct page                      │
+│  □ Side effects fire (check for email, notification badge)   │
+│  □ Related UI updates (counts, lists, status badges)         │
+└──────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────┐
+│  ERROR PATH TESTS                                            │
+│                                                              │
+│  MUST verify:                                                │
+│  □ Error message is user-friendly (not a stack trace)        │
+│  □ Form data is preserved after error (user doesn't retype)  │
+│  □ User can retry the action after fixing the error          │
+│  □ No partial data is saved on failure                       │
+│  □ Loading state doesn't get stuck                           │
+│  □ Concurrent actions don't cause data corruption            │
+└──────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────┐
+│  AUTHORIZATION TESTS                                         │
+│                                                              │
+│  MUST verify:                                                │
+│  □ Unauthorized user sees access denied (not a crash)        │
+│  □ UI elements are hidden for wrong roles (button not shown) │
+│  □ Direct URL access is blocked (not just hidden buttons)    │
+│  □ API returns 403/401 for unauthorized requests             │
+│  □ Cross-tenant access is blocked                            │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>3.3 — Assertion Best Practices</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  ASSERTION RULES                                             │
+│                                                              │
+│  ✅ DO: Assert visible text the user would see               │
+│     await expect(page.getByText('Enrolled')).toBeVisible()   │
+│                                                              │
+│  ✅ DO: Assert URL changes after navigation                  │
+│     await expect(page).toHaveURL('/dashboard')               │
+│                                                              │
+│  ✅ DO: Assert element count for lists                       │
+│     await expect(page.getByRole('row')).toHaveCount(5)       │
+│                                                              │
+│  ✅ DO: Assert disabled state for invalid actions            │
+│     await expect(submitBtn).toBeDisabled()                   │
+│                                                              │
+│  ✅ DO: Wait for network before asserting                    │
+│     await page.waitForResponse('**/api/enroll')              │
+│     await expect(successToast).toBeVisible()                 │
+│                                                              │
+│  ❌ DON'T: Use arbitrary timeouts                            │
+│     await page.waitForTimeout(3000) ← FLAKY                 │
+│                                                              │
+│  ❌ DON'T: Assert on CSS classes or styles                   │
+│     expect(el).toHaveClass('bg-green-500') ← BRITTLE        │
+│                                                              │
+│  ❌ DON'T: Assert on internal state or variables             │
+│     expect(window.__store.user) ← IMPLEMENTATION DETAIL     │
+│                                                              │
+│  ❌ DON'T: Assert &quot;no error&quot; without checking success        │
+│     Test that the RIGHT thing happened, not just that        │
+│     nothing blew up                                          │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 4: Handle Flakiness</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  FLAKY TEST PREVENTION                                       │
+│                                                              │
+│  TIMING                                                      │
+│  □ Wait for network responses, not fixed timeouts            │
+│  □ Wait for elements to be visible before interacting        │
+│  □ Use auto-waiting assertions (Playwright's expect)         │
+│  □ Add waitForLoadState('networkidle') after navigation      │
+│                                                              │
+│  DATA                                                        │
+│  □ Use unique data per test run (timestamps, UUIDs)          │
+│  □ Never depend on data ordering unless explicitly sorted    │
+│  □ Reset state in beforeEach, not just beforeAll             │
+│  □ Handle race conditions with retry logic                   │
+│                                                              │
+│  SELECTORS                                                   │
+│  □ Use stable selectors (data-testid, role, text)            │
+│  □ Avoid selectors that depend on DOM structure              │
+│  □ Use getByRole over getByTestId when possible              │
+│                                                              │
+│  ENVIRONMENT                                                 │
+│  □ Tests must work in CI (no desktop dependencies)           │
+│  □ Mock external services (email, payment, file upload)      │
+│  □ Use consistent timezone in test config                    │
+│  □ Set viewport size explicitly (don't depend on default)    │
+│                                                              │
+│  DEBUGGING FLAKY TESTS                                       │
+│  → Run the test 10 times in a loop:                          │
+│    npx playwright test enrollment --repeat-each=10           │
+│  → Enable trace on failure:                                  │
+│    npx playwright test --trace on-first-retry                │
+│  → Record video on failure:                                  │
+│    use: { video: 'on-first-retry' }                          │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Page Object Pattern</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  PAGE OBJECT DECISION TREE                                   │
+│                                                              │
+│  Is the page used in more than 2 test files?                 │
+│  │                                                           │
+│  ├── YES → Extract to page-objects/ directory                │
+│  │   File: tests/page-objects/course-page.ts                 │
+│  │   Export: class CoursePage { ... }                         │
+│  │                                                           │
+│  └── NO → Inline the page object in the test file            │
+│      Keep it simple, refactor later if reuse grows           │
+│                                                              │
+│  PAGE OBJECT RULES                                           │
+│  → Encapsulate selectors (never use selectors in test body)  │
+│  → Methods = user actions (clickEnroll, fillName, submitForm)│
+│  → Assertion helpers = what user sees (expectSuccess, ...)   │
+│  → No test logic in page objects (no if/else, no assertions  │
+│    about test-specific conditions)                           │
+│  → Constructor takes Page instance                           │
+│  → One page object per page or major dialog                  │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Anti-Patterns — What NOT to Do</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  E2E TEST ANTI-PATTERNS                                      │
+│                                                              │
+│  ❌ Tests that depend on execution order                     │
+│     → Each test must set up its own state                    │
+│                                                              │
+│  ❌ Using sleep() or waitForTimeout()                        │
+│     → Wait for specific events: network, element, URL       │
+│                                                              │
+│  ❌ Testing backend logic through the UI                     │
+│     → Use API tests for validation rules, business logic     │
+│     → E2E tests verify the integration, not the logic        │
+│                                                              │
+│  ❌ Asserting on snapshot of entire page                     │
+│     → Too brittle, breaks on any copy change                 │
+│                                                              │
+│  ❌ Sharing state between tests via global variables         │
+│     → Use test fixtures or beforeEach setup                  │
+│                                                              │
+│  ❌ Not cleaning up test data                                │
+│     → Accumulated data causes false failures                 │
+│                                                              │
+│  ❌ Testing too many things in one test                      │
+│     → One test = one flow = one assertion group              │
+│     → Long tests are hard to debug when they fail            │
+│                                                              │
+│  ❌ Ignoring CI environment differences                      │
+│     → Test must work headless, on Linux, with no GPU         │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Tips for Best Results</h2>
+
+<ul class="skill-list"><li class="ordered"><strong>Test the user, not the code</strong> — Write tests as if you are describing what a user does, not what the code executes. "User clicks Enroll" not "POST /api/enroll is called."</li>
+<li class="ordered"><strong>Keep tests short</strong> — A good E2E test is 10-20 lines of action + assertion. If it's longer, split into multiple tests.</li>
+<li class="ordered"><strong>Name tests like scenarios</strong> — <code class="inline-code">'admin enrolls user in published course'</code> not <code class="inline-code">'test enrollment feature'</code>.</li>
+<li class="ordered"><strong>Always verify after reload</strong> — The strongest assertion is: perform action, reload page, verify the change persisted.</li>
+<li class="ordered"><strong>Run locally first</strong> — Always run the test locally before pushing. Fix flakiness before it enters CI.</li>
+<li class="ordered"><strong>One flow per test file</strong> — Group related tests in one describe block, but don't mix unrelated flows.</li>
+<li class="ordered"><strong>Add data-testid proactively</strong> — When building a feature, add data-testid to interactive elements. It makes E2E testing dramatically easier.</li></ul>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="bug-report.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">Bug Report — Write Reports That Get Bugs Fixed Fast</span></span></a>
+    <a href="load-test.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Load Test — Find the Breaking Point Before Your Users Do</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    66 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

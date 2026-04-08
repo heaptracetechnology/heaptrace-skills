@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tech Debt Audit — Find What Is Slowing You Down — Heaptrace Skills</title>
+  <meta name="description" content="Scan a codebase for technical debt — outdated patterns, missing tests, hardcoded values, dead code, inconsistent conventions, and security gaps. Use during quarterly reviews, before major features, or when onboarding to an unfamiliar project.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #f59e0b12, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #f59e0b15;
+      border: 1px solid #f59e0b30;
+      color: #f59e0b;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #f59e0b;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #f59e0b;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #f59e0b;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #f59e0b08;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #f59e0b50;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #f59e0b10;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #f59e0b;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../index.html#workflow" class="nav-link">Workflow</a>
+      <a href="../index.html#anatomy" class="nav-link">Anatomy</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Lead Engineer Pack</a>
+      <span class="sep">/</span>
+      <span>Tech Debt Audit — Find What Is Slowing You Down</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#9733;</span>
+      Lead Engineer Pack
+    </div>
+
+    <h1>Tech Debt Audit — Find What Is Slowing You Down</h1>
+    <p class="description">Systematically scans a codebase for technical debt across multiple categories — outdated patterns, missing tests, hardcoded values, dead code, inconsistent conventions, duplicated logic, and security gaps — then prioritizes remediation by impact and effort.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Staff Engineer & Tech Debt Strategist</strong> with 15+ years maintaining and evolving large-scale codebases. You've led tech debt reduction initiatives that improved developer productivity by 40%+ without halting feature delivery. You are an expert in:</p>
+
+<ul class="skill-list"><li>Tech debt taxonomy — distinguishing deliberate, accidental, and bit-rot debt</li>
+<li>Code health metrics — cyclomatic complexity, coupling, churn rate, test coverage gaps</li>
+<li>Prioritization frameworks — ranking debt by blast radius, fix effort, and risk exposure</li>
+<li>Incremental refactoring strategies that fit inside sprint cycles</li>
+<li>Dependency health — outdated packages, deprecated APIs, security vulnerabilities</li>
+<li>Making the business case — translating tech debt into developer hours lost and incident risk</li>
+
+</ul>You approach tech debt like a financial advisor approaches real debt — quantify it, prioritize the highest-interest items, and pay it down strategically without going bankrupt on features.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Codebase Age &amp; Size</h4>
+      <p class="config-example">18 months old, ~150K LOC TypeScript, 47 Prisma models</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Known Debt Areas</h4>
+      <p class="config-example">No test coverage on auth routes, duplicated components, outdated dependencies</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Debt Budget</h4>
+      <p class="config-example">15-20% of each sprint allocated to tech debt reduction</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Quality Gates</h4>
+      <p class="config-example">ESLint errors block PR, no any types allowed, Prisma strict mode</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Priority Framework</h4>
+      <p class="config-example">P0: Security debt, P1: Performance debt, P2: Maintainability, P3: Code style</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│         MANDATORY RULES FOR EVERY TECH DEBT AUDIT            │
+│                                                              │
+│  1. CATEGORIZE BEFORE PRIORITIZING                           │
+│     → Security debt (vulnerable deps, exposed secrets)       │
+│     → Performance debt (N+1 queries, missing indexes)        │
+│     → Maintainability debt (duplicated code, god modules)    │
+│     → Dependency debt (outdated packages, deprecated APIs)   │
+│     → Not all debt is equal — category determines urgency    │
+│                                                              │
+│  2. QUANTIFY THE COST OF INACTION                            │
+│     → &quot;This is messy&quot; is not a finding — &quot;This causes 2      │
+│       hours of debugging per sprint&quot; is                      │
+│     → Estimate: how many developer-hours does this waste?    │
+│     → What's the incident risk if left unfixed?              │
+│     → Stakeholders respond to numbers, not opinions          │
+│                                                              │
+│  3. EVERY FINDING NEEDS A FIX PLAN                           │
+│     → Not just &quot;refactor this&quot; — specify HOW and HOW LONG   │
+│     → Can it be fixed incrementally alongside features?      │
+│     → Does it need a dedicated sprint or task?               │
+│     → Include the risk of the fix itself (regressions)       │
+│                                                              │
+│  4. FOCUS ON BLAST RADIUS, NOT LINE COUNT                    │
+│     → A 10-line function called 500 times matters more than  │
+│       a 500-line file called once                            │
+│     → Debt in auth, payment, and data paths is highest       │
+│       priority                                               │
+│     → Debt in dead code is zero priority — delete it instead │
+│                                                              │
+│  5. TRACK AND TREND — AUDITS ARE NOT ONE-TIME                │
+│     → Compare against the last audit — is debt growing or    │
+│       shrinking?                                             │
+│     → Celebrate debt paid down, not just debt found          │
+│     → Set targets: &quot;Reduce critical debt items by 50% this   │
+│       quarter&quot;                                               │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in audit reports or findings            │
+│     → All output reads as if written by a staff engineer     │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #f59e0b18; color: #f59e0b;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+
+<ul class="skill-list"><li>Quarterly tech debt review — scheduled health check</li>
+<li>Before starting a major feature — understand what will slow you down</li>
+<li>After rapid prototyping — clean up shortcuts taken during crunch</li>
+<li>Onboarding to an unfamiliar codebase — identify landmines early</li>
+<li>After an incident — find systemic issues beyond the immediate bug</li>
+</ul><hr class="section-divider">
+<h2>How It Works</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────────────┐
+│                    TECH DEBT AUDIT FLOW                               │
+│                                                                      │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐            │
+│  │   SCAN   │  │ CLASSIFY │  │PRIORITIZE│  │  REPORT  │            │
+│  │ CODEBASE │─▶│  &amp; TAG   │─▶│  BY ROI  │─▶│  &amp; PLAN  │            │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘            │
+│       │              │              │              │                  │
+│       ▼              ▼              ▼              ▼                  │
+│  Search for      Categorize     Effort vs.    Debt register          │
+│  patterns,       each item,     impact        + remediation          │
+│  smells, gaps    assign type    quadrant      roadmap                │
+└──────────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Debt Categories — What to Look For</h2>
+
+<h3>Category 1: Hardcoded Values</h3>
+
+<pre class="code-block"><code>WHAT TO FIND:
+  □ Magic numbers in business logic (if (count &gt; 50) ...)
+  □ Hardcoded URLs, API endpoints, email addresses
+  □ Hardcoded feature flags or toggles
+  □ Environment-specific values in source code
+  □ Hardcoded credentials or API keys (CRITICAL)
+  □ Hardcoded timeouts, retry counts, thresholds
+
+HOW TO SEARCH:
+  → Grep for string literals in business logic files
+  → Search for http://, https:// in non-config files
+  → Search for @gmail, @yahoo, @example in source
+  → Look for numeric literals in conditionals</code></pre>
+
+<h3>Category 2: Missing or Weak Tests</h3>
+
+<pre class="code-block"><code>WHAT TO FIND:
+  □ Critical paths with zero test coverage
+  □ Tests that pass but don't assert anything meaningful
+  □ Flaky tests (pass/fail randomly)
+  □ Missing edge case coverage (null, empty, boundary)
+  □ No integration tests for API endpoints
+  □ Missing validation tests (what happens with bad input?)
+
+COVERAGE PRIORITY (test these first):
+  1. Authentication / authorization flows
+  2. Payment / billing logic
+  3. Data mutation endpoints (POST, PUT, DELETE)
+  4. Business rule calculations
+  5. Error handling paths</code></pre>
+
+<h3>Category 3: Dead Code</h3>
+
+<pre class="code-block"><code>WHAT TO FIND:
+  □ Unused exports — functions/classes never imported
+  □ Commented-out code blocks (&gt; 5 lines)
+  □ Feature flags for features that shipped months ago
+  □ Unused dependencies in package.json
+  □ Unreachable code paths (after return/throw)
+  □ Deprecated API endpoints still in the router
+  □ Database columns/tables no longer referenced in code
+
+HOW TO DETECT:
+  → Run: npx depcheck (unused npm dependencies)
+  → Run: npx ts-prune (unused TypeScript exports)
+  → Search for large comment blocks: // TODO, /<em> old </em>/
+  → Check git blame — files not touched in 6+ months</code></pre>
+
+<h3>Category 4: Inconsistent Patterns</h3>
+
+<pre class="code-block"><code>WHAT TO FIND:
+  □ Multiple ways to do the same thing
+    - Some routes use middleware auth, others check manually
+    - Some APIs return { data }, others return { result }
+    - Some use async/await, others use .then() chains
+  □ Naming inconsistencies
+    - camelCase vs snake_case mixed in same layer
+    - getUserById vs fetchUser vs loadUserData
+  □ Error handling inconsistencies
+    - Some routes catch errors, others let them bubble
+    - Mixed use of HTTP status codes for same error type
+  □ File organization inconsistencies
+    - Feature A has service/controller/route separation
+    - Feature B has everything in one file</code></pre>
+
+<h3>Category 5: Code Duplication</h3>
+
+<pre class="code-block"><code>WHAT TO FIND:
+  □ Copy-pasted functions with minor differences
+  □ Similar API handlers with repeated boilerplate
+  □ Duplicated validation logic across endpoints
+  □ Same UI component built twice for different pages
+  □ Repeated SQL queries / Prisma queries with same shape
+
+DETECTION APPROACH:
+  → Look for files with similar names in different folders
+  → Search for identical function signatures
+  → Compare API handlers — are they structurally identical?
+  → Check for repeated 10+ line blocks</code></pre>
+
+<h3>Category 6: Outdated Dependencies</h3>
+
+<pre class="code-block"><code>WHAT TO FIND:
+  □ Major version behind on framework (Next.js, Express)
+  □ Dependencies with known security vulnerabilities
+  □ Deprecated packages still in use
+  □ Pinned versions preventing security patches
+  □ Lock file drift (package-lock.json out of sync)
+
+HOW TO CHECK:
+  → Run: npm audit
+  → Run: npm outdated
+  → Run: npx npm-check-updates
+  → Check: GitHub Dependabot alerts</code></pre>
+
+<h3>Category 7: Security Gaps</h3>
+
+<pre class="code-block"><code>WHAT TO FIND:
+  □ Missing input validation on API endpoints
+  □ SQL injection vectors (raw queries with string concat)
+  □ Missing rate limiting on sensitive endpoints
+  □ Secrets in source code or committed .env files
+  □ Missing CORS configuration or overly permissive CORS
+  □ Missing authentication on endpoints that need it
+  □ Missing authorization checks (user can access others' data)
+  □ Missing CSRF protection on state-changing endpoints
+  □ Sensitive data in logs (passwords, tokens, PII)</code></pre>
+
+<h3>Category 8: Performance Debt</h3>
+
+<pre class="code-block"><code>WHAT TO FIND:
+  □ N+1 database queries (loop with individual queries)
+  □ Missing database indexes on frequently queried columns
+  □ Unbounded queries (no LIMIT clause)
+  □ Large payloads returned when only a few fields are needed
+  □ Missing caching for expensive or repeated operations
+  □ Synchronous operations that should be async/background
+  □ Frontend bundle importing entire libraries for one function</code></pre>
+<hr class="section-divider">
+<h2>Prioritization Framework</h2>
+
+Use the Effort vs. Impact quadrant to decide what to fix first:
+
+<pre class="code-block"><code>                        HIGH IMPACT
+                            │
+              ┌─────────────┼─────────────┐
+              │  QUICK WINS  │  STRATEGIC  │
+              │  Fix now —   │  Plan and   │
+              │  high ROI    │  schedule   │
+   LOW ───────┼─────────────┼─────────────┼─── HIGH
+   EFFORT     │  IGNORE     │  AVOID      │   EFFORT
+              │  Not worth   │  High cost, │
+              │  the time    │  consider   │
+              │              │  alternatives│
+              └─────────────┼─────────────┘
+                            │
+                        LOW IMPACT</code></pre>
+<div class="table-wrap"><table><thead><tr><th>Quadrant</th><th>Action</th><th>Example</th><th></th></tr></thead><tbody><tr><td>Quick Wins (low effort, high impact)</td><td>Fix immediately</td><td>Remove hardcoded secrets, add missing auth check</td><td></td></tr><tr><td>Strategic (high effort, high impact)</td><td>Schedule in next 1-2 sprints</td><td>Refactor God service, add test suite</td><td></td></tr><tr><td>Ignore (low effort, low impact)</td><td>Skip or do opportunistically</td><td>Rename a variable, fix a typo in comment</td><td></td></tr><tr><td>Avoid (high effort, low impact)</td><td>Do not do unless forced</td><td>Rewrite working code for style preference</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Output Template</h2>
+
+<pre class="code-block"><code># Tech Debt Audit Report
+
+<h2>Date: YYYY-MM-DD</h2>
+<h2>Scope: [Entire codebase / Module X / Backend only]</h2>
+<h2>Auditor: [Name/Role]</h2>
+
+<h2>Summary</h2>
+<ul class="skill-list"><li><strong>Total items found</strong>: NN</li>
+<li><strong>Critical</strong>: N | <strong>High</strong>: N | <strong>Medium</strong>: N | <strong>Low</strong>: N</li>
+<li><strong>Estimated total remediation</strong>: NN story points</li>
+<li><strong>Top 3 quick wins</strong>: #1, #5, #12</li>
+
+</ul><h2>Debt Register</h2>
+
+<h3>Critical (Fix Before Next Release)<div class="table-wrap"><table><thead><tr><th>#</th><th>Category</th><th>Location</th><th>Description</th><th>Effort</th><th>Impact</th><th></th></tr></thead><tbody><tr><td>1</td><td>Security</td><td>src/api/auth.ts:45</td><td>Missing rate limit on login</td><td>2 pts</td><td>Critical</td><td></td></tr></tbody></table></div></h3>
+<h3>High (Fix This Sprint)<div class="table-wrap"><table><thead><tr><th>#</th><th>Category</th><th>Location</th><th>Description</th><th>Effort</th><th>Impact</th><th></th></tr></thead><tbody><tr><td>2</td><td>Performance</td><td>src/api/courses.ts:120</td><td>N+1 query in course listing</td><td>3 pts</td><td>High</td><td></td></tr></tbody></table></div></h3>
+<h3>Medium (Schedule Next Sprint)<div class="table-wrap"><table><thead><tr><th>#</th><th>Category</th><th>Location</th><th>Description</th><th>Effort</th><th>Impact</th><th></th></tr></thead><tbody><tr><td>3</td><td>Duplication</td><td>src/components/</td><td>CourseCard duplicated in 3 files</td><td>3 pts</td><td>Medium</td><td></td></tr></tbody></table></div></h3>
+<h3>Low (Backlog)<div class="table-wrap"><table><thead><tr><th>#</th><th>Category</th><th>Location</th><th>Description</th><th>Effort</th><th>Impact</th><th></th></tr></thead><tbody><tr><td>4</td><td>Dead Code</td><td>src/utils/old-helpers.ts</td><td>Entire file unused</td><td>1 pt</td><td>Low</td><td></td></tr></tbody></table></div></h3>
+<h2>Remediation Roadmap</h2>
+
+<h3>Immediate (This Week)</h3>
+<ul class="skill-list"><li class="checkbox"><input type="checkbox" disabled> #1 — Add rate limiting to auth endpoints</li>
+<li class="checkbox"><input type="checkbox" disabled> #5 — Remove hardcoded API key from config</li>
+
+</ul><h3>Short-term (Next 2 Sprints)</h3>
+<ul class="skill-list"><li class="checkbox"><input type="checkbox" disabled> #2 — Fix N+1 queries with eager loading</li>
+<li class="checkbox"><input type="checkbox" disabled> #3 — Extract shared CourseCard component</li>
+
+</ul><h3>Medium-term (This Quarter)</h3>
+<ul class="skill-list"><li class="checkbox"><input type="checkbox" disabled> #8 — Add integration test suite for payment flow</li>
+<li class="checkbox"><input type="checkbox" disabled> #11 — Migrate deprecated auth library</li>
+
+</ul><h2>Metrics to Track<div class="table-wrap"><table><thead><tr><th>Metric</th><th>Current</th><th>Target</th><th>Timeline</th><th></th></tr></thead><tbody><tr><td>Test coverage (critical paths)</td><td>35%</td><td>80%</td><td>3 months</td><td></td></tr><tr><td>npm audit vulnerabilities</td><td>12</td><td>0</td><td>1 month</td><td></td></tr></tbody></table></div>| Avg API response time (p95) | 800ms | 200ms | 2 months |</code></pre></h2>
+<hr class="section-divider">
+<h2>Common Mistakes When Auditing</h2>
+<div class="table-wrap"><table><thead><tr><th>Mistake</th><th>Why It Fails</th><th>Fix</th><th></th></tr></thead><tbody><tr><td>Trying to fix everything at once</td><td>Burns the team, nothing ships</td><td>Prioritize ruthlessly, fix top 5</td><td></td></tr><tr><td>Only looking at code style</td><td>Misses real problems (security, perf)</td><td>Focus on runtime impact first</td><td></td></tr><tr><td>No severity classification</td><td>Team does not know what matters</td><td>Use the quadrant framework</td><td></td></tr><tr><td>Audit without action plan</td><td>Report sits in a drawer</td><td>Every finding needs an owner and date</td><td></td></tr><tr><td>Ignoring tests as debt</td><td>Untested code is a ticking bomb</td><td>Test coverage is a first-class metric</td><td></td></tr><tr><td>Treating all debt as bad</td><td>Some debt is intentional and fine</td><td>Document deliberate trade-offs</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Checklist Before Submitting Audit</h2>
+
+<pre class="code-block"><code>□ All 8 debt categories scanned
+□ Every finding has a file/line reference
+□ Every finding is classified by severity
+□ Quick wins are clearly identified
+□ Remediation roadmap has specific timelines
+□ Critical security items are flagged separately
+□ Report includes metrics to track improvement
+□ No recommendations to rewrite without justification</code></pre>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="sprint-plan.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">Sprint Plan — Break Epics Into Deliverable Sprints</span></span></a>
+    <div></div>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    66 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

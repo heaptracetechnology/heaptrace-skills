@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Automation QA Pack — Heaptrace Skills</title>
+  <meta name="description" content="Test automation — Cypress E2E, CI pipelines, mock services, visual regression, coverage analysis, and contract testing.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+
+  <style>
+    .pack-hero { padding: calc(var(--nav-height) + 60px) 0 60px; text-align: center; position: relative; overflow: hidden; }
+    .pack-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(99, 102, 241, 0.1), transparent 70%); pointer-events: none; }
+    .pack-hero-content { position: relative; z-index: 1; }
+    .pack-hero-icon { width: 80px; height: 80px; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 40px; margin: 0 auto 24px; background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.2); }
+    .pack-hero h1 { font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; margin-bottom: 12px; letter-spacing: -0.02em; }
+    .pack-hero-desc { font-size: 1.1rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto 24px; line-height: 1.7; }
+    .pack-hero-meta { display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; padding: 6px 16px; border-radius: 999px; background: rgba(99, 102, 241, 0.08); color: #6366f1; border: 1px solid rgba(99, 102, 241, 0.15); }
+    .skills-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    @media (max-width: 768px) { .skills-grid { grid-template-columns: 1fr; } }
+    .skill-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; transition: var(--transition); display: flex; flex-direction: column; text-decoration: none; color: inherit; }
+    .skill-card:hover { transform: translateY(-4px); border-color: rgba(99, 102, 241, 0.4); box-shadow: 0 8px 30px rgba(99, 102, 241, 0.1); }
+    .skill-card-name { font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+    .skill-card-name svg { opacity: 0; transition: var(--transition-fast); color: #6366f1; }
+    .skill-card:hover .skill-card-name svg { opacity: 1; transform: translateX(4px); }
+    .skill-card-desc { font-size: 0.87rem; color: var(--text-secondary); line-height: 1.65; flex-grow: 1; }
+    .skill-card-id { display: inline-flex; align-items: center; gap: 6px; font-size: 0.72rem; font-family: 'JetBrains Mono', monospace; font-weight: 500; padding: 4px 10px; border-radius: 999px; background: rgba(99, 102, 241, 0.06); color: #6366f1; border: 1px solid rgba(99, 102, 241, 0.12); margin-top: 16px; width: fit-content; }
+    .back-link { display: inline-flex; align-items: center; gap: 8px; color: var(--text-secondary); font-size: 0.9rem; font-weight: 500; transition: var(--transition-fast); margin-top: 48px; }
+    .back-link:hover { color: #6366f1; }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo"><div class="nav-logo-icon">H</div><span>Heaptrace Skills</span></a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../index.html#workflow" class="nav-link">Workflow</a>
+      <a href="../index.html#anatomy" class="nav-link">Anatomy</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<section class="pack-hero">
+  <div class="container pack-hero-content">
+    <div class="pack-hero-icon">&#x2699;&#xFE0F;</div>
+    <h1>Automation QA Pack</h1>
+    <p class="pack-hero-desc">Test automation — Cypress E2E, CI pipelines, mock services, visual regression, coverage analysis, and contract testing.</p>
+    <div class="pack-hero-meta">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+      6 Skills
+    </div>
+  </div>
+</section>
+
+<section class="section-sm">
+  <div class="container">
+    <div class="skills-grid">
+
+      <a href="../skills/cypress-test.html" class="skill-card">
+        <div class="skill-card-name">cypress-test<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+        <div class="skill-card-desc">Write robust Cypress or Playwright end-to-end tests with page object pattern, custom commands, auth handling, selector strategies, waiting patterns, and test isolation.</div>
+        <div class="skill-card-id">automation-qa / cypress-test</div>
+      </a>
+
+      <a href="../skills/ci-test-pipeline.html" class="skill-card">
+        <div class="skill-card-name">ci-test-pipeline<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+        <div class="skill-card-desc">Set up test automation in CI/CD pipelines with parallel test runs, flaky test handling, test splitting, retry logic, artifact collection, and coverage reporting.</div>
+        <div class="skill-card-id">automation-qa / ci-test-pipeline</div>
+      </a>
+
+      <a href="../skills/mock-service.html" class="skill-card">
+        <div class="skill-card-name">mock-service<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+        <div class="skill-card-desc">Create mock APIs and services for testing using MSW, Nock, or custom mock servers. Covers when to mock vs use real services, mock data factories, and network request interception.</div>
+        <div class="skill-card-id">automation-qa / mock-service</div>
+      </a>
+
+      <a href="../skills/visual-regression.html" class="skill-card">
+        <div class="skill-card-name">visual-regression<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+        <div class="skill-card-desc">Set up visual regression testing with screenshot comparison, pixel threshold configuration, baseline management, CI integration, and responsive viewport testing.</div>
+        <div class="skill-card-id">automation-qa / visual-regression</div>
+      </a>
+
+      <a href="../skills/test-coverage.html" class="skill-card">
+        <div class="skill-card-name">test-coverage<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+        <div class="skill-card-desc">Analyze and improve test coverage by identifying untested code paths, prioritizing coverage gaps by risk, setting meaningful thresholds, and distinguishing vanity metrics from real quality.</div>
+        <div class="skill-card-id">automation-qa / test-coverage</div>
+      </a>
+
+      <a href="../skills/contract-test.html" class="skill-card">
+        <div class="skill-card-name">contract-test<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+        <div class="skill-card-desc">Write contract tests between services using Pact or schema validation to ensure API compatibility. Covers consumer-driven contracts, provider verification, and breaking change detection.</div>
+        <div class="skill-card-id">automation-qa / contract-test</div>
+      </a>
+
+    </div>
+
+    <div class="text-center">
+      <a href="../index.html#packs" class="back-link">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Back to all packs
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-links">
+      <a href="https://github.com/heaptracetechnology/heaptrace-skills" class="footer-link" target="_blank" rel="noopener">GitHub</a>
+      <a href="../index.html#packs" class="footer-link">Packs</a>
+      <a href="../setup/index.html" class="footer-link">Setup Guide</a>
+      <a href="https://heaptrace.com" class="footer-link" target="_blank" rel="noopener">Heaptrace</a>
+    </div>
+    <div class="footer-copy">
+      MIT License &middot; Built by <a href="https://heaptrace.com" target="_blank" rel="noopener">Heaptrace Technology</a>
+      <br>66 Skills &middot; 8 Packs &middot; Free &amp; Open Source
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

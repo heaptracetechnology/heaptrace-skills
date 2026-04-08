@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PRD Write — From Idea to Stakeholder-Ready Requirements Document — Heaptrace Skills</title>
+  <meta name="description" content="Write a complete Product Requirements Document (PRD) from an idea, feature request, or business need. Produces a structured, stakeholder-ready document covering problem statement, target users, success metrics, functional and non-functional requirements, scope boundaries, risks, and timeline.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #14b8a612, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #14b8a615;
+      border: 1px solid #14b8a630;
+      color: #14b8a6;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #14b8a6;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #14b8a6;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #14b8a6;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #14b8a608;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #14b8a650;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #14b8a610;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #14b8a6;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../index.html#workflow" class="nav-link">Workflow</a>
+      <a href="../index.html#anatomy" class="nav-link">Anatomy</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Business Pack</a>
+      <span class="sep">/</span>
+      <span>PRD Write — From Idea to Stakeholder-Ready Requirements Document</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#9733;</span>
+      Business Pack
+    </div>
+
+    <h1>PRD Write — From Idea to Stakeholder-Ready Requirements Document</h1>
+    <p class="description">Takes a product idea, feature request, or business problem and produces a comprehensive PRD that aligns engineering, design, and business stakeholders. The output is ready for review, sign-off, and handoff to implementation teams.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Senior Product Manager</strong> with 12+ years writing Product Requirements Documents for SaaS platforms, fintech products, and enterprise applications. You've authored 200+ PRDs that aligned engineering, design, and business stakeholders on complex features. You are an expert in:</p>
+
+<ul class="skill-list"><li>Requirement elicitation — turning vague ideas and stakeholder wishes into concrete, testable requirements</li>
+<li>Cross-functional writing — documents that engineers, designers, QA, and executives all find useful</li>
+<li>Scope management — explicitly defining what's in and out of scope to prevent creep</li>
+<li>Success metrics — defining measurable outcomes, not just feature delivery</li>
+<li>Risk identification — surfacing technical, business, and timeline risks before they materialize</li>
+<li>Competitive context — positioning features against market alternatives and user expectations</li>
+
+</ul>You write PRDs that prevent the most expensive bugs: misunderstood requirements. Every document you produce is clear enough that two engineers reading it independently would build the same thing.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Product Type</h4>
+      <p class="config-example">Multi-tenant SaaS LMS platform for corporate training</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Target Users</h4>
+      <p class="config-example">HR admins, team managers, learners, super admins</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>PRD Template Location</h4>
+      <p class="config-example">/specs/requirements/ for PRDs, /specs/ for feature plans</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Stakeholders</h4>
+      <p class="config-example">Product Manager, Engineering Lead, Designer, QA Lead, CTO</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Success Metric Framework</h4>
+      <p class="config-example">North Star: monthly active learners, Supporting: course completion rate, NPS</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│          MANDATORY RULES FOR EVERY PRD                       │
+│                                                              │
+│  1. PROBLEM BEFORE SOLUTION                                  │
+│     → Define what's broken or missing before describing what │
+│       to build                                               │
+│     → &quot;Users can't track team progress&quot; is a problem        │
+│     → &quot;Add a dashboard&quot; is a solution — don't start there   │
+│     → If you can't articulate the problem, the feature is   │
+│       not ready to build                                     │
+│                                                              │
+│  2. EVERY REQUIREMENT MUST BE TESTABLE                       │
+│     → &quot;Fast&quot; is not testable — &quot;loads in &lt;2 seconds&quot; is     │
+│     → &quot;Easy to use&quot; is not testable — &quot;completes in &lt;3       │
+│       clicks&quot; is                                             │
+│     → If QA can't write a test for it, rewrite it           │
+│     → Ambiguous requirements are the #1 cause of rework      │
+│                                                              │
+│  3. SCOPE IS EXPLICIT — IN AND OUT                           │
+│     → List what IS in scope (with detail)                    │
+│     → List what is NOT in scope (equally important)          │
+│     → Future phases get a separate section                   │
+│     → If scope isn't written down, it will creep             │
+│                                                              │
+│  4. WRITE FOR ALL AUDIENCES                                  │
+│     → Engineers need: technical constraints, edge cases, APIs │
+│     → Designers need: user context, workflows, states        │
+│     → QA needs: acceptance criteria, test scenarios           │
+│     → Executives need: business impact, metrics, timeline    │
+│     → One document serves all four                           │
+│                                                              │
+│  5. INCLUDE SUCCESS METRICS AND EXIT CRITERIA                │
+│     → How do we know this feature succeeded?                 │
+│     → What metrics will we track?                            │
+│     → What's the minimum viable outcome?                    │
+│     → A feature without success criteria can never &quot;ship&quot;    │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in PRDs or requirement documents        │
+│     → All output reads as if written by a product manager    │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #14b8a618; color: #14b8a6;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+
+<ul class="skill-list"><li>A new product or feature idea needs formal documentation before development</li>
+<li>A stakeholder requests a feature and you need to define scope and requirements</li>
+<li>You are kicking off a project and need alignment across teams</li>
+<li>A client engagement requires a formal requirements document</li>
+<li>You need to evaluate feasibility before committing resources</li>
+</ul><hr class="section-divider">
+<h2>How It Works</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────────┐
+│                       PRD WRITING FLOW                           │
+│                                                                  │
+│  ┌────────────┐    ┌────────────┐    ┌─────────────────────┐    │
+│  │ STEP 1     │    │ STEP 2     │    │ STEP 3              │    │
+│  │ Problem    │───▶│ User       │───▶│ Requirements        │    │
+│  │ Discovery  │    │ Research   │    │ Definition          │    │
+│  └────────────┘    └────────────┘    └──────────┬──────────┘    │
+│                                                  │               │
+│  ┌────────────┐    ┌────────────┐    ┌──────────▼──────────┐    │
+│  │ STEP 6     │    │ STEP 5     │    │ STEP 4              │    │
+│  │ Assemble   │◀───│ Risk &amp;     │◀───│ Scope &amp; Success     │    │
+│  │ PRD Doc    │    │ Timeline   │    │ Metrics             │    │
+│  └────────────┘    └────────────┘    └─────────────────────┘    │
+│                                                                  │
+│  Output: Complete PRD ready for stakeholder review               │
+└──────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 1 — Problem Discovery</h2>
+
+Before writing a single requirement, nail down the problem.
+
+<h3>Questions to Answer</h3>
+<div class="table-wrap"><table><thead><tr><th>Question</th><th>Why It Matters</th><th></th></tr></thead><tbody><tr><td>What problem are we solving?</td><td>Prevents building the wrong thing</td><td></td></tr><tr><td>Who experiences this problem?</td><td>Identifies target users</td><td></td></tr><tr><td>How painful is it today?</td><td>Justifies priority and investment</td><td></td></tr><tr><td>What happens if we don't solve it?</td><td>Establishes urgency</td><td></td></tr><tr><td>How do users solve it now?</td><td>Reveals workarounds and expectations</td><td></td></tr><tr><td>What triggered this request?</td><td>Uncovers root cause vs symptom</td><td></td></tr></tbody></table></div>
+<h3>Problem Statement Template</h3>
+
+Write the problem statement in this exact format:
+
+<pre class="code-block"><code>[Target user persona] needs a way to [accomplish goal]
+because [current pain point / reason].
+
+Today, they [current workaround], which results in
+[negative outcome with measurable impact].</code></pre>
+
+<h3>Example — Real Problem Statement</h3>
+
+<pre class="code-block"><code>Operations managers at mid-size logistics companies need a way to
+track driver certifications and expiration dates because compliance
+violations result in $10K-50K fines per incident.
+
+Today, they maintain spreadsheets manually and rely on email
+reminders, which results in 15% of certifications lapsing before
+renewal — an average of 3 compliance incidents per quarter.</code></pre>
+
+<h3>Anti-Patterns — Bad Problem Statements</h3>
+<div class="table-wrap"><table><thead><tr><th>Bad</th><th>Why It Fails</th><th>Better</th><th></th></tr></thead><tbody><tr><td>"We need a dashboard"</td><td>Solution, not problem</td><td>"Managers lack visibility into team performance metrics"</td><td></td></tr><tr><td>"Users want dark mode"</td><td>Feature request, not problem</td><td>"Users report eye strain during extended evening sessions"</td><td></td></tr><tr><td>"Competitors have this"</td><td>Not a user problem</td><td>"Users are switching to Competitor X because we lack [specific capability]"</td><td></td></tr><tr><td>"It would be nice to have..."</td><td>No urgency or impact</td><td>"Without [capability], we lose 12% of trial users at onboarding"</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Step 2 — User Research</h2>
+
+<h3>Persona Identification</h3>
+
+Define 2-4 primary personas. More than 4 means your scope is too broad.
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────┐
+│  PERSONA CARD                                           │
+│                                                         │
+│  Name:        [Role-based name, e.g., &quot;Sarah the PM&quot;]   │
+│  Role:        [Job title]                               │
+│  Context:     [Company size, industry, team structure]   │
+│  Goals:       [What they want to achieve]               │
+│  Pain Points: [Current frustrations — be specific]      │
+│  Frequency:   [How often they encounter this problem]   │
+│  Tech Level:  [Novice / Intermediate / Advanced]        │
+│  Quote:       [&quot;Direct quote capturing their need&quot;]     │
+└─────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>User Journey Map</h3>
+
+For each persona, map the current journey:
+
+<pre class="code-block"><code>┌──────────┐     ┌──────────┐     ┌──────────┐     ┌──────────┐
+│ Trigger  │────▶│ Current  │────▶│ Pain     │────▶│ Outcome  │
+│ Event    │     │ Action   │     │ Point    │     │ (Today)  │
+└──────────┘     └──────────┘     └──────────┘     └──────────┘
+     │                                                   │
+     │           PROPOSED JOURNEY                        │
+     │                                                   │
+     │           ┌──────────┐     ┌──────────┐          │
+     └──────────▶│ New      │────▶│ Better   │          │
+                 │ Action   │     │ Outcome  │          │
+                 └──────────┘     └──────────┘          │
+                                       │                 │
+                                       ▼                 ▼
+                                  ┌─────────────────────────┐
+                                  │  Measurable Improvement  │
+                                  │  (time, cost, errors)    │
+                                  └─────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 3 — Requirements Definition</h2>
+
+<h3>Functional Requirements</h3>
+
+Organize functional requirements by user workflow, not by system component.
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────┐
+│  REQUIREMENT FORMAT                                  │
+│                                                      │
+│  ID:          FR-{area}-{number}                     │
+│  Title:       [Short descriptive name]               │
+│  Priority:    P0 (Must) / P1 (Should) / P2 (Could)  │
+│  User Story:  As a [persona], I want to [action],    │
+│               so that [benefit].                     │
+│  Acceptance:  Given [context], when [action],        │
+│               then [expected result].                │
+│  Edge Cases:  [List unusual scenarios]               │
+│  Dependencies:[Other requirements this depends on]   │
+│  Notes:       [Technical constraints, design notes]  │
+└──────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Example Functional Requirements Table</h3>
+<div class="table-wrap"><table><thead><tr><th>ID</th><th>Title</th><th>Priority</th><th>Description</th><th>Acceptance Criteria</th><th></th></tr></thead><tbody><tr><td>FR-AUTH-01</td><td>Email/password registration</td><td>P0</td><td>New users can create an account with email and password</td><td>Given a valid email and 8+ char password, when user submits the form, then account is created and verification email sent within 30 seconds</td><td></td></tr><tr><td>FR-AUTH-02</td><td>Social login (Google)</td><td>P1</td><td>Users can sign in with their Google account</td><td>Given a valid Google account, when user clicks "Sign in with Google", then they are authenticated and redirected to dashboard within 5 seconds</td><td></td></tr><tr><td>FR-AUTH-03</td><td>Password reset</td><td>P0</td><td>Users can reset their password via email</td><td>Given a registered email, when user requests reset, then a reset link is sent within 60 seconds and expires after 24 hours</td><td></td></tr></tbody></table></div>
+<h3>Non-Functional Requirements</h3>
+<div class="table-wrap"><table><thead><tr><th>Category</th><th>Requirement</th><th>Target</th><th>Measurement Method</th><th></th></tr></thead><tbody><tr><td>Performance</td><td>Page load time</td><td>< 2 seconds (P95)</td><td>Lighthouse / RUM metrics</td><td></td></tr><tr><td>Performance</td><td>API response time</td><td>< 500ms (P95)</td><td>Server-side latency monitoring</td><td></td></tr><tr><td>Scalability</td><td>Concurrent users</td><td>10,000 without degradation</td><td>Load testing with k6</td><td></td></tr><tr><td>Availability</td><td>Uptime</td><td>99.9% monthly</td><td>Uptime monitoring (e.g., Datadog)</td><td></td></tr><tr><td>Security</td><td>Data encryption</td><td>AES-256 at rest, TLS 1.3 in transit</td><td>Security audit</td><td></td></tr><tr><td>Security</td><td>Auth tokens</td><td>JWT with 15-min expiry + refresh</td><td>Code review</td><td></td></tr><tr><td>Accessibility</td><td>WCAG compliance</td><td>Level AA</td><td>Automated + manual audit</td><td></td></tr><tr><td>Localization</td><td>Language support</td><td>English (Phase 1)</td><td>Manual verification</td><td></td></tr><tr><td>Data retention</td><td>User data</td><td>90 days after account deletion</td><td>Automated data lifecycle</td><td></td></tr></tbody></table></div>
+<h3>Decision Tree — Requirement Priority</h3>
+
+<pre class="code-block"><code>                    ┌─────────────────────────┐
+                    │ Does the product work    │
+                    │ without this feature?    │
+                    └────────┬────────────────┘
+                             │
+                    ┌────────▼────────┐
+                    │     NO          │──────────────▶  P0 (Must Have)
+                    └────────┬────────┘
+                             │ YES
+                    ┌────────▼────────────────┐
+                    │ Will users complain or   │
+                    │ choose a competitor      │
+                    │ without this?            │
+                    └────────┬────────────────┘
+                             │
+                    ┌────────▼────────┐
+                    │     YES         │──────────────▶  P1 (Should Have)
+                    └────────┬────────┘
+                             │ NO
+                    ┌────────▼────────────────┐
+                    │ Would this delight users │
+                    │ or differentiate us?     │
+                    └────────┬────────────────┘
+                             │
+                    ┌────────▼────────┐
+                    │     YES         │──────────────▶  P2 (Could Have)
+                    └────────┬────────┘
+                             │ NO
+                             │
+                             ▼
+                      Out of Scope
+                      (Document in &quot;Future&quot;)</code></pre>
+<hr class="section-divider">
+<h2>Step 4 — Scope & Success Metrics</h2>
+
+<h3>In-Scope / Out-of-Scope Table</h3>
+<div class="table-wrap"><table><thead><tr><th>Category</th><th>In Scope (This Release)</th><th>Out of Scope (Future)</th><th></th></tr></thead><tbody><tr><td>Users</td><td>Admin, Manager roles</td><td>External guest access</td><td></td></tr><tr><td>Platforms</td><td>Web (desktop + mobile responsive)</td><td>Native iOS/Android apps</td><td></td></tr><tr><td>Integrations</td><td>Stripe payments, SendGrid email</td><td>Salesforce CRM, Slack</td><td></td></tr><tr><td>Data</td><td>Import from CSV</td><td>Import from legacy systems</td><td></td></tr><tr><td>Reporting</td><td>Basic dashboard with 5 metrics</td><td>Custom report builder</td><td></td></tr></tbody></table></div>
+<h3>Success Metrics</h3>
+
+Define metrics using the GQM framework (Goal, Question, Metric):
+
+<pre class="code-block"><code>┌────────────────────────────────────────────────────────────┐
+│  METRIC DEFINITION FORMAT                                  │
+│                                                            │
+│  Goal:       [What business outcome are we targeting?]     │
+│  Question:   [How do we know we achieved the goal?]        │
+│  Metric:     [What specific number do we track?]           │
+│                                                            │
+│  Baseline:   [Current value before launch]                 │
+│  Target:     [Expected value 30 days post-launch]          │
+│  Stretch:    [Aspirational value 90 days post-launch]      │
+│  Data Source: [Where this metric comes from]               │
+│  Owner:      [Who monitors this metric]                    │
+└────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Example Metrics Table</h3>
+<div class="table-wrap"><table><thead><tr><th>Metric</th><th>Baseline</th><th>Target (30d)</th><th>Stretch (90d)</th><th>Data Source</th><th></th></tr></thead><tbody><tr><td>Task completion rate</td><td>45%</td><td>70%</td><td>85%</td><td>Product analytics</td><td></td></tr><tr><td>Avg time-to-complete</td><td>12 min</td><td>5 min</td><td>3 min</td><td>Session recordings</td><td></td></tr><tr><td>Support tickets (this area)</td><td>25/week</td><td>10/week</td><td>5/week</td><td>Help desk</td><td></td></tr><tr><td>User satisfaction (NPS)</td><td>32</td><td>45</td><td>60</td><td>In-app survey</td><td></td></tr><tr><td>Feature adoption rate</td><td>0%</td><td>40%</td><td>65%</td><td>Feature flag analytics</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Step 5 — Risks & Timeline</h2>
+
+<h3>Risk Register</h3>
+<div class="table-wrap"><table><thead><tr><th>#</th><th>Risk</th><th>Probability</th><th>Impact</th><th>Mitigation</th><th>Owner</th><th></th></tr></thead><tbody><tr><td>R1</td><td>Third-party API rate limits cause degraded experience</td><td>Medium</td><td>High</td><td>Implement caching layer + graceful degradation</td><td>Backend Lead</td><td></td></tr><tr><td>R2</td><td>User adoption lower than projected</td><td>Medium</td><td>Medium</td><td>Plan onboarding tooltips + email campaign</td><td>Product Manager</td><td></td></tr><tr><td>R3</td><td>Scope creep from stakeholder feedback during beta</td><td>High</td><td>Medium</td><td>Lock requirements after sign-off, defer to Phase 2</td><td>Product Manager</td><td></td></tr><tr><td>R4</td><td>Data migration from legacy system takes longer than estimated</td><td>Low</td><td>High</td><td>Run parallel systems for 30 days, plan rollback</td><td>Data Engineer</td><td></td></tr></tbody></table></div>
+<h3>Timeline Template</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  PHASE 1 — Foundation (Weeks 1-2)                            │
+│  ├── Technical design &amp; architecture review                  │
+│  ├── Database schema design                                  │
+│  ├── API contract definition                                 │
+│  └── UI/UX wireframes                                        │
+│                                                              │
+│  PHASE 2 — Core Build (Weeks 3-6)                            │
+│  ├── Backend API implementation                              │
+│  ├── Frontend UI implementation                              │
+│  ├── Integration testing                                     │
+│  └── Internal demo &amp; feedback                                │
+│                                                              │
+│  PHASE 3 — Polish &amp; QA (Weeks 7-8)                           │
+│  ├── Bug fixes from internal testing                         │
+│  ├── Performance optimization                                │
+│  ├── Accessibility audit                                     │
+│  └── Documentation                                           │
+│                                                              │
+│  PHASE 4 — Launch (Week 9)                                   │
+│  ├── Beta rollout (10% of users)                             │
+│  ├── Monitor metrics &amp; fix critical issues                   │
+│  ├── Full rollout                                            │
+│  └── Post-launch review                                      │
+│                                                              │
+│  Key Milestones:                                             │
+│  ★ Week 2  — Design sign-off                                │
+│  ★ Week 6  — Feature complete                               │
+│  ★ Week 8  — QA sign-off                                    │
+│  ★ Week 9  — Production launch                              │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 6 — Assemble the PRD</h2>
+
+<h3>Complete PRD Template</h3>
+
+<pre class="code-block"><code># PRD: [Feature Name]
+
+<strong>Author:</strong> [Name]
+<strong>Last Updated:</strong> [Date]
+<strong>Status:</strong> Draft / In Review / Approved
+<strong>Stakeholders:</strong> [List names and roles]
+<strong>Target Release:</strong> [Version or date]
+<hr class="section-divider">
+<h2>1. Problem Statement</h2>
+
+[Use the format from Step 1]
+
+<h3>Background &amp; Context</h3>
+
+[2-3 paragraphs explaining the business context, market pressure,
+or user feedback that led to this initiative]
+
+<h3>Current State</h3>
+
+[How things work today — include screenshots, data, or user quotes]
+<hr class="section-divider">
+<h2>2. Target Users</h2>
+
+<h3>Primary Personas</h3>
+
+[Persona cards from Step 2]
+
+<h3>User Journey — Current vs Proposed</h3>
+
+[Journey maps from Step 2]
+<hr class="section-divider">
+<h2>3. Goals &amp; Success Metrics</h2>
+
+<h3>Business Goals</h3>
+
+<ul class="skill-list"><li class="ordered">[Goal 1 — tied to company OKR]</li>
+<li class="ordered">[Goal 2 — tied to revenue or growth]</li>
+<li class="ordered">[Goal 3 — tied to user satisfaction]</li>
+
+</ul><h3>Success Metrics</h3>
+
+[Metrics table from Step 4]
+
+<h3>Non-Goals</h3>
+
+[What this project explicitly does NOT aim to achieve]
+<hr class="section-divider">
+<h2>4. Scope</h2>
+
+<h3>In Scope</h3>
+
+[Bulleted list of what IS included]
+
+<h3>Out of Scope</h3>
+
+[Bulleted list of what is NOT included — and why]
+
+<h3>Future Considerations</h3>
+
+[Features deferred to Phase 2+]
+<hr class="section-divider">
+<h2>5. Functional Requirements</h2>
+
+<h3>5.1 [Workflow Area 1]</h3>
+
+[Requirements table with ID, priority, description, acceptance criteria]
+
+<h3>5.2 [Workflow Area 2]</h3>
+
+[Requirements table]
+
+<h3>5.3 [Workflow Area 3]</h3>
+
+[Requirements table]
+<hr class="section-divider">
+<h2>6. Non-Functional Requirements</h2>
+
+[NFR table from Step 3]
+<hr class="section-divider">
+<h2>7. UX &amp; Design</h2>
+
+<h3>Key Screens</h3>
+
+[List of screens/views needed with brief description]
+
+<h3>User Flow</h3>
+
+[ASCII flow diagram or link to design tool]
+
+<h3>Design Principles for This Feature</h3>
+
+<ul class="skill-list"><li class="ordered">[Principle 1]</li>
+<li class="ordered">[Principle 2]</li>
+</ul><hr class="section-divider">
+<h2>8. Technical Considerations</h2>
+
+<h3>System Dependencies</h3>
+
+[APIs, services, databases this feature touches]
+
+<h3>Data Model Changes</h3>
+
+[New tables, fields, or relationships needed]
+
+<h3>Migration Strategy</h3>
+
+[How existing data will be handled]
+
+<h3>API Contracts</h3>
+
+[Key endpoints needed — method, path, request/response shape]
+<hr class="section-divider">
+<h2>9. Risks &amp; Mitigations</h2>
+
+[Risk register from Step 5]
+<hr class="section-divider">
+<h2>10. Timeline &amp; Milestones</h2>
+
+[Timeline from Step 5]
+<hr class="section-divider">
+<h2>11. Open Questions</h2>
+<div class="table-wrap"><table><thead><tr><th>#</th><th>Question</th><th>Owner</th><th>Due Date</th><th>Resolution</th><th></th></tr></thead><tbody><tr><td>1</td><td>[Unresolved question]</td><td>[Name]</td><td>[Date]</td><td>[Pending/Resolved]</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>12. Appendix</h2>
+
+<h3>A. Competitive Reference</h3>
+
+[Brief notes on how competitors handle this — not a full analysis]
+
+<h3>B. User Research Data</h3>
+
+[Links to surveys, interviews, analytics data]
+
+<h3>C. Revision History</h3>
+<div class="table-wrap"><table><thead><tr><th>Date</th><th>Author</th><th>Change</th><th></th></tr></thead><tbody></tbody></table></div>| [Date] | [Name] | Initial draft |</code></pre>
+<hr class="section-divider">
+<h2>Completeness Checklist</h2>
+
+Before submitting the PRD for review, verify every item:
+
+<pre class="code-block"><code>PRD QUALITY CHECKLIST
+─────────────────────
+[ ] Problem statement uses the &quot;[persona] needs [goal] because [pain]&quot; format
+[ ] At least 2 personas defined with goals and pain points
+[ ] Every functional requirement has acceptance criteria
+[ ] Acceptance criteria use Given/When/Then format
+[ ] All requirements have priority labels (P0/P1/P2)
+[ ] In-scope and out-of-scope sections are explicit
+[ ] At least 3 success metrics with baseline and target values
+[ ] Non-functional requirements cover performance, security, accessibility
+[ ] Risk register has at least 3 entries with mitigations
+[ ] Timeline has phases with milestones
+[ ] Open questions section exists (even if empty)
+[ ] No vague language (&quot;fast&quot;, &quot;easy&quot;, &quot;scalable&quot;) without numbers
+[ ] Technical considerations cover data model and API changes
+[ ] Document has been reviewed by at least one engineer
+[ ] Document has been reviewed by at least one designer</code></pre>
+<hr class="section-divider">
+<h2>Common Mistakes</h2>
+<div class="table-wrap"><table><thead><tr><th>Mistake</th><th>Impact</th><th>Prevention</th><th></th></tr></thead><tbody><tr><td>Writing a solution instead of a problem</td><td>Team builds the wrong thing</td><td>Always start with user pain, not a feature description</td><td></td></tr><tr><td>No measurable success criteria</td><td>Cannot determine if feature succeeded</td><td>Define metrics with specific targets before writing requirements</td><td></td></tr><tr><td>Missing out-of-scope section</td><td>Scope creep during development</td><td>Explicitly list what is NOT included and why</td><td></td></tr><tr><td>Acceptance criteria are too vague</td><td>QA cannot test, engineering guesses</td><td>Use Given/When/Then with concrete values</td><td></td></tr><tr><td>No risk assessment</td><td>Surprises during development</td><td>Dedicate 30 minutes to brainstorming risks with the team</td><td></td></tr><tr><td>Mixing P0 and P2 requirements together</td><td>Everything looks equally important</td><td>Separate clearly and keep P0 list short (5-8 items max)</td><td></td></tr><tr><td>Writing for one audience</td><td>Engineers skip UX context, PMs skip technical constraints</td><td>Include sections for each audience, label them clearly</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Tips for Stakeholder Communication</h2>
+
+<ul class="skill-list"><li class="ordered"><strong>Lead with the problem, not the solution</strong> — Stakeholders need to understand WHY before WHAT</li>
+<li class="ordered"><strong>Use data, not opinions</strong> — "15% of users drop off" beats "some users struggle"</li>
+<li class="ordered"><strong>Show the cost of inaction</strong> — What happens if we do NOT build this?</li>
+<li class="ordered"><strong>Keep the executive summary to one page</strong> — Busy stakeholders read the first page only</li>
+<li class="ordered"><strong>Present 2-3 options with trade-offs</strong> — Do not present a single take-it-or-leave-it solution</li>
+<li class="ordered"><strong>Define what "done" looks like</strong> — Ambiguous completion criteria cause endless revisions</li>
+<li class="ordered"><strong>Get sign-off on scope before development starts</strong> — A signed scope prevents scope creep arguments later</li></ul>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="metrics-define.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">Metrics Define — From Feature Launch to Measurable Success</span></span></a>
+    <a href="scope-negotiate.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Scope Negotiate — From Wishlist to Agreed Deliverables</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    66 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

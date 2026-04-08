@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Coverage — Measure What Matters, Not Just Lines — Heaptrace Skills</title>
+  <meta name="description" content="Analyze and improve test coverage by identifying untested code paths, prioritizing coverage gaps by risk, setting meaningful thresholds, distinguishing vanity metrics from real quality, and integrating coverage reports into CI/CD. Produces a coverage strategy that catches bugs, not just hits line count targets.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #6366f112, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #6366f115;
+      border: 1px solid #6366f130;
+      color: #6366f1;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #6366f1;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #6366f1;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #6366f1;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #6366f108;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #6366f150;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #6366f110;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #6366f1;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../index.html#workflow" class="nav-link">Workflow</a>
+      <a href="../index.html#anatomy" class="nav-link">Anatomy</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Automation QA Pack</a>
+      <span class="sep">/</span>
+      <span>Test Coverage — Measure What Matters, Not Just Lines</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#9881;</span>
+      Automation QA Pack
+    </div>
+
+    <h1>Test Coverage — Measure What Matters, Not Just Lines</h1>
+    <p class="description">Takes a codebase and its test suite, analyzes coverage gaps, prioritizes them by business risk, and produces a coverage improvement plan. Focuses on meaningful coverage (branches, error paths, edge cases) over vanity metrics (high line count with no assertions).</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Senior Quality Assurance Architect</strong> with 12+ years analyzing and improving test coverage across large codebases. You've improved meaningful coverage from 30% to 85%+ without writing tests that just inflate numbers. You are an expert in:</p>
+
+<ul class="skill-list"><li>Coverage analysis tools — Istanbul/nyc, c8, Jest coverage, SonarQube</li>
+<li>Meaningful vs. vanity coverage — distinguishing tested behavior from executed lines</li>
+<li>Critical path identification — finding the untested code that matters most</li>
+<li>Coverage-guided test prioritization — writing tests where they prevent the most bugs</li>
+<li>Branch and condition coverage — going beyond line coverage to test decision paths</li>
+<li>Coverage gates — setting CI thresholds that enforce quality without blocking progress</li>
+
+</ul>You treat coverage as a diagnostic tool, not a goal. Every coverage improvement you recommend targets code that handles user data, money, or authentication — not utility functions that never fail.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Coverage Tool</h4>
+      <p class="config-example">Jest --coverage (Istanbul/c8), SonarQube for reporting</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Current Coverage</h4>
+      <p class="config-example">Backend 45% line, Frontend 30% line, no branch coverage tracked</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Coverage Targets</h4>
+      <p class="config-example">New code: 80%+ lines, Critical paths (auth, payments): 95%+</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>CI Integration</h4>
+      <p class="config-example">Coverage report uploaded to SonarQube, PR comment shows diff</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Excluded Paths</h4>
+      <p class="config-example">migrations/, __mocks__/, generated types, config files</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│        MANDATORY RULES FOR EVERY COVERAGE ANALYSIS           │
+│                                                              │
+│  1. MEANINGFUL COVERAGE, NOT LINE COVERAGE                   │
+│     → A line being executed is not the same as being tested  │
+│     → Branch coverage matters more than line coverage        │
+│     → An assertion-free test adds coverage but catches       │
+│       nothing                                                │
+│     → Quality of tests &gt; quantity of coverage                │
+│                                                              │
+│  2. FOCUS ON HIGH-RISK UNTESTED CODE                         │
+│     → Auth, payment, and data mutation paths first           │
+│     → Frequently changed files with low coverage             │
+│     → Code that handles user input                           │
+│     → Don't waste time covering utility functions that       │
+│       never fail                                             │
+│                                                              │
+│  3. SET THRESHOLDS THAT ENFORCE, NOT BLOCK                   │
+│     → Gate on new code coverage, not total — don't block PRs │
+│       for legacy gaps                                        │
+│     → Ratchet up: never let coverage decrease below current  │
+│       level                                                  │
+│     → Different thresholds for different risk levels         │
+│                                                              │
+│  4. COVERAGE GAPS ARE FINDINGS, NOT FAILURES                 │
+│     → Report gaps with their risk level                      │
+│     → &quot;This 50-line function handles payment webhooks with   │
+│       0% coverage&quot; is an actionable finding                  │
+│     → Prioritize gaps that protect against real failure modes│
+│                                                              │
+│  5. TRACK TRENDS, NOT SNAPSHOTS                              │
+│     → Is coverage going up or down over time?                │
+│     → Which modules are improving? Which are degrading?      │
+│     → Coverage trends tell you more than current numbers     │
+│     → Celebrate improvements — it motivates the team         │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in coverage reports or analysis         │
+│     → All output reads as if written by a QA architect       │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #6366f118; color: #6366f1;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+<div class="table-wrap"><table><thead><tr><th>Scenario</th><th>Use?</th><th></th></tr></thead><tbody><tr><td>Starting a new project, want coverage from day 1</td><td>Yes</td><td></td></tr><tr><td>Existing project has < 50% coverage</td><td>Yes — prioritize critical paths</td><td></td></tr><tr><td>Coverage regression on a PR</td><td>Yes — find what lost coverage</td><td></td></tr><tr><td>Manager asks "what's our coverage?"</td><td>Yes — but report meaningful metrics</td><td></td></tr><tr><td>Coverage is at 90% and you want 95%</td><td>Maybe — diminishing returns</td><td></td></tr><tr><td>Trying to hit 100% coverage</td><td>No — 100% is a vanity target</td><td></td></tr><tr><td>Legacy code with zero tests</td><td>Yes — but focus on highest-risk first</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Understanding Coverage Types</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  COVERAGE TYPE      │  WHAT IT MEASURES  │  VALUE            │
+├──────────────────────┼────────────────────┼───────────────────┤
+│  Line Coverage       │  Was this line     │  Low — most       │
+│                      │  executed?         │  superficial      │
+│                      │                    │  metric           │
+├──────────────────────┼────────────────────┼───────────────────┤
+│  Statement Coverage  │  Was this          │  Low — similar    │
+│                      │  statement run?    │  to line coverage │
+├──────────────────────┼────────────────────┼───────────────────┤
+│  Branch Coverage     │  Were both sides   │  HIGH — catches   │
+│                      │  of every if/else  │  untested code    │
+│                      │  tested?           │  paths            │
+├──────────────────────┼────────────────────┼───────────────────┤
+│  Function Coverage   │  Was this function │  Medium — shows   │
+│                      │  called at all?    │  dead code        │
+├──────────────────────┼────────────────────┼───────────────────┤
+│  Condition Coverage  │  Was each boolean  │  HIGH — catches   │
+│                      │  sub-expression    │  complex logic    │
+│                      │  tested true &amp; false│  bugs            │
+└──────────────────────┴────────────────────┴───────────────────┘</code></pre>
+
+<h3>Why Branch Coverage Matters Most</h3>
+
+<pre class="code-block"><code>// This function has 100% LINE coverage but 50% BRANCH coverage
+function processOrder(order: Order) {
+  if (order.total &gt; 1000) {
+    applyDiscount(order)    // ← tested
+  }
+  // The else branch (total &lt;= 1000) was never tested!
+
+  if (order.isRush &amp;&amp; order.address.country !== 'US') {
+    addInternationalRushFee(order)  // ← never tested
+  }
+
+  return order
+}
+
+// Test that gives 100% line coverage:
+test('processes large order', () =&gt; {
+  const order = { total: 1500, isRush: false, address: { country: 'US' } }
+  processOrder(order)
+  // &quot;All lines were hit&quot; but:
+  //  - What about orders under $1000?
+  //  - What about international rush orders?
+  //  - What about orders exactly at $1000 boundary?
+  //  THESE ARE THE BUGS YOU SHIP.
+})</code></pre>
+<hr class="section-divider">
+<h2>Meaningful vs Vanity Coverage</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│                                                              │
+│  VANITY COVERAGE (looks good, catches nothing):              │
+│                                                              │
+│  test('renders without crashing', () =&gt; {                    │
+│    render(&lt;Dashboard /&gt;)                                     │
+│    // No assertions! Just calling render() hits              │
+│    // every line in the component but tests NOTHING           │
+│  })                                                          │
+│                                                              │
+│  ────────────────────────────────────────────────────────    │
+│                                                              │
+│  MEANINGFUL COVERAGE (catches real bugs):                    │
+│                                                              │
+│  test('shows error when API fails', async () =&gt; {            │
+│    server.use(http.get('*/api/data', () =&gt;                   │
+│      HttpResponse.json({ error: 'fail' }, { status: 500 })  │
+│    ))                                                        │
+│    render(&lt;Dashboard /&gt;)                                     │
+│    await waitFor(() =&gt; {                                     │
+│      expect(screen.getByText('Failed to load')).toBeTruthy()│
+│      expect(screen.queryByText('Dashboard')).toBeNull()      │
+│    })                                                        │
+│  })                                                          │
+│                                                              │
+│  Same lines covered. Only one catches a bug.                 │
+│                                                              │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Process Flow — Coverage Analysis</h2>
+
+<pre class="code-block"><code>┌──────────────┐     Generate     ┌──────────────┐     Read        ┌──────────────┐
+│  Run tests   │ ───────────────▶ │  Coverage    │ ──────────────▶ │  Identify    │
+│  with        │                  │  Report      │                  │  gaps        │
+│  --coverage  │                  │  (HTML/JSON) │                  │              │
+└──────────────┘                  └──────────────┘                  └──────┬───────┘
+                                                                          │
+                              ┌───────────────────────────────────────────┘
+                              ▼
+                    ┌──────────────┐     Rank by      ┌──────────────┐
+                    │  Categorize  │ ───────────────▶  │  Write tests │
+                    │  by risk:    │                    │  for top     │
+                    │  Critical /  │                    │  priority    │
+                    │  High / Low  │                    │  gaps first  │
+                    └──────────────┘                    └──────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 1 — Generate Coverage Reports</h2>
+
+<h3>Jest Configuration</h3>
+
+<pre class="code-block"><code>// jest.config.js
+module.exports = {
+  collectCoverage: true,
+  collectCoverageFrom: [
+    'src/<em>*/</em>.{ts,tsx}',
+    // EXCLUDE from coverage (not testable or not valuable):
+    '!src/<em>*/</em>.d.ts',           // Type definitions
+    '!src/**/index.ts',         // Barrel exports
+    '!src/<em>*/</em>.stories.tsx',    // Storybook stories
+    '!src/<em>*/</em>.test.{ts,tsx}',  // Test files themselves
+    '!src/types/**',            // Pure type files
+    '!src/mocks/**',            // Mock data
+    '!src/**/constants.ts',     // Constants (trivial)
+    '!src/config/**',           // Config files (env-dependent)
+  ],
+  coverageDirectory: 'coverage',
+  coverageReporters: [
+    'text',             // Console table
+    'text-summary',     // Console one-liner
+    'html',             // Interactive HTML report
+    'json-summary',     // Machine-readable summary
+    'lcov',             // For Codecov/Coveralls upload
+    'clover',           // For CI tools
+  ],
+  coverageThreshold: {
+    // ─── Global minimums ──────────────────────────────
+    global: {
+      branches: 70,      // MOST IMPORTANT
+      functions: 75,
+      lines: 80,
+      statements: 80,
+    },
+    // ─── Stricter thresholds for critical code ────────
+    './src/services/auth/': {
+      branches: 90,
+      functions: 95,
+      lines: 95,
+      statements: 95,
+    },
+    './src/services/billing/': {
+      branches: 90,
+      functions: 90,
+      lines: 90,
+    },
+    './src/middleware/': {
+      branches: 85,
+      functions: 90,
+      lines: 90,
+    },
+  },
+}</code></pre>
+
+<h3>Run Commands</h3>
+
+<pre class="code-block"><code># Generate full coverage report
+npm test -- --coverage
+
+# Generate coverage for specific directory
+npm test -- --coverage --collectCoverageFrom='src/services/<em>*/</em>.ts'
+
+# Generate coverage for changed files only (fast feedback)
+npm test -- --coverage --changedSince=main
+
+# Open HTML report in browser
+open coverage/lcov-report/index.html</code></pre>
+<hr class="section-divider">
+<h2>Step 2 — Read and Interpret Reports</h2>
+
+<h3>Understanding the Console Output</h3>
+
+<pre class="code-block"><code>--------------------|---------|----------|---------|---------|-------------------
+File                | % Stmts | % Branch | % Funcs | % Lines | Uncovered Lines
+--------------------|---------|----------|---------|---------|-------------------
+All files           |   82.14 |    68.42 |   78.57 |   83.33 |
+ services/          |   90.00 |    85.71 |   88.89 |   91.30 |
+  auth.ts           |   95.00 |    90.00 |  100.00 |   95.45 | 42,67
+  billing.ts        |   85.00 |    81.43 |   77.78 |   87.14 | 23,45,89-92
+ controllers/       |   74.29 |    51.72 |   68.42 |   75.47 |
+  courses.ts        |   70.00 |    45.00 |   60.00 |   71.43 | 34-56,89,112-118
+  users.ts          |   78.57 |    58.44 |   76.84 |   79.52 | 23,67-70
+--------------------|---------|----------|---------|---------|-------------------</code></pre>
+
+<h3>Reading Guide</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  HOW TO READ COVERAGE REPORTS                                │
+│                                                              │
+│  1. Look at BRANCH coverage first — it's the most telling    │
+│     → 45% branch coverage in courses.ts = many untested      │
+│       code paths (error handling, edge cases)                │
+│                                                              │
+│  2. Check &quot;Uncovered Lines&quot; column                           │
+│     → Lines 34-56 in courses.ts = a whole function untested  │
+│     → Line 42 in auth.ts = single edge case missed           │
+│                                                              │
+│  3. Low function coverage = dead code or untested features   │
+│     → 60% functions = 40% of functions never called          │
+│     → Either they're unused (delete them) or untested        │
+│                                                              │
+│  4. HTML report &gt; console output                             │
+│     → Open coverage/lcov-report/index.html                   │
+│     → Click into files to see which exact lines/branches     │
+│       are red (uncovered) vs green (covered)                 │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 3 — Prioritize Coverage Gaps</h2>
+
+<h3>Risk-Based Prioritization</h3>
+
+<pre class="code-block"><code>┌────────────────────────────────────────────┐
+│  COVERAGE PRIORITY MATRIX                  │
+│                                            │
+│  HIGH RISK + LOW COVERAGE = FIX FIRST      │
+│                                            │
+│        │  Low Coverage   High Coverage     │
+│   ─────┼──────────────┬──────────────      │
+│   High │ CRITICAL     │ Good — keep        │
+│   Risk │ Fix NOW      │ maintaining        │
+│        │ Auth, billing│                     │
+│        │ permissions  │                     │
+│   ─────┼──────────────┼──────────────      │
+│   Low  │ Nice to have │ Over-tested?       │
+│   Risk │ Fix later    │ Consider           │
+│        │ UI helpers,  │ reducing           │
+│        │ formatters   │                     │
+│   ─────┴──────────────┴──────────────      │
+└────────────────────────────────────────────┘</code></pre>
+
+<h3>Risk Categories for a Typical SaaS App</h3>
+
+<pre class="code-block"><code>CRITICAL — Test these first:
+  ├── Authentication (login, signup, token refresh, password reset)
+  ├── Authorization (role checks, permission guards, tenant isolation)
+  ├── Billing (subscription create, cancel, webhook handling)
+  ├── Data mutations (create, update, delete operations)
+  └── Middleware (auth middleware, rate limiting, error handling)
+
+HIGH — Test these next:
+  ├── API controllers (request validation, response shaping)
+  ├── Database services (queries, transactions, constraints)
+  ├── File uploads (validation, size limits, type checks)
+  └── Email sending (template rendering, queue processing)
+
+MEDIUM — Test when time allows:
+  ├── Utility functions (formatters, validators, parsers)
+  ├── React hooks (custom hooks with complex state)
+  ├── Component logic (conditional rendering, event handlers)
+  └── API client functions (request/response mapping)
+
+LOW — Test if bored:
+  ├── Constants and config files
+  ├── Type definitions
+  ├── Simple React components (pure display, no logic)
+  └── Index/barrel export files</code></pre>
+<hr class="section-divider">
+<h2>Step 4 — Set Meaningful Thresholds</h2>
+
+<h3>Threshold Strategy</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  THRESHOLD STRATEGY                                          │
+│                                                              │
+│  DON'T: Set one global threshold and call it done            │
+│  DO:    Set tiered thresholds by code criticality            │
+│                                                              │
+│  Tier 1 — Critical paths (auth, billing, middleware):        │
+│    Branches: 90%  Functions: 95%  Lines: 95%                 │
+│                                                              │
+│  Tier 2 — Business logic (services, controllers):            │
+│    Branches: 75%  Functions: 80%  Lines: 80%                 │
+│                                                              │
+│  Tier 3 — UI components (React components, hooks):           │
+│    Branches: 60%  Functions: 70%  Lines: 70%                 │
+│                                                              │
+│  Tier 4 — Utilities (helpers, formatters):                   │
+│    Branches: 50%  Functions: 60%  Lines: 60%                 │
+│                                                              │
+│  RAISING THRESHOLDS:                                         │
+│    Start at current coverage + 5%. Increase by 5% each       │
+│    quarter. Never jump 20% at once — you'll block all PRs.   │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Ratcheting Strategy (Never Go Backward)</h3>
+
+<pre class="code-block"><code>// scripts/check-coverage-ratchet.js
+// Ensures coverage never decreases from the last recorded baseline
+
+const fs = require('fs')
+
+const currentCoverage = require('../coverage/coverage-summary.json')
+const baselinePath = './coverage-baseline.json'
+
+let baseline = {}
+if (fs.existsSync(baselinePath)) {
+  baseline = require(baselinePath)
+}
+
+const metrics = ['lines', 'branches', 'functions', 'statements']
+const failures = []
+
+for (const metric of metrics) {
+  const current = currentCoverage.total[metric].pct
+  const previous = baseline[metric] || 0
+
+  if (current &lt; previous) {
+    failures.push(
+      <code class="inline-code">${metric}: ${current}% (was ${previous}% — decreased by ${(previous - current).toFixed(1)}%)</code>
+    )
+  }
+}
+
+if (failures.length &gt; 0) {
+  console.error('Coverage decreased:')
+  failures.forEach((f) =&gt; console.error(<code class="inline-code">  - ${f}</code>))
+  process.exit(1)
+} else {
+  // Update baseline with new (higher) values
+  const newBaseline = {}
+  for (const metric of metrics) {
+    newBaseline[metric] = currentCoverage.total[metric].pct
+  }
+  fs.writeFileSync(baselinePath, JSON.stringify(newBaseline, null, 2))
+  console.log('Coverage maintained or improved.')
+}</code></pre>
+<hr class="section-divider">
+<h2>Step 5 — Coverage in CI/CD</h2>
+
+<h3>PR Coverage Comment</h3>
+
+<pre class="code-block"><code># .github/workflows/coverage.yml
+coverage-report:
+  name: Coverage Report
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Need full history for diff coverage
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: src/backend/package-lock.json
+
+    - run: cd src/backend &amp;&amp; npm ci
+    - run: cd src/backend &amp;&amp; npm test -- --coverage --forceExit
+
+    - name: Coverage diff
+      id: coverage
+      run: |
+        cd src/backend
+        # Get coverage of changed files only
+        CHANGED_FILES=$(git diff --name-only origin/main...HEAD -- 'src/<em>*/</em>.ts' | tr '\n' ',')
+        echo &quot;changed_files=${CHANGED_FILES}&quot; &gt;&gt; $GITHUB_OUTPUT
+
+        # Extract summary
+        LINE_COV=$(cat coverage/coverage-summary.json | jq '.total.lines.pct')
+        BRANCH_COV=$(cat coverage/coverage-summary.json | jq '.total.branches.pct')
+        FUNC_COV=$(cat coverage/coverage-summary.json | jq '.total.functions.pct')
+
+        echo &quot;line_cov=${LINE_COV}&quot; &gt;&gt; $GITHUB_OUTPUT
+        echo &quot;branch_cov=${BRANCH_COV}&quot; &gt;&gt; $GITHUB_OUTPUT
+        echo &quot;func_cov=${FUNC_COV}&quot; &gt;&gt; $GITHUB_OUTPUT
+
+    - name: Comment on PR
+      uses: marocchino/sticky-pull-request-comment@v2
+      with:
+        header: coverage
+        message: |
+          ## Test Coverage
+
+          | Metric | Coverage | Threshold | Status |
+          |--------|----------|-----------|--------|
+          | Lines | ${{ steps.coverage.outputs.line_cov }}% | 80% | ${{ steps.coverage.outputs.line_cov &gt;= 80 &amp;&amp; '✅' || '❌' }} |
+          | Branches | ${{ steps.coverage.outputs.branch_cov }}% | 70% | ${{ steps.coverage.outputs.branch_cov &gt;= 70 &amp;&amp; '✅' || '❌' }} |
+          | Functions | ${{ steps.coverage.outputs.func_cov }}% | 75% | ${{ steps.coverage.outputs.func_cov &gt;= 75 &amp;&amp; '✅' || '❌' }} |
+
+          &lt;details&gt;
+          &lt;summary&gt;Changed files in this PR&lt;/summary&gt;</code></pre>
+          ${{ steps.coverage.outputs.changed_files }}
+          <pre class="code-block"><code>          &lt;/details&gt;</code></pre>
+<hr class="section-divider">
+<h2>Step 6 — Finding Untested Paths</h2>
+
+<h3>Systematic Gap Analysis</h3>
+
+<pre class="code-block"><code>// Script to identify the highest-impact coverage gaps
+
+// 1. Read the coverage JSON
+import coverageSummary from './coverage/coverage-summary.json'
+
+interface FileEntry {
+  path: string
+  lines: number
+  branches: number
+  functions: number
+  uncoveredLines: number
+}
+
+// 2. Find files with lowest branch coverage
+const files: FileEntry[] = Object.entries(coverageSummary)
+  .filter(([key]) =&gt; key !== 'total')
+  .map(([path, data]: [string, any]) =&gt; ({
+    path,
+    lines: data.lines.pct,
+    branches: data.branches.pct,
+    functions: data.functions.pct,
+    uncoveredLines: data.lines.total - data.lines.covered,
+  }))
+  .sort((a, b) =&gt; a.branches - b.branches)
+
+// 3. Show worst offenders
+console.log('\nFILES WITH LOWEST BRANCH COVERAGE:')
+files.slice(0, 10).forEach((f, i) =&gt; {
+  console.log(
+    <code class="inline-code">${i + 1}. ${f.path} — Branches: ${f.branches}% | Lines: ${f.lines}% | ${f.uncoveredLines} uncovered lines</code>
+  )
+})</code></pre>
+
+<h3>What to Test When Filling Gaps</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  COMMON UNTESTED PATTERNS — LOOK FOR THESE                   │
+│                                                              │
+│  1. Error branches                                           │
+│     if (error) { handleError(error) }                        │
+│     → Test: What happens when the operation throws?          │
+│                                                              │
+│  2. Null/undefined guards                                    │
+│     if (!user) { return null }                               │
+│     → Test: What happens with missing data?                  │
+│                                                              │
+│  3. Switch/case defaults                                     │
+│     default: throw new Error('Unknown status')               │
+│     → Test: Pass an unexpected value                         │
+│                                                              │
+│  4. Try/catch blocks                                         │
+│     catch (error) { logger.error(error) }                    │
+│     → Test: Trigger the exception                            │
+│                                                              │
+│  5. Early returns                                            │
+│     if (cached) return cached                                │
+│     → Test: Both cache hit and cache miss                    │
+│                                                              │
+│  6. Ternary expressions                                      │
+│     const label = isAdmin ? 'Admin' : 'User'                │
+│     → Test: Both true and false paths                        │
+│                                                              │
+│  7. Optional chaining fallbacks                              │
+│     const name = user?.profile?.name ?? 'Unknown'            │
+│     → Test: When user is null, profile is null               │
+│                                                              │
+│  8. Array/loop edge cases                                    │
+│     items.forEach(item =&gt; ...)                               │
+│     → Test: Empty array, single item, many items             │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Common Mistakes / Anti-Patterns</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  ANTI-PATTERN                    │  DO THIS INSTEAD          │
+├──────────────────────────────────┼───────────────────────────┤
+│  Targeting 100% coverage         │  80-90% with meaningful   │
+│                                  │  assertions                │
+│                                  │                           │
+│  Testing getters/setters         │  Test behavior, not        │
+│  and simple accessors            │  trivial code             │
+│                                  │                           │
+│  render() with no assertions     │  render() + expect()      │
+│  (vanity coverage)               │  on visible behavior      │
+│                                  │                           │
+│  One global threshold            │  Tiered thresholds by     │
+│                                  │  code criticality         │
+│                                  │                           │
+│  Ignoring branch coverage        │  Branch coverage is the   │
+│                                  │  most valuable metric     │
+│                                  │                           │
+│  Adding /<em> istanbul ignore </em>/    │  Write a test or delete   │
+│  to skip coverage                │  the untestable code      │
+│                                  │                           │
+│  Coverage only in local dev      │  Coverage gates in CI     │
+│                                  │  that block merges        │
+│                                  │                           │
+│  Measuring coverage but not      │  Track trend over time,   │
+│  acting on it                    │  ratchet up quarterly     │
+│                                  │                           │
+│  Testing implementation details  │  Test public API behavior │
+│  for coverage numbers            │                           │
+│                                  │                           │
+│  Same threshold for new code     │  New files: 80%+ required │
+│  and legacy code                 │  Legacy: gradual increase │
+└──────────────────────────────────┴───────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Tips for Best Results</h2>
+
+<ul class="skill-list"><li class="ordered"><strong>Branch coverage is king</strong> — 70% branch coverage catches more bugs than 95% line coverage</li>
+<li class="ordered"><strong>Coverage is a floor, not a ceiling</strong> — it tells you what's NOT tested, not what's well-tested</li>
+<li class="ordered"><strong>Exclude the right files</strong> — don't inflate coverage by excluding hard-to-test files; exclude only non-testable files (types, constants, config)</li>
+<li class="ordered"><strong>Ratchet up, never down</strong> — once you reach 80%, make 80% the minimum. Next quarter, push to 82%</li>
+<li class="ordered"><strong>Focus on changed files in PRs</strong> — require high coverage for new code, gradually improve legacy</li>
+<li class="ordered"><strong>Read the HTML report</strong> — red lines in the HTML report tell a story. Read them before writing tests</li>
+<li class="ordered"><strong>Coverage + assertions = quality</strong> — a test that covers a line but has no assertion is worse than no test (false confidence)</li>
+<li class="ordered"><strong>Use <code class="inline-code">--changedSince=main</code></strong> for fast local feedback — only measure coverage for files you changed</li>
+<li class="ordered"><strong>Review <code class="inline-code">/<em> istanbul ignore </em>/</code> comments in code reviews</strong> — every ignore is tech debt</li>
+<li class="ordered"><strong>Coverage thresholds should be enforced in CI</strong> — local-only thresholds are suggestions, CI thresholds are gates</li></ul>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="mock-service.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">Mock Service — Build Test Doubles That Don't Lie</span></span></a>
+    <a href="visual-regression.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Visual Regression Testing — Catch UI Bugs Your Eyes Miss</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    66 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

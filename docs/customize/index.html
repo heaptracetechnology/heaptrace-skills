@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customization Guide — Heaptrace Skills</title>
+  <meta name="description" content="Learn how to customize Heaptrace Skills for your project. Fill in Project Configuration, add domain-specific rules, and create your own skills.">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Shared Styles -->
+  <link rel="stylesheet" href="../css/styles.css">
+
+  <!-- Page-specific styles -->
+  <style>
+    /* Guide sections */
+    .guide-section {
+      margin-bottom: 64px;
+    }
+    .guide-section h2 {
+      font-size: 1.6rem; font-weight: 700; margin-bottom: 8px;
+    }
+    .guide-section h2 .guide-icon {
+      margin-right: 10px;
+    }
+    .guide-section .guide-lead {
+      font-size: 1rem; color: var(--text-secondary); margin-bottom: 32px;
+      line-height: 1.8;
+    }
+
+    /* Numbered step cards */
+    .guide-step {
+      display: flex; gap: 20px; padding: 24px;
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); margin-bottom: 16px;
+      transition: var(--transition);
+    }
+    .guide-step:hover { border-color: var(--border-hover); }
+    .guide-step-num {
+      width: 36px; height: 36px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.95rem; font-weight: 800; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--cyan), var(--blue));
+      color: white;
+    }
+    .guide-step-num.rose {
+      background: linear-gradient(135deg, var(--rose), var(--red));
+    }
+    .guide-step-num.amber {
+      background: linear-gradient(135deg, var(--amber), var(--orange));
+    }
+    .guide-step-num.green {
+      background: linear-gradient(135deg, var(--green), var(--teal));
+    }
+    .guide-step-content h4 {
+      font-weight: 600; margin-bottom: 6px; font-size: 1rem;
+    }
+    .guide-step-content p {
+      font-size: 0.9rem; color: var(--text-secondary); line-height: 1.7;
+    }
+
+    /* Code blocks */
+    .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      line-height: 1.8;
+      color: var(--text-secondary);
+      overflow-x: auto;
+      margin: 16px 0;
+      white-space: pre;
+    }
+    .code-block .kw { color: var(--purple); }
+    .code-block .cm { color: var(--text-muted); }
+    .code-block .str { color: var(--green); }
+    .code-block .fn { color: var(--cyan-light); }
+    .step-code {
+      margin-top: 12px; padding: 12px 16px;
+      background: var(--bg-code); border-radius: var(--radius-sm);
+      font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;
+      color: var(--cyan-light); border: 1px solid var(--border);
+      overflow-x: auto;
+    }
+
+    /* Flow diagram */
+    .flow-diagram {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 24px;
+      overflow-x: auto;
+      margin-bottom: 16px;
+    }
+    .flow-steps {
+      display: flex; align-items: center; justify-content: center;
+      gap: 12px; min-width: fit-content;
+    }
+    .flow-step-box {
+      padding: 16px 20px; border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      text-align: center; min-width: 120px;
+      background: var(--bg-secondary);
+      transition: var(--transition);
+    }
+    .flow-step-box:hover {
+      border-color: var(--cyan);
+      box-shadow: 0 0 12px rgba(6, 182, 212, 0.2);
+    }
+    .flow-step-num-label {
+      font-size: 0.7rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.1em;
+      margin-bottom: 4px;
+    }
+    .flow-step-name { font-weight: 600; font-size: 0.9rem; }
+    .flow-step-detail { font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px; }
+    .flow-arrow { color: var(--cyan); font-size: 20px; flex-shrink: 0; }
+
+    /* Callouts */
+    .callout {
+      padding: 16px 20px;
+      border-radius: var(--radius-sm);
+      margin: 16px 0;
+      font-size: 0.9rem;
+      line-height: 1.7;
+    }
+    .callout-cyan {
+      background: rgba(6, 182, 212, 0.08);
+      border-left: 3px solid var(--cyan);
+      color: var(--text-secondary);
+    }
+    .callout-purple {
+      background: rgba(168, 85, 247, 0.08);
+      border-left: 3px solid var(--purple);
+      color: var(--text-secondary);
+    }
+    .callout-green {
+      background: rgba(16, 185, 129, 0.08);
+      border-left: 3px solid var(--green);
+      color: var(--text-secondary);
+    }
+    .callout-amber {
+      background: rgba(245, 158, 11, 0.08);
+      border-left: 3px solid var(--amber);
+      color: var(--text-secondary);
+    }
+    .callout-rose {
+      background: rgba(244, 63, 94, 0.08);
+      border-left: 3px solid var(--rose);
+      color: var(--text-secondary);
+    }
+
+    /* Before/After blocks */
+    .before-after {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 24px 0;
+    }
+    .before-after-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+    }
+    .before-after-label {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 16px;
+      font-size: 0.75rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      border-bottom: 1px solid var(--border);
+    }
+    .before-after-label.before {
+      color: var(--text-muted);
+      background: rgba(100, 116, 139, 0.06);
+    }
+    .before-after-label.after {
+      color: var(--green);
+      background: rgba(16, 185, 129, 0.06);
+    }
+    .before-after-label .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+    }
+    .before-after-content {
+      padding: 16px 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.8;
+      color: var(--text-secondary);
+      white-space: pre;
+      overflow-x: auto;
+    }
+
+    /* Anatomy preview */
+    .anatomy-preview {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      max-width: 700px;
+      margin: 0 auto 32px;
+    }
+    .anatomy-line {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 24px;
+      border-bottom: 1px solid rgba(30, 41, 59, 0.5);
+      font-size: 0.9rem;
+      transition: var(--transition-fast);
+    }
+    .anatomy-line:last-child { border-bottom: none; }
+    .anatomy-line:hover { background: rgba(255,255,255,0.02); }
+    .anatomy-num {
+      width: 28px; height: 28px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 700; flex-shrink: 0;
+    }
+    .anatomy-icon { font-size: 18px; flex-shrink: 0; }
+    .anatomy-name { font-weight: 600; }
+    .anatomy-desc {
+      font-size: 0.8rem; color: var(--text-muted); margin-left: auto;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .anatomy-line.highlight {
+      background: rgba(168, 85, 247, 0.06);
+      border-left: 3px solid var(--purple);
+    }
+
+    /* Rules grid */
+    .rules-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 16px;
+    }
+    .rule-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      transition: var(--transition);
+    }
+    .rule-card:hover { border-color: var(--border-hover); box-shadow: var(--shadow-sm); }
+    .rule-number {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem; font-weight: 700; margin-bottom: 12px;
+    }
+    .rule-title { font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
+    .rule-desc { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; }
+
+    /* Tips list */
+    .tips-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+    }
+    .tip-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      transition: var(--transition);
+    }
+    .tip-card:hover { border-color: var(--border-hover); }
+    .tip-icon { font-size: 1.5rem; margin-bottom: 12px; }
+    .tip-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 6px; }
+    .tip-desc { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; }
+
+    @media (max-width: 768px) {
+      .before-after { grid-template-columns: 1fr; }
+      .flow-steps { flex-direction: column; }
+      .flow-arrow { transform: rotate(90deg); }
+      .guide-step { flex-direction: column; gap: 12px; }
+      .rules-grid { grid-template-columns: 1fr; }
+      .tips-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     NAVIGATION
+     ══════════════════════════════════════════ -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+      <a href="index.html" class="nav-link active">Customize</a>
+    </div>
+
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M4 6h16M4 12h16M4 18h16"/>
+      </svg>
+    </button>
+  </div>
+</nav>
+
+
+<!-- ══════════════════════════════════════════
+     HERO
+     ══════════════════════════════════════════ -->
+<section class="hero">
+  <div class="container hero-content">
+    <div class="hero-badge">
+      <span class="hero-badge-dot"></span>
+      Customization Guide
+    </div>
+
+    <h1>Customize Skills for<br>Your Project</h1>
+
+    <p class="hero-subtitle">
+      Every skill is designed to be adapted. Fill in your tech stack, add project-specific rules,
+      and create custom skills that match how your team actually works.
+    </p>
+
+    <div class="hero-ctas">
+      <a href="#project-config" class="btn-primary">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+        Project Configuration
+      </a>
+      <a href="#create-skills" class="btn-secondary">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
+        Create Custom Skills
+      </a>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     HOW PROJECT CONFIGURATION WORKS
+     ══════════════════════════════════════════ -->
+<section class="section" id="project-config">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-eyebrow">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
+        Core Concept
+      </div>
+      <h2 class="section-title">How Project Configuration Works</h2>
+      <p class="section-desc">Every skill has a <strong>Project Configuration</strong> section with HTML comment placeholders. Replace these with your actual project details, and the LLM reads them before every task.</p>
+    </div>
+
+    <!-- Anatomy with highlight -->
+    <div class="anatomy-preview">
+      <div class="anatomy-line">
+        <div class="anatomy-num" style="background:rgba(6,182,212,0.12);color:var(--cyan)">1</div>
+        <div class="anatomy-icon">&#129504;</div>
+        <div><div class="anatomy-name">Expert Persona</div></div>
+        <div class="anatomy-desc">unique per skill</div>
+      </div>
+      <div class="anatomy-line highlight">
+        <div class="anatomy-num" style="background:rgba(168,85,247,0.12);color:var(--purple)">2</div>
+        <div class="anatomy-icon">&#9881;&#65039;</div>
+        <div><div class="anatomy-name">Project Configuration</div></div>
+        <div class="anatomy-desc" style="color:var(--purple-light)">you customize this</div>
+      </div>
+      <div class="anatomy-line">
+        <div class="anatomy-num" style="background:rgba(239,68,68,0.12);color:var(--red)">3</div>
+        <div class="anatomy-icon">&#128220;</div>
+        <div><div class="anatomy-name">Domain-Specific Rules</div></div>
+        <div class="anatomy-desc">6 per skill</div>
+      </div>
+      <div class="anatomy-line">
+        <div class="anatomy-num" style="background:rgba(59,130,246,0.12);color:var(--blue)">4</div>
+        <div class="anatomy-icon">&#128736;&#65039;</div>
+        <div><div class="anatomy-name">Step-by-Step Workflow</div></div>
+        <div class="anatomy-desc">with flow diagrams</div>
+      </div>
+      <div class="anatomy-line">
+        <div class="anatomy-num" style="background:rgba(16,185,129,0.12);color:var(--green)">5</div>
+        <div class="anatomy-icon">&#9989;</div>
+        <div><div class="anatomy-name">Quality Checklists</div></div>
+        <div class="anatomy-desc">before you ship</div>
+      </div>
+    </div>
+
+    <!-- Before / After -->
+    <h3 style="font-size:1.1rem; font-weight:700; text-align:center; margin:40px 0 20px; color:var(--text-primary)">Before vs After: Project Configuration</h3>
+
+    <div class="before-after">
+      <div class="before-after-block">
+        <div class="before-after-label before">
+          <span class="dot" style="background:var(--text-muted)"></span>
+          Before &mdash; Default Placeholders
+        </div>
+        <div class="before-after-content"><span style="color:var(--purple)">### API Framework</span>
+<span style="color:var(--text-muted)">&lt;!-- Example: Express.js + TypeScript,
+     Zod for validation, JWT auth
+     middleware --&gt;</span>
+
+<span style="color:var(--purple)">### URL Convention</span>
+<span style="color:var(--text-muted)">&lt;!-- Example: /api/v1/{resource},
+     plural nouns, kebab-case --&gt;</span>
+
+<span style="color:var(--purple)">### Auth Pattern</span>
+<span style="color:var(--text-muted)">&lt;!-- Example: Bearer JWT in
+     Authorization header --&gt;</span>
+
+<span style="color:var(--purple)">### Error Response Format</span>
+<span style="color:var(--text-muted)">&lt;!-- Example: { error: { code: string,
+     message: string } } --&gt;</span></div>
+      </div>
+
+      <div class="before-after-block">
+        <div class="before-after-label after">
+          <span class="dot" style="background:var(--green)"></span>
+          After &mdash; Filled In For Your Project
+        </div>
+        <div class="before-after-content"><span style="color:var(--purple)">### API Framework</span>
+<span style="color:var(--green)">Express.js + TypeScript, Zod validation,
+Prisma ORM, JWT auth middleware</span>
+
+<span style="color:var(--purple)">### URL Convention</span>
+<span style="color:var(--green)">/api/v1/{resource}, plural nouns,
+kebab-case, tenant-scoped routes</span>
+
+<span style="color:var(--purple)">### Auth Pattern</span>
+<span style="color:var(--green)">Bearer JWT in Authorization header,
+role-based middleware (owner, admin,
+manager, learner), tenant isolation</span>
+
+<span style="color:var(--purple)">### Error Response Format</span>
+<span style="color:var(--green)">{ error: { code: string, message: string,
+  details?: object }, statusCode: number }</span></div>
+      </div>
+    </div>
+
+    <div class="callout callout-purple" style="margin-top:24px">
+      <strong>Why this matters:</strong> When you fill in your Project Configuration, the LLM reads it before every task. Instead of generating generic Express.js boilerplate, it generates code that matches your actual patterns &mdash; correct auth middleware, correct error format, correct URL structure.
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+
+<!-- ══════════════════════════════════════════
+     STEP-BY-STEP CUSTOMIZATION
+     ══════════════════════════════════════════ -->
+<section class="section" id="step-by-step">
+  <div class="container">
+    <div class="guide-section">
+      <h2><span class="guide-icon" style="color:var(--rose)">&#10022;</span> Step-by-Step: Customize a Skill</h2>
+      <p class="guide-lead">Follow these four steps to customize any skill for your project. It takes about 5 minutes per skill.</p>
+
+      <div class="flow-diagram" style="margin-bottom:32px">
+        <div class="flow-steps">
+          <div class="flow-step-box" style="border-color:rgba(244,63,94,0.3)">
+            <div class="flow-step-num-label">Step 1</div>
+            <div class="flow-step-name">Open</div>
+            <div class="flow-step-detail">Find the SKILL.md file</div>
+          </div>
+          <div class="flow-arrow" style="color:var(--rose)">&rarr;</div>
+          <div class="flow-step-box" style="border-color:rgba(244,63,94,0.3)">
+            <div class="flow-step-num-label">Step 2</div>
+            <div class="flow-step-name">Find</div>
+            <div class="flow-step-detail">Project Configuration</div>
+          </div>
+          <div class="flow-arrow" style="color:var(--rose)">&rarr;</div>
+          <div class="flow-step-box" style="border-color:rgba(244,63,94,0.3)">
+            <div class="flow-step-num-label">Step 3</div>
+            <div class="flow-step-name">Replace</div>
+            <div class="flow-step-detail">Comments with details</div>
+          </div>
+          <div class="flow-arrow" style="color:var(--rose)">&rarr;</div>
+          <div class="flow-step-box" style="border-color:rgba(16,185,129,0.3)">
+            <div class="flow-step-num-label">Step 4</div>
+            <div class="flow-step-name">Save</div>
+            <div class="flow-step-detail">LLM reads it on every task</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="guide-step">
+        <div class="guide-step-num rose">1</div>
+        <div class="guide-step-content">
+          <h4>Open the SKILL.md file</h4>
+          <p>Navigate to the skill you want to customize. For example, if you're customizing the API Design skill:</p>
+          <div class="step-code">.claude/skills/api-design/SKILL.md</div>
+        </div>
+      </div>
+
+      <div class="guide-step">
+        <div class="guide-step-num rose">2</div>
+        <div class="guide-step-content">
+          <h4>Find the Project Configuration section</h4>
+          <p>Scroll to the <code class="mono" style="color:var(--purple-light)">## Project Configuration</code> heading. You'll see sub-headings with HTML comments like <code class="mono" style="color:var(--text-muted)">&lt;!-- Example: ... --&gt;</code>. These are your placeholders.</p>
+        </div>
+      </div>
+
+      <div class="guide-step">
+        <div class="guide-step-num rose">3</div>
+        <div class="guide-step-content">
+          <h4>Replace HTML comments with your project details</h4>
+          <p>Delete the HTML comment and type your actual project configuration. Be specific &mdash; include framework names, library versions, naming conventions, and file paths. The more detail you provide, the better the LLM output.</p>
+          <div class="code-block"><span style="color:var(--text-muted)"># Before:</span>
+<span style="color:var(--purple)">### API Framework</span>
+<span style="color:var(--text-muted)">&lt;!-- Example: Express.js + TypeScript, Zod for validation --&gt;</span>
+
+<span style="color:var(--text-muted)"># After:</span>
+<span style="color:var(--purple)">### API Framework</span>
+<span style="color:var(--green)">Express.js + TypeScript, Zod validation on all request bodies,</span>
+<span style="color:var(--green)">Prisma ORM for database access, Winston for logging,</span>
+<span style="color:var(--green)">JWT auth middleware on all protected routes</span></div>
+        </div>
+      </div>
+
+      <div class="guide-step">
+        <div class="guide-step-num green">4</div>
+        <div class="guide-step-content">
+          <h4>Save — the LLM reads it before every task</h4>
+          <p>That's it. The next time the skill is invoked, the LLM will read your project configuration and produce output that matches your actual codebase. No generic boilerplate.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+
+<!-- ══════════════════════════════════════════
+     REAL EXAMPLE: API DESIGN
+     ══════════════════════════════════════════ -->
+<section class="section" id="example">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-eyebrow">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+        Full Example
+      </div>
+      <h2 class="section-title">Example: Customizing api-design</h2>
+      <p class="section-desc">Here's a complete before/after of the api-design skill's Project Configuration filled in for a real SaaS project.</p>
+    </div>
+
+    <div class="before-after">
+      <div class="before-after-block">
+        <div class="before-after-label before">
+          <span class="dot" style="background:var(--text-muted)"></span>
+          Default (from repo)
+        </div>
+        <div class="before-after-content"><span style="color:var(--purple)">## Project Configuration</span>
+
+<span style="color:var(--purple)">### API Framework</span>
+<span style="color:var(--text-muted)">&lt;!-- Example: Express.js + TypeScript,
+     Zod for validation, JWT auth
+     middleware --&gt;</span>
+
+<span style="color:var(--purple)">### URL Convention</span>
+<span style="color:var(--text-muted)">&lt;!-- Example: /api/v1/{resource},
+     plural nouns, kebab-case --&gt;</span>
+
+<span style="color:var(--purple)">### Auth Pattern</span>
+<span style="color:var(--text-muted)">&lt;!-- Example: Bearer JWT in
+     Authorization header, role-based
+     middleware --&gt;</span>
+
+<span style="color:var(--purple)">### Pagination Pattern</span>
+<span style="color:var(--text-muted)">&lt;!-- Example: Cursor-based with
+     ?cursor=&amp;limit=, or offset
+     ?page=&amp;pageSize= --&gt;</span>
+
+<span style="color:var(--purple)">### Error Response Format</span>
+<span style="color:var(--text-muted)">&lt;!-- Example: { error: { code: string,
+     message: string, details?: object } }
+     --&gt;</span>
+
+<span style="color:var(--purple)">### Existing API Reference</span>
+<span style="color:var(--text-muted)">&lt;!-- Example: See /specs/api-contracts.md
+     for current endpoints --&gt;</span></div>
+      </div>
+
+      <div class="before-after-block">
+        <div class="before-after-label after">
+          <span class="dot" style="background:var(--green)"></span>
+          Customized for a SaaS LMS project
+        </div>
+        <div class="before-after-content"><span style="color:var(--purple)">## Project Configuration</span>
+
+<span style="color:var(--purple)">### API Framework</span>
+<span style="color:var(--green)">Express.js + TypeScript, Zod validation
+on all request/response schemas,
+Prisma ORM, JWT refresh tokens,
+Winston structured logging</span>
+
+<span style="color:var(--purple)">### URL Convention</span>
+<span style="color:var(--green)">/api/v1/{resource}, plural nouns,
+kebab-case. All routes tenant-scoped
+via tenantMiddleware. No /api/v2.</span>
+
+<span style="color:var(--purple)">### Auth Pattern</span>
+<span style="color:var(--green)">Bearer JWT (Authorization header).
+Roles: superadmin, owner, admin,
+manager, learner. tenantMiddleware
+injects tenant_id on every request.</span>
+
+<span style="color:var(--purple)">### Pagination Pattern</span>
+<span style="color:var(--green)">Offset-based: ?page=1&amp;pageSize=20.
+Response: { items: T[], total: number,
+page: number, pageSize: number }.</span>
+
+<span style="color:var(--purple)">### Error Response Format</span>
+<span style="color:var(--green)">throw new ApiError(statusCode, message).
+Response: { error: { code: string,
+message: string, details?: object } }</span>
+
+<span style="color:var(--purple)">### Existing API Reference</span>
+<span style="color:var(--green)">See /specs/api-contracts.md for current
+endpoints. Backend: src/backend/src/
+routes/. Use existing route patterns.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+
+<!-- ══════════════════════════════════════════
+     CUSTOMIZING RULES
+     ══════════════════════════════════════════ -->
+<section class="section" id="rules">
+  <div class="container">
+    <div class="guide-section">
+      <h2><span class="guide-icon" style="color:var(--amber)">&#10022;</span> Customizing Domain-Specific Rules</h2>
+      <p class="guide-lead">Each skill has 6 mandatory rules that are unique to its domain. You can add project-specific sub-rules under any of these to enforce your team's conventions.</p>
+
+      <div class="rules-grid" style="margin-bottom:32px">
+        <div class="rule-card">
+          <div class="rule-number" style="background:rgba(6,182,212,0.1);color:var(--cyan);border:1px solid rgba(6,182,212,0.2)">1</div>
+          <div class="rule-title">Understand the 6 Rules</div>
+          <div class="rule-desc">Every skill's Common Rules section has exactly 6 domain-specific rules. For example, the code-review skill has rules like "Check error handling" and "Verify component reuse."</div>
+        </div>
+        <div class="rule-card">
+          <div class="rule-number" style="background:rgba(168,85,247,0.1);color:var(--purple);border:1px solid rgba(168,85,247,0.2)">2</div>
+          <div class="rule-title">Add Sub-Rules</div>
+          <div class="rule-desc">Under each rule, add project-specific checks. If rule 3 says "Check security patterns," add sub-items like "Verify all Prisma queries include tenant_id filter."</div>
+        </div>
+        <div class="rule-card">
+          <div class="rule-number" style="background:rgba(16,185,129,0.1);color:var(--green);border:1px solid rgba(16,185,129,0.2)">3</div>
+          <div class="rule-title">Add Checklist Items</div>
+          <div class="rule-desc">Every time a bug slips through that a skill should have caught, add a new checklist item. Your skills get smarter over time and prevent repeat mistakes.</div>
+        </div>
+        <div class="rule-card">
+          <div class="rule-number" style="background:rgba(245,158,11,0.1);color:var(--amber);border:1px solid rgba(245,158,11,0.2)">4</div>
+          <div class="rule-title">Keep Rules Actionable</div>
+          <div class="rule-desc">Every rule and sub-rule should be a verifiable check. "Write good code" is not actionable. "Verify all new API routes use tenantMiddleware" is actionable.</div>
+        </div>
+      </div>
+
+      <h3 style="font-size:1.1rem; font-weight:700; margin:0 0 16px">Example: Adding project-specific checklist items to code-review</h3>
+      <div class="code-block"><span style="color:var(--text-muted)"># Added checklist items for our project:</span>
+
+<span style="color:var(--green)">- [ ] Check that all new API routes use the tenantMiddleware</span>
+<span style="color:var(--green)">- [ ] Verify Prisma queries include tenant_id filter</span>
+<span style="color:var(--green)">- [ ] Confirm new components reuse existing UI primitives from /components/ui/</span>
+<span style="color:var(--green)">- [ ] Check that new pages follow the existing layout pattern</span>
+<span style="color:var(--green)">- [ ] Verify error responses use the standard ApiError format</span>
+<span style="color:var(--green)">- [ ] Ensure new environment variables are added to .env.example</span></div>
+
+      <div class="callout callout-amber">
+        <strong>Pro tip:</strong> After every production incident or escaped bug, add a checklist item to the relevant skill. Over 6 months your skills will capture every hard lesson your team has learned.
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+
+<!-- ══════════════════════════════════════════
+     CREATE CUSTOM SKILLS
+     ══════════════════════════════════════════ -->
+<section class="section" id="create-skills">
+  <div class="container">
+    <div class="guide-section">
+      <h2><span class="guide-icon" style="color:var(--green)">&#10022;</span> Creating Custom Skills</h2>
+      <p class="guide-lead">You can create custom skills for any repeatable process in your team's workflow. Follow the same structure as the built-in skills for best results.</p>
+
+      <div class="flow-diagram" style="margin-bottom:32px">
+        <div class="flow-steps">
+          <div class="flow-step-box" style="border-color:rgba(16,185,129,0.3)">
+            <div class="flow-step-num-label">Step 1</div>
+            <div class="flow-step-name">Identify</div>
+            <div class="flow-step-detail">Find a repeated task</div>
+          </div>
+          <div class="flow-arrow" style="color:var(--green)">&rarr;</div>
+          <div class="flow-step-box" style="border-color:rgba(16,185,129,0.3)">
+            <div class="flow-step-num-label">Step 2</div>
+            <div class="flow-step-name">Structure</div>
+            <div class="flow-step-detail">Follow the template</div>
+          </div>
+          <div class="flow-arrow" style="color:var(--green)">&rarr;</div>
+          <div class="flow-step-box" style="border-color:rgba(16,185,129,0.3)">
+            <div class="flow-step-num-label">Step 3</div>
+            <div class="flow-step-name">Write</div>
+            <div class="flow-step-detail">Steps + checklists</div>
+          </div>
+          <div class="flow-arrow" style="color:var(--green)">&rarr;</div>
+          <div class="flow-step-box" style="border-color:rgba(16,185,129,0.3)">
+            <div class="flow-step-num-label">Step 4</div>
+            <div class="flow-step-name">Test</div>
+            <div class="flow-step-detail">Use with real work</div>
+          </div>
+          <div class="flow-arrow" style="color:var(--green)">&rarr;</div>
+          <div class="flow-step-box" style="border-color:rgba(245,158,11,0.3)">
+            <div class="flow-step-num-label">Step 5</div>
+            <div class="flow-step-name">Refine</div>
+            <div class="flow-step-detail">Iterate and improve</div>
+          </div>
+        </div>
+      </div>
+
+      <h3 style="font-size:1.15rem; font-weight:700; margin:0 0 16px">The 5 Sections Every Skill Needs</h3>
+      <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:24px;">Follow this structure to create skills that work consistently with any LLM tool.</p>
+
+      <div class="guide-step">
+        <div class="guide-step-num green">1</div>
+        <div class="guide-step-content">
+          <h4>Expert Persona</h4>
+          <p>Define who the LLM becomes when this skill is active. Give it a specific title, years of experience, and domain expertise. The more specific the persona, the better the output quality.</p>
+          <div class="code-block"><span style="color:var(--purple)">## Your Expertise</span>
+
+You are a <span style="color:var(--green)">**Senior Database Migration Specialist**</span> with 15+ years
+managing schema changes across PostgreSQL, MySQL, and MongoDB. You've
+migrated databases with 500M+ rows without downtime at fintech and
+healthcare companies.</div>
+        </div>
+      </div>
+
+      <div class="guide-step">
+        <div class="guide-step-num green">2</div>
+        <div class="guide-step-content">
+          <h4>Project Configuration</h4>
+          <p>Add customizable sections with HTML comment placeholders. This lets anyone using the skill fill in their project-specific details.</p>
+          <div class="code-block"><span style="color:var(--purple)">## Project Configuration</span>
+
+<span style="color:var(--purple)">### Database</span>
+<span style="color:var(--text-muted)">&lt;!-- Example: PostgreSQL 15, Prisma ORM, UUID primary keys --&gt;</span>
+
+<span style="color:var(--purple)">### Migration Tool</span>
+<span style="color:var(--text-muted)">&lt;!-- Example: Prisma Migrate, or raw SQL with Flyway --&gt;</span>
+
+<span style="color:var(--purple)">### Rollback Strategy</span>
+<span style="color:var(--text-muted)">&lt;!-- Example: Down migrations required, tested in staging first --&gt;</span></div>
+        </div>
+      </div>
+
+      <div class="guide-step">
+        <div class="guide-step-num green">3</div>
+        <div class="guide-step-content">
+          <h4>Domain-Specific Rules (6 rules)</h4>
+          <p>Write exactly 6 mandatory rules for this skill's domain. Each rule should be battle-tested and specific &mdash; not generic advice. These are the non-negotiable checks the LLM must follow every time.</p>
+        </div>
+      </div>
+
+      <div class="guide-step">
+        <div class="guide-step-num green">4</div>
+        <div class="guide-step-content">
+          <h4>Step-by-Step Workflow</h4>
+          <p>Break the process into clear, sequential steps. Each step should have a single focus. Include flow diagrams for complex decision points. The LLM follows these steps in order.</p>
+        </div>
+      </div>
+
+      <div class="guide-step">
+        <div class="guide-step-num green">5</div>
+        <div class="guide-step-content">
+          <h4>Quality Checklists</h4>
+          <p>Add a checklist of items to verify before the task is considered complete. These catch issues that the workflow steps might miss. Update the checklist whenever a new failure mode is discovered.</p>
+          <div class="code-block"><span style="color:var(--purple)">## Final Checklist</span>
+
+<span style="color:var(--green)">- [ ] Migration runs cleanly on empty database</span>
+<span style="color:var(--green)">- [ ] Migration runs cleanly on production snapshot</span>
+<span style="color:var(--green)">- [ ] Rollback/down migration tested</span>
+<span style="color:var(--green)">- [ ] No data loss in existing rows</span>
+<span style="color:var(--green)">- [ ] Indexes added for new foreign keys</span>
+<span style="color:var(--green)">- [ ] Prisma client regenerated without errors</span></div>
+        </div>
+      </div>
+
+      <h3 style="font-size:1.15rem; font-weight:700; margin:40px 0 16px">Complete Skill Template</h3>
+      <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:16px;">Use this template as a starting point for any new skill.</p>
+      <div class="code-block"><span style="color:var(--text-muted)">---</span>
+<span style="color:var(--purple)">name:</span> <span style="color:var(--green)">your-skill-name</span>
+<span style="color:var(--purple)">description:</span> <span style="color:var(--green)">"One-line summary of what this skill does and when to use it."</span>
+<span style="color:var(--text-muted)">---</span>
+
+<span style="color:var(--cyan-light)"># Skill Title &mdash; Short Description</span>
+
+Takes {input} and produces {output}.
+
+<span style="color:var(--text-muted)">---</span>
+
+<span style="color:var(--purple)">## Your Expertise</span>
+
+You are a **{Title}** with {N}+ years of experience in {domain}.
+You've {specific accomplishment that builds credibility}.
+
+<span style="color:var(--text-muted)">---</span>
+
+<span style="color:var(--purple)">## Project Configuration</span>
+
+<span style="color:var(--purple)">### {Config Section 1}</span>
+<span style="color:var(--text-muted)">&lt;!-- Example: ... --&gt;</span>
+
+<span style="color:var(--purple)">### {Config Section 2}</span>
+<span style="color:var(--text-muted)">&lt;!-- Example: ... --&gt;</span>
+
+<span style="color:var(--text-muted)">---</span>
+
+<span style="color:var(--purple)">## Common Rules</span>
+
+1. {Rule 1 &mdash; specific, actionable, verifiable}
+2. {Rule 2}
+3. {Rule 3}
+4. {Rule 4}
+5. {Rule 5}
+6. {Rule 6}
+
+<span style="color:var(--text-muted)">---</span>
+
+<span style="color:var(--purple)">## Workflow</span>
+
+<span style="color:var(--purple)">### Step 1: {Step Name}</span>
+- {What to do}
+- {What to check}
+
+<span style="color:var(--purple)">### Step 2: {Step Name}</span>
+- {What to do}
+- {What to check}
+
+<span style="color:var(--text-muted)">---</span>
+
+<span style="color:var(--purple)">## Final Checklist</span>
+- [ ] {Verification item 1}
+- [ ] {Verification item 2}
+- [ ] {Verification item 3}</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+
+<!-- ══════════════════════════════════════════
+     TIPS
+     ══════════════════════════════════════════ -->
+<section class="section" id="tips">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-eyebrow">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+        Tips &amp; Best Practices
+      </div>
+      <h2 class="section-title">Keep Skills Effective</h2>
+      <p class="section-desc">Practical advice for maintaining and evolving your skill library over time.</p>
+    </div>
+
+    <div class="tips-grid">
+      <div class="tip-card">
+        <div class="tip-icon">&#128197;</div>
+        <div class="tip-title">Review quarterly</div>
+        <div class="tip-desc">Set a reminder to review your customized skills every quarter. As your project evolves, so should your Project Configuration, rules, and checklists. Remove stale items and add new patterns.</div>
+      </div>
+      <div class="tip-card">
+        <div class="tip-icon">&#128027;</div>
+        <div class="tip-title">Add items from past bugs</div>
+        <div class="tip-desc">Every production bug is a missing checklist item. After a post-mortem, add a new check to the relevant skill. Over time, your skills become a living record of hard-won lessons.</div>
+      </div>
+      <div class="tip-card">
+        <div class="tip-icon">&#128260;</div>
+        <div class="tip-title">Keep skills up to date</div>
+        <div class="tip-desc">When you upgrade frameworks, change conventions, or adopt new tools, update the Project Configuration in affected skills. Stale config leads to stale output.</div>
+      </div>
+      <div class="tip-card">
+        <div class="tip-icon">&#128101;</div>
+        <div class="tip-title">Share customizations with your team</div>
+        <div class="tip-desc">Commit your customized skills to the project repo. When a teammate runs the same skill, they get the same project-specific context. This is how you scale consistency.</div>
+      </div>
+      <div class="tip-card">
+        <div class="tip-icon">&#127919;</div>
+        <div class="tip-title">Start with your most common workflow</div>
+        <div class="tip-desc">Don't customize all 66 skills at once. Start with the 3-4 skills you use daily (feature-plan, feature-work, code-review). Customize those first and expand as needed.</div>
+      </div>
+      <div class="tip-card">
+        <div class="tip-icon">&#128200;</div>
+        <div class="tip-title">Measure the impact</div>
+        <div class="tip-desc">Track how often the LLM produces output that matches your conventions without manual correction. As you fill in more Project Configuration, this rate should increase significantly.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     CTA BANNER
+     ══════════════════════════════════════════ -->
+<section class="section-sm">
+  <div class="container">
+    <div class="cta-banner">
+      <h2>Start Customizing Today</h2>
+      <p>Open any SKILL.md file, fill in your Project Configuration, and watch the LLM produce code that matches your project.</p>
+      <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap; position:relative;">
+        <a href="../setup/index.html" class="btn-secondary">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+          Setup Guide
+        </a>
+        <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="btn-primary">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          Clone from GitHub
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     FOOTER
+     ══════════════════════════════════════════ -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-links">
+      <a href="https://github.com/heaptracetechnology/heaptrace-skills" class="footer-link" target="_blank" rel="noopener">GitHub</a>
+      <a href="../index.html#packs" class="footer-link">Packs</a>
+      <a href="../setup/index.html" class="footer-link">Setup Guide</a>
+      <a href="index.html" class="footer-link">Customize</a>
+      <a href="https://heaptrace.com" class="footer-link" target="_blank" rel="noopener">Heaptrace</a>
+    </div>
+    <div class="footer-copy">
+      MIT License &middot; Built by <a href="https://heaptrace.com" target="_blank" rel="noopener">Heaptrace Technology</a>
+      <br>66 Skills &middot; 8 Packs &middot; Free &amp; Open Source
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

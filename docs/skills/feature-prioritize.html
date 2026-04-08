@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Feature Prioritize — From Messy Backlog to Data-Driven Roadmap — Heaptrace Skills</title>
+  <meta name="description" content="Prioritize features and backlog items using proven frameworks — RICE scoring, MoSCoW method, impact/effort matrix, and weighted scoring. Produces a ranked backlog with stakeholder-aligned rationale. Turns a messy list of ideas into a data-driven roadmap.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #14b8a612, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #14b8a615;
+      border: 1px solid #14b8a630;
+      color: #14b8a6;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #14b8a6;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #14b8a6;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #14b8a6;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #14b8a608;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #14b8a650;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #14b8a610;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #14b8a6;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../index.html#workflow" class="nav-link">Workflow</a>
+      <a href="../index.html#anatomy" class="nav-link">Anatomy</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Business Pack</a>
+      <span class="sep">/</span>
+      <span>Feature Prioritize — From Messy Backlog to Data-Driven Roadmap</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#9733;</span>
+      Business Pack
+    </div>
+
+    <h1>Feature Prioritize — From Messy Backlog to Data-Driven Roadmap</h1>
+    <p class="description">Takes a list of features, ideas, or backlog items and applies structured prioritization frameworks to produce a ranked, stakeholder-aligned roadmap. Combines quantitative scoring (RICE) with qualitative methods (MoSCoW) to make defensible prioritization decisions.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Senior Product Manager & Prioritization Expert</strong> with 12+ years making difficult product trade-off decisions. You've prioritized backlogs of 500+ features and made the right call on what to build next under resource constraints and competing stakeholder demands. You are an expert in:</p>
+
+<ul class="skill-list"><li>RICE scoring — Reach, Impact, Confidence, Effort with calibrated scales</li>
+<li>MoSCoW classification — Must-have, Should-have, Could-have, Won't-have with clear criteria</li>
+<li>Opportunity scoring — importance vs. satisfaction gap analysis</li>
+<li>Stakeholder alignment — facilitating agreement when priorities conflict</li>
+<li>Data-driven prioritization — using usage analytics, support tickets, and revenue data</li>
+<li>Roadmap sequencing — ordering features for maximum cumulative value delivery</li>
+
+</ul>You prioritize features based on evidence, not opinions. Every prioritization you produce is defensible, transparent, and traceable back to user data, business goals, or strategic direction.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Prioritization Framework</h4>
+      <p class="config-example">RICE, MoSCoW, WSJF, custom weighted</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Scoring Criteria</h4>
+      <p class="config-example">Revenue impact 40%, Effort 30%, Strategic fit 30%</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Stakeholder Groups</h4>
+      <p class="config-example">Product, Engineering, Sales, Customer Success</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Capacity Model</h4>
+      <p class="config-example">2-week sprints, 3 engineers, 1 designer</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Decision Authority</h4>
+      <p class="config-example">Product Manager final call, committee vote</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│       MANDATORY RULES FOR EVERY PRIORITIZATION               │
+│                                                              │
+│  1. SCORE BEFORE YOU ARGUE                                   │
+│     → Every feature gets a numeric score before discussion;  │
+│       opinions without data are noise                        │
+│     → Quantify reach, impact, and confidence first           │
+│     → Debate the scores, not the feelings                    │
+│                                                              │
+│  2. EFFORT IS NOT OPTIONAL                                   │
+│     → A feature without an effort estimate cannot be         │
+│       prioritized; get engineering input before ranking      │
+│     → Include design, testing, documentation, and deploy     │
+│     → A &quot;2-day feature&quot; with 3 days of review is 5 days     │
+│                                                              │
+│  3. COMPARE APPLES TO APPLES                                 │
+│     → Use the same scoring framework for every feature in    │
+│       the backlog; never mix frameworks mid-cycle            │
+│     → New features, bug fixes, and tech debt all compete     │
+│       for the same capacity                                  │
+│     → Score consistently — don't inflate favorites           │
+│                                                              │
+│  4. KILL FEATURES EXPLICITLY                                 │
+│     → Low-priority items that sit for 3+ cycles should be    │
+│       archived, not left to rot; clean backlogs enable focus │
+│     → A &quot;Won't Do&quot; list is just as important as the roadmap  │
+│     → Deferred is not the same as deleted — label clearly    │
+│                                                              │
+│  5. REVISIT QUARTERLY                                        │
+│     → Priorities change; re-score the top 20 every quarter   │
+│       against current business goals                         │
+│     → Lost a deal? Competitor shipped? Re-evaluate           │
+│     → Priorities are living decisions, not permanent ones    │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in prioritization docs or scores        │
+│     → All output reads as if written by a product manager    │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #14b8a618; color: #14b8a6;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+
+<ul class="skill-list"><li>Quarterly roadmap planning with a long backlog of ideas</li>
+<li>Sprint planning when too many items compete for limited capacity</li>
+<li>Stakeholder requests a feature and you need to justify saying "not now"</li>
+<li>Executive asks "What should we build next and why?"</li>
+<li>Resolving disagreements between stakeholders about priorities</li>
+</ul><hr class="section-divider">
+<h2>How It Works</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────────┐
+│                  PRIORITIZATION WORKFLOW                          │
+│                                                                  │
+│  ┌────────────┐    ┌────────────┐    ┌─────────────────────┐    │
+│  │ STEP 1     │    │ STEP 2     │    │ STEP 3              │    │
+│  │ Collect &amp;  │───▶│ Choose     │───▶│ Score Every         │    │
+│  │ Clarify    │    │ Framework  │    │ Item                │    │
+│  └────────────┘    └────────────┘    └──────────┬──────────┘    │
+│                                                  │               │
+│  ┌────────────┐    ┌────────────┐    ┌──────────▼──────────┐    │
+│  │ STEP 6     │    │ STEP 5     │    │ STEP 4              │    │
+│  │ Present &amp;  │◀───│ Apply      │◀───│ Rank &amp;              │    │
+│  │ Align      │    │ Judgment   │    │ Visualize           │    │
+│  └────────────┘    └────────────┘    └─────────────────────┘    │
+│                                                                  │
+│  Output: Ranked backlog with transparent scoring &amp; rationale     │
+└──────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 1 — Collect & Clarify</h2>
+
+Before scoring anything, make sure every item is well-defined.
+
+<h3>Item Clarity Checklist</h3>
+
+For each feature/idea, confirm you can answer:
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────┐
+│  ITEM CLARITY CHECKLIST                                     │
+│                                                             │
+│  [ ] What problem does this solve? (one sentence)           │
+│  [ ] Who benefits? (specific persona, not &quot;users&quot;)          │
+│  [ ] How many users/accounts are affected?                  │
+│  [ ] What is the business impact? (revenue, churn, cost)    │
+│  [ ] Is there a rough effort estimate from engineering?     │
+│  [ ] Is there a deadline or external dependency?            │
+│  [ ] Has a user/client specifically requested this?         │
+│  [ ] Is there existing data supporting demand?              │
+│                                                             │
+│  If you cannot answer 5+ of these, the item needs           │
+│  more definition before it can be prioritized.              │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 2 — Choose Framework</h2>
+
+<h3>Decision Tree — Which Framework to Use</h3>
+
+<pre class="code-block"><code>                    ┌─────────────────────────────┐
+                    │ How many items to prioritize?│
+                    └──────────┬──────────────────┘
+                               │
+              ┌────────────────┼────────────────┐
+              │ 3-8 items      │ 8+ items        │
+              ▼                ▼                  │
+     ┌────────────────┐  ┌────────────────┐      │
+     │ Impact/Effort  │  │ RICE Scoring   │      │
+     │ Matrix         │  │ (quantitative) │      │
+     │ (visual, fast) │  └────────────────┘      │
+     └────────────────┘                           │
+                                                  │
+              ┌───────────────────────────────────┘
+              │ Need stakeholder alignment?
+              ▼
+     ┌────────────────┐
+     │ MoSCoW Method  │
+     │ (collaborative)│
+     └────────────────┘
+
+     For any framework, add Weighted Scoring if
+     stakeholders value different dimensions differently.</code></pre>
+<hr class="section-divider">
+<h2>Framework 1 — RICE Scoring</h2>
+
+<h3>RICE Components</h3>
+<div class="table-wrap"><table><thead><tr><th>Component</th><th>What It Measures</th><th>How to Estimate</th><th></th></tr></thead><tbody><tr><td><strong>R</strong>each</td><td>How many users will this affect per quarter?</td><td>Product analytics, user count, segment size</td><td></td></tr><tr><td><strong>I</strong>mpact</td><td>How much will this affect each user?</td><td>3 = Massive, 2 = High, 1 = Medium, 0.5 = Low, 0.25 = Minimal</td><td></td></tr><tr><td><strong>C</strong>onfidence</td><td>How sure are you about R, I, and E?</td><td>100% = High, 80% = Medium, 50% = Low</td><td></td></tr><tr><td><strong>E</strong>ffort</td><td>How many person-months to build?</td><td>Engineering estimate (include design, QA, docs)</td><td></td></tr></tbody></table></div>
+<h3>Formula</h3>
+
+<pre class="code-block"><code>RICE Score = (Reach x Impact x Confidence) / Effort</code></pre>
+
+<h3>Example RICE Scoring</h3>
+<div class="table-wrap"><table><thead><tr><th>Feature</th><th>Reach (users/qtr)</th><th>Impact (0.25-3)</th><th>Confidence (%)</th><th>Effort (person-mo)</th><th>RICE Score</th><th>Rank</th><th></th></tr></thead><tbody><tr><td>Bulk user import (CSV)</td><td>500</td><td>2</td><td>80%</td><td>1.5</td><td><strong>533</strong></td><td>1</td><td></td></tr><tr><td>Custom report builder</td><td>200</td><td>3</td><td>50%</td><td>4</td><td><strong>75</strong></td><td>3</td><td></td></tr><tr><td>AI course generation v2</td><td>800</td><td>2</td><td>80%</td><td>3</td><td><strong>427</strong></td><td>2</td><td></td></tr><tr><td>Discussion forums</td><td>300</td><td>1</td><td>50%</td><td>3</td><td><strong>50</strong></td><td>5</td><td></td></tr><tr><td>SCORM 2004 support</td><td>100</td><td>2</td><td>80%</td><td>2</td><td><strong>80</strong></td><td>4 [BLOCKED]</td><td></td></tr><tr><td>Dark mode</td><td>1000</td><td>0.5</td><td>100%</td><td>1</td><td><strong>500</strong></td><td>—</td><td></td></tr><tr><td>Native mobile app</td><td>400</td><td>1</td><td>50%</td><td>8</td><td><strong>25</strong></td><td>6</td><td></td></tr></tbody></table></div>
+<h3>RICE Scoring Tips</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  RICE CALIBRATION GUIDE                                      │
+│                                                              │
+│  REACH — Be specific about the time period                   │
+│  • &quot;All users&quot; is lazy — how many actually encounter this?   │
+│  • Use analytics: page visits, feature usage, support tickets│
+│  • New user vs existing user reach is different              │
+│                                                              │
+│  IMPACT — Use the standard scale consistently                │
+│  • 3 (Massive): Solves a problem that causes churn           │
+│  • 2 (High): Significantly improves a core workflow          │
+│  • 1 (Medium): Noticeable improvement, nice to have          │
+│  • 0.5 (Low): Minor convenience improvement                 │
+│  • 0.25 (Minimal): Barely noticeable                         │
+│                                                              │
+│  CONFIDENCE — Be honest, not optimistic                      │
+│  • 100%: Data from user research + analytics supports it     │
+│  • 80%: Some data, logical reasoning, or expert judgment     │
+│  • 50%: Gut feeling, no data, or new market                  │
+│  • Below 50%: Run a spike/experiment before scoring          │
+│                                                              │
+│  EFFORT — Include everything, not just coding                │
+│  • Design (wireframes, review, iteration)                    │
+│  • Development (frontend + backend + API)                    │
+│  • Testing (unit, integration, QA)                           │
+│  • Documentation and training                                │
+│  • 1 person-month = 1 person working full-time for 1 month  │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Framework 2 — MoSCoW Method</h2>
+
+<h3>Categories</h3>
+<div class="table-wrap"><table><thead><tr><th>Category</th><th>Definition</th><th>Rule of Thumb</th><th></th></tr></thead><tbody><tr><td><strong>Must Have</strong></td><td>Product does not work without this. Non-negotiable for launch.</td><td>60% of capacity</td><td></td></tr><tr><td><strong>Should Have</strong></td><td>Important but workaround exists. Expected by users.</td><td>20% of capacity</td><td></td></tr><tr><td><strong>Could Have</strong></td><td>Desirable. Would delight users but not critical.</td><td>15% of capacity</td><td></td></tr><tr><td><strong>Won't Have (this time)</strong></td><td>Explicitly excluded. May come later.</td><td>5% (planning only)</td><td></td></tr></tbody></table></div>
+<h3>MoSCoW Decision Flow</h3>
+
+<pre class="code-block"><code>        ┌─────────────────────────────┐
+        │ Can the product launch      │
+        │ without this feature?       │
+        └────────────┬────────────────┘
+                     │
+           ┌─────────▼────────┐
+           │       NO         │──────────────▶ MUST HAVE
+           └─────────┬────────┘
+                     │ YES
+           ┌─────────▼──────────────┐
+           │ Would most users be    │
+           │ disappointed without   │
+           │ it?                    │
+           └─────────┬──────────────┘
+                     │
+           ┌─────────▼────────┐
+           │       YES        │──────────────▶ SHOULD HAVE
+           └─────────┬────────┘
+                     │ NO
+           ┌─────────▼──────────────┐
+           │ Would it delight users │
+           │ or create competitive  │
+           │ advantage?             │
+           └─────────┬──────────────┘
+                     │
+           ┌─────────▼────────┐
+           │       YES        │──────────────▶ COULD HAVE
+           └─────────┬────────┘
+                     │ NO
+                     │
+                     ▼
+              WON'T HAVE (this time)
+              Document for future reference</code></pre>
+
+<h3>Example MoSCoW Output</h3>
+<div class="table-wrap"><table><thead><tr><th>Feature</th><th>MoSCoW</th><th>Rationale</th><th></th></tr></thead><tbody><tr><td>User authentication (email/password)</td><td>Must</td><td>Cannot launch without login</td><td></td></tr><tr><td>Course creation (manual)</td><td>Must</td><td>Core value proposition</td><td></td></tr><tr><td>Stripe payment integration</td><td>Must</td><td>Revenue collection required for launch</td><td></td></tr><tr><td>AI course generation</td><td>Should</td><td>Key differentiator but manual creation is a workaround</td><td></td></tr><tr><td>Learning paths</td><td>Should</td><td>Users expect guided learning journeys</td><td></td></tr><tr><td>Gamification (points, badges)</td><td>Could</td><td>Engagement booster, not core to learning</td><td></td></tr><tr><td>Discussion forums</td><td>Could</td><td>Community feature, not day-one critical</td><td></td></tr><tr><td>SCORM import</td><td>Won't</td><td>Compliance market is Phase 2 target</td><td></td></tr><tr><td>Native mobile app</td><td>Won't</td><td>Mobile web responsive covers Phase 1</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Framework 3 — Impact/Effort Matrix</h2>
+
+<h3>2x2 Matrix</h3>
+
+<pre class="code-block"><code>                          HIGH IMPACT
+                              │
+                              │
+           ┌──────────────────┼──────────────────┐
+           │                  │                  │
+           │    QUICK WINS    │    BIG BETS      │
+           │   (Do First)     │   (Plan &amp; Do)    │
+           │                  │                  │
+           │  • Bulk import   │  • Report builder│
+           │  • Due date      │  • AI gen v2     │
+           │    reminders     │  • SSO           │
+           │                  │                  │
+  LOW  ────┼──────────────────┼──────────────────┼──── HIGH
+  EFFORT   │                  │                  │   EFFORT
+           │                  │                  │
+           │   FILL-INS       │    MONEY PITS    │
+           │  (Do If Time)    │   (Avoid)        │
+           │                  │                  │
+           │  • Dark mode     │  • Native app    │
+           │  • Export CSV    │  • Custom CMS    │
+           │  • UI polish     │  • Full offline  │
+           │                  │                  │
+           └──────────────────┼──────────────────┘
+                              │
+                          LOW IMPACT</code></pre>
+
+<h3>How to Place Items</h3>
+
+<ul class="skill-list"><li class="ordered"><strong>Estimate Impact</strong> (1-10): Revenue potential + user satisfaction + strategic value</li>
+<li class="ordered"><strong>Estimate Effort</strong> (1-10): Engineering weeks + design + testing + risk</li>
+<li class="ordered"><strong>Plot on the matrix</strong> — Items above the diagonal are higher priority</li>
+
+</ul><h3>Priority Order</h3>
+
+<pre class="code-block"><code>1. QUICK WINS (High Impact, Low Effort)   → Do these first. No excuses.
+<ul class="skill-list"><li class="ordered">BIG BETS (High Impact, High Effort)    → Plan carefully, then commit.</li>
+<li class="ordered">FILL-INS (Low Impact, Low Effort)      → Do when capacity is available.</li>
+<li class="ordered">MONEY PITS (Low Impact, High Effort)   → Say no. Redirect resources.</code></pre></li>
+</ul><hr class="section-divider">
+<h2>Framework 4 — Weighted Scoring</h2>
+
+When different stakeholders value different dimensions, use weighted scoring.
+
+<h3>Define Scoring Dimensions</h3>
+<div class="table-wrap"><table><thead><tr><th>Dimension</th><th>Weight</th><th>Description</th><th></th></tr></thead><tbody><tr><td>User Demand</td><td>25%</td><td>How many users/clients have requested this?</td><td></td></tr><tr><td>Revenue Impact</td><td>25%</td><td>Will this directly increase revenue or reduce churn?</td><td></td></tr><tr><td>Strategic Fit</td><td>20%</td><td>Does this align with company strategy and vision?</td><td></td></tr><tr><td>Technical Feasibility</td><td>15%</td><td>Can we build this reliably with current architecture?</td><td></td></tr><tr><td>Competitive Necessity</td><td>15%</td><td>Do competitors have this and users expect it?</td><td></td></tr><tr><td><strong>Total</strong></td><td><strong>100%</strong></td><td></td><td></td></tr></tbody></table></div>
+<h3>Scoring Scale</h3>
+<div class="table-wrap"><table><thead><tr><th>Score</th><th>Meaning</th><th></th></tr></thead><tbody><tr><td>5</td><td>Critical — directly addresses this dimension</td><td></td></tr><tr><td>4</td><td>Strong — significant positive contribution</td><td></td></tr><tr><td>3</td><td>Moderate — some positive contribution</td><td></td></tr><tr><td>2</td><td>Low — marginal contribution</td><td></td></tr><tr><td>1</td><td>Minimal — barely relevant</td><td></td></tr></tbody></table></div>
+<h3>Example Weighted Scoring</h3>
+<div class="table-wrap"><table><thead><tr><th>Feature</th><th>User Demand (25%)</th><th>Revenue (25%)</th><th>Strategy (20%)</th><th>Feasibility (15%)</th><th>Competition (15%)</th><th>Weighted Score</th><th>Rank</th><th></th></tr></thead><tbody><tr><td>Report builder</td><td>5 (1.25)</td><td>4 (1.00)</td><td>3 (0.60)</td><td>3 (0.45)</td><td>5 (0.75)</td><td><strong>4.05</strong></td><td>1</td><td></td></tr><tr><td>AI gen v2</td><td>4 (1.00)</td><td>5 (1.25)</td><td>5 (1.00)</td><td>4 (0.60)</td><td>5 (0.75)</td><td><strong>4.60</strong></td><td>—</td><td></td></tr><tr><td>Bulk import</td><td>5 (1.25)</td><td>3 (0.75)</td><td>2 (0.40)</td><td>5 (0.75)</td><td>3 (0.45)</td><td><strong>3.60</strong></td><td>2</td><td></td></tr><tr><td>Discussion forums</td><td>2 (0.50)</td><td>2 (0.50)</td><td>3 (0.60)</td><td>4 (0.60)</td><td>3 (0.45)</td><td><strong>2.65</strong></td><td>4</td><td></td></tr><tr><td>SCORM support</td><td>3 (0.75)</td><td>4 (1.00)</td><td>3 (0.60)</td><td>2 (0.30)</td><td>4 (0.60)</td><td><strong>3.25</strong></td><td>3</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Step 4 — Rank & Visualize</h2>
+
+<h3>Final Prioritized Backlog</h3>
+<div class="table-wrap"><table><thead><tr><th>Rank</th><th>Feature</th><th>RICE</th><th>MoSCoW</th><th>Quadrant</th><th>Final Priority</th><th>Rationale</th><th></th></tr></thead><tbody><tr><td>1</td><td>Bulk user import</td><td>533</td><td>Must</td><td>Quick Win</td><td>P0 — Sprint 1</td><td>Highest RICE, low effort, blocks 5 enterprise deals</td><td></td></tr><tr><td>2</td><td>AI generation v2</td><td>427</td><td>Should</td><td>Big Bet</td><td>P0 — Sprint 1-2</td><td>Key differentiator, high confidence, phased delivery</td><td></td></tr><tr><td>3</td><td>Due date reminders</td><td>320</td><td>Must</td><td>Quick Win</td><td>P0 — Sprint 1</td><td>Reduces support tickets by ~40%</td><td></td></tr><tr><td>4</td><td>Custom reports (Phase 1)</td><td>75</td><td>Should</td><td>Big Bet</td><td>P1 — Sprint 3-4</td><td>Start with 5 pre-built, full builder in Q3</td><td></td></tr><tr><td>5</td><td>SCORM 2004</td><td>80</td><td>Could</td><td>Big Bet</td><td>P2 — Q3</td><td>Compliance market not yet targeted</td><td></td></tr><tr><td>6</td><td>Discussion forums</td><td>50</td><td>Could</td><td>Fill-in</td><td>P2 — Q3</td><td>Low demand, moderate effort</td><td></td></tr><tr><td>7</td><td>Native mobile app</td><td>25</td><td>Won't</td><td>Money Pit</td><td>P3 — Future</td><td>Mobile web responsive sufficient for now</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Step 5 — Apply Judgment</h2>
+
+Scoring is input, not output. Apply these judgment overrides:
+
+<h3>Override Reasons</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  VALID REASONS TO OVERRIDE A SCORE                           │
+│                                                              │
+│  ✓ Strategic bet — CEO-level decision to invest in a market  │
+│  ✓ Regulatory requirement — compliance deadline              │
+│  ✓ Security vulnerability — must fix regardless of score     │
+│  ✓ Technical debt — high-score features blocked without it   │
+│  ✓ Key client commitment — contractual obligation            │
+│  ✓ Platform stability — outage risk affects everything       │
+│                                                              │
+│  INVALID REASONS TO OVERRIDE A SCORE                         │
+│                                                              │
+│  ✗ &quot;The CEO wants it&quot; (without strategic rationale)          │
+│  ✗ &quot;It's easy&quot; (easy ≠ important)                            │
+│  ✗ &quot;Competitor has it&quot; (does not mean your users need it)    │
+│  ✗ &quot;We already started&quot; (sunk cost fallacy)                  │
+│  ✗ &quot;The loudest client wants it&quot; (one voice ≠ market need)   │
+│  ✗ &quot;It's cool technology&quot; (tech fascination ≠ user value)    │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 6 — Present & Align</h2>
+
+<h3>Stakeholder Presentation Structure</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  PRIORITIZATION PRESENTATION FLOW                            │
+│                                                              │
+│  Slide 1: Context                                            │
+│  &quot;Here's our capacity for next quarter: X person-months&quot;     │
+│                                                              │
+│  Slide 2: Methodology                                        │
+│  &quot;We scored items using RICE + stakeholder input&quot;            │
+│                                                              │
+│  Slide 3: Top 5 with rationale                               │
+│  &quot;Here's what we recommend building and why&quot;                 │
+│                                                              │
+│  Slide 4: What we're NOT doing and why                       │
+│  &quot;Here's what we're deferring and the reasoning&quot;             │
+│                                                              │
+│  Slide 5: Decision request                                   │
+│  &quot;Do you agree with this ranking? Any changes?&quot;              │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Complete Output Template</h2>
+
+<pre class="code-block"><code># Feature Prioritization — [Quarter/Sprint]
+
+<strong>Author:</strong> [Name]
+<strong>Date:</strong> [Date]
+<strong>Capacity:</strong> [X person-months available]
+<strong>Method:</strong> [RICE + MoSCoW + Impact/Effort]
+
+<h2>Executive Summary</h2>
+
+We evaluated [N] features across [dimensions]. Our recommended priority
+order optimizes for [primary goal — e.g., revenue growth, user retention].
+
+<h2>Scoring Methodology</h2>
+
+[Describe framework(s) used, scoring scale, and weights]
+
+<h2>Prioritized Backlog</h2>
+
+[Ranked table with scores and rationale]
+
+<h2>What We Are NOT Doing (and Why)</h2>
+
+[Table of deferred items with clear reasoning]
+
+<h2>Capacity Allocation</h2>
+<div class="table-wrap"><table><thead><tr><th>Priority</th><th>Features</th><th>Estimated Effort</th><th>% of Capacity</th><th></th></tr></thead><tbody><tr><td>P0</td><td>[List]</td><td>[X] person-months</td><td>60%</td><td></td></tr><tr><td>P1</td><td>[List]</td><td>[X] person-months</td><td>25%</td><td></td></tr><tr><td>Buffer</td><td>Bug fixes, tech debt</td><td>[X] person-months</td><td>15%</td><td></td></tr></tbody></table></div>
+<h2>Risks &amp; Assumptions</h2>
+
+[List key assumptions in your scoring]
+
+<h2>Decision Log</h2>
+<div class="table-wrap"><table><thead><tr><th>Decision</th><th>Made By</th><th>Date</th><th>Context</th><th></th></tr></thead><tbody></tbody></table></div>| [What was decided] | [Who] | [When] | [Why] |</code></pre>
+<hr class="section-divider">
+<h2>Completeness Checklist</h2>
+
+<pre class="code-block"><code>PRIORITIZATION QUALITY CHECKLIST
+────────────────────────────────
+[ ] Every item has a clear problem statement (not just a feature name)
+[ ] At least one quantitative framework applied (RICE or weighted scoring)
+[ ] Effort estimates validated with engineering team
+[ ] Impact estimates backed by data (analytics, user feedback, revenue)
+[ ] Confidence levels honestly assessed (not all 100%)
+[ ] Items grouped into P0/P1/P2 with capacity allocation
+[ ] Deferred items have explicit rationale (not just &quot;low score&quot;)
+[ ] Stakeholders reviewed and agreed on weights/dimensions
+[ ] Override decisions documented with reasoning
+[ ] Total effort does not exceed available capacity
+[ ] 15% buffer reserved for bugs and unplanned work
+[ ] Presentation prepared for stakeholder alignment
+[ ] Decision log captures any changes made during review</code></pre>
+<hr class="section-divider">
+<h2>Common Mistakes</h2>
+<div class="table-wrap"><table><thead><tr><th>Mistake</th><th>Impact</th><th>Prevention</th><th></th></tr></thead><tbody><tr><td>Scoring without engineering input on effort</td><td>Effort is wildly wrong, plan fails</td><td>Get T-shirt sizes from engineers before scoring</td><td></td></tr><tr><td>All items scored as "High Impact"</td><td>Differentiation impossible</td><td>Force-rank: only 20% can be "High Impact"</td><td></td></tr><tr><td>Ignoring capacity constraints</td><td>Plan is 3x larger than capacity</td><td>Start with capacity, then fit items within it</td><td></td></tr><tr><td>No "Won't Do" list</td><td>Stakeholders assume everything is coming</td><td>Explicitly list and communicate what is deferred</td><td></td></tr><tr><td>One person scores everything</td><td>Bias and blind spots</td><td>Score collaboratively in a working session</td><td></td></tr><tr><td>Changing priorities mid-sprint</td><td>Team loses focus, nothing ships</td><td>Lock sprint priorities, defer new requests to next sprint</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Tips for Stakeholder Alignment</h2>
+
+<ul class="skill-list"><li class="ordered"><strong>Show the math</strong> — Transparent scoring builds trust even when stakeholders disagree</li>
+<li class="ordered"><strong>Present trade-offs, not ultimatums</strong> — "If we add X, we must cut Y" is better than "No"</li>
+<li class="ordered"><strong>Use revenue language with executives</strong> — "$50K ARR at risk" beats "users want this"</li>
+<li class="ordered"><strong>Validate with recent data</strong> — "Last month, 15 users requested this" beats "some users asked"</li>
+<li class="ordered"><strong>Commit to a review cadence</strong> — "We'll re-evaluate in 4 weeks" prevents priority anxiety</li>
+<li class="ordered"><strong>Document every override</strong> — When someone overrides the score, write it down with their name and rationale</li>
+<li class="ordered"><strong>Never skip the "Won't Do" slide</strong> — This is where trust is built or broken</li></ul>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="competitor-analysis.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">Competitor Analysis — From Market Scan to Strategic Insights</span></span></a>
+    <a href="metrics-define.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Metrics Define — From Feature Launch to Measurable Success</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    66 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

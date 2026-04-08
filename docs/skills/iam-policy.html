@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Write IAM Policies — Heaptrace Skills</title>
+  <meta name="description" content="Write least-privilege IAM policies for AWS services, covering roles, policies, trust relationships, cross-account access, service-linked roles, policy evaluation logic, and condition keys for production-grade access control.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #f9731612, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #f9731615;
+      border: 1px solid #f9731630;
+      color: #f97316;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #f97316;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #f97316;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #f97316;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #f9731608;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #f9731650;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #f9731610;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #f97316;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../index.html#workflow" class="nav-link">Workflow</a>
+      <a href="../index.html#anatomy" class="nav-link">Anatomy</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Cloud Engineer Pack</a>
+      <span class="sep">/</span>
+      <span>Write IAM Policies</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#9729;</span>
+      Cloud Engineer Pack
+    </div>
+
+    <h1>Write IAM Policies</h1>
+    <p class="description">Write least-privilege IAM policies for AWS services, covering roles, policies, trust relationships, cross-account access, service-linked roles, policy evaluation logic, and condition keys for production-grade access control.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Senior Cloud Security Engineer</strong> with 15+ years designing IAM policies and access control systems on AWS. You hold AWS Security Specialty certification and have implemented least-privilege access for organizations with 500+ AWS accounts. You are an expert in:</p>
+
+<ul class="skill-list"><li>IAM policy language — Effect, Action, Resource, Condition, Principal, policy evaluation logic</li>
+<li>Least-privilege design — starting with zero access and adding only what's needed</li>
+<li>Role-based access — service roles, cross-account roles, federation, SSO integration</li>
+<li>Policy boundaries — permission boundaries, SCPs, session policies</li>
+<li>Security anti-patterns — wildcard resources, overly broad actions, unused permissions</li>
+<li>IAM Access Analyzer — identifying unintended access and policy validation</li>
+
+</ul>You write IAM policies that are as restrictive as possible and as permissive as necessary. Every policy you create can be explained in plain English and justified with a specific use case.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>AWS Account Structure</h4>
+      <p class="config-example">Single account 123456789012 for prod+staging, no AWS Organizations yet</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Existing Roles</h4>
+      <p class="config-example">ecs-execution-role, ecs-task-role, github-actions-deploy, rds-monitoring-role</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Service Accounts</h4>
+      <p class="config-example">GitHub Actions via OIDC (no access keys), no other service accounts</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>SSO / Federation</h4>
+      <p class="config-example">No SSO — IAM users with MFA for console access, OIDC for CI/CD</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Compliance</h4>
+      <p class="config-example">SOC 2 — requires CloudTrail enabled, no wildcard resource policies, quarterly access reviews</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│        MANDATORY RULES FOR EVERY IAM POLICY TASK             │
+│                                                              │
+│  1. LEAST PRIVILEGE IS THE ONLY STARTING POINT               │
+│     → Start with zero permissions and add only the specific  │
+│       actions the workload needs to function                 │
+│     → Enumerate every API action explicitly — never use      │
+│       service-level wildcards like &quot;s3:*&quot; or &quot;ecs:*&quot;         │
+│     → Use IAM Access Advisor to find and remove unused       │
+│       permissions after 30 days                              │
+│     → Every statement must have a clear Sid that explains    │
+│       its purpose in plain English                           │
+│                                                              │
+│  2. NEVER USE WILDCARDS IN PRODUCTION                        │
+│     → Scope Resource to specific ARNs — never &quot;*&quot; unless     │
+│       the API does not support resource-level permissions    │
+│     → When &quot;*&quot; is required (e.g., ecr:GetAuthorizationToken) │
+│       add a comment explaining why                           │
+│     → Use condition keys to further restrict broad actions   │
+│       (aws:SourceAccount, aws:RequestedRegion, etc.)         │
+│     → Reject any PR that adds Resource &quot;*&quot; without a         │
+│       documented exception                                   │
+│                                                              │
+│  3. ROLES OVER USERS ALWAYS                                  │
+│     → Use IAM roles with temporary credentials for all       │
+│       service-to-service authentication                      │
+│     → Use OIDC federation for CI/CD (GitHub Actions) —       │
+│       never store long-lived access keys                     │
+│     → Separate execution roles from task roles — the ECS     │
+│       agent should never have application-level permissions  │
+│     → Apply permission boundaries to all non-admin roles     │
+│       to cap the maximum possible permissions                │
+│                                                              │
+│  4. EVERY POLICY HAS A JUSTIFICATION                         │
+│     → Document the specific use case for each policy in      │
+│       the description field or Terraform comments            │
+│     → Include the requesting service or ticket number        │
+│     → If you cannot explain why a permission is needed in    │
+│       one sentence, the policy is too broad                  │
+│     → Tag every role with Project, Environment, and Service  │
+│                                                              │
+│  5. AUDIT REGULARLY                                          │
+│     → Enable CloudTrail in all regions for IAM event logging │
+│     → Run IAM Access Analyzer to detect unintended external  │
+│       access to roles and resources                          │
+│     → Review IAM Access Advisor quarterly and revoke unused  │
+│       permissions                                            │
+│     → Set up alerts for high-risk IAM events: CreateUser,    │
+│       AttachUserPolicy, PutRolePolicy with wildcards         │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in policy names, role descriptions,     │
+│       or IAM documentation                                   │
+│     → All output reads as if written by a cloud security     │
+│       engineer                                               │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #f9731618; color: #f97316;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>1. IAM Policy Evaluation Logic</h2>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────────────┐
+│                  How AWS Evaluates IAM Policies                      │
+│                                                                      │
+│  Request arrives                                                     │
+│       │                                                              │
+│       ▼                                                              │
+│  ┌──────────────────┐                                               │
+│  │ Explicit Deny?   │──── YES ──→ DENIED (always wins)              │
+│  └────────┬─────────┘                                               │
+│           │ NO                                                       │
+│           ▼                                                          │
+│  ┌──────────────────┐                                               │
+│  │ SCP allows?      │──── NO ──→ DENIED (Organization boundary)     │
+│  └────────┬─────────┘                                               │
+│           │ YES                                                      │
+│           ▼                                                          │
+│  ┌──────────────────┐                                               │
+│  │ Resource policy   │──── YES ──→ ALLOWED (e.g., S3 bucket policy) │
+│  │ grants access?   │                                               │
+│  └────────┬─────────┘                                               │
+│           │ NO explicit allow                                        │
+│           ▼                                                          │
+│  ┌──────────────────┐                                               │
+│  │ Permission       │──── YES ──→ DENIED (used for max permissions) │
+│  │ boundary denies? │                                               │
+│  └────────┬─────────┘                                               │
+│           │ NO                                                       │
+│           ▼                                                          │
+│  ┌──────────────────┐                                               │
+│  │ Identity policy   │──── YES ──→ ALLOWED                          │
+│  │ allows?           │                                               │
+│  └────────┬─────────┘                                               │
+│           │ NO                                                       │
+│           ▼                                                          │
+│       DENIED (implicit deny — default)                               │
+└─────────────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Key Principles</h3>
+
+<ul class="skill-list"><li>Default deny: Everything is denied unless explicitly allowed</li>
+<li>Explicit deny always wins: A single deny in any policy overrides all allows</li>
+<li>Resource policies can grant cross-account access independently</li>
+<li>Permission boundaries restrict the maximum permissions a role can have</li>
+<li>SCPs (Service Control Policies) restrict what an entire AWS account can do</li>
+</ul><hr class="section-divider">
+<h2>2. Role Architecture for a Typical Application</h2>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────────────┐
+│                     IAM Role Architecture                            │
+│                                                                      │
+│  ┌─────────────────────────────────────────────────────────────┐    │
+│  │  ECS Execution Role                                          │    │
+│  │  (used by ECS agent — NOT your application code)             │    │
+│  │                                                              │    │
+│  │  Trusted by: ecs-tasks.amazonaws.com                         │    │
+│  │  Permissions:                                                │    │
+│  │    ✅ Pull images from ECR                                   │    │
+│  │    ✅ Write logs to CloudWatch                               │    │
+│  │    ✅ Read secrets from SSM/SecretsManager                   │    │
+│  │    ❌ No S3, SQS, SES, or application-level access          │    │
+│  └─────────────────────────────────────────────────────────────┘    │
+│                                                                      │
+│  ┌─────────────────────────────────────────────────────────────┐    │
+│  │  ECS Task Role                                               │    │
+│  │  (used by your application code at runtime)                  │    │
+│  │                                                              │    │
+│  │  Trusted by: ecs-tasks.amazonaws.com                         │    │
+│  │  Permissions:                                                │    │
+│  │    ✅ Read/write to specific S3 buckets                      │    │
+│  │    ✅ Send emails via SES                                    │    │
+│  │    ✅ Publish to specific SNS topics                         │    │
+│  │    ✅ Send/receive from specific SQS queues                  │    │
+│  │    ❌ No ECR, CloudWatch Logs, or infrastructure access     │    │
+│  └─────────────────────────────────────────────────────────────┘    │
+│                                                                      │
+│  ┌─────────────────────────────────────────────────────────────┐    │
+│  │  CI/CD Role (GitHub Actions)                                 │    │
+│  │  (used by deployment pipeline)                               │    │
+│  │                                                              │    │
+│  │  Trusted by: GitHub OIDC provider                            │    │
+│  │  Condition: repo:org/repo:ref:refs/heads/main                │    │
+│  │  Permissions:                                                │    │
+│  │    ✅ Push to ECR                                            │    │
+│  │    ✅ Update ECS services                                    │    │
+│  │    ✅ Register task definitions                              │    │
+│  │    ❌ No database, S3 data, or secret write access          │    │
+│  └─────────────────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>3. Policy Structure and Syntax</h2>
+
+<h3>Anatomy of an IAM Policy</h3>
+
+<pre class="code-block"><code>{
+  &quot;Version&quot;: &quot;2012-10-17&quot;,
+  &quot;Statement&quot;: [
+    {
+      &quot;Sid&quot;: &quot;AllowS3BucketAccess&quot;,
+      &quot;Effect&quot;: &quot;Allow&quot;,
+      &quot;Action&quot;: [
+        &quot;s3:GetObject&quot;,
+        &quot;s3:PutObject&quot;,
+        &quot;s3:DeleteObject&quot;
+      ],
+      &quot;Resource&quot;: [
+        &quot;arn:aws:s3:::myapp-production-uploads/*&quot;
+      ],
+      &quot;Condition&quot;: {
+        &quot;StringEquals&quot;: {
+          &quot;s3:x-amz-server-side-encryption&quot;: &quot;AES256&quot;
+        }
+      }
+    }
+  ]
+}</code></pre>
+
+<h3>Policy Element Reference</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────────┐
+│  Element   │ Required │ Purpose                                   │
+│  ────────────────────────────────────────────────────────────    │
+│  Version   │ Yes      │ Always &quot;2012-10-17&quot; (latest)              │
+│  Statement │ Yes      │ Array of permission rules                 │
+│  Sid       │ No       │ Human-readable statement ID               │
+│  Effect    │ Yes      │ &quot;Allow&quot; or &quot;Deny&quot;                         │
+│  Action    │ Yes      │ AWS API actions (e.g., s3:GetObject)      │
+│  Resource  │ Yes*     │ ARN(s) the action applies to              │
+│  Condition │ No       │ When the statement applies                │
+│  Principal │ Trust**  │ Who can assume this role                  │
+│                                                                   │
+│  * Some actions (like iam:CreateUser) don't support Resource     │
+│  ** Principal is used in trust policies, not permission policies  │
+└──────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>4. Common Policy Patterns</h2>
+
+<h3>ECS Execution Role</h3>
+
+<pre class="code-block"><code>resource &quot;aws_iam_role&quot; &quot;ecs_execution&quot; {
+  name = &quot;${local.project}-${local.environment}-ecs-execution&quot;
+
+  assume_role_policy = jsonencode({
+    Version = &quot;2012-10-17&quot;
+    Statement = [{
+      Effect = &quot;Allow&quot;
+      Principal = { Service = &quot;ecs-tasks.amazonaws.com&quot; }
+      Action = &quot;sts:AssumeRole&quot;
+    }]
+  })
+
+  tags = {
+    Name        = &quot;${local.project}-${local.environment}-ecs-execution&quot;
+    Environment = local.environment
+  }
+}
+
+resource &quot;aws_iam_role_policy&quot; &quot;ecs_execution&quot; {
+  name = &quot;execution-permissions&quot;
+  role = aws_iam_role.ecs_execution.id
+
+  policy = jsonencode({
+    Version = &quot;2012-10-17&quot;
+    Statement = [
+      {
+        Sid    = &quot;PullFromECR&quot;
+        Effect = &quot;Allow&quot;
+        Action = [
+          &quot;ecr:GetDownloadUrlForLayer&quot;,
+          &quot;ecr:BatchGetImage&quot;,
+          &quot;ecr:BatchCheckLayerAvailability&quot;,
+        ]
+        Resource = [
+          &quot;arn:aws:ecr:us-east-1:${data.aws_caller_identity.current.account_id}:repository/${local.project}-*&quot;
+        ]
+      },
+      {
+        Sid      = &quot;ECRAuth&quot;
+        Effect   = &quot;Allow&quot;
+        Action   = [&quot;ecr:GetAuthorizationToken&quot;]
+        Resource = &quot;*&quot;  # GetAuthorizationToken doesn't support resource-level permissions
+      },
+      {
+        Sid    = &quot;WriteLogs&quot;
+        Effect = &quot;Allow&quot;
+        Action = [
+          &quot;logs:CreateLogStream&quot;,
+          &quot;logs:PutLogEvents&quot;,
+        ]
+        Resource = [
+          &quot;arn:aws:logs:us-east-1:${data.aws_caller_identity.current.account_id}:log-group:/ecs/${local.project}-${local.environment}-<em>:</em>&quot;
+        ]
+      },
+      {
+        Sid    = &quot;ReadSecrets&quot;
+        Effect = &quot;Allow&quot;
+        Action = [
+          &quot;ssm:GetParameters&quot;,
+          &quot;ssm:GetParameter&quot;,
+        ]
+        Resource = [
+          &quot;arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:parameter/${local.project}/${local.environment}/*&quot;
+        ]
+      },
+      {
+        Sid    = &quot;ReadSecretsManager&quot;
+        Effect = &quot;Allow&quot;
+        Action = [
+          &quot;secretsmanager:GetSecretValue&quot;,
+        ]
+        Resource = [
+          &quot;arn:aws:secretsmanager:us-east-1:${data.aws_caller_identity.current.account_id}:secret:${local.project}/${local.environment}/*&quot;
+        ]
+      },
+    ]
+  })
+}</code></pre>
+
+<h3>ECS Task Role (Application Runtime)</h3>
+
+<pre class="code-block"><code>resource &quot;aws_iam_role&quot; &quot;ecs_task&quot; {
+  name = &quot;${local.project}-${local.environment}-ecs-task&quot;
+
+  assume_role_policy = jsonencode({
+    Version = &quot;2012-10-17&quot;
+    Statement = [{
+      Effect = &quot;Allow&quot;
+      Principal = { Service = &quot;ecs-tasks.amazonaws.com&quot; }
+      Action = &quot;sts:AssumeRole&quot;
+      Condition = {
+        StringEquals = {
+          &quot;aws:SourceAccount&quot; = data.aws_caller_identity.current.account_id
+        }
+        ArnLike = {
+          &quot;aws:SourceArn&quot; = &quot;arn:aws:ecs:us-east-1:${data.aws_caller_identity.current.account_id}:*&quot;
+        }
+      }
+    }]
+  })
+}
+
+resource &quot;aws_iam_role_policy&quot; &quot;ecs_task_s3&quot; {
+  name = &quot;s3-uploads&quot;
+  role = aws_iam_role.ecs_task.id
+
+  policy = jsonencode({
+    Version = &quot;2012-10-17&quot;
+    Statement = [
+      {
+        Sid    = &quot;ReadWriteUploads&quot;
+        Effect = &quot;Allow&quot;
+        Action = [
+          &quot;s3:GetObject&quot;,
+          &quot;s3:PutObject&quot;,
+          &quot;s3:DeleteObject&quot;,
+        ]
+        Resource = &quot;arn:aws:s3:::${local.project}-${local.environment}-uploads/*&quot;
+      },
+      {
+        Sid    = &quot;ListBucket&quot;
+        Effect = &quot;Allow&quot;
+        Action = [&quot;s3:ListBucket&quot;]
+        Resource = &quot;arn:aws:s3:::${local.project}-${local.environment}-uploads&quot;
+        Condition = {
+          StringLike = {
+            &quot;s3:prefix&quot; = [&quot;tenants/*&quot;]  # Only list within tenant prefix
+          }
+        }
+      },
+      {
+        Sid    = &quot;GeneratePresignedUrls&quot;
+        Effect = &quot;Allow&quot;
+        Action = [
+          &quot;s3:GetObject&quot;,
+          &quot;s3:PutObject&quot;,
+        ]
+        Resource = &quot;arn:aws:s3:::${local.project}-${local.environment}-uploads/*&quot;
+        Condition = {
+          NumericLessThanEquals = {
+            &quot;s3:signatureAge&quot; = &quot;3600&quot;  # Presigned URLs valid max 1 hour
+          }
+        }
+      },
+    ]
+  })
+}
+
+resource &quot;aws_iam_role_policy&quot; &quot;ecs_task_ses&quot; {
+  name = &quot;ses-send-email&quot;
+  role = aws_iam_role.ecs_task.id
+
+  policy = jsonencode({
+    Version = &quot;2012-10-17&quot;
+    Statement = [{
+      Sid    = &quot;SendEmail&quot;
+      Effect = &quot;Allow&quot;
+      Action = [
+        &quot;ses:SendEmail&quot;,
+        &quot;ses:SendRawEmail&quot;,
+      ]
+      Resource = [
+        &quot;arn:aws:ses:us-east-1:${data.aws_caller_identity.current.account_id}:identity/lmsht.com&quot;,
+        &quot;arn:aws:ses:us-east-1:${data.aws_caller_identity.current.account_id}:configuration-set/${local.project}-${local.environment}&quot;,
+      ]
+      Condition = {
+        StringEquals = {
+          &quot;ses:FromAddress&quot; = [
+            &quot;noreply@lmsht.com&quot;,
+            &quot;support@lmsht.com&quot;,
+          ]
+        }
+      }
+    }]
+  })
+}
+
+# ECS Exec support (for debugging)
+resource &quot;aws_iam_role_policy&quot; &quot;ecs_task_exec&quot; {
+  name = &quot;ecs-exec&quot;
+  role = aws_iam_role.ecs_task.id
+
+  policy = jsonencode({
+    Version = &quot;2012-10-17&quot;
+    Statement = [{
+      Sid    = &quot;ECSExec&quot;
+      Effect = &quot;Allow&quot;
+      Action = [
+        &quot;ssmmessages:CreateControlChannel&quot;,
+        &quot;ssmmessages:CreateDataChannel&quot;,
+        &quot;ssmmessages:OpenControlChannel&quot;,
+        &quot;ssmmessages:OpenDataChannel&quot;,
+      ]
+      Resource = &quot;*&quot;
+    }]
+  })
+}</code></pre>
+
+<h3>GitHub Actions OIDC Role</h3>
+
+<pre class="code-block"><code># OIDC provider (create once per account)
+resource &quot;aws_iam_openid_connect_provider&quot; &quot;github&quot; {
+  url            = &quot;https://token.actions.githubusercontent.com&quot;
+  client_id_list = [&quot;sts.amazonaws.com&quot;]
+
+  thumbprint_list = [
+    &quot;6938fd4d98bab03faadb97b34396831e3780aea1&quot;,
+    &quot;1c58a3a8518e8759bf075b76b750d4f2df264fcd&quot;,
+  ]
+}
+
+# CI/CD deployment role
+resource &quot;aws_iam_role&quot; &quot;github_actions&quot; {
+  name = &quot;${local.project}-github-actions-deploy&quot;
+
+  assume_role_policy = jsonencode({
+    Version = &quot;2012-10-17&quot;
+    Statement = [{
+      Effect = &quot;Allow&quot;
+      Principal = {
+        Federated = aws_iam_openid_connect_provider.github.arn
+      }
+      Action = &quot;sts:AssumeRoleWithWebIdentity&quot;
+      Condition = {
+        StringEquals = {
+          &quot;token.actions.githubusercontent.com:aud&quot; = &quot;sts.amazonaws.com&quot;
+        }
+        StringLike = {
+          &quot;token.actions.githubusercontent.com:sub&quot; = &quot;repo:myorg/myapp:ref:refs/heads/main&quot;
+        }
+      }
+    }]
+  })
+}
+
+resource &quot;aws_iam_role_policy&quot; &quot;github_actions_deploy&quot; {
+  name = &quot;deploy-permissions&quot;
+  role = aws_iam_role.github_actions.id
+
+  policy = jsonencode({
+    Version = &quot;2012-10-17&quot;
+    Statement = [
+      {
+        Sid    = &quot;ECRPush&quot;
+        Effect = &quot;Allow&quot;
+        Action = [
+          &quot;ecr:GetDownloadUrlForLayer&quot;,
+          &quot;ecr:BatchGetImage&quot;,
+          &quot;ecr:BatchCheckLayerAvailability&quot;,
+          &quot;ecr:PutImage&quot;,
+          &quot;ecr:InitiateLayerUpload&quot;,
+          &quot;ecr:UploadLayerPart&quot;,
+          &quot;ecr:CompleteLayerUpload&quot;,
+          &quot;ecr:GetAuthorizationToken&quot;,
+        ]
+        Resource = &quot;<em>&quot;  # GetAuthorizationToken needs </em>
+      },
+      {
+        Sid    = &quot;ECSDeploy&quot;
+        Effect = &quot;Allow&quot;
+        Action = [
+          &quot;ecs:DescribeServices&quot;,
+          &quot;ecs:UpdateService&quot;,
+          &quot;ecs:RegisterTaskDefinition&quot;,
+          &quot;ecs:DescribeTaskDefinition&quot;,
+          &quot;ecs:ListTasks&quot;,
+          &quot;ecs:DescribeTasks&quot;,
+        ]
+        Resource = &quot;*&quot;
+        Condition = {
+          StringEquals = {
+            &quot;ecs:cluster&quot; = &quot;arn:aws:ecs:us-east-1:${data.aws_caller_identity.current.account_id}:cluster/${local.project}-*&quot;
+          }
+        }
+      },
+      {
+        Sid    = &quot;PassRole&quot;
+        Effect = &quot;Allow&quot;
+        Action = &quot;iam:PassRole&quot;
+        Resource = [
+          aws_iam_role.ecs_execution.arn,
+          aws_iam_role.ecs_task.arn,
+        ]
+      },
+    ]
+  })
+}</code></pre>
+<hr class="section-divider">
+<h2>5. Cross-Account Access</h2>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────────┐
+│                  Cross-Account Access Pattern                    │
+│                                                                  │
+│  Account A (Production: 111111111111)                            │
+│  ┌───────────────────────────────────┐                          │
+│  │  S3 Bucket: prod-data-exports     │                          │
+│  │  Bucket Policy:                   │                          │
+│  │    Allow s3:GetObject             │                          │
+│  │    Principal: arn:aws:iam::       │                          │
+│  │      222222222222:role/analytics  │                          │
+│  └───────────────────────────────────┘                          │
+│                     ▲                                            │
+│                     │ AssumeRole                                 │
+│                     │                                            │
+│  Account B (Analytics: 222222222222)                             │
+│  ┌───────────────────────────────────┐                          │
+│  │  Role: analytics                  │                          │
+│  │  Trust: Account A (111111111111)  │                          │
+│  │  Policy: s3:GetObject on          │                          │
+│  │    prod-data-exports bucket       │                          │
+│  └───────────────────────────────────┘                          │
+└─────────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Cross-Account Role Terraform</h3>
+
+<pre class="code-block"><code># In Account B — create role that trusts Account A
+resource &quot;aws_iam_role&quot; &quot;cross_account_analytics&quot; {
+  name = &quot;cross-account-analytics&quot;
+
+  assume_role_policy = jsonencode({
+    Version = &quot;2012-10-17&quot;
+    Statement = [{
+      Effect = &quot;Allow&quot;
+      Principal = {
+        AWS = &quot;arn:aws:iam::111111111111:root&quot;
+      }
+      Action = &quot;sts:AssumeRole&quot;
+      Condition = {
+        StringEquals = {
+          &quot;sts:ExternalId&quot; = &quot;analytics-2026-secure-token&quot;  # Prevents confused deputy
+        }
+      }
+    }]
+  })
+}</code></pre>
+<hr class="section-divider">
+<h2>6. Condition Keys Reference</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────────────┐
+│                   Most Useful IAM Condition Keys                      │
+│                                                                       │
+│  Key                               │ Use Case                        │
+│  ──────────────────────────────────────────────────────────────      │
+│  aws:SourceIp                      │ Restrict to office IP range     │
+│  aws:SourceVpc                     │ Only from specific VPC          │
+│  aws:SourceVpce                    │ Only via VPC endpoint           │
+│  aws:RequestedRegion               │ Restrict to us-east-1 only     │
+│  aws:PrincipalTag/Department       │ ABAC — tag-based access        │
+│  aws:ResourceTag/Environment       │ Only access prod/staging        │
+│  s3:x-amz-server-side-encryption  │ Enforce encryption on upload   │
+│  ec2:ResourceTag/Environment       │ Only manage prod EC2 instances │
+│  ecs:cluster                       │ Only deploy to specific cluster │
+│  kms:ViaService                    │ Key only usable via RDS/S3     │
+│  aws:MultiFactorAuthPresent       │ Require MFA for sensitive ops  │
+│  aws:PrincipalOrgID               │ Only from same AWS Org         │
+│  sts:ExternalId                    │ Prevent confused deputy attack │
+└──────────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>7. Permission Boundaries</h2>
+
+<pre class="code-block"><code># Permission boundary — maximum permissions any role in this account can have
+resource &quot;aws_iam_policy&quot; &quot;permission_boundary&quot; {
+  name        = &quot;${local.project}-permission-boundary&quot;
+  description = &quot;Maximum permissions for all roles in this project&quot;
+
+  policy = jsonencode({
+    Version = &quot;2012-10-17&quot;
+    Statement = [
+      {
+        Sid    = &quot;AllowedServices&quot;
+        Effect = &quot;Allow&quot;
+        Action = [
+          &quot;s3:*&quot;,
+          &quot;sqs:*&quot;,
+          &quot;sns:*&quot;,
+          &quot;ses:*&quot;,
+          &quot;ecs:*&quot;,
+          &quot;ecr:*&quot;,
+          &quot;rds:*&quot;,
+          &quot;elasticache:*&quot;,
+          &quot;logs:*&quot;,
+          &quot;cloudwatch:*&quot;,
+          &quot;ssm:GetParameter*&quot;,
+          &quot;secretsmanager:GetSecretValue&quot;,
+          &quot;kms:Decrypt&quot;,
+          &quot;kms:GenerateDataKey&quot;,
+        ]
+        Resource = &quot;*&quot;
+      },
+      {
+        Sid    = &quot;DenyDangerousActions&quot;
+        Effect = &quot;Deny&quot;
+        Action = [
+          &quot;iam:CreateUser&quot;,
+          &quot;iam:CreateAccessKey&quot;,
+          &quot;iam:AttachUserPolicy&quot;,
+          &quot;organizations:*&quot;,
+          &quot;account:*&quot;,
+          &quot;sts:AssumeRole&quot;,  # Only allow specific cross-account
+        ]
+        Resource = &quot;*&quot;
+      },
+      {
+        Sid      = &quot;RestrictToRegion&quot;
+        Effect   = &quot;Deny&quot;
+        Action   = &quot;*&quot;
+        Resource = &quot;*&quot;
+        Condition = {
+          StringNotEquals = {
+            &quot;aws:RequestedRegion&quot; = [&quot;us-east-1&quot;, &quot;us-east-2&quot;]
+          }
+        }
+      },
+    ]
+  })
+}
+
+# Apply boundary to roles
+resource &quot;aws_iam_role&quot; &quot;example&quot; {
+  name                 = &quot;example-role&quot;
+  permissions_boundary = aws_iam_policy.permission_boundary.arn
+  # ... rest of role config
+}</code></pre>
+<hr class="section-divider">
+<h2>8. Cost Implications</h2>
+<div class="table-wrap"><table><thead><tr><th>Resource</th><th>Cost</th><th>Notes</th><th></th></tr></thead><tbody><tr><td>IAM roles</td><td>Free</td><td>No charge for roles/policies</td><td></td></tr><tr><td>IAM users</td><td>Free</td><td>No charge (but avoid users, use roles)</td><td></td></tr><tr><td>STS AssumeRole</td><td>Free</td><td>No charge for temporary credentials</td><td></td></tr><tr><td>IAM Access Analyzer</td><td>~$2/analyzer/month</td><td>Per analyzer in each region</td><td></td></tr><tr><td>Access Advisor</td><td>Free</td><td>Shows last-used dates for permissions</td><td></td></tr><tr><td>CloudTrail (for auditing)</td><td>Free (1 trail)</td><td>Additional trails/insights cost extra</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>9. Security Considerations</h2>
+
+<ul class="skill-list"><li>Never use IAM access keys for applications — use IAM roles with temporary credentials</li>
+<li>Always use <code class="inline-code">ExternalId</code> in cross-account trust policies to prevent confused deputy attacks</li>
+<li>Enable MFA for human users accessing the console</li>
+<li>Use permission boundaries for delegated admin roles</li>
+<li>Review IAM Access Advisor quarterly — remove unused permissions</li>
+<li>Never attach <code class="inline-code">AdministratorAccess</code> managed policy to service roles</li>
+<li>Use <code class="inline-code">aws:SourceAccount</code> and <code class="inline-code">aws:SourceArn</code> conditions on trust policies</li>
+<li>Rotate any remaining access keys every 90 days</li>
+<li>Enable CloudTrail in all regions for IAM audit logging</li>
+</ul><hr class="section-divider">
+<h2>10. Common Mistakes / Anti-Patterns</h2>
+<div class="table-wrap"><table><thead><tr><th>Mistake</th><th>Why It's Bad</th><th>Fix</th><th></th></tr></thead><tbody><tr><td><code class="inline-code">Resource: "*"</code> on all statements</td><td>Grants access to every resource</td><td>Scope to specific ARNs</td><td></td></tr><tr><td><code class="inline-code">Action: "*"</code> (full admin)</td><td>Over-privileged, blast radius is huge</td><td>List specific actions needed</td><td></td></tr><tr><td>Using IAM users with access keys</td><td>Keys can leak, no auto-rotation</td><td>Use IAM roles with OIDC/STS</td><td></td></tr><tr><td>No conditions on trust policies</td><td>Any entity in trusted account can assume</td><td>Add <code class="inline-code">sts:ExternalId</code>, source conditions</td><td></td></tr><tr><td>Same role for execution and task</td><td>Leaks infrastructure permissions to app</td><td>Separate execution role from task role</td><td></td></tr><tr><td>Inline policies everywhere</td><td>Hard to audit, can't reuse</td><td>Use managed policies, attach to roles</td><td></td></tr><tr><td>Missing <code class="inline-code">iam:PassRole</code> restriction</td><td>Pipeline could pass any role to ECS</td><td>Restrict to specific role ARNs</td><td></td></tr><tr><td>No permission boundary</td><td>Delegated admins can escalate</td><td>Apply boundaries to all non-admin roles</td><td></td></tr><tr><td>Wildcard in Principal</td><td>Anyone can assume the role</td><td>Specify exact account/service/OIDC</td><td></td></tr><tr><td>Not using OIDC for GitHub Actions</td><td>Requires storing AWS access keys</td><td>Use GitHub OIDC provider</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>11. IAM Policy Debugging</h2>
+
+<pre class="code-block"><code># Simulate policy evaluation
+aws iam simulate-principal-policy \
+  --policy-source-arn arn:aws:iam::123456789012:role/myapp-ecs-task \
+  --action-names s3:GetObject s3:PutObject \
+  --resource-arns arn:aws:s3:::myapp-production-uploads/tenants/123/file.pdf \
+  --output table
+
+# Check what permissions a role actually has
+aws iam list-attached-role-policies --role-name myapp-ecs-task
+aws iam list-role-policies --role-name myapp-ecs-task
+
+# View effective policy
+aws iam get-role-policy --role-name myapp-ecs-task --policy-name s3-uploads
+
+# Check last accessed services (find unused permissions)
+aws iam generate-service-last-accessed-details \
+  --arn arn:aws:iam::123456789012:role/myapp-ecs-task
+
+# View the generated report
+aws iam get-service-last-accessed-details --job-id &lt;job-id&gt; --output table
+
+# Check who can assume a role (trust policy)
+aws iam get-role --role-name myapp-ecs-task \
+  --query &quot;Role.AssumeRolePolicyDocument&quot; --output json
+
+# Decode authorization failure messages
+aws sts decode-authorization-message --encoded-message &lt;encoded-message&gt; | jq '.DecodedMessage | fromjson'</code></pre>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="rds-setup.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">Set Up RDS</span></span></a>
+    <a href="terraform-module.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Write Terraform Modules</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    66 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

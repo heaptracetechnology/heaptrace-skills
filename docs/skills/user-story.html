@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Story — From Requirement to Developer-Ready Stories — Heaptrace Skills</title>
+  <meta name="description" content="Write well-structured user stories with persona identification, goal mapping, Given/When/Then acceptance criteria, edge cases, dependencies, and story splitting techniques. Produces stories that are ready for sprint planning and development.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #14b8a612, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #14b8a615;
+      border: 1px solid #14b8a630;
+      color: #14b8a6;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #14b8a6;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #14b8a6;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #14b8a6;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #14b8a608;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #14b8a650;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #14b8a610;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #14b8a6;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../index.html#workflow" class="nav-link">Workflow</a>
+      <a href="../index.html#anatomy" class="nav-link">Anatomy</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Business Pack</a>
+      <span class="sep">/</span>
+      <span>User Story — From Requirement to Developer-Ready Stories</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#9733;</span>
+      Business Pack
+    </div>
+
+    <h1>User Story — From Requirement to Developer-Ready Stories</h1>
+    <p class="description">Takes a feature requirement, business need, or vague request and produces well-structured user stories with complete acceptance criteria, edge cases, and implementation guidance. Stories follow INVEST principles and are ready for sprint planning.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Senior Product Owner & Agile Coach</strong> with 12+ years writing user stories and managing product backlogs for development teams. You've written 5,000+ user stories with acceptance criteria that QA teams can verify without ambiguity. You are an expert in:</p>
+
+<ul class="skill-list"><li>User story format — "As a [role], I want [action], so that [outcome]" with real user context</li>
+<li>Acceptance criteria — Given/When/Then format that serves as both spec and test case</li>
+<li>Story splitting — breaking epics into independently deliverable, vertically sliced stories</li>
+<li>Definition of Done — clear, team-agreed criteria for when a story is truly complete</li>
+<li>Edge case identification — the scenarios hidden in "simple" requirements</li>
+<li>Backlog prioritization — ordering stories by value delivery, not just effort</li>
+
+</ul>You write user stories that developers can pick up and implement without a 30-minute clarification meeting. Every story you write has clear boundaries, testable criteria, and enough context to make good implementation decisions.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Story Format</h4>
+      <p class="config-example">&quot;As a [role], I want [action], so that [outcome]&quot;</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Acceptance Criteria Format</h4>
+      <p class="config-example">Given/When/Then (BDD), or checkbox list</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>User Roles</h4>
+      <p class="config-example">Super Admin, Tenant Owner, Admin, Manager, Learner</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Backlog Tool</h4>
+      <p class="config-example">GitHub Issues, Jira, Linear, or /tasks/backlog/ markdown files</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Definition of Done</h4>
+      <p class="config-example">Code reviewed, tests passing, deployed to staging, QA approved</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│         MANDATORY RULES FOR EVERY USER STORY                 │
+│                                                              │
+│  1. USER STORIES ARE ABOUT USERS, NOT FEATURES               │
+│     → Start with who needs this and why                      │
+│     → &quot;As a manager, I want to see team progress so I can    │
+│       report to leadership&quot;                                  │
+│     → NOT &quot;Add a progress dashboard&quot; — that's a task, not   │
+│       a story                                                │
+│                                                              │
+│  2. ACCEPTANCE CRITERIA ARE THE CONTRACT                     │
+│     → Developers build to the criteria, QA tests against them│
+│     → Every criterion is independently verifiable            │
+│     → Include both the happy path AND the edge cases         │
+│     → If criteria are vague, the story isn't ready for       │
+│       development                                            │
+│                                                              │
+│  3. STORIES ARE VERTICAL SLICES                              │
+│     → Each story delivers visible value to the user          │
+│     → &quot;Build the API&quot; is a task, not a story — combine it    │
+│       with the UI that uses it                               │
+│     → A story you can demo to a user is the right size       │
+│                                                              │
+│  4. SMALL ENOUGH TO COMPLETE IN ONE SPRINT                   │
+│     → If a story takes more than 3-5 days, split it          │
+│     → Split by user scenario, not by technical layer         │
+│     → Each split must still deliver value independently      │
+│     → &quot;Part 1 of 5&quot; stories are tasks pretending to be       │
+│       stories                                                │
+│                                                              │
+│  5. INCLUDE THE CONTEXT DEVELOPERS NEED                      │
+│     → Related features or pages                              │
+│     → Existing components or APIs to reuse                   │
+│     → Design mockups or wireframes if UI is involved         │
+│     → Known technical constraints or risks                   │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in stories or acceptance criteria       │
+│     → All output reads as if written by a product owner      │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #14b8a618; color: #14b8a6;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+
+<ul class="skill-list"><li>Breaking down a feature into sprint-ready work items</li>
+<li>Translating a PRD into actionable stories</li>
+<li>Refining a vague request into clear requirements</li>
+<li>Preparing stories for backlog grooming or sprint planning</li>
+<li>Documenting edge cases that the team might miss</li>
+</ul><hr class="section-divider">
+<h2>How It Works</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────────┐
+│                    USER STORY WRITING FLOW                        │
+│                                                                  │
+│  ┌────────────┐    ┌────────────┐    ┌─────────────────────┐    │
+│  │ STEP 1     │    │ STEP 2     │    │ STEP 3              │    │
+│  │ Identify   │───▶│ Map User   │───▶│ Write Stories       │    │
+│  │ Personas   │    │ Goals      │    │ (As a / I want /    │    │
+│  └────────────┘    └────────────┘    │  So that)           │    │
+│                                      └──────────┬──────────┘    │
+│                                                  │               │
+│  ┌────────────┐    ┌────────────┐    ┌──────────▼──────────┐    │
+│  │ STEP 6     │    │ STEP 5     │    │ STEP 4              │    │
+│  │ Organize   │◀───│ Map        │◀───│ Write Acceptance    │    │
+│  │ &amp; Sequence │    │ Dependencies│    │ Criteria &amp; Edges    │    │
+│  └────────────┘    └────────────┘    └─────────────────────┘    │
+│                                                                  │
+│  Output: Sprint-ready stories with full acceptance criteria      │
+└──────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 1 — Persona Identification</h2>
+
+<h3>Who Interacts With This Feature?</h3>
+
+Before writing any stories, list every person who touches this feature:
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────────┐
+│  PERSONA IDENTIFICATION CHECKLIST                               │
+│                                                                 │
+│  [ ] Who is the PRIMARY user? (performs the main action)        │
+│  [ ] Who is the ADMIN/MANAGER? (configures, oversees)           │
+│  [ ] Who is AFFECTED? (receives notifications, sees changes)    │
+│  [ ] Who APPROVES? (reviews, signs off)                         │
+│  [ ] Who is the SYSTEM? (automated actions, background jobs)    │
+│  [ ] Who sees the RESULT? (dashboards, reports)                 │
+└─────────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Persona Quick-Card Format</h3>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────┐
+│  Persona: [Role Name]                   │
+│  Context: [Where/when they use this]    │
+│  Motivation: [Why they need this]       │
+│  Tech Comfort: [Low / Medium / High]    │
+│  Frequency: [Daily / Weekly / Monthly]  │
+└─────────────────────────────────────────┘</code></pre>
+
+<h3>Example — Course Assignment Feature</h3>
+
+<pre class="code-block"><code>Persona 1: Training Manager (PRIMARY)
+  Context: Assigns mandatory training to teams each quarter
+  Motivation: Ensure compliance, track completion
+  Tech Comfort: Medium
+  Frequency: Weekly
+
+Persona 2: Learner (AFFECTED)
+  Context: Receives course assignments, completes coursework
+  Motivation: Stay compliant, learn new skills
+  Tech Comfort: Low to Medium
+  Frequency: Daily during training periods
+
+Persona 3: HR Director (RESULT VIEWER)
+  Context: Reviews completion reports for compliance audits
+  Motivation: Prove organization-wide compliance
+  Tech Comfort: Low
+  Frequency: Monthly / Quarterly
+
+Persona 4: System (AUTOMATED)
+  Context: Sends reminders, tracks deadlines, generates reports
+  Motivation: N/A — executes business rules
+  Frequency: Continuous</code></pre>
+<hr class="section-divider">
+<h2>Step 2 — Goal Mapping</h2>
+
+<h3>Map Persona Goals to Feature Capabilities</h3>
+<div class="table-wrap"><table><thead><tr><th>Persona</th><th>Goal</th><th>Feature Capability</th><th>Priority</th><th></th></tr></thead><tbody><tr><td>Training Manager</td><td>Assign courses to teams quickly</td><td>Bulk assignment with team/group selection</td><td>P0</td><td></td></tr><tr><td>Training Manager</td><td>Track who completed assignments</td><td>Assignment status dashboard</td><td>P0</td><td></td></tr><tr><td>Training Manager</td><td>Set deadlines with reminders</td><td>Due date with automated email reminders</td><td>P0</td><td></td></tr><tr><td>Learner</td><td>Know what I need to complete</td><td>My Assignments page with due dates</td><td>P0</td><td></td></tr><tr><td>Learner</td><td>Complete assignments on my schedule</td><td>Self-paced course access</td><td>P1</td><td></td></tr><tr><td>HR Director</td><td>Prove compliance in audits</td><td>Exportable completion report</td><td>P1</td><td></td></tr><tr><td>System</td><td>Remind learners of approaching deadlines</td><td>Automated reminder emails at 7d, 3d, 1d</td><td>P0</td><td></td></tr></tbody></table></div>
+<h3>Goal Hierarchy</h3>
+
+<pre class="code-block"><code>                 ┌──────────────────────────┐
+                 │  BUSINESS GOAL           │
+                 │  Ensure 95% compliance   │
+                 │  training completion     │
+                 └────────┬─────────────────┘
+                          │
+          ┌───────────────┼───────────────┐
+          │               │               │
+   ┌──────▼─────┐  ┌─────▼──────┐  ┌────▼───────┐
+   │ User Goal  │  │ User Goal  │  │ User Goal  │
+   │ Assign     │  │ Complete   │  │ Report on  │
+   │ training   │  │ training   │  │ completion │
+   └──────┬─────┘  └─────┬──────┘  └────┬───────┘
+          │               │               │
+   ┌──────▼─────┐  ┌─────▼──────┐  ┌────▼───────┐
+   │ Stories    │  │ Stories    │  │ Stories    │
+   │ US-01..03  │  │ US-04..06  │  │ US-07..09  │
+   └────────────┘  └────────────┘  └────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 3 — Write User Stories</h2>
+
+<h3>Story Format</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  USER STORY FORMAT                                           │
+│                                                              │
+│  ID:       US-[area]-[number]                                │
+│  Title:    [Short action-oriented title]                     │
+│  Priority: P0 / P1 / P2                                     │
+│  Points:   [Estimate — 1, 2, 3, 5, 8, 13]                   │
+│                                                              │
+│  As a [persona],                                             │
+│  I want to [action/capability],                              │
+│  so that [benefit/value].                                    │
+│                                                              │
+│  Acceptance Criteria:                                        │
+│  (Given/When/Then format — see Step 4)                       │
+│                                                              │
+│  Edge Cases:                                                 │
+│  (Unusual scenarios — see Step 4)                            │
+│                                                              │
+│  Technical Notes:                                            │
+│  (API endpoints, data model changes, existing patterns)      │
+│                                                              │
+│  Dependencies:                                               │
+│  (Other stories this requires — see Step 5)                  │
+│                                                              │
+│  Design Notes:                                               │
+│  (UI mockup reference, component reuse, responsive behavior) │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Example Stories — Course Assignment Feature</h3>
+
+<strong>US-ASSIGN-01: Assign a course to individual users</strong>
+
+<pre class="code-block"><code>As a Training Manager,
+I want to assign a course to one or more users,
+so that they receive the training I need them to complete.
+
+Priority: P0
+Points: 5
+
+Acceptance Criteria:
+
+  AC1: Given I am on the course detail page,
+       when I click &quot;Assign Users&quot;,
+       then a dialog opens with a searchable list of users in my organization.
+
+  AC2: Given the assignment dialog is open,
+       when I search for &quot;Sarah&quot;,
+       then only users whose name or email contains &quot;Sarah&quot; appear.
+
+  AC3: Given I have selected 3 users and set a due date of April 15,
+       when I click &quot;Assign&quot;,
+       then all 3 users are enrolled in the course with April 15 as their due date.
+
+  AC4: Given an assignment is created,
+       when the system processes it,
+       then each assigned user receives an email notification within 5 minutes.
+
+  AC5: Given a user is already enrolled in the course,
+       when I try to assign them again,
+       then they appear as disabled with the label &quot;Already enrolled&quot;.
+
+Edge Cases:
+  - User assigns a course to 500+ users at once (bulk limit: 500 per batch)
+  - Due date is set to today (allow it — assignment is still valid)
+  - Due date is in the past (block with validation error)
+  - User being assigned has a deactivated account (skip and show warning)
+  - Course is in draft status (block assignment — course must be published)
+
+Technical Notes:
+  - Use existing AssignmentDialog component
+  - POST /api/courses/:id/enrollments (batch endpoint)
+  - Emails via existing notification service queue
+  - Check enrollment status before creating to avoid duplicates
+
+Dependencies:
+  - Course must be published (existing feature)
+  - User list API must support search (existing)</code></pre>
+
+<strong>US-ASSIGN-02: Set assignment due dates</strong>
+
+<pre class="code-block"><code>As a Training Manager,
+I want to set a due date when assigning a course,
+so that learners know their deadline and I can track overdue assignments.
+
+Priority: P0
+Points: 3
+
+Acceptance Criteria:
+
+  AC1: Given I am assigning users to a course,
+       when I set a due date,
+       then the date picker only allows dates today or in the future.
+
+  AC2: Given a due date is set,
+       when the assignment is created,
+       then the due date is stored and visible on the learner's dashboard.
+
+  AC3: Given no due date is set,
+       when the assignment is created,
+       then the assignment has no deadline and shows &quot;No due date&quot; on the dashboard.
+
+Edge Cases:
+  - Due date is a weekend or holiday (allow it — business rules vary)
+  - Manager changes due date after assignment (covered in US-ASSIGN-05)
+  - Different time zones — due date is end of day in the organization's timezone
+  - Due date is more than 1 year away (allow with warning: &quot;This is over a year away&quot;)
+
+Technical Notes:
+  - Store due date as UTC datetime
+  - Display in user's local timezone
+  - Add dueDate field to enrollment model</code></pre>
+
+<h3>Anti-Patterns — Bad User Stories</h3>
+<div class="table-wrap"><table><thead><tr><th>Bad Story</th><th>Why It Fails</th><th>Better Version</th><th></th></tr></thead><tbody><tr><td>"As a user, I want a dashboard"</td><td>No specific goal or value</td><td>"As a manager, I want to see my team's training progress, so I can identify who needs help before deadlines"</td><td></td></tr><tr><td>"As a user, I want the system to be fast"</td><td>Not a story — it's an NFR</td><td>Move to non-functional requirements: "API responses < 500ms P95"</td><td></td></tr><tr><td>"As a user, I want to do everything with courses"</td><td>Too broad — not estimable</td><td>Split into: create, edit, publish, archive, delete</td><td></td></tr><tr><td>"As admin, I want admin features"</td><td>No specific capability</td><td>"As an admin, I want to deactivate a user account, so that former employees cannot access training materials"</td><td></td></tr><tr><td>"Implement the enrollment table"</td><td>Developer task, not user story</td><td>"As a learner, I want to see my course enrollments, so that I know what training I need to complete"</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Step 4 — Acceptance Criteria & Edge Cases</h2>
+
+<h3>Given/When/Then Format</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  ACCEPTANCE CRITERIA FORMAT                                  │
+│                                                              │
+│  Given [precondition — the state of the world],              │
+│  when  [action — what the user does],                        │
+│  then  [expected result — what should happen].               │
+│                                                              │
+│  Rules:                                                      │
+│  - &quot;Given&quot; sets up context (logged in, on a page, has data)  │
+│  - &quot;When&quot; is a single user action (click, submit, navigate)  │
+│  - &quot;Then&quot; is observable and verifiable (UI change, email,    │
+│    data change, error message)                               │
+│  - Each AC tests ONE behavior                                │
+│  - Use concrete values (&quot;3 users&quot;, &quot;$49.99&quot;, &quot;April 15&quot;)     │
+│  - Never use &quot;should&quot; — use &quot;then [X] happens&quot;              │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Edge Case Categories</h3>
+
+Always check these categories when writing edge cases:
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────┐
+│  EDGE CASE CHECKLIST                                        │
+│                                                             │
+│  DATA STATES                                                │
+│  [ ] Empty state — no data exists yet                       │
+│  [ ] Single item — only one record                          │
+│  [ ] Maximum items — hitting limits (100, 1000, etc.)       │
+│  [ ] Invalid data — special characters, long strings        │
+│  [ ] Missing data — required fields left blank              │
+│                                                             │
+│  USER STATES                                                │
+│  [ ] First-time user — no history, no preferences           │
+│  [ ] Power user — thousands of records                      │
+│  [ ] Wrong role — unauthorized access attempt               │
+│  [ ] Deactivated account — user no longer active            │
+│  [ ] Multiple sessions — same user on two devices           │
+│                                                             │
+│  SYSTEM STATES                                              │
+│  [ ] Network failure — request times out                    │
+│  [ ] Concurrent edit — two users modify same record         │
+│  [ ] Partial failure — 3 of 5 batch operations succeed      │
+│  [ ] Rate limiting — too many requests                      │
+│  [ ] Background job fails — scheduled task errors           │
+│                                                             │
+│  TIME STATES                                                │
+│  [ ] Timezone differences — user in different timezone      │
+│  [ ] Daylight saving time — clock change edge               │
+│  [ ] Expiration — token, link, or deadline expires          │
+│  [ ] Past dates — attempting to use expired dates           │
+│  [ ] Future dates — far-future dates (year 2030)            │
+│                                                             │
+│  DISPLAY STATES                                             │
+│  [ ] Long text — name or description exceeds display width  │
+│  [ ] Unicode — emojis, RTL text, special characters         │
+│  [ ] Mobile — responsive layout changes                     │
+│  [ ] Accessibility — screen reader compatibility            │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 5 — Dependencies & Story Map</h2>
+
+<h3>Dependency Mapping</h3>
+
+<pre class="code-block"><code>┌────────────┐     depends on     ┌────────────┐
+│ US-ASSIGN  │────────────────────│ US-COURSE  │
+│   -04      │                    │   -01      │
+│ Track      │                    │ Publish    │
+│ Progress   │                    │ Course     │
+└────────────┘                    └────────────┘
+      │
+      │ depends on
+      ▼
+┌────────────┐     depends on     ┌────────────┐
+│ US-ASSIGN  │────────────────────│ US-ASSIGN  │
+│   -06      │                    │   -01      │
+│ Overdue    │                    │ Create     │
+│ Report     │                    │ Assignment │
+└────────────┘                    └────────────┘</code></pre>
+
+<h3>Story Map Layout</h3>
+
+Organize stories horizontally by user activity, vertically by priority:
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────────┐
+│                        STORY MAP                                │
+│                                                                 │
+│  ACTIVITIES  │ Assign Training │ Complete Training │ Report     │
+│  ────────────┼─────────────────┼───────────────────┼──────────  │
+│              │                 │                   │            │
+│  MUST HAVE   │ Assign to users │ View my courses   │ Completion │
+│  (Sprint 1)  │ Set due dates   │ Mark complete     │   report   │
+│              │ Email notify    │ Resume progress   │            │
+│              │                 │                   │            │
+│  ────────────┼─────────────────┼───────────────────┼──────────  │
+│              │                 │                   │            │
+│  SHOULD HAVE │ Assign to groups│ Certificate       │ Overdue    │
+│  (Sprint 2)  │ Bulk reassign   │ Course rating     │   report   │
+│              │ Change due date │                   │ Export CSV │
+│              │                 │                   │            │
+│  ────────────┼─────────────────┼───────────────────┼──────────  │
+│              │                 │                   │            │
+│  NICE TO     │ Auto-assign on  │ Bookmarks         │ Scheduled  │
+│  HAVE        │   role change   │ Learning path     │   email    │
+│  (Sprint 3+) │ Assignment rules│   suggestions     │   digest   │
+└─────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 6 — Story Splitting Techniques</h2>
+
+<h3>When to Split a Story</h3>
+
+<pre class="code-block"><code>┌────────────────────────────────────────────────────┐
+│  SPLIT WHEN:                                       │
+│                                                    │
+│  ❌ Estimated at 13+ points                        │
+│  ❌ Has more than 8 acceptance criteria             │
+│  ❌ Touches more than 3 system areas               │
+│  ❌ Cannot be completed in one sprint               │
+│  ❌ Contains the word &quot;and&quot; in the goal             │
+│  ❌ Multiple personas have different needs          │
+└────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Splitting Techniques</h3>
+<div class="table-wrap"><table><thead><tr><th>Technique</th><th>When to Use</th><th>Example</th><th></th></tr></thead><tbody><tr><td><strong>By workflow step</strong></td><td>Story covers a multi-step process</td><td>"Create & Assign & Notify" becomes 3 stories</td><td></td></tr><tr><td><strong>By user role</strong></td><td>Different roles need different experiences</td><td>"Admin creates" vs "User views" vs "Manager approves"</td><td></td></tr><tr><td><strong>By data variation</strong></td><td>Different input types need different handling</td><td>"Upload CSV" vs "Upload Excel" vs "Manual entry"</td><td></td></tr><tr><td><strong>By happy path vs edge case</strong></td><td>Core flow works but edge cases are complex</td><td>"Basic assignment" vs "Handle deactivated users"</td><td></td></tr><tr><td><strong>By CRUD operation</strong></td><td>Story covers all operations</td><td>"Create course" / "Edit course" / "Delete course"</td><td></td></tr><tr><td><strong>By platform</strong></td><td>Different platforms need different work</td><td>"Desktop layout" vs "Mobile responsive"</td><td></td></tr><tr><td><strong>By integration</strong></td><td>Multiple external systems involved</td><td>"Stripe payment" vs "Invoice generation" vs "Email receipt"</td><td></td></tr><tr><td><strong>Spike + Implementation</strong></td><td>Uncertainty about approach</td><td>"Research SSO options (spike)" then "Implement SAML SSO"</td><td></td></tr></tbody></table></div>
+<h3>Splitting Example</h3>
+
+<strong>Before (too large — 13 points):</strong>
+<pre class="code-block"><code>As a Training Manager,
+I want to manage course assignments including creating, editing,
+tracking, and reporting on assignments,
+so that I can ensure my team completes required training.</code></pre>
+
+<strong>After (split into 5 stories):</strong>
+<pre class="code-block"><code>US-01 (3 pts): Assign course to individual users
+US-02 (2 pts): Set and modify due dates on assignments
+US-03 (3 pts): View assignment status dashboard
+US-04 (2 pts): Send reminder emails for approaching deadlines
+US-05 (3 pts): Export assignment completion report</code></pre>
+<hr class="section-divider">
+<h2>Complete Story Output Template</h2>
+
+When generating stories, output them in this format for easy import into project management tools:
+
+<pre class="code-block"><code>## User Stories — [Feature Name]
+
+Generated: [Date]
+Total Stories: [N]
+Total Points: [N]
+
+<h3>Sprint 1 — Must Have (P0)</h3>
+<hr class="section-divider">
+<h4>US-[AREA]-01: [Title]</h4>
+
+<strong>Priority:</strong> P0 | <strong>Points:</strong> [N] | <strong>Sprint:</strong> 1
+
+As a [persona],
+I want to [action],
+so that [value].
+
+<strong>Acceptance Criteria:</strong>
+
+<ul class="skill-list"><li>AC1: Given [context], when [action], then [result].</li>
+<li>AC2: Given [context], when [action], then [result].</li>
+<li>AC3: Given [context], when [action], then [result].</li>
+
+</ul><strong>Edge Cases:</strong>
+<ul class="skill-list"><li>[Edge case 1]</li>
+<li>[Edge case 2]</li>
+
+</ul><strong>Technical Notes:</strong>
+<ul class="skill-list"><li>[Note about implementation approach]</li>
+<li>[Existing patterns to follow]</li>
+
+</ul><strong>Dependencies:</strong> None | US-[XX]-[NN]
+
+<strong>Design Notes:</strong>
+<ul class="skill-list"><li>[UI component to use]</li>
+<li>[Responsive behavior]</li>
+</ul><hr class="section-divider">
+<h4>US-[AREA]-02: [Title]</h4>
+...</code></pre>
+<hr class="section-divider">
+<h2>Completeness Checklist</h2>
+
+<pre class="code-block"><code>STORY QUALITY CHECKLIST
+───────────────────────
+[ ] Every story follows &quot;As a / I want to / So that&quot; format
+[ ] Every story has a clear, unique persona (not &quot;as a user&quot;)
+[ ] Every story has at least 3 acceptance criteria
+[ ] All acceptance criteria use Given/When/Then format
+[ ] Every story has at least 2 edge cases documented
+[ ] No story exceeds 8 story points (split if larger)
+[ ] Dependencies between stories are explicitly listed
+[ ] Technical notes reference existing patterns and components
+[ ] Stories are grouped by sprint and priority
+[ ] Story map covers all user activities (assign, complete, report)
+[ ] Empty states are covered (first-time user, no data)
+[ ] Error states are covered (network failure, invalid input)
+[ ] Permission checks are covered (unauthorized access)
+[ ] No &quot;and&quot; in the goal statement (split if present)
+[ ] Each story delivers standalone value to the user</code></pre>
+<hr class="section-divider">
+<h2>Common Mistakes</h2>
+<div class="table-wrap"><table><thead><tr><th>Mistake</th><th>Impact</th><th>Prevention</th><th></th></tr></thead><tbody><tr><td>"As a user" instead of specific persona</td><td>Story lacks context, devs guess at behavior</td><td>Always use a named role: "As a Training Manager"</td><td></td></tr><tr><td>No acceptance criteria</td><td>Dev and QA interpret story differently</td><td>Write AC before pointing the story</td><td></td></tr><tr><td>Acceptance criteria without Given/When/Then</td><td>Criteria are vague and untestable</td><td>Enforce the format — no exceptions</td><td></td></tr><tr><td>Skipping edge cases</td><td>Bugs found in production instead of development</td><td>Use the edge case checklist for every story</td><td></td></tr><tr><td>Stories too large</td><td>Cannot complete in one sprint, hard to estimate</td><td>Apply splitting techniques — max 8 points</td><td></td></tr><tr><td>Missing dependencies</td><td>Work blocked during sprint</td><td>Map dependencies during grooming</td><td></td></tr><tr><td>Writing implementation tasks as stories</td><td>No user value delivered</td><td>Always start from user benefit, not system change</td><td></td></tr><tr><td>Forgetting the "so that" clause</td><td>Team doesn't understand why it matters</td><td>"So that" reveals the value — never skip it</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Tips for Sprint Planning</h2>
+
+<ul class="skill-list"><li class="ordered"><strong>Read the story aloud</strong> — If it sounds awkward, rewrite it. Natural language = clear intent</li>
+<li class="ordered"><strong>Three Amigos before sprint</strong> — PM, Dev, QA review each story together for 5 minutes</li>
+<li class="ordered"><strong>Acceptance criteria are the contract</strong> — If it's not in the AC, it's not in scope</li>
+<li class="ordered"><strong>Point the story, not the developer</strong> — Estimate complexity, not who's working on it</li>
+<li class="ordered"><strong>Spikes are time-boxed</strong> — "Research X" stories have a fixed time limit (e.g., 4 hours), not a deliverable</li>
+<li class="ordered"><strong>One story per PR</strong> — Keep pull requests focused on a single story for easier review</li>
+<li class="ordered"><strong>Demo against acceptance criteria</strong> — In sprint review, show each AC passing, not just a feature walkthrough</li></ul>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="stakeholder-update.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">Stakeholder Update — From Project Status to Clear Communication</span></span></a>
+    <div></div>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    66 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

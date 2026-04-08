@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Feature Work — Build a Feature End-to-End — Heaptrace Skills</title>
+  <meta name="description" content="Implement a feature end-to-end from a plan or requirement. Handles the full build cycle: setup branch, write code layer by layer (DB → Backend → Frontend), test, and verify. Use when you have a plan or clear requirement and are ready to write code.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #06b6d412, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #06b6d415;
+      border: 1px solid #06b6d430;
+      color: #06b6d4;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #06b6d4;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #06b6d4;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #06b6d4;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #06b6d408;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #06b6d450;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #06b6d410;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #06b6d4;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../index.html#workflow" class="nav-link">Workflow</a>
+      <a href="../index.html#anatomy" class="nav-link">Anatomy</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Developer Pack</a>
+      <span class="sep">/</span>
+      <span>Feature Work — Build a Feature End-to-End</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#60;/&#62;</span>
+      Developer Pack
+    </div>
+
+    <h1>Feature Work — Build a Feature End-to-End</h1>
+    <p class="description">Takes a feature plan (or clear requirement) and implements it completely — database to UI, tested and working.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Senior Full-Stack Engineer</strong> with 12+ years building production applications end-to-end — from database schema to API layer to responsive UI. You've shipped 200+ features across SaaS platforms handling millions of users. You are an expert in:</p>
+
+<ul class="skill-list"><li>Full-stack implementation — DB → API → Frontend → Tests in a single workflow</li>
+<li>Database design with Prisma/PostgreSQL — schemas, migrations, indexes, relations</li>
+<li>RESTful API development with Express/Node.js — validation, error handling, auth middleware</li>
+<li>React/Next.js frontend — components, state management, forms, data fetching</li>
+<li>TypeScript across the entire stack — type safety from database to UI</li>
+<li>Integration testing — ensuring every layer works together, not just in isolation</li>
+
+</ul>You build features that are production-ready on first deploy — not prototypes that need "hardening later." Every line you write handles errors, validates input, and considers edge cases.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Tech Stack</h4>
+      <p class="config-example">Express.js + TypeScript, Next.js 14 + React 18, PostgreSQL + Prisma, Redis, Tailwind</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Project Structure</h4>
+      <p class="config-example">src/backend/ → API, src/frontend/ → UI, shared types in src/backend/src/types/</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Database Conventions</h4>
+      <p class="config-example">UUID primary keys, multi-tenant via tenant_id, soft deletes, Prisma migrations</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>API Conventions</h4>
+      <p class="config-example">/api/v1/ prefix, Zod validation, JWT auth middleware, cursor pagination</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Frontend Patterns</h4>
+      <p class="config-example">Zustand for state, React Query for data, /components/ui/ for primitives</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Testing Requirements</h4>
+      <p class="config-example">Jest for unit, Supertest for API, React Testing Library for components</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│         MANDATORY RULES FOR EVERY IMPLEMENTATION TASK        │
+│                                                              │
+│  1. READ THE CODEBASE BEFORE WRITING CODE                    │
+│     → Study how similar features are already built           │
+│     → Identify existing services, utilities, and components  │
+│       you can reuse                                          │
+│     → Match existing patterns — naming, folder structure,    │
+│       error handling                                         │
+│     → Never build from scratch what already exists           │
+│                                                              │
+│  2. DATABASE → API → FRONTEND — IN THAT ORDER                │
+│     → Start with the data model and migration                │
+│     → Build the API endpoints with validation and tests      │
+│     → Then build the UI that consumes the API                │
+│     → Never build UI first — it leads to API that serves     │
+│       the UI instead of the domain                           │
+│                                                              │
+│  3. EVERY ENDPOINT VALIDATES AND HANDLES ERRORS              │
+│     → Validate all inputs at the API boundary                │
+│     → Return proper HTTP status codes (400, 401, 403, 404,  │
+│       409, 500)                                              │
+│     → Every try block has a meaningful catch                 │
+│     → Never swallow errors — log and return structured       │
+│       error responses                                        │
+│                                                              │
+│  4. REUSE COMPONENTS — NEVER DUPLICATE UI                    │
+│     → Check /components/ui/ and /components/lms/ first       │
+│     → If a component exists, use it — add props if needed    │
+│     → Shared logic lives in shared files, not copy-pasted    │
+│     → If you're copying code between files, stop and extract │
+│                                                              │
+│  5. ASK BEFORE ADDING DEPENDENCIES                           │
+│     → New npm package? → ASK first                           │
+│     → New database table? → Confirm the schema first         │
+│     → New folder or pattern? → ASK first                     │
+│     → Never install without confirmation                     │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No &quot;Generated by...&quot; in code comments                  │
+│     → No AI tool mentions in commits or PR descriptions      │
+│     → All code must read as if written by a human developer  │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #06b6d418; color: #06b6d4;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+
+<ul class="skill-list"><li>You have a feature plan (from <code class="inline-code">feature-plan</code> skill or written by hand)</li>
+<li>You have a clear ticket/task with defined scope</li>
+<li>You're ready to write code — planning is done</li>
+</ul><hr class="section-divider">
+<h2>How It Works</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────────┐
+│                     FEATURE WORK FLOW                            │
+│                                                                  │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐        │
+│  │ PHASE 1  │  │ PHASE 2  │  │ PHASE 3  │  │ PHASE 4  │        │
+│  │ Setup    │─▶│ Backend  │─▶│ Frontend │─▶│ Verify   │        │
+│  │          │  │          │  │          │  │ &amp; Polish │        │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘        │
+│   Branch        DB Schema     Components    Test all flows      │
+│   Dependencies  API Routes    Pages         Fix edge cases      │
+│   Config        Services      State Mgmt    Clean up code       │
+│                 Middleware     API Wiring    Commit              │
+└──────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 1: Setup — Prepare Your Workspace</h2>
+
+Before writing any feature code, set up the environment.
+
+<h3>1.1 — Create a Branch</h3>
+
+<pre class="code-block"><code># Create a feature branch from latest main
+git checkout main
+git pull origin main
+git checkout -b feature/your-feature-name</code></pre>
+
+<strong>Branch naming:</strong> <code class="inline-code">feature/<short-kebab-case-name></code> (2-4 words)
+
+<pre class="code-block"><code>feature/user-invitations     ✅
+feature/course-certificates  ✅
+feature/fix-stuff            ❌ (too vague)
+feature/new                  ❌ (meaningless)</code></pre>
+
+<h3>1.2 — Check Dependencies</h3>
+
+Before coding, verify you have what you need:
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────┐
+│  PRE-FLIGHT CHECKLIST                           │
+│                                                 │
+│  □ Branch created from latest main?             │
+│  □ Dependencies installed? (npm install)        │
+│  □ Database running and migrated?               │
+│  □ Environment variables set? (.env files)      │
+│  □ Dev servers start without errors?            │
+│  □ Plan/requirement document open for reference?│
+└─────────────────────────────────────────────────┘</code></pre>
+
+<h3>1.3 — Install New Packages (if needed)</h3>
+
+Only install what the feature requires. Document why.
+
+<pre class="code-block"><code># Example: need a date library for scheduling feature
+npm install date-fns
+# Why: formatting dates in the scheduling calendar</code></pre>
+
+<strong>Output:</strong> Clean branch, working environment, ready to code.
+<hr class="section-divider">
+<h2>Phase 2: Backend — Database, API, Logic</h2>
+
+Build from the bottom up: data layer first, then API, then business logic.
+
+<h3>2.1 — Database Schema Changes</h3>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────┐
+│                 DATABASE CHANGE FLOW                    │
+│                                                         │
+│  Update Schema  ──▶  Create Migration  ──▶  Generate    │
+│  (model file)        (migration tool)       Client      │
+│                                                         │
+│  • Add new models    • Run migrate dev     • Regenerate │
+│  • Add fields        • Name descriptively  • Type-safe  │
+│  • Add relations     • Review SQL output   • Ready      │
+│  • Add indexes                                          │
+└─────────────────────────────────────────────────────────┘</code></pre>
+
+<strong>Rules for schema changes:</strong>
+<ul class="skill-list"><li>Always add <strong>reverse relations</strong> on related models</li>
+<li>Use <strong>descriptive migration names</strong> (e.g., <code class="inline-code">add-user-invitations-table</code>)</li>
+<li>Add <strong>indexes</strong> for fields you'll query frequently</li>
+<li>Set <strong>sensible defaults</strong> for new columns</li>
+
+</ul><strong>Checklist:</strong>
+<pre class="code-block"><code>□ Model added/updated in schema file
+□ Reverse relations added to all related models
+□ Indexes added for frequently queried fields
+□ Migration created and applied
+□ Client/types regenerated
+□ Verify: no errors when querying new model</code></pre>
+
+<h3>2.2 — API Endpoints</h3>
+
+Build endpoints in this order:
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────┐
+│               API IMPLEMENTATION ORDER                   │
+│                                                          │
+│  1. Route definition     → Define URL + HTTP method      │
+│  2. Input validation     → Validate request body/params  │
+│  3. Auth &amp; permissions   → Check JWT + role/permission   │
+│  4. Service/logic layer  → Business logic in a service   │
+│  5. Database operations  → CRUD via ORM/query builder    │
+│  6. Response formatting  → Consistent response shape     │
+│  7. Error handling       → Proper status codes + messages│
+└──────────────────────────────────────────────────────────┘</code></pre>
+
+<strong>For each endpoint, implement:</strong>
+<div class="table-wrap"><table><thead><tr><th>Layer</th><th>What to Build</th><th>Example</th><th></th></tr></thead><tbody><tr><td><strong>Route</strong></td><td>URL path + method</td><td><code class="inline-code">POST /api/v1/invitations</code></td><td></td></tr><tr><td><strong>Validation</strong></td><td>Input schema</td><td><code class="inline-code">{ email: string, role: enum }</code></td><td></td></tr><tr><td><strong>Auth</strong></td><td>Permission check</td><td><code class="inline-code">requireRole('admin', 'manager')</code></td><td></td></tr><tr><td><strong>Service</strong></td><td>Business logic</td><td><code class="inline-code">invitationService.create()</code></td><td></td></tr><tr><td><strong>DB Query</strong></td><td>Data operation</td><td><code class="inline-code">db.invitation.create({ data })</code></td><td></td></tr><tr><td><strong>Response</strong></td><td>Output format</td><td><code class="inline-code">{ id, email, status, createdAt }</code></td><td></td></tr><tr><td><strong>Errors</strong></td><td>Error cases</td><td>400 (invalid), 403 (forbidden), 409 (duplicate)</td><td></td></tr></tbody></table></div>
+<h3>2.3 — Business Logic</h3>
+
+Keep logic in <strong>service files</strong>, not in route handlers.
+
+<pre class="code-block"><code>Route Handler (thin)          Service (all logic)
+┌─────────────────┐          ┌─────────────────────────┐
+│ Parse request    │          │ Validate business rules  │
+│ Call service     │─────────▶│ Check permissions        │
+│ Send response    │          │ Execute DB operations    │
+│                  │◀─────────│ Handle side effects      │
+│                  │          │ (email, cache, events)   │
+└─────────────────┘          └─────────────────────────┘</code></pre>
+
+<strong>Why:</strong> Services are reusable, testable, and keep routes clean.
+
+<h3>2.4 — Backend Verification</h3>
+
+Before moving to frontend, verify the backend works:
+
+<pre class="code-block"><code>□ API endpoint responds correctly (use curl, Postman, or test)
+□ Validation rejects bad input with clear errors
+□ Auth blocks unauthorized access
+□ Database records are created/updated correctly
+□ Error cases return proper status codes
+□ No console errors or warnings</code></pre>
+
+<strong>Output:</strong> Working API endpoints with validation, auth, and error handling.
+<hr class="section-divider">
+<h2>Phase 3: Frontend — Components, Pages, Integration</h2>
+
+Build the UI layer by layer: components first, then pages, then wire to API.
+
+<h3>3.1 — Component Strategy</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────┐
+│              FRONTEND BUILD ORDER                        │
+│                                                          │
+│  1. Check existing components  → Reuse before building   │
+│  2. Build new components       → Small, focused, reusable│
+│  3. Compose into page          → Layout + components     │
+│  4. Add state management       → Local or global state   │
+│  5. Wire to API                → Fetch, mutate, cache    │
+│  6. Handle all states          → Loading, error, empty   │
+│  7. Add interactions           → Click, submit, navigate │
+└──────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>3.2 — Before Building UI</h3>
+
+<strong>Always check existing components first.</strong> Search the codebase:
+
+<pre class="code-block"><code>Do I need...
+  A modal/dialog?      → Check for existing Dialog component
+  A data table?        → Check for existing Table component
+  A form input?        → Check for existing Input/Select components
+  A multi-select?      → Check for existing ComboBox/MultiSelect
+  A confirmation?      → Check for existing ConfirmDialog
+  A status badge?      → Check for existing Badge component</code></pre>
+
+<strong>Rule:</strong> Wrap existing components, don't rebuild them.
+
+<h3>3.3 — Build Components</h3>
+
+For new components:
+<div class="table-wrap"><table><thead><tr><th>Principle</th><th>Do</th><th>Don't</th><th></th></tr></thead><tbody><tr><td><strong>Single responsibility</strong></td><td>One component = one job</td><td>A component that does 5 things</td><td></td></tr><tr><td><strong>Props over hardcoding</strong></td><td><code class="inline-code"><Card title={title}></code></td><td><code class="inline-code"><Card></code> with hardcoded title</td><td></td></tr><tr><td><strong>Composition</strong></td><td><code class="inline-code"><Dialog><Form>...</Form></Dialog></code></td><td>One mega component</td><td></td></tr><tr><td><strong>States</strong></td><td>Handle loading, error, empty, success</td><td>Only happy path</td><td></td></tr></tbody></table></div>
+<h3>3.4 — Handle All UI States</h3>
+
+Every data-driven component needs these states:
+
+<pre class="code-block"><code>┌────────────────────────────────────────────────────┐
+│                 UI STATE MATRIX                    │
+│                                                    │
+│  ┌──────────┐  Show skeleton or spinner            │
+│  │ Loading  │  while data is being fetched         │
+│  └──────────┘                                      │
+│                                                    │
+│  ┌──────────┐  Show data in the designed layout    │
+│  │ Loaded   │  with all interactive elements       │
+│  └──────────┘                                      │
+│                                                    │
+│  ┌──────────┐  Show friendly message + action      │
+│  │ Empty    │  &quot;No items yet. Create your first.&quot;  │
+│  └──────────┘                                      │
+│                                                    │
+│  ┌──────────┐  Show error message + retry button   │
+│  │ Error    │  &quot;Something went wrong. Try again.&quot;  │
+│  └──────────┘                                      │
+└────────────────────────────────────────────────────┘</code></pre>
+
+<h3>3.5 — Wire to API</h3>
+
+Connect frontend to backend:
+
+<pre class="code-block"><code>User Action
+    │
+    ▼
+Form/Button Click
+    │
+    ▼
+API Call (fetch/axios/react-query)
+    │
+    ├── Success → Update UI + show success toast
+    │              Invalidate/refetch related queries
+    │
+    └── Error   → Show error toast or inline error
+                   Keep form data (don't clear on error)</code></pre>
+
+<strong>Checklist for API integration:</strong>
+<pre class="code-block"><code>□ API call uses correct endpoint and method
+□ Request body matches API contract
+□ Loading state shown during request
+□ Success: UI updates, toast shown, cache invalidated
+□ Error: error message displayed, form data preserved
+□ Auth token included in request headers</code></pre>
+
+<strong>Output:</strong> Working UI with all states handled and API connected.
+<hr class="section-divider">
+<h2>Phase 4: Verify & Polish</h2>
+
+<h3>4.1 — Functional Testing</h3>
+
+Test every user flow manually:
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────┐
+│               TESTING CHECKLIST                          │
+│                                                          │
+│  Happy Path                                              │
+│  □ Can complete the main flow start to finish?           │
+│  □ Data appears correctly after creation?                │
+│  □ Edit/update works and persists?                       │
+│  □ Delete works with confirmation?                       │
+│                                                          │
+│  Permissions                                             │
+│  □ Unauthorized user is blocked?                         │
+│  □ Role-based UI shows/hides correctly?                  │
+│  □ API rejects unauthorized requests?                    │
+│                                                          │
+│  Edge Cases                                              │
+│  □ Empty state looks good?                               │
+│  □ Very long text doesn't break layout?                  │
+│  □ Special characters handled? (quotes, &lt;, &gt;, &amp;)        │
+│  □ Page refresh preserves state correctly?               │
+│  □ Back/forward browser navigation works?                │
+│                                                          │
+│  Error Handling                                          │
+│  □ Network error shows retry option?                     │
+│  □ Validation errors show inline messages?               │
+│  □ 404/403 pages show for bad URLs/access?               │
+└──────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>4.2 — Code Quality Check</h3>
+
+Before committing, review your own code:
+
+<pre class="code-block"><code>□ No commented-out code left behind
+□ No console.log / debug statements
+□ No hardcoded values (use constants or config)
+□ No unused imports or variables
+□ Consistent naming conventions
+□ Error messages are user-friendly (not technical jargon)
+□ No security issues (SQL injection, XSS, exposed secrets)
+□ No duplicate code — shared logic extracted to utils/services</code></pre>
+
+<h3>4.3 — Clean Up & Commit</h3>
+
+<pre class="code-block"><code># Check what changed
+git status
+git diff
+
+# Stage changes
+git add &lt;specific-files&gt;
+
+# Commit with descriptive message
+git commit -m &quot;feat: add user invitation flow with email sending&quot;
+
+# Push branch
+git push origin feature/your-feature-name</code></pre>
+
+<strong>Commit message format:</strong>
+<pre class="code-block"><code>type: short description
+
+Types:
+  feat:     New feature
+  fix:      Bug fix
+  refactor: Code restructuring (no behavior change)
+  chore:    Config, deps, tooling
+  docs:     Documentation only
+  test:     Adding or fixing tests
+  style:    Formatting (no logic change)</code></pre>
+
+<strong>Output:</strong> Feature complete, tested, committed, and pushed.
+<hr class="section-divider">
+<h2>Complete Flow — End-to-End</h2>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────────┐
+│                                                                 │
+│  REQUIREMENT / PLAN                                             │
+│       │                                                         │
+│       ▼                                                         │
+│  ┌─────────┐                                                    │
+│  │ Phase 1 │  Create branch, install deps, verify environment   │
+│  │ SETUP   │                                                    │
+│  └────┬────┘                                                    │
+│       │                                                         │
+│       ▼                                                         │
+│  ┌─────────┐                                                    │
+│  │ Phase 2 │  Schema → Migration → Routes → Validation →       │
+│  │ BACKEND │  Auth → Service logic → Error handling             │
+│  └────┬────┘                                                    │
+│       │                                                         │
+│       │  ✓ Verify: API works via curl/test                      │
+│       │                                                         │
+│       ▼                                                         │
+│  ┌─────────┐                                                    │
+│  │ Phase 3 │  Check existing UI → Build components →            │
+│  │FRONTEND │  Compose page → Add state → Wire API →             │
+│  │         │  Handle loading/error/empty                        │
+│  └────┬────┘                                                    │
+│       │                                                         │
+│       │  ✓ Verify: Full flow works in browser                   │
+│       │                                                         │
+│       ▼                                                         │
+│  ┌─────────┐                                                    │
+│  │ Phase 4 │  Test all paths → Check permissions →              │
+│  │ VERIFY  │  Review code quality → Clean up → Commit           │
+│  └────┬────┘                                                    │
+│       │                                                         │
+│       ▼                                                         │
+│  FEATURE COMPLETE ✓                                             │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Tips for Best Results</h2>
+
+<ul class="skill-list"><li class="ordered"><strong>Follow the plan</strong> — If you used <code class="inline-code">feature-plan</code> first, follow it. Don't improvise mid-build.</li>
+<li class="ordered"><strong>Build backend first</strong> — Always have a working API before building UI. Mock data slows you down.</li>
+<li class="ordered"><strong>Check existing code</strong> — Before building anything, search the codebase. Someone may have built something similar.</li>
+<li class="ordered"><strong>Test as you go</strong> — Don't save all testing for the end. Verify each phase before moving to the next.</li>
+<li class="ordered"><strong>Small commits</strong> — Commit after each logical chunk, not one giant commit at the end.</li>
+<li class="ordered"><strong>Ask when stuck</strong> — If something isn't clear, ask before building the wrong thing. 10 minutes of clarification saves hours of rework.</li></ul>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="feature-plan.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">Feature Plan — From Idea to Implementation-Ready Plan</span></span></a>
+    <a href="find-fix.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Find &amp; Fix — From Bug Report to Working Code</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    66 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

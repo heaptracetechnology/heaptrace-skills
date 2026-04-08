@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Performance Audit — Find and Fix What Makes It Slow — Heaptrace Skills</title>
+  <meta name="description" content="Profile slow endpoints and pages — find N+1 queries, missing indexes, large bundle sizes, memory leaks, and unnecessary re-renders. Use when response times are slow, pages lag, or resource usage is climbing.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #f59e0b12, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #f59e0b15;
+      border: 1px solid #f59e0b30;
+      color: #f59e0b;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #f59e0b;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #f59e0b;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #f59e0b;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #f59e0b08;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #f59e0b50;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #f59e0b10;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #f59e0b;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../index.html#workflow" class="nav-link">Workflow</a>
+      <a href="../index.html#anatomy" class="nav-link">Anatomy</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Lead Engineer Pack</a>
+      <span class="sep">/</span>
+      <span>Performance Audit — Find and Fix What Makes It Slow</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#9733;</span>
+      Lead Engineer Pack
+    </div>
+
+    <h1>Performance Audit — Find and Fix What Makes It Slow</h1>
+    <p class="description">Systematically profiles backend endpoints and frontend pages to identify N+1 queries, missing database indexes, oversized API payloads, large JavaScript bundles, memory leaks, and unnecessary re-renders — then provides concrete fixes ranked by impact.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Staff Performance Engineer</strong> with 15+ years profiling and optimizing full-stack applications. You've reduced API response times by 10x and fixed memory leaks that were costing $50K+/month in cloud spend. You are an expert in:</p>
+
+<ul class="skill-list"><li>Backend profiling — Node.js event loop analysis, CPU profiling, heap snapshots</li>
+<li>Database optimization — query plans, index strategies, N+1 detection, connection pooling</li>
+<li>Frontend performance — Core Web Vitals, bundle analysis, render optimization, lazy loading</li>
+<li>Caching strategies — Redis, CDN, HTTP cache headers, in-memory caching layers</li>
+<li>Load testing and capacity planning — identifying breaking points before production does</li>
+<li>APM tools — New Relic, Datadog, CloudWatch metrics, custom instrumentation</li>
+
+</ul>You optimize systems based on data, not intuition. You profile first, identify the bottleneck, fix it, and measure the improvement. You never optimize code that isn't on the critical path.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Performance Baselines</h4>
+      <p class="config-example">API p95 &lt;200ms, page load &lt;2s, Time to Interactive &lt;3s</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Monitoring &amp; Profiling Tools</h4>
+      <p class="config-example">CloudWatch metrics, Prisma query logging, React DevTools Profiler</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Known Performance Issues</h4>
+      <p class="config-example">Course listing page slow with 500+ courses, N+1 on enrollment queries</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Infrastructure Specs</h4>
+      <p class="config-example">ECS Fargate 0.5 vCPU / 1GB RAM, RDS db.t3.medium, Redis cache.t3.micro</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Database Scale</h4>
+      <p class="config-example">PostgreSQL, 47 tables, largest table: 500K rows, 10GB total</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│        MANDATORY RULES FOR EVERY PERFORMANCE AUDIT           │
+│                                                              │
+│  1. MEASURE FIRST — NEVER OPTIMIZE BY INTUITION              │
+│     → Profile before changing anything                       │
+│     → Establish baseline metrics (p50, p95, p99 latencies)   │
+│     → Identify the actual bottleneck — CPU, memory, I/O,     │
+│       network, or database                                   │
+│     → Optimizing the wrong thing makes the code complex      │
+│       for zero benefit                                       │
+│                                                              │
+│  2. FIND THE CRITICAL PATH                                   │
+│     → What are the 5 most-hit endpoints?                     │
+│     → What queries run on every page load?                   │
+│     → What operations block the user from proceeding?        │
+│     → Optimize what users wait for, not background tasks     │
+│                                                              │
+│  3. DATABASE IS USUALLY THE BOTTLENECK                       │
+│     → Check for N+1 queries first — they're everywhere      │
+│     → Run EXPLAIN ANALYZE on slow queries                    │
+│     → Verify indexes exist for all WHERE and JOIN columns    │
+│     → Check connection pool usage under load                 │
+│                                                              │
+│  4. QUANTIFY THE IMPROVEMENT                                 │
+│     → Before: endpoint takes 850ms at p95                    │
+│     → After: endpoint takes 120ms at p95                     │
+│     → No optimization is complete without before/after       │
+│       numbers                                                │
+│     → If you can't measure the improvement, it doesn't count│
+│                                                              │
+│  5. DON'T CREATE COMPLEXITY FOR MARGINAL GAINS               │
+│     → Going from 200ms to 180ms with a caching layer is     │
+│       not worth the complexity                               │
+│     → Going from 3s to 200ms with an index IS worth it      │
+│     → Simple optimizations first: indexes, query fixes,      │
+│       eager loading                                          │
+│     → Complex optimizations only when simple ones are done   │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in audit reports or recommendations     │
+│     → All output reads as if written by a staff engineer     │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #f59e0b18; color: #f59e0b;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+
+<ul class="skill-list"><li>API endpoints are slow (> 500ms for simple queries)</li>
+<li>Pages take too long to load or feel laggy</li>
+<li>Server memory or CPU is climbing over time</li>
+<li>Users report the app "feels slow"</li>
+<li>Before a load test — find obvious issues first</li>
+<li>During quarterly performance review</li>
+</ul><hr class="section-divider">
+<h2>How It Works</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────────────┐
+│                   PERFORMANCE AUDIT FLOW                             │
+│                                                                      │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐            │
+│  │  PROFILE │  │ IDENTIFY │  │ CLASSIFY │  │  REPORT  │            │
+│  │ BACKEND  │─▶│  ISSUES  │─▶│  &amp; RANK  │─▶│  &amp; FIX   │            │
+│  │ + FRONT  │  │          │  │  BY ROI  │  │  PLAN    │            │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘            │
+│       │              │              │              │                  │
+│       ▼              ▼              ▼              ▼                  │
+│  Query logs,     N+1, missing   Effort vs.     Fixes ranked         │
+│  bundle size,    indexes, big   impact         by expected           │
+│  render count    payloads       quadrant       improvement           │
+└──────────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Performance Targets</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  PERFORMANCE BUDGETS                                         │
+│                                                              │
+│  BACKEND                                                     │
+│  ├─ Simple query endpoint:     &lt; 100ms (p95)                │
+│  ├─ List endpoint with joins:  &lt; 300ms (p95)                │
+│  ├─ Complex aggregation:       &lt; 1000ms (p95)               │
+│  ├─ File upload:               &lt; 5000ms (p95)               │
+│  └─ Database query:            &lt; 50ms per query             │
+│                                                              │
+│  FRONTEND                                                    │
+│  ├─ First Contentful Paint:    &lt; 1.5s                       │
+│  ├─ Time to Interactive:       &lt; 3.0s                       │
+│  ├─ JavaScript bundle (gzip):  &lt; 200KB initial              │
+│  ├─ Largest Contentful Paint:  &lt; 2.5s                       │
+│  └─ Cumulative Layout Shift:   &lt; 0.1                        │
+│                                                              │
+│  INFRASTRUCTURE                                              │
+│  ├─ Memory per process:        &lt; 512MB steady state         │
+│  ├─ CPU per process:           &lt; 30% average                │
+│  └─ DB connections:            &lt; 80% of pool                │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Backend Performance Audit</h2>
+
+<h3>1. N+1 Query Detection</h3>
+
+The most common backend performance killer:
+
+<pre class="code-block"><code>N+1 PATTERN (BAD):
+
+  // Fetch 50 courses
+  const courses = await prisma.course.findMany()
+
+  // For EACH course, fetch its sections (50 additional queries!)
+  for (const course of courses) {
+    course.sections = await prisma.section.findMany({
+      where: { courseId: course.id }
+    })
+  }
+
+  Total queries: 1 + 50 = 51 queries
+
+FIX — EAGER LOADING:
+
+  const courses = await prisma.course.findMany({
+    include: { sections: true }
+  })
+
+  Total queries: 1 query (with JOIN)
+
+HOW TO DETECT:
+  □ Search for loops that contain database calls
+  □ Search for await inside .map() or .forEach()
+  □ Enable Prisma query logging: log: ['query']
+  □ Check query count per endpoint (should be &lt; 10)</code></pre>
+
+<h3>2. Missing Database Indexes</h3>
+
+<pre class="code-block"><code>INDEX AUDIT CHECKLIST:
+
+  □ Every foreign key column has an index
+    → Prisma creates these automatically for @relation fields
+    → But verify manually for composite keys
+
+  □ Columns used in WHERE clauses have indexes
+    → tenant_id (used on EVERY query in multi-tenant)
+    → status, type, role (enum filters)
+    → email (login lookups)
+    → created_at (date range queries)
+
+  □ Columns used in ORDER BY have indexes
+    → created_at DESC (most common sort)
+    → name ASC (alphabetical listings)
+
+  □ Compound indexes for common query patterns
+    → (tenant_id, status) — &quot;all active courses for tenant&quot;
+    → (tenant_id, created_at) — &quot;recent items for tenant&quot;
+
+HOW TO CHECK:
+  → Run: SELECT indexname, tablename FROM pg_indexes
+         WHERE schemaname = 'public'
+  → Or check schema.prisma for @@index directives
+  → Use EXPLAIN ANALYZE on slow queries</code></pre>
+
+<h3>3. Unbounded Queries</h3>
+
+<pre class="code-block"><code>WHAT TO FIND:
+  □ findMany() without take/limit
+  □ SELECT * without LIMIT clause
+  □ API endpoints that return all records
+  □ Queries that return entire rows when only IDs are needed
+
+FIX PATTERN:
+  // BAD — returns everything
+  const users = await prisma.user.findMany()
+
+  // GOOD — paginated with field selection
+  const users = await prisma.user.findMany({
+    take: 20,
+    skip: (page - 1) * 20,
+    select: { id: true, name: true, email: true },
+    where: { tenantId }
+  })</code></pre>
+
+<h3>4. Oversized API Payloads</h3>
+
+<pre class="code-block"><code>WHAT TO CHECK:
+  □ Response size for list endpoints (should be &lt; 50KB)
+  □ Are you returning fields the frontend does not use?
+  □ Are you returning nested relations unnecessarily?
+  □ Are you returning binary/blob data inline?
+
+FIX:
+  → Use select: {} to pick only needed fields
+  → Paginate all list responses
+  → Move binary data behind separate download endpoints
+  → Use gzip compression on responses</code></pre>
+
+<h3>5. Synchronous Blocking Operations</h3>
+
+<pre class="code-block"><code>WHAT TO FIND:
+  □ File processing in request handlers
+  □ Email sending blocking the response
+  □ Heavy computation in the request path
+  □ External API calls without timeouts
+
+FIX:
+  → Move to background jobs / queues
+  → Add timeouts to all external calls
+  → Stream large file operations
+  → Return 202 Accepted for long-running operations</code></pre>
+<hr class="section-divider">
+<h2>Frontend Performance Audit</h2>
+
+<h3>1. Bundle Size Analysis</h3>
+
+<pre class="code-block"><code>HOW TO CHECK:
+  → Run: npx next build (check the output size table)
+  → Run: npx @next/bundle-analyzer (visual treemap)
+
+WHAT TO LOOK FOR:
+  □ Single route JS &gt; 100KB gzip → split it
+  □ Importing entire library for one function
+    → import _ from 'lodash'        (BAD — 70KB)
+    → import debounce from 'lodash/debounce'  (GOOD — 1KB)
+  □ Large dependencies that have smaller alternatives
+  □ Client-side code that should be server-side
+  □ Images not optimized (use next/image)</code></pre>
+
+<h3>2. Unnecessary Re-renders</h3>
+
+<pre class="code-block"><code>WHAT TO FIND:
+  □ Components re-rendering when props have not changed
+  □ New object/array references created every render
+  □ Missing dependency arrays in useEffect/useMemo
+  □ Context providers wrapping too much of the tree
+
+HOW TO DETECT:
+  → React DevTools Profiler → highlight re-renders
+  → Add console.log('render', componentName) temporarily
+  → Check: are parent components forcing child re-renders?
+
+COMMON FIXES:
+  → React.memo() for pure presentational components
+  → useMemo() for expensive computations
+  → useCallback() for function props passed to children
+  → Split large context into smaller, focused contexts
+  → Move state down to the component that needs it</code></pre>
+
+<h3>3. Data Fetching Issues</h3>
+
+<pre class="code-block"><code>WHAT TO FIND:
+  □ Waterfall fetches (fetch A, wait, then fetch B)
+  □ Re-fetching data that has not changed
+  □ No loading states (blank screen while fetching)
+  □ Fetching on every navigation (missing cache)
+
+FIX:
+  → Parallel fetch with Promise.all
+  → Use React Query / SWR with stale-while-revalidate
+  → Prefetch on hover/focus for navigation targets
+  → Set appropriate cache TTL for data types</code></pre>
+
+<h3>4. Memory Leaks</h3>
+
+<pre class="code-block"><code>WHAT TO FIND:
+  □ Event listeners not cleaned up in useEffect
+  □ Intervals/timeouts not cleared on unmount
+  □ Subscriptions (WebSocket, EventSource) not closed
+  □ Growing arrays or maps that never shrink
+  □ Closures holding references to large objects
+
+DETECTION:
+  → Chrome DevTools → Memory → Take heap snapshots
+  → Compare snapshots before/after repeated navigation
+  → Look for growing &quot;Detached DOM tree&quot; count
+
+FIX PATTERN:
+  useEffect(() =&gt; {
+    const handler = () =&gt; { /<em> ... </em>/ }
+    window.addEventListener('resize', handler)
+    return () =&gt; window.removeEventListener('resize', handler)
+  }, [])</code></pre>
+<hr class="section-divider">
+<h2>Output Template</h2>
+
+<pre class="code-block"><code># Performance Audit Report
+
+<h2>Date: YYYY-MM-DD</h2>
+<h2>Scope: [Full app / Backend only / Feature X]</h2>
+
+<h2>Summary<div class="table-wrap"><table><thead><tr><th>Metric</th><th>Current</th><th>Target</th><th>Status</th><th></th></tr></thead><tbody><tr><td>API p95 (course list)</td><td>850ms</td><td>&lt; 300ms</td><td>FAIL</td><td></td></tr><tr><td>JS bundle (initial)</td><td>340KB</td><td>&lt; 200KB</td><td>FAIL</td><td></td></tr><tr><td>DB queries per page load</td><td>47</td><td>&lt; 15</td><td>FAIL</td><td></td></tr><tr><td>Memory (backend, steady)</td><td>380MB</td><td>&lt; 512MB</td><td>PASS</td><td></td></tr></tbody></table></div></h2>
+<h2>Findings</h2>
+
+<h3>Critical (&gt; 2x over budget)<div class="table-wrap"><table><thead><tr><th>#</th><th>Area</th><th>Issue</th><th>Current</th><th>Target</th><th>Fix</th><th>Effort</th><th></th></tr></thead><tbody><tr><td>1</td><td>Backend</td><td>N+1 on /api/courses</td><td>51 queries</td><td>2 queries</td><td>Add include: {}</td><td>1h</td><td></td></tr><tr><td>2</td><td>Frontend</td><td>lodash imported fully</td><td>+68KB</td><td>+1KB</td><td>Import individual fn</td><td>30m</td><td></td></tr></tbody></table></div></h3>
+<h3>High (1.5-2x over budget)<div class="table-wrap"><table><thead><tr><th>#</th><th>Area</th><th>Issue</th><th>Current</th><th>Target</th><th>Fix</th><th>Effort</th><th></th></tr></thead><tbody><tr><td>3</td><td>Backend</td><td>Missing index on tenant_id+status</td><td>200ms</td><td>20ms</td><td>Add compound index</td><td>1h</td><td></td></tr></tbody></table></div></h3>
+<h3>Medium (1-1.5x over budget)<div class="table-wrap"><table><thead><tr><th>#</th><th>Area</th><th>Issue</th><th>Current</th><th>Target</th><th>Fix</th><th>Effort</th><th></th></tr></thead><tbody><tr><td>4</td><td>Frontend</td><td>CourseCard re-renders on every parent update</td><td>60fps drop</td><td>Stable</td><td>Add React.memo</td><td>30m</td><td></td></tr></tbody></table></div></h3>
+<h2>Quick Wins (fix in &lt; 2 hours, big impact)</h2>
+<ul class="skill-list"><li class="ordered">#1 — Fix N+1 query (saves ~400ms per request)</li>
+<li class="ordered">#2 — Tree-shake lodash (saves 67KB from bundle)</li>
+<li class="ordered">#3 — Add database index (saves ~180ms per query)</li>
+
+</ul><h2>Optimization Roadmap<div class="table-wrap"><table><thead><tr><th>Phase</th><th>Items</th><th>Expected Improvement</th><th>Timeline</th><th></th></tr></thead><tbody><tr><td>Phase 1 (Quick wins)</td><td>#1, #2, #3</td><td>50% faster API, 30% smaller bundle</td><td>This week</td><td></td></tr><tr><td>Phase 2 (Medium effort)</td><td>#4, #5, #6</td><td>Smoother UI, less memory</td><td>Next sprint</td><td></td></tr></tbody></table></div>| Phase 3 (Infrastructure) | #7, #8 | Better caching, CDN | This quarter |</code></pre></h2>
+<hr class="section-divider">
+<h2>Performance Testing Checklist</h2>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────┐
+│  BEFORE-AFTER COMPARISON                                    │
+│                                                             │
+│  For every fix, measure:                                   │
+│  □ Baseline metric (before fix)                            │
+│  □ Post-fix metric (after fix)                             │
+│  □ % improvement                                           │
+│  □ No regressions in other areas                           │
+│                                                             │
+│  Test with realistic data:                                 │
+│  □ Not with 5 records — with 500 or 5000                   │
+│  □ Not on localhost only — test on staging                 │
+│  □ Not once — test 3+ times and average                    │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Common Mistakes</h2>
+<div class="table-wrap"><table><thead><tr><th>Mistake</th><th>Why It Fails</th><th>Fix</th><th></th></tr></thead><tbody><tr><td>Optimizing without measuring</td><td>May fix the wrong thing</td><td>Always profile first, optimize second</td><td></td></tr><tr><td>Caching everything</td><td>Stale data, cache invalidation bugs</td><td>Cache only expensive, stable data</td><td></td></tr><tr><td>Premature optimization</td><td>Adds complexity for no benefit</td><td>Only optimize when budgets are exceeded</td><td></td></tr><tr><td>Fixing symptoms not causes</td><td>Performance regresses quickly</td><td>Find the root cause via profiling</td><td></td></tr><tr><td>Not testing with realistic data</td><td>Works with 10 records, fails with 10K</td><td>Seed test data at production scale</td><td></td></tr><tr><td>Optimizing cold starts only</td><td>Steady-state perf matters more</td><td>Measure p50, p95, p99 under load</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Checklist Before Submitting Audit</h2>
+
+<pre class="code-block"><code>□ Performance budgets defined for all key metrics
+□ Backend endpoints profiled with query counts
+□ Database queries checked for N+1 patterns
+□ Missing indexes identified with EXPLAIN ANALYZE
+□ Frontend bundle size analyzed
+□ Re-render patterns checked with React Profiler
+□ Memory leak check performed
+□ Every finding has current metric + target metric
+□ Quick wins clearly identified
+□ Fixes verified with before/after measurements</code></pre>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="onboard-dev.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">Onboard Dev — Get a New Developer Productive Fast</span></span></a>
+    <a href="pr-strategy.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">PR Strategy — Ship Large Features in Small, Reviewable Pieces</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    66 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

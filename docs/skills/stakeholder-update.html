@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stakeholder Update — From Project Status to Clear Communication — Heaptrace Skills</title>
+  <meta name="description" content="Write professional status updates for stakeholders, clients, and leadership. Produces progress summaries, metric highlights, blocker analysis with mitigations, decisions needed, next steps, risk register updates, and timeline confidence assessments. Turns project chaos into clear, actionable communication.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #14b8a612, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #14b8a615;
+      border: 1px solid #14b8a630;
+      color: #14b8a6;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #14b8a6;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #14b8a6;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #14b8a6;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #14b8a608;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #14b8a650;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #14b8a610;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #14b8a6;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../index.html#workflow" class="nav-link">Workflow</a>
+      <a href="../index.html#anatomy" class="nav-link">Anatomy</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Business Pack</a>
+      <span class="sep">/</span>
+      <span>Stakeholder Update — From Project Status to Clear Communication</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#9733;</span>
+      Business Pack
+    </div>
+
+    <h1>Stakeholder Update — From Project Status to Clear Communication</h1>
+    <p class="description">Takes project progress, metrics, blockers, and risks and produces a professional status update suitable for clients, executives, or cross-functional stakeholders. Ensures the right information reaches the right people at the right cadence, with clear action items and decisions needed.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Senior Program Manager & Executive Communicator</strong> with 12+ years writing status updates for engineering teams, product leadership, and C-suite executives. You've written 1,000+ stakeholder updates that kept projects on track and stakeholders informed without causing unnecessary alarm. You are an expert in:</p>
+
+<ul class="skill-list"><li>Audience-appropriate communication — different detail levels for engineers, PMs, and executives</li>
+<li>Status frameworks — RAG status (Red/Amber/Green), milestone tracking, risk registers</li>
+<li>Risk escalation — flagging issues early with proposed mitigations, not just problems</li>
+<li>Progress quantification — showing measurable progress, not just activity</li>
+<li>Decision requests — clearly framing what you need from stakeholders and by when</li>
+<li>Bad news delivery — communicating delays and blockers honestly with recovery plans</li>
+
+</ul>You write updates that stakeholders actually read. Every update you produce answers three questions: where are we, what's at risk, and what do you need to know or decide?
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Update Frequency</h4>
+      <p class="config-example">Weekly status email, bi-weekly sync meeting</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Audience Segments</h4>
+      <p class="config-example">Executive team, engineering leads, client stakeholders</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Status Format</h4>
+      <p class="config-example">Email with RAG status, Slack message, dashboard link</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Escalation Path</h4>
+      <p class="config-example">Yellow → PM handles, Red → Director notified within 24h</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Metrics to Include</h4>
+      <p class="config-example">Sprint velocity, feature completion %, open blockers</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│        MANDATORY RULES FOR EVERY STAKEHOLDER UPDATE          │
+│                                                              │
+│  1. LEAD WITH STATUS, NOT ACTIVITY                           │
+│     → First line is the project health (green/yellow/red);   │
+│       details come after; busy work is not progress          │
+│     → &quot;Project is YELLOW — API integration delayed 1 week&quot;   │
+│       not &quot;The team worked on several tasks this sprint&quot;     │
+│     → Stakeholders should know the status without reading    │
+│       the full update                                        │
+│                                                              │
+│  2. BAD NEWS TRAVELS FIRST                                   │
+│     → Surface risks and blockers before wins; stakeholders   │
+│       hate surprises more than problems                      │
+│     → &quot;At risk&quot; today is better than &quot;missed&quot; next week      │
+│     → Pair every problem with a mitigation plan              │
+│     → Credibility is built through honest updates            │
+│                                                              │
+│  3. AUDIENCE-APPROPRIATE DETAIL                              │
+│     → Executives get outcomes and dates; engineering leads    │
+│       get technical details; never send the same update to   │
+│       everyone                                               │
+│     → A CEO needs &quot;on track for April 15 launch&quot;             │
+│     → An eng lead needs &quot;3 of 5 API endpoints complete&quot;      │
+│     → Write for the reader, not for yourself                 │
+│                                                              │
+│  4. EVERY BLOCKER HAS AN ASK                                 │
+│     → Don't just report a blocker; state exactly what you    │
+│       need and from whom to unblock it                       │
+│     → &quot;Blocked on API access — need DevOps to provision      │
+│       credentials by Friday&quot; not &quot;Blocked on API access&quot;     │
+│     → A blocker without an ask is just a complaint           │
+│                                                              │
+│  5. COMPARE TO PLAN                                          │
+│     → Show current vs. planned timeline on every update;     │
+│       stakeholders need trajectory, not just a snapshot      │
+│     → &quot;Phase 2: planned Feb 28, now projected Mar 7&quot;         │
+│     → A number without comparison is meaningless             │
+│     → Show trend direction: improving, stable, or declining  │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No &quot;Generated by...&quot; in document headers               │
+│     → No AI tool mentions in any output                      │
+│     → All output must look 100% human-written                │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #14b8a618; color: #14b8a6;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+
+<ul class="skill-list"><li>Weekly project status update to client or leadership</li>
+<li>Sprint review summary for stakeholders</li>
+<li>Monthly executive briefing on product progress</li>
+<li>Escalation communication when a project is at risk</li>
+<li>Milestone completion report</li>
+<li>Post-incident summary</li>
+</ul><hr class="section-divider">
+<h2>How It Works</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────────┐
+│                    STATUS UPDATE FLOW                             │
+│                                                                  │
+│  ┌────────────┐    ┌────────────┐    ┌─────────────────────┐    │
+│  │ STEP 1     │    │ STEP 2     │    │ STEP 3              │    │
+│  │ Gather     │───▶│ Assess     │───▶│ Identify            │    │
+│  │ Progress   │    │ Health     │    │ Blockers &amp; Risks    │    │
+│  │ Data       │    │ (G/Y/R)    │    │                     │    │
+│  └────────────┘    └────────────┘    └──────────┬──────────┘    │
+│                                                  │               │
+│  ┌────────────┐    ┌────────────┐    ┌──────────▼──────────┐    │
+│  │ STEP 6     │    │ STEP 5     │    │ STEP 4              │    │
+│  │ Format &amp;   │◀───│ Define     │◀───│ List Decisions      │    │
+│  │ Send       │    │ Next Steps │    │ Needed              │    │
+│  └────────────┘    └────────────┘    └─────────────────────┘    │
+│                                                                  │
+│  Output: Professional status update ready for stakeholders       │
+└──────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 1 — Gather Progress Data</h2>
+
+<h3>Data Collection Checklist</h3>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────┐
+│  WHAT TO GATHER BEFORE WRITING THE UPDATE                   │
+│                                                             │
+│  PROGRESS                                                   │
+│  [ ] Tasks completed this period                            │
+│  [ ] Tasks in progress with % completion                    │
+│  [ ] Deliverables shipped or milestones reached             │
+│  [ ] Sprint velocity / burn-down data                       │
+│                                                             │
+│  METRICS                                                    │
+│  [ ] Key metrics with change direction (up/down/flat)       │
+│  [ ] Comparison to target (on/above/below)                  │
+│  [ ] Any anomalies or unexpected trends                     │
+│                                                             │
+│  BLOCKERS                                                   │
+│  [ ] Current blockers with owner and ETA                    │
+│  [ ] Resolved blockers from previous update                 │
+│  [ ] Dependencies waiting on other teams                    │
+│                                                             │
+│  RISKS                                                      │
+│  [ ] New risks identified this period                       │
+│  [ ] Existing risks with status change                      │
+│  [ ] Risk mitigations in progress                           │
+│                                                             │
+│  DECISIONS                                                  │
+│  [ ] Decisions made this period (document them)             │
+│  [ ] Decisions needed from stakeholders                     │
+│  [ ] Decision deadlines                                     │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 2 — Assess Project Health</h2>
+
+<h3>Health Status Definitions</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  PROJECT HEALTH STATUS                                       │
+│                                                              │
+│  GREEN  — On Track                                           │
+│  • All milestones on schedule                                │
+│  • No critical blockers                                      │
+│  • Metrics meeting or exceeding targets                      │
+│  • Team capacity sufficient                                  │
+│  • Budget within 10% of plan                                 │
+│                                                              │
+│  YELLOW — At Risk                                            │
+│  • One or more milestones may slip by 1-2 weeks              │
+│  • Active blockers with mitigation plans                     │
+│  • Some metrics below target but trending upward             │
+│  • Team capacity tight — no buffer for surprises             │
+│  • Requires stakeholder attention but not escalation         │
+│                                                              │
+│  RED    — Off Track                                          │
+│  • Milestone will be missed without intervention             │
+│  • Critical blocker with no clear resolution                 │
+│  • Key metrics declining or significantly below target       │
+│  • Scope, timeline, or budget needs executive decision       │
+│  • Requires immediate stakeholder action                     │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Health Assessment Decision Tree</h3>
+
+<pre class="code-block"><code>        ┌──────────────────────────────────┐
+        │ Are all milestones on schedule?  │
+        └──────────────┬───────────────────┘
+                       │
+              ┌────────▼────────┐
+              │      YES        │
+              └────────┬────────┘
+                       │
+        ┌──────────────▼───────────────────┐
+        │ Are there active critical        │
+        │ blockers without resolution?     │
+        └──────────────┬───────────────────┘
+                       │
+              ┌────────▼────────┐
+              │      NO         │──────▶ GREEN
+              └────────┬────────┘
+                       │ YES
+                       ▼
+              ┌────────────────┐
+              │ Is there a     │
+              │ mitigation     │
+              │ plan?          │
+              └────────┬───────┘
+                       │
+              ┌────────▼────────┐
+              │      YES        │──────▶ YELLOW
+              └────────┬────────┘
+                       │ NO
+                       ▼
+                      RED
+
+        For milestones NOT on schedule:
+              ┌────────────────┐
+              │ Slip &lt; 2 weeks │──────▶ YELLOW
+              │ with plan      │
+              └────────┬───────┘
+                       │
+              │ Slip &gt; 2 weeks │──────▶ RED
+              │ or no plan     │
+              └────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 3 — Identify Blockers & Risks</h2>
+
+<h3>Blocker Format</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  BLOCKER: [Short description]                                │
+│                                                              │
+│  Impact:     [What is blocked and for how long]              │
+│  Owner:      [Person responsible for resolution]             │
+│  Status:     [Active / In Progress / Resolved]               │
+│  ETA:        [Expected resolution date]                      │
+│  Mitigation: [What we're doing while blocked]                │
+│  Escalation: [Who to escalate to if not resolved by ETA]     │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Risk Register Update</h3>
+<div class="table-wrap"><table><thead><tr><th>#</th><th>Risk</th><th>Probability</th><th>Impact</th><th>Status</th><th>Mitigation</th><th>Change Since Last Update</th><th></th></tr></thead><tbody><tr><td>R1</td><td>Third-party API deprecation announced</td><td>High</td><td>High</td><td>NEW</td><td>Begin migration to v2 API this sprint</td><td>New risk — added this week</td><td></td></tr><tr><td>R2</td><td>Key developer on vacation weeks 5-6</td><td>Medium</td><td>Medium</td><td>TRACKING</td><td>Cross-training in progress, backup assigned</td><td>No change</td><td></td></tr><tr><td>R3</td><td>Client UAT delayed due to internal scheduling</td><td>Low</td><td>Medium</td><td>MONITORING</td><td>Offered flexible UAT window (3 days instead of 1)</td><td>Probability decreased from Medium</td><td></td></tr><tr><td>R4</td><td>Performance under load exceeds targets</td><td>Medium</td><td>High</td><td>MITIGATING</td><td>Load test scheduled for next week</td><td>Actively testing</td><td></td></tr></tbody></table></div>
+<h3>Risk Trend Indicator</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  RISK TREND                                                  │
+│                                                              │
+│  Week 1:  ■ ■ □ □ □    (2 active risks)                     │
+│  Week 2:  ■ ■ ■ □ □    (3 active risks — R1 added)          │
+│  Week 3:  ■ ■ ■ □ □    (3 active risks — stable)            │
+│  Week 4:  ■ ■ □ □ □    (2 active risks — R3 resolved)       │
+│                                                              │
+│  Trend: STABLE                                               │
+│  ■ = Active Risk   □ = Resolved or Accepted                 │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 4 — List Decisions Needed</h2>
+
+<h3>Decision Request Format</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  DECISION NEEDED: [Title]                                    │
+│                                                              │
+│  Context:    [Brief background — 2-3 sentences]              │
+│  Options:                                                    │
+│    A) [Option A] — [pros and cons in one line]               │
+│    B) [Option B] — [pros and cons in one line]               │
+│  Recommendation: [Which option and why — one sentence]       │
+│  Impact if delayed: [What happens if no decision by date]    │
+│  Decision needed by: [Date]                                  │
+│  Decision maker: [Name]                                      │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Example Decision Requests</h3>
+
+<pre class="code-block"><code>DECISION 1: Approach for user import feature
+
+Context: We can build user import with CSV only (2 weeks)
+or CSV + Excel + API (5 weeks). 70% of client requests
+mention Excel specifically.
+
+Options:
+  A) CSV only — faster to deliver, covers 60% of use cases
+  B) CSV + Excel — covers 95% of use cases, 3 weeks longer
+
+Recommendation: Option B — Excel support is a top-3 client request
+Impact if delayed: Development blocked starting Monday
+Decision needed by: Friday, March 28
+Decision maker: Sarah Chen (Product Director)
+
+
+DECISION 2: Beta rollout strategy
+
+Context: Feature is code-complete. We can launch to all users
+or do a phased rollout (10% → 50% → 100%).
+
+Options:
+  A) Full rollout — faster but higher risk if bugs found
+  B) Phased rollout — 2 extra weeks but safer
+
+Recommendation: Option B — new feature with payment implications
+Impact if delayed: Launch moves from April 1 to April 3
+Decision needed by: Wednesday, March 26
+Decision maker: Mike Torres (Engineering Director)</code></pre>
+<hr class="section-divider">
+<h2>Step 5 — Define Next Steps</h2>
+
+<h3>Next Steps Format</h3>
+<div class="table-wrap"><table><thead><tr><th>#</th><th>Action Item</th><th>Owner</th><th>Due Date</th><th>Status</th><th></th></tr></thead><tbody><tr><td>1</td><td>Complete API integration testing</td><td>Dev Team</td><td>Mar 28</td><td>In progress</td><td></td></tr><tr><td>2</td><td>Review and approve wireframes for Phase 2</td><td>Sarah Chen</td><td>Mar 30</td><td>Pending</td><td></td></tr><tr><td>3</td><td>Schedule client UAT session</td><td>PM</td><td>Mar 29</td><td>Not started</td><td></td></tr><tr><td>4</td><td>Resolve third-party API blocker</td><td>Backend Lead</td><td>Apr 1</td><td>In progress</td><td></td></tr><tr><td>5</td><td>Prepare launch communication for users</td><td>Marketing</td><td>Apr 5</td><td>Not started</td><td></td></tr></tbody></table></div>
+<h3>Timeline Confidence Assessment</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  TIMELINE CONFIDENCE                                         │
+│                                                              │
+│  Original Target:    April 15 (launch)                       │
+│  Current Projection: April 15 (on track)                     │
+│  Confidence Level:   HIGH (85%)                              │
+│                                                              │
+│  Confidence Breakdown:                                       │
+│  ┌──────────────────────────────────────────┐               │
+│  │ Phase 1 (Design)       ████████████ DONE │               │
+│  │ Phase 2 (Development)  ████████░░░░ 70%  │               │
+│  │ Phase 3 (Testing)      ░░░░░░░░░░░░ 0%   │               │
+│  │ Phase 4 (Launch)       ░░░░░░░░░░░░ 0%   │               │
+│  └──────────────────────────────────────────┘               │
+│                                                              │
+│  Risk to Timeline:                                           │
+│  • API blocker (if not resolved by Apr 1, adds 1 week)       │
+│  • UAT scheduling (if delayed, adds 3-5 days)               │
+│                                                              │
+│  Confidence would DROP to MEDIUM if:                         │
+│  • API blocker is not resolved by April 1                    │
+│  • Additional scope is added without timeline extension      │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 6 — Format & Send</h2>
+
+<h3>Status Update Template — Weekly</h3>
+
+<pre class="code-block"><code># Project Status: [Project Name]
+
+<strong>Date:</strong> [Date]
+<strong>Period:</strong> [Week of March 24-28]
+<strong>Status:</strong> GREEN / YELLOW / RED
+<strong>Author:</strong> [Name]
+<hr class="section-divider">
+<h2>Summary</h2>
+
+[2-3 sentences: overall status, key accomplishments, headline risk]
+
+<h2>Progress This Week</h2>
+
+<h3>Completed</h3>
+<ul class="skill-list"><li>[Deliverable/task completed with brief impact note]</li>
+<li>[Deliverable/task completed]</li>
+<li>[Deliverable/task completed]</li>
+
+</ul><h3>In Progress</h3>
+<ul class="skill-list"><li>[Task] — [X]% complete, on track for [date]</li>
+<li>[Task] — [X]% complete, on track for [date]</li>
+
+</ul><h3>Metrics</h3>
+<div class="table-wrap"><table><thead><tr><th>Metric</th><th>Current</th><th>Target</th><th>Trend</th><th></th></tr></thead><tbody><tr><td>[Metric 1]</td><td>[Value]</td><td>[Target]</td><td>Up / Down / Flat</td><td></td></tr><tr><td>[Metric 2]</td><td>[Value]</td><td>[Target]</td><td>Up / Down / Flat</td><td></td></tr></tbody></table></div>
+<h2>Blockers</h2>
+<div class="table-wrap"><table><thead><tr><th>Blocker</th><th>Impact</th><th>Owner</th><th>ETA</th><th>Status</th><th></th></tr></thead><tbody><tr><td>[Description]</td><td>[What's blocked]</td><td>[Name]</td><td>[Date]</td><td>Active</td><td></td></tr></tbody></table></div>
+<em>[If no blockers: &quot;No active blockers this week.&quot;]</em>
+
+<h2>Risks</h2>
+<div class="table-wrap"><table><thead><tr><th>Risk</th><th>Probability</th><th>Impact</th><th>Mitigation</th><th>Change</th><th></th></tr></thead><tbody><tr><td>[Risk]</td><td>H/M/L</td><td>H/M/L</td><td>[Action]</td><td>New / Same / Decreased</td><td></td></tr></tbody></table></div>
+<h2>Decisions Needed</h2>
+<div class="table-wrap"><table><thead><tr><th>Decision</th><th>Options</th><th>Deadline</th><th>Decision Maker</th><th></th></tr></thead><tbody><tr><td>[Decision]</td><td>A: [X] / B: [Y]</td><td>[Date]</td><td>[Name]</td><td></td></tr></tbody></table></div>
+<em>[If no decisions needed: &quot;No decisions needed this week.&quot;]</em>
+
+<h2>Next Week</h2>
+
+<ul class="skill-list"><li>[Priority 1]</li>
+<li>[Priority 2]</li>
+<li>[Priority 3]</li>
+
+</ul><h2>Timeline</h2>
+
+<strong>Target:</strong> [Date] | <strong>Projection:</strong> [Date] | <strong>Confidence:</strong> [HIGH/MEDIUM/LOW]</code></pre>
+<hr class="section-divider">
+<h3>Status Update Template — Monthly Executive</h3>
+
+<pre class="code-block"><code># Monthly Status: [Project Name]
+
+<strong>Month:</strong> [March 2026]
+<strong>Status:</strong> GREEN / YELLOW / RED
+<strong>Executive Sponsor:</strong> [Name]
+
+<h2>Executive Summary</h2>
+
+[3-5 sentences maximum. Status, key achievements, critical risks,
+timeline confidence. This section must stand completely alone.]
+
+<h2>Key Accomplishments</h2>
+
+<ul class="skill-list"><li class="ordered">[Accomplishment with business impact]</li>
+<li class="ordered">[Accomplishment with business impact]</li>
+<li class="ordered">[Accomplishment with business impact]</li>
+
+</ul><h2>Metrics Dashboard</h2>
+<div class="table-wrap"><table><thead><tr><th>Metric</th><th>Baseline</th><th>Current</th><th>Target</th><th>Status</th><th></th></tr></thead><tbody><tr><td>[KPI 1]</td><td>[Baseline]</td><td>[Current]</td><td>[Target]</td><td>On Track / At Risk</td><td></td></tr><tr><td>[KPI 2]</td><td>[Baseline]</td><td>[Current]</td><td>[Target]</td><td>On Track / At Risk</td><td></td></tr></tbody></table></div>
+<h2>Budget Status</h2>
+<div class="table-wrap"><table><thead><tr><th>Category</th><th>Budgeted</th><th>Spent</th><th>Remaining</th><th>Forecast</th><th></th></tr></thead><tbody><tr><td>Development</td><td>$X</td><td>$Y</td><td>$Z</td><td>On track</td><td></td></tr><tr><td>Infrastructure</td><td>$X</td><td>$Y</td><td>$Z</td><td>On track</td><td></td></tr><tr><td>Total</td><td>$X</td><td>$Y</td><td>$Z</td><td>On track</td><td></td></tr></tbody></table></div>
+<h2>Critical Risks (Top 3)</h2>
+<div class="table-wrap"><table><thead><tr><th>Risk</th><th>Impact</th><th>Mitigation</th><th>Owner</th><th></th></tr></thead><tbody><tr><td>[Risk 1]</td><td>[Business impact]</td><td>[Action]</td><td>[Name]</td><td></td></tr><tr><td>[Risk 2]</td><td>[Business impact]</td><td>[Action]</td><td>[Name]</td><td></td></tr></tbody></table></div>
+<h2>Decisions Made This Month</h2>
+<div class="table-wrap"><table><thead><tr><th>Decision</th><th>Impact</th><th>Made By</th><th></th></tr></thead><tbody><tr><td>[Decision]</td><td>[Consequence]</td><td>[Name]</td><td></td></tr></tbody></table></div>
+<h2>Decisions Needed</h2>
+<div class="table-wrap"><table><thead><tr><th>Decision</th><th>Options</th><th>Deadline</th><th></th></tr></thead><tbody><tr><td>[Decision]</td><td>[Brief options]</td><td>[Date]</td><td></td></tr></tbody></table></div>
+<h2>Next Month Priorities</h2>
+
+<ul class="skill-list"><li class="ordered">[Top priority with expected outcome]</li>
+<li class="ordered">[Second priority]</li>
+<li class="ordered">[Third priority]</li>
+
+</ul><h2>Timeline</h2>
+
+[Visual progress bar or milestone chart]</code></pre>
+<hr class="section-divider">
+<h2>Cadence Guide — Who Gets What, When</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  STATUS UPDATE CADENCE                                       │
+│                                                              │
+│  DAILY (Standup — internal team only)                        │
+│  • What I did yesterday                                      │
+│  • What I'm doing today                                      │
+│  • Blockers (if any)                                         │
+│  Format: Verbal or Slack message (2 minutes)                 │
+│                                                              │
+│  WEEKLY (Status update — client + stakeholders)              │
+│  • Progress summary + metrics                                │
+│  • Blockers with owners                                      │
+│  • Decisions needed                                          │
+│  • Next week priorities                                      │
+│  Format: Written update (1 page max)                         │
+│                                                              │
+│  BIWEEKLY (Sprint review — team + stakeholders)              │
+│  • Demo of completed work                                    │
+│  • Sprint metrics (velocity, completion rate)                │
+│  • Retrospective highlights                                  │
+│  Format: Meeting + written summary                           │
+│                                                              │
+│  MONTHLY (Executive briefing — leadership)                   │
+│  • High-level progress + business metrics                    │
+│  • Budget status                                             │
+│  • Top 3 risks                                               │
+│  • Strategic decisions needed                                │
+│  Format: Written report (2 pages max)                        │
+│                                                              │
+│  AD HOC (Escalation — when status changes to RED)            │
+│  • What happened                                             │
+│  • Impact assessment                                         │
+│  • Mitigation plan                                           │
+│  • What you need from leadership                             │
+│  Format: Immediate message + follow-up document              │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Escalation Update Template</h2>
+
+When project status changes from Green/Yellow to Red:
+
+<pre class="code-block"><code># ESCALATION: [Project Name] — Status Change to RED
+
+<strong>Date:</strong> [Date]
+<strong>Escalated by:</strong> [Name]
+<strong>Escalated to:</strong> [Name, Title]
+<strong>Severity:</strong> CRITICAL / HIGH
+
+<h2>What Happened</h2>
+
+[2-3 sentences explaining the trigger event]
+
+<h2>Impact</h2>
+
+<ul class="skill-list"><li><strong>Timeline:</strong> [Original date] now at risk — projected slip of [X weeks]</li>
+<li><strong>Scope:</strong> [What is affected]</li>
+<li><strong>Users/Revenue:</strong> [Business impact]</li>
+
+</ul><h2>Root Cause</h2>
+
+[Brief explanation of why this happened]
+
+<h2>Immediate Actions Taken</h2>
+
+<ul class="skill-list"><li class="ordered">[Action already taken]</li>
+<li class="ordered">[Action already taken]</li>
+
+</ul><h2>What We Need</h2>
+
+<ul class="skill-list"><li class="ordered">[Specific ask — decision, resource, priority change]</li>
+<li class="ordered">[Specific ask]</li>
+
+</ul><h2>Options for Resolution</h2>
+<div class="table-wrap"><table><thead><tr><th>Option</th><th>Timeline Impact</th><th>Cost Impact</th><th>Risk</th><th></th></tr></thead><tbody><tr><td>A: [Approach]</td><td>[Impact]</td><td>[Cost]</td><td>[Risk]</td><td></td></tr><tr><td>B: [Approach]</td><td>[Impact]</td><td>[Cost]</td><td>[Risk]</td><td></td></tr></tbody></table></div>
+<strong>Recommended:</strong> Option [X] because [one sentence rationale]
+
+<h2>Next Check-In</h2>
+
+[Date and time for follow-up]</code></pre>
+<hr class="section-divider">
+<h2>Completeness Checklist</h2>
+
+<pre class="code-block"><code>STATUS UPDATE QUALITY CHECKLIST
+───────────────────────────────
+[ ] Health status (Green/Yellow/Red) stated in first line
+[ ] Summary can be understood without reading the rest
+[ ] Completed items listed with brief impact notes
+[ ] In-progress items have % completion and expected dates
+[ ] Metrics included with trend direction (up/down/flat)
+[ ] Metrics compared to target (not just shown in isolation)
+[ ] Every blocker has an owner and ETA
+[ ] Every blocker has a mitigation or escalation plan
+[ ] Risk register updated (new risks, changed risks, resolved risks)
+[ ] Decisions needed section lists specific options (not just &quot;we need input&quot;)
+[ ] Decision deadlines specified
+[ ] Next steps have owners and due dates
+[ ] Timeline confidence stated with conditions for change
+[ ] Update is 1 page or less (weekly) / 2 pages or less (monthly)
+[ ] No jargon that stakeholders won't understand
+[ ] Bad news presented honestly with mitigation plans</code></pre>
+<hr class="section-divider">
+<h2>Common Mistakes</h2>
+<div class="table-wrap"><table><thead><tr><th>Mistake</th><th>Impact</th><th>Prevention</th><th></th></tr></thead><tbody><tr><td>Burying bad news at the end</td><td>Stakeholder surprised, trust broken</td><td>Lead with the headline — good or bad</td><td></td></tr><tr><td>"Everything is fine" when it's not</td><td>Problems discovered too late to fix</td><td>Use the Green/Yellow/Red framework honestly</td><td></td></tr><tr><td>Blockers without owners</td><td>Nobody resolves them</td><td>Every blocker gets a name and a date</td><td></td></tr><tr><td>Too much detail</td><td>Stakeholders stop reading updates</td><td>1 page max for weekly, 2 pages for monthly</td><td></td></tr><tr><td>No decisions section</td><td>Stakeholders don't know you need their input</td><td>Always include — even if it says "No decisions needed"</td><td></td></tr><tr><td>Metrics without context</td><td>Numbers are meaningless without comparison</td><td>Always show trend, target, and change direction</td><td></td></tr><tr><td>Inconsistent cadence</td><td>Stakeholders lose confidence</td><td>Set a recurring calendar event and never skip</td><td></td></tr><tr><td>No escalation protocol</td><td>Project goes red without leadership knowing</td><td>Define and follow the escalation template</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Tips for Effective Status Updates</h2>
+
+<ul class="skill-list"><li class="ordered"><strong>Write the subject line like a headline</strong> — "[Project] Week 12: GREEN — Feature complete, entering QA" tells the full story</li>
+<li class="ordered"><strong>Assume the reader has 60 seconds</strong> — Front-load the most important information</li>
+<li class="ordered"><strong>Show, don't tell</strong> — "Completed 12 of 15 stories (80%)" beats "Good progress this week"</li>
+<li class="ordered"><strong>Track your predictions</strong> — If you said "95% confidence" last week and missed, explain why. This builds credibility over time</li>
+<li class="ordered"><strong>Celebrate wins publicly</strong> — Call out team members who delivered exceptional work</li>
+<li class="ordered"><strong>Use the same format every time</strong> — Consistency makes updates scannable. Readers know where to look for what they care about</li>
+<li class="ordered"><strong>Send on schedule, every time</strong> — A late status update signals chaos, even when the project is fine</li>
+<li class="ordered"><strong>Reply to questions in the next update</strong> — If a stakeholder asks a question on Tuesday, answer it in Friday's update (and directly via message)</li></ul>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="scope-negotiate.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">Scope Negotiate — From Wishlist to Agreed Deliverables</span></span></a>
+    <a href="user-story.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">User Story — From Requirement to Developer-Ready Stories</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    66 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

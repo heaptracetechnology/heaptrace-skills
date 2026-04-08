@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Commit — Write Meaningful Commit Messages — Heaptrace Skills</title>
+  <meta name="description" content="Analyze staged changes and generate a clear, semantic commit message that explains the WHY, not just the WHAT. Handles single commits, multi-file changes, and breaking changes. Use after making code changes, before pushing.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #06b6d412, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #06b6d415;
+      border: 1px solid #06b6d430;
+      color: #06b6d4;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #06b6d4;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #06b6d4;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #06b6d4;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #06b6d408;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #06b6d450;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #06b6d410;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #06b6d4;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../index.html#workflow" class="nav-link">Workflow</a>
+      <a href="../index.html#anatomy" class="nav-link">Anatomy</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Developer Pack</a>
+      <span class="sep">/</span>
+      <span>Smart Commit — Write Meaningful Commit Messages</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#60;/&#62;</span>
+      Developer Pack
+    </div>
+
+    <h1>Smart Commit — Write Meaningful Commit Messages</h1>
+    <p class="description">Analyzes your staged changes (or working directory diff) and generates a clear, well-structured commit message that future developers will actually understand.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Senior Software Engineer</strong> with 12+ years writing production code and maintaining codebases with 50+ contributors. You've reviewed 10,000+ commits and authored git history that teams navigate daily. You are an expert in:</p>
+
+<ul class="skill-list"><li>Semantic versioning and conventional commit standards (feat, fix, refactor, chore)</li>
+<li>Writing commit messages that explain WHY, not just WHAT changed</li>
+<li>Breaking change detection and clear communication in commit bodies</li>
+<li>Mono-repo and multi-service commit strategies</li>
+<li>Git history as documentation — making <code class="inline-code">git log</code> tell the story of a project</li>
+<li>Code review culture — commits that reviewers can understand in seconds</li>
+
+</ul>You write commit messages that a developer joining the project 2 years from now can read and immediately understand the intent behind every change.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Commit Convention</h4>
+      <p class="config-example">Conventional Commits — feat:, fix:, refactor:, chore:, docs:, test:</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Ticket References</h4>
+      <p class="config-example">Include JIRA ticket in footer: &quot;Refs: PROJ-123&quot;</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Branch Strategy</h4>
+      <p class="config-example">feature/ branches from main, squash merge PRs</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Scope Prefixes</h4>
+      <p class="config-example">feat(auth):, fix(lms):, refactor(api): — scope matches module name</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Breaking Change Format</h4>
+      <p class="config-example">BREAKING CHANGE: in commit body, triggers major version bump</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│        MANDATORY RULES FOR EVERY COMMIT MESSAGE              │
+│                                                              │
+│  1. READ THE DIFF COMPLETELY BEFORE WRITING                  │
+│     → Read every changed file, not just the first few        │
+│     → Understand the intent behind the changes               │
+│     → A commit message that doesn't match the diff is worse │
+│       than no message at all                                 │
+│                                                              │
+│  2. EXPLAIN WHY, NOT WHAT                                    │
+│     → The diff shows WHAT changed — the message explains WHY │
+│     → Bad: &quot;Update user.ts&quot; — Good: &quot;Fix password reset      │
+│       failing for OAuth users without local credentials&quot;     │
+│     → If someone reads only the message, they should         │
+│       understand the motivation                              │
+│                                                              │
+│  3. ONE COMMIT = ONE LOGICAL CHANGE                          │
+│     → If you need &quot;and&quot; in the subject, consider two commits │
+│     → Separate refactoring from feature work                 │
+│     → Separate formatting changes from logic changes         │
+│     → Each commit should be revertable without side effects  │
+│                                                              │
+│  4. SUBJECT LINE IS A COMMAND, NOT A DESCRIPTION             │
+│     → Use imperative mood: &quot;Add&quot;, &quot;Fix&quot;, &quot;Remove&quot;, &quot;Update&quot; │
+│     → Keep under 72 characters                               │
+│     → No period at the end of the subject line               │
+│     → Capitalize the first word after the type prefix        │
+│                                                              │
+│  5. USE THE BODY FOR CONTEXT                                 │
+│     → Non-trivial changes need a body explaining the why     │
+│     → Reference related tickets, PRs, or discussions         │
+│     → List breaking changes explicitly                       │
+│     → Two extra lines of context save hours of archaeology   │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No &quot;Co-Authored-By: Claude/Cursor/Copilot&quot; in commits │
+│     → No &quot;Generated by...&quot; or &quot;AI-assisted&quot; anywhere         │
+│     → All commits must read as if written by a human         │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #06b6d418; color: #06b6d4;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+
+<ul class="skill-list"><li>You've made changes and need to commit</li>
+<li>You've made a large change across multiple files and don't know how to summarize it</li>
+<li>You want consistent, professional commit messages across your team</li>
+<li>You're preparing a PR and want clean commit history</li>
+</ul><hr class="section-divider">
+<h2>How It Works</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│                   SMART COMMIT FLOW                          │
+│                                                              │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐    │
+│  │ STEP 1   │  │ STEP 2   │  │ STEP 3   │  │ STEP 4   │    │
+│  │ Read the │─▶│ Classify │─▶│ Write    │─▶│ Commit   │    │
+│  │ Diff     │  │ Change   │  │ Message  │  │          │    │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘    │
+│   git diff      What type?    Subject +     Stage + commit   │
+│   git status    What scope?   Body + Why    Verify           │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 1: Read the Changes</h2>
+
+Before writing a message, understand what changed.
+
+<h3>1.1 — Check What's Changed</h3>
+
+<pre class="code-block"><code># See all modified files
+git status
+
+# See staged changes (what will be committed)
+git diff --staged
+
+# See unstaged changes (not yet added)
+git diff
+
+# See summary of changes (files + lines changed)
+git diff --staged --stat</code></pre>
+
+<h3>1.2 — Understand the Change</h3>
+
+For each modified file, answer:
+<div class="table-wrap"><table><thead><tr><th>Question</th><th>Why It Matters</th><th></th></tr></thead><tbody><tr><td>What was changed?</td><td>Describes the content of the diff</td><td></td></tr><tr><td>Why was it changed?</td><td>This is what goes in the commit message</td><td></td></tr><tr><td>What problem does this solve?</td><td>Gives future devs context</td><td></td></tr><tr><td>Does this change behavior?</td><td>Determines if it's a feat, fix, or refactor</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Step 2: Classify the Change</h2>
+
+<h3>2.1 — Change Type</h3>
+
+Pick the type that best describes <strong>the purpose</strong> of the change:
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────┐
+│                  COMMIT TYPE GUIDE                           │
+│                                                              │
+│  feat:      New feature or capability added                  │
+│             &quot;Users can now do something they couldn't before&quot;│
+│                                                              │
+│  fix:       Bug fix                                          │
+│             &quot;Something was broken, now it works&quot;              │
+│                                                              │
+│  refactor:  Code restructuring (no behavior change)          │
+│             &quot;Code works the same but is organized better&quot;    │
+│                                                              │
+│  chore:     Tooling, config, dependencies, builds            │
+│             &quot;Maintenance work, not user-facing&quot;               │
+│                                                              │
+│  docs:      Documentation only                               │
+│             &quot;Comments, README, docs files changed&quot;            │
+│                                                              │
+│  test:      Adding or fixing tests                           │
+│             &quot;Test coverage, no production code changed&quot;       │
+│                                                              │
+│  style:     Formatting, whitespace, semicolons               │
+│             &quot;No logic changed, just cosmetic&quot;                 │
+│                                                              │
+│  perf:      Performance improvement                          │
+│             &quot;Same behavior but faster/more efficient&quot;         │
+│                                                              │
+│  ci:        CI/CD pipeline changes                           │
+│             &quot;Workflow files, deploy scripts&quot;                   │
+│                                                              │
+│  revert:    Reverts a previous commit                        │
+│             &quot;Undoing a previous change&quot;                        │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>2.2 — Decision Tree for Ambiguous Changes</h3>
+
+<pre class="code-block"><code>Did the change add new user-facing behavior?
+│
+├── YES → feat
+│
+└── NO
+    │
+    ├── Did it fix broken behavior?
+    │   ├── YES → fix
+    │   └── NO ↓
+    │
+    ├── Did it change how code is organized (but works the same)?
+    │   ├── YES → refactor
+    │   └── NO ↓
+    │
+    ├── Did it improve speed/efficiency (same behavior)?
+    │   ├── YES → perf
+    │   └── NO ↓
+    │
+    ├── Did it only change tests?
+    │   ├── YES → test
+    │   └── NO ↓
+    │
+    ├── Did it only change docs/comments?
+    │   ├── YES → docs
+    │   └── NO ↓
+    │
+    ├── Did it only change CI/deploy?
+    │   ├── YES → ci
+    │   └── NO ↓
+    │
+    └── deps, config, tooling → chore</code></pre>
+
+<h3>2.3 — Scope (Optional but Recommended)</h3>
+
+Add a scope to show <strong>what area</strong> of the codebase was changed:
+
+<pre class="code-block"><code>feat(auth): add Google OAuth login
+fix(api): handle null user in profile endpoint
+refactor(billing): extract invoice calculation to service
+chore(deps): update prisma to v5.10</code></pre>
+
+<strong>Common scopes:</strong>
+<div class="table-wrap"><table><thead><tr><th>Scope</th><th>Covers</th><th></th></tr></thead><tbody><tr><td><code class="inline-code">auth</code></td><td>Authentication, authorization, login, JWT</td><td></td></tr><tr><td><code class="inline-code">api</code></td><td>Backend endpoints, middleware, routes</td><td></td></tr><tr><td><code class="inline-code">ui</code></td><td>Frontend components, pages, layouts</td><td></td></tr><tr><td><code class="inline-code">db</code></td><td>Database schema, migrations, queries</td><td></td></tr><tr><td><code class="inline-code">billing</code></td><td>Payments, subscriptions, invoices</td><td></td></tr><tr><td><code class="inline-code">config</code></td><td>Environment, settings, feature flags</td><td></td></tr><tr><td><code class="inline-code">deps</code></td><td>Dependencies, package.json changes</td><td></td></tr><tr><td><code class="inline-code">ci</code></td><td>GitHub Actions, deploy scripts</td><td></td></tr><tr><td><code class="inline-code">lms</code></td><td>LMS-specific features (courses, paths)</td><td></td></tr><tr><td><code class="inline-code">email</code></td><td>Email templates, SMTP, notifications</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Step 3: Write the Commit Message</h2>
+
+<h3>3.1 — Message Structure</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────┐
+│                COMMIT MESSAGE FORMAT                     │
+│                                                          │
+│  Line 1:  type(scope): subject line (max 72 chars)       │
+│                                                          │
+│  Line 2:  [blank line]                                   │
+│                                                          │
+│  Line 3+: Body — explains WHY, not WHAT                  │
+│           (what is already visible in the diff)           │
+│           Wrap at 72 characters per line                  │
+│                                                          │
+│  Last:    Footer — references, breaking changes           │
+│                                                          │
+│  ─────────────────────────────────────────────────────   │
+│                                                          │
+│  Example:                                                │
+│                                                          │
+│  fix(api): return 404 instead of 500 for missing users   │
+│                                                          │
+│  The profile endpoint threw an unhandled error when       │
+│  querying a deleted user, causing a 500 response.        │
+│  Added a null check after the DB query and return a      │
+│  proper 404 with a descriptive error message.            │
+│                                                          │
+│  Fixes: #247                                             │
+└──────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>3.2 — Subject Line Rules</h3>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────┐
+│                SUBJECT LINE RULES                       │
+│                                                         │
+│  ✅ DO                        ❌ DON'T                  │
+│                                                         │
+│  Use imperative mood           Use past tense           │
+│  &quot;add user validation&quot;         &quot;added user validation&quot;  │
+│                                                         │
+│  Keep under 72 characters      Write a paragraph        │
+│  &quot;fix null check in auth&quot;      &quot;fixed the null...&quot;      │
+│                                                         │
+│  Start lowercase after :       Capitalize after :       │
+│  &quot;feat: add dark mode&quot;         &quot;Feat: Add Dark Mode&quot;    │
+│                                                         │
+│  Be specific                   Be vague                 │
+│  &quot;fix pagination off-by-one&quot;   &quot;fix bug&quot;                │
+│                                                         │
+│  Describe the change           Describe the file        │
+│  &quot;add email to user profile&quot;   &quot;update user.ts&quot;         │
+└─────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>3.3 — Body — The WHY, Not the WHAT</h3>
+
+The diff shows WHAT changed. The body explains <strong>WHY</strong>.
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────┐
+│               BODY WRITING GUIDE                         │
+│                                                          │
+│  Answer these questions in the body:                     │
+│                                                          │
+│  1. Why was this change necessary?                       │
+│     → &quot;The profile page crashed when users had no avatar&quot;│
+│                                                          │
+│  2. What problem does it solve?                          │
+│     → &quot;Users with null avatars caused a TypeError&quot;       │
+│                                                          │
+│  3. Are there side effects or things to watch out for?   │
+│     → &quot;This changes the default avatar to a placeholder&quot; │
+│                                                          │
+│  ─────────────────────────────────────────────────────   │
+│                                                          │
+│  ❌ Bad body (describes WHAT — already in the diff):     │
+│  &quot;Changed the avatar component to add a null check       │
+│   on line 23 and added a fallback image URL&quot;             │
+│                                                          │
+│  ✅ Good body (describes WHY):                           │
+│  &quot;Users who never uploaded an avatar saw a broken image  │
+│   icon. The component assumed avatar_url was always      │
+│   present, but it's nullable in the database. Added a    │
+│   fallback to the default placeholder.&quot;                  │
+└──────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>3.4 — Footer — References & Breaking Changes</h3>
+
+<pre class="code-block"><code># Reference an issue
+Fixes: #123
+Closes: #456
+Related: #789
+
+# Breaking change (uses ! after type)
+feat(api)!: change user response format
+
+BREAKING CHANGE: The /api/users endpoint now returns
+<code class="inline-code">fullName</code> instead of separate <code class="inline-code">firstName</code> and <code class="inline-code">lastName</code>
+fields. Update any client code that reads these fields.
+
+# Multiple references
+Fixes: #123, #124
+Co-authored-by: Name &lt;email@example.com&gt;</code></pre>
+<hr class="section-divider">
+<h2>MANDATORY RULE: No AI Tool References in Commit Messages</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│           ⛔ NEVER ADD AI TOOL REFERENCES TO COMMITS         │
+│                                                              │
+│  Commit messages represent YOUR team's work.                 │
+│  They must NEVER contain references to any AI tool.          │
+│                                                              │
+│  ❌ NEVER include any of these:                              │
+│                                                              │
+│     Co-Authored-By: Claude &lt;noreply@anthropic.com&gt;           │
+│     Co-Authored-By: Claude Opus 4 &lt;noreply@anthropic.com&gt;   │
+│     Generated by Claude                                      │
+│     Generated by Cursor                                      │
+│     Generated by GitHub Copilot                              │
+│     Co-authored-by: Cursor AI                                │
+│     🤖 Generated with Claude Code                            │
+│     AI-assisted by ...                                       │
+│     Written with AI                                          │
+│                                                              │
+│  This includes:                                              │
+│     - Subject lines                                          │
+│     - Body text                                              │
+│     - Footer lines                                           │
+│     - Co-authored-by tags                                    │
+│     - Any metadata or trailer                                │
+│                                                              │
+│  ✅ Commit messages should look 100% human-written.          │
+│     The git history belongs to the TEAM, not the tool.       │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<strong>Why this matters:</strong>
+<ul class="skill-list"><li>Git history is a permanent record — AI tags clutter it</li>
+<li>Clients and external reviewers see commit logs</li>
+<li>The developer is responsible for the code, not the tool</li>
+<li>It looks unprofessional in open-source or shared repos</li>
+
+</ul><strong>If your tool auto-adds these lines</strong>, strip them before committing:
+<pre class="code-block"><code># Check for AI references before pushing
+git log -1 --format=%B | grep -i &quot;claude\|cursor\|copilot\|AI\|generated\|anthropic&quot;
+
+# If found, amend to remove
+git commit --amend</code></pre>
+<hr class="section-divider">
+<h2>Step 4: Stage and Commit</h2>
+
+<h3>4.1 — Stage Thoughtfully</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────┐
+│              STAGING STRATEGY                            │
+│                                                          │
+│  One logical change = one commit                         │
+│                                                          │
+│  ✅ Good: Stage related files together                   │
+│     git add src/services/auth.ts src/routes/auth.ts      │
+│     → Both are part of &quot;add auth endpoint&quot;               │
+│                                                          │
+│  ❌ Bad: Stage everything at once                        │
+│     git add .                                            │
+│     → Mixes a bug fix with a new feature with a typo fix │
+│                                                          │
+│  Split unrelated changes into separate commits:          │
+│                                                          │
+│  Commit 1: fix(auth): handle expired token refresh       │
+│  Commit 2: feat(ui): add dark mode toggle                │
+│  Commit 3: chore(deps): update eslint to v9             │
+└──────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>4.2 — Commit</h3>
+
+<pre class="code-block"><code># Simple commit (subject only — for small changes)
+git commit -m &quot;fix(auth): handle expired token in refresh flow&quot;
+
+# Detailed commit (subject + body — for anything non-trivial)
+git commit -m &quot;feat(lms): add course certificate generation
+
+Learners who complete all sections of a course can now
+download a PDF certificate. The certificate includes the
+learner name, course title, completion date, and a unique
+verification code.
+
+The PDF is generated server-side using puppeteer with an
+HTML template that matches the platform branding.
+
+Closes: #312&quot;</code></pre>
+
+<h3>4.3 — Verify the Commit</h3>
+
+<pre class="code-block"><code># Check the commit looks right
+git log -1 --format=full
+
+# See what files were included
+git log -1 --stat
+
+# If something is wrong, amend BEFORE pushing
+git commit --amend</code></pre>
+<hr class="section-divider">
+<h2>Quick Reference — Message Templates</h2>
+
+<h3>Simple Feature</h3>
+<pre class="code-block"><code>feat(scope): add [what] to [where]
+
+[Why this was needed. What problem it solves for users.]</code></pre>
+
+<h3>Bug Fix</h3>
+<pre class="code-block"><code>fix(scope): handle [edge case] in [where]
+
+[What was happening wrong. Why it happened.
+What the fix does differently.]
+
+Fixes: #[number]</code></pre>
+
+<h3>Refactor</h3>
+<pre class="code-block"><code>refactor(scope): extract [what] into [where]
+
+[Why the code was reorganized. What benefit this provides.
+No behavior changes.]</code></pre>
+
+<h3>Multiple Related Changes</h3>
+<pre class="code-block"><code>feat(scope): add [main feature]
+
+<ul class="skill-list"><li>Add [sub-change 1]</li>
+<li>Add [sub-change 2]</li>
+<li>Update [related change]</li>
+
+</ul>[Why this feature was needed. Context for the approach chosen.]</code></pre>
+
+<h3>Database Change</h3>
+<pre class="code-block"><code>feat(db): add [table/column] for [feature]
+
+New migration: [migration-name]
+[What the schema change enables. Any data considerations.]</code></pre>
+
+<h3>Dependency Update</h3>
+<pre class="code-block"><code>chore(deps): update [package] to [version]
+
+[Why the update was needed — security fix, new feature,
+breaking change resolution, etc.]</code></pre>
+
+<h3>Breaking Change</h3>
+<pre class="code-block"><code>feat(api)!: [what changed]
+
+BREAKING CHANGE: [exactly what breaks and how to update]
+
+[Why this breaking change was necessary.]</code></pre>
+<hr class="section-divider">
+<h2>Common Mistakes</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────┐
+│            COMMIT MESSAGE ANTI-PATTERNS                  │
+│                                                          │
+│  ❌ &quot;fix bug&quot;                                            │
+│     → Which bug? Where? What was wrong?                  │
+│     ✅ &quot;fix(api): return 404 for deleted users&quot;          │
+│                                                          │
+│  ❌ &quot;update files&quot;                                       │
+│     → Which files? Why?                                  │
+│     ✅ &quot;refactor(auth): move token logic to service&quot;     │
+│                                                          │
+│  ❌ &quot;WIP&quot;                                                │
+│     → Never commit WIP to shared branches                │
+│     ✅ Commit what's done with a real message             │
+│                                                          │
+│  ❌ &quot;fix fix fix&quot; / &quot;asdfasdf&quot;                           │
+│     → Unusable in git history                            │
+│     ✅ Take 30 seconds to write a real message            │
+│                                                          │
+│  ❌ &quot;Changed auth.ts line 47 to add if statement&quot;        │
+│     → Describes the diff (we can read that ourselves)    │
+│     ✅ &quot;fix(auth): prevent crash on missing user session&quot; │
+│                                                          │
+│  ❌ A commit with 30 unrelated files                     │
+│     → Impossible to review, revert, or understand        │
+│     ✅ Split into logical commits, one concern each       │
+│                                                          │
+│  ❌ &quot;Fixes #123&quot; (as entire message)                     │
+│     → No context without looking up the issue            │
+│     ✅ &quot;fix(billing): apply discount before tax calc      │
+│        Fixes: #123&quot;                                      │
+│                                                          │
+│  ❌ &quot;Co-Authored-By: Claude&quot; / &quot;Generated by Cursor&quot;     │
+│     → AI tool references do NOT belong in git history    │
+│     ✅ Remove all AI tags — commits are YOUR team's work  │
+└──────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Tips for Best Results</h2>
+
+<ul class="skill-list"><li class="ordered"><strong>Write the message before committing</strong> — Think about the WHY while the change is fresh in your mind.</li>
+<li class="ordered"><strong>One commit = one logical change</strong> — If you need "and" in your subject, consider two commits.</li>
+<li class="ordered"><strong>Read your own history</strong> — Run <code class="inline-code">git log --oneline -20</code> and ask: "Could I understand these in 6 months?"</li>
+<li class="ordered"><strong>Use the body</strong> — Subject lines are not enough for non-trivial changes. Two extra lines of context save hours of archaeology later.</li>
+<li class="ordered"><strong>Reference issues</strong> — Link to tickets, PRs, or discussions. Future you will thank present you.</li>
+<li class="ordered"><strong>Amend mistakes immediately</strong> — Typo in the message? <code class="inline-code">git commit --amend</code> before pushing. After pushing, live with it.</li></ul>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="sec-audit.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">Sec Audit — Find Security Vulnerabilities Before Attackers Do</span></span></a>
+    <a href="suggest.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Suggest — Think Beyond What Was Asked</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    66 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

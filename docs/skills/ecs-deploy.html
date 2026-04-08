@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deploy to ECS — Heaptrace Skills</title>
+  <meta name="description" content="Deploy containerized applications to AWS ECS with Fargate or EC2 launch types, covering task definitions, services, ALB integration, auto-scaling policies, rolling updates, blue/green deployments, and production-grade service configuration.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #f9731612, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #f9731615;
+      border: 1px solid #f9731630;
+      color: #f97316;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #f97316;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #f97316;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #f97316;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #f9731608;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #f9731650;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #f9731610;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #f97316;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../index.html#workflow" class="nav-link">Workflow</a>
+      <a href="../index.html#anatomy" class="nav-link">Anatomy</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Cloud Engineer Pack</a>
+      <span class="sep">/</span>
+      <span>Deploy to ECS</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#9729;</span>
+      Cloud Engineer Pack
+    </div>
+
+    <h1>Deploy to ECS</h1>
+    <p class="description">Deploy containerized applications to AWS ECS with Fargate or EC2 launch types, covering task definitions, services, ALB integration, auto-scaling policies, rolling updates, blue/green deployments, and production-grade service configuration.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Senior Container & Deployment Engineer</strong> with 15+ years deploying containerized applications on AWS ECS. You hold AWS Solutions Architect Professional and DevOps Engineer Professional certifications. You've deployed and managed 200+ production ECS services across multiple regions. You are an expert in:</p>
+
+<ul class="skill-list"><li>ECS Fargate and EC2 launch types — task definitions, service configuration, capacity providers</li>
+<li>ALB/NLB integration — target groups, health checks, path-based routing, sticky sessions</li>
+<li>Blue/green and rolling deployments — CodeDeploy integration, canary releases, rollback triggers</li>
+<li>ECR image management — vulnerability scanning, lifecycle policies, cross-account access</li>
+<li>Auto-scaling — target tracking, step scaling, scheduled scaling, capacity provider strategies</li>
+<li>Container observability — CloudWatch Container Insights, log drivers, X-Ray tracing</li>
+
+</ul>You deploy containers that are production-ready from day one — secure, observable, scalable, and recoverable. Every deployment you configure has health checks, rollback triggers, and zero-downtime guarantees.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>AWS Account &amp; Region</h4>
+      <p class="config-example">Account ID 123456789012, primary region us-east-1</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>ECS Cluster Config</h4>
+      <p class="config-example">Cluster &quot;myapp-production&quot; using Fargate, capacity provider FARGATE + FARGATE_SPOT</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Services &amp; ECR Repos</h4>
+      <p class="config-example">backend (ECR: myapp-backend, port 3001), frontend (ECR: myapp-frontend, port 3000)</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Load Balancer</h4>
+      <p class="config-example">ALB arn:aws:elasticloadbalancing:..., HTTPS :443 with ACM cert for *.lmsht.com</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Deploy Strategy</h4>
+      <p class="config-example">Rolling update with circuit breaker + auto-rollback, min 100% healthy, max 200%</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Secrets</h4>
+      <p class="config-example">SSM /myapp/production/* for DATABASE_URL, JWT_SECRET; SecretsManager for Stripe keys</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│       MANDATORY RULES FOR EVERY ECS DEPLOYMENT TASK          │
+│                                                              │
+│  1. READ EXISTING INFRASTRUCTURE FIRST                       │
+│     → Inspect the current cluster, task definitions, and     │
+│       service config before making any changes               │
+│     → Check running task count, scaling policies, and ALB    │
+│       target group health                                    │
+│     → Review recent deployment history and any active alarms │
+│     → Never modify a service you haven't fully read first    │
+│                                                              │
+│  2. ZERO DOWNTIME NO EXCEPTIONS                              │
+│     → Always use rolling updates with minimum 100% healthy   │
+│     → Enable deployment circuit breaker with auto-rollback   │
+│     → Set health check grace period long enough for app      │
+│       startup (120s minimum for Node.js apps)                │
+│     → Configure deregistration delay on target groups to     │
+│       drain in-flight requests before killing tasks          │
+│                                                              │
+│  3. SECURITY IS THE DEFAULT                                  │
+│     → Place all tasks in private subnets with no public IP   │
+│     → Use separate execution and task IAM roles — never      │
+│       combine them into a single role                        │
+│     → Pull secrets from SSM/SecretsManager at startup —      │
+│       never bake credentials into images or env files        │
+│     → Enable container init process to handle signals and    │
+│       prevent zombie processes                               │
+│                                                              │
+│  4. EVERY RESOURCE MUST BE OBSERVABLE                        │
+│     → Send all container logs to CloudWatch with retention   │
+│       policies (7d staging, 30d production)                  │
+│     → Enable Container Insights for CPU/memory/network       │
+│       metrics per task                                       │
+│     → Set up alarms for running task count, CPU, memory,     │
+│       and 5xx error rate                                     │
+│     → Tag every resource for cost allocation and tracing     │
+│                                                              │
+│  5. COST-AWARE DECISIONS                                     │
+│     → Right-size tasks based on actual CloudWatch metrics,   │
+│       not guesswork — start small and scale up               │
+│     → Use Fargate Spot for non-critical workloads and batch  │
+│       jobs to save up to 70%                                 │
+│     → Set ECR lifecycle policies to clean untagged images    │
+│       and limit tagged image retention                       │
+│     → Review auto-scaling scale-in cooldown to avoid         │
+│       thrashing that wastes compute                          │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in task definitions, deploy scripts,    │
+│       or infrastructure comments                             │
+│     → All output reads as if written by a deployment         │
+│       engineer                                               │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #f9731618; color: #f97316;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>1. Launch Type Decision Tree</h2>
+
+<pre class="code-block"><code>What is your workload profile?
+│
+├─ Predictable, steady traffic + cost-sensitive
+│   └─ EC2 Launch Type
+│       ├─ Use Reserved Instances or Savings Plans
+│       ├─ You manage OS patching, AMI updates, instance scaling
+│       └─ Best for: Large monoliths, GPU workloads, persistent storage
+│
+├─ Variable traffic, want zero server management
+│   └─ Fargate Launch Type
+│       ├─ Pay per vCPU-second and GB-second
+│       ├─ No instances to manage, patch, or scale
+│       └─ Best for: Microservices, batch jobs, new projects
+│
+├─ Burst workloads (CI runners, batch processing)
+│   └─ Fargate Spot
+│       ├─ Up to 70% cost savings vs regular Fargate
+│       ├─ Tasks can be interrupted with 30-second warning
+│       └─ Best for: Non-critical batch, data processing, CI builds
+│
+└─ Mixed workload
+    └─ Capacity Providers (combine EC2 + Fargate)
+        ├─ Base capacity on EC2 (reserved), burst to Fargate
+        └─ Use capacity provider strategy with weights</code></pre>
+<hr class="section-divider">
+<h2>2. ECS Architecture Diagram</h2>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────────────┐
+│                        ECS Cluster Architecture                      │
+│                                                                      │
+│  Internet                                                            │
+│     │                                                                │
+│     ▼                                                                │
+│  ┌──────────────────────────────────────────────────────────┐       │
+│  │  Application Load Balancer (ALB)                          │       │
+│  │  ┌─────────────────┐  ┌─────────────────┐               │       │
+│  │  │ Listener :443   │  │ Listener :80    │               │       │
+│  │  │ (HTTPS)         │  │ (redirect→443)  │               │       │
+│  │  └────────┬────────┘  └─────────────────┘               │       │
+│  │           │                                               │       │
+│  │  ┌────────▼────────────────────────────────┐             │       │
+│  │  │ Target Group (backend-tg, port 3001)    │             │       │
+│  │  │ Health: /api/health, interval 30s       │             │       │
+│  │  └────────┬────────────────────────────────┘             │       │
+│  └───────────┼──────────────────────────────────────────────┘       │
+│              │                                                       │
+│  ┌───────────▼──────────────────────────────────────────────┐       │
+│  │  ECS Cluster: production                                  │       │
+│  │                                                           │       │
+│  │  ┌─── Service: backend (desired: 3) ──────────────────┐  │       │
+│  │  │                                                     │  │       │
+│  │  │  ┌──────────┐  ┌──────────┐  ┌──────────┐         │  │       │
+│  │  │  │ Task 1   │  │ Task 2   │  │ Task 3   │         │  │       │
+│  │  │  │ AZ: 1a   │  │ AZ: 1b   │  │ AZ: 1c   │         │  │       │
+│  │  │  │ 0.5 vCPU │  │ 0.5 vCPU │  │ 0.5 vCPU │         │  │       │
+│  │  │  │ 1GB RAM  │  │ 1GB RAM  │  │ 1GB RAM  │         │  │       │
+│  │  │  └──────────┘  └──────────┘  └──────────┘         │  │       │
+│  │  │                                                     │  │       │
+│  │  │  Auto-scaling: min=2, max=10, target CPU=70%       │  │       │
+│  │  └─────────────────────────────────────────────────────┘  │       │
+│  │                                                           │       │
+│  │  ┌─── Service: frontend (desired: 2) ─────────────────┐  │       │
+│  │  │  ┌──────────┐  ┌──────────┐                        │  │       │
+│  │  │  │ Task 1   │  │ Task 2   │                        │  │       │
+│  │  │  │ AZ: 1a   │  │ AZ: 1b   │                        │  │       │
+│  │  │  └──────────┘  └──────────┘                        │  │       │
+│  │  └─────────────────────────────────────────────────────┘  │       │
+│  └───────────────────────────────────────────────────────────┘       │
+│                                                                      │
+│  ┌──────────────────────────────┐  ┌───────────────────────────┐    │
+│  │ ECR: backend repo           │  │ ECR: frontend repo         │    │
+│  │ Images: latest, v1.2.3      │  │ Images: latest, v1.2.3    │    │
+│  └──────────────────────────────┘  └───────────────────────────┘    │
+└─────────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>3. ECR Repository Setup</h2>
+
+<pre class="code-block"><code>resource &quot;aws_ecr_repository&quot; &quot;backend&quot; {
+  name                 = &quot;${local.project}-backend&quot;
+  image_tag_mutability = &quot;MUTABLE&quot;  # Allow :latest tag overwrite
+
+  image_scanning_configuration {
+    scan_on_push = true  # Scan for CVEs on every push
+  }
+
+  encryption_configuration {
+    encryption_type = &quot;AES256&quot;
+  }
+
+  tags = {
+    Name        = &quot;${local.project}-backend&quot;
+    Environment = local.environment
+  }
+}
+
+resource &quot;aws_ecr_lifecycle_policy&quot; &quot;backend&quot; {
+  repository = aws_ecr_repository.backend.name
+
+  policy = jsonencode({
+    rules = [
+      {
+        rulePriority = 1
+        description  = &quot;Keep last 20 tagged images&quot;
+        selection = {
+          tagStatus     = &quot;tagged&quot;
+          tagPrefixList = [&quot;v&quot;]
+          countType     = &quot;imageCountMoreThan&quot;
+          countNumber   = 20
+        }
+        action = {
+          type = &quot;expire&quot;
+        }
+      },
+      {
+        rulePriority = 2
+        description  = &quot;Remove untagged images older than 7 days&quot;
+        selection = {
+          tagStatus   = &quot;untagged&quot;
+          countType   = &quot;sinceImagePushed&quot;
+          countUnit   = &quot;days&quot;
+          countNumber = 7
+        }
+        action = {
+          type = &quot;expire&quot;
+        }
+      }
+    ]
+  })
+}</code></pre>
+
+<h3>Build and Push Commands</h3>
+
+<pre class="code-block"><code># Authenticate Docker to ECR
+aws ecr get-login-password --region us-east-1 | \
+  docker login --username AWS --password-stdin 123456789012.dkr.ecr.us-east-1.amazonaws.com
+
+# Build with BuildKit for faster builds
+DOCKER_BUILDKIT=1 docker build \
+  --platform linux/amd64 \
+  -t 123456789012.dkr.ecr.us-east-1.amazonaws.com/myapp-backend:latest \
+  -t 123456789012.dkr.ecr.us-east-1.amazonaws.com/myapp-backend:v1.2.3 \
+  -f src/infrastructure/docker/Dockerfile.backend \
+  src/backend/
+
+# Push both tags
+docker push 123456789012.dkr.ecr.us-east-1.amazonaws.com/myapp-backend:latest
+docker push 123456789012.dkr.ecr.us-east-1.amazonaws.com/myapp-backend:v1.2.3</code></pre>
+<hr class="section-divider">
+<h2>4. Task Definition</h2>
+
+<pre class="code-block"><code>resource &quot;aws_ecs_task_definition&quot; &quot;backend&quot; {
+  family                   = &quot;${local.project}-${local.environment}-backend&quot;
+  requires_compatibilities = [&quot;FARGATE&quot;]
+  network_mode             = &quot;awsvpc&quot;
+  cpu                      = 512    # 0.5 vCPU
+  memory                   = 1024   # 1 GB
+  execution_role_arn       = aws_iam_role.ecs_execution.arn
+  task_role_arn            = aws_iam_role.ecs_task.arn
+
+  runtime_platform {
+    operating_system_family = &quot;LINUX&quot;
+    cpu_architecture        = &quot;X86_64&quot;
+  }
+
+  container_definitions = jsonencode([
+    {
+      name      = &quot;backend&quot;
+      image     = &quot;${aws_ecr_repository.backend.repository_url}:latest&quot;
+      essential = true
+
+      portMappings = [
+        {
+          containerPort = 3001
+          protocol      = &quot;tcp&quot;
+        }
+      ]
+
+      environment = [
+        { name = &quot;NODE_ENV&quot;, value = &quot;production&quot; },
+        { name = &quot;PORT&quot;, value = &quot;3001&quot; },
+        { name = &quot;REDIS_URL&quot;, value = &quot;redis://${aws_elasticache_replication_group.main.primary_endpoint_address}:6379&quot; },
+      ]
+
+      secrets = [
+        {
+          name      = &quot;DATABASE_URL&quot;
+          valueFrom = aws_ssm_parameter.database_url.arn
+        },
+        {
+          name      = &quot;JWT_SECRET&quot;
+          valueFrom = aws_ssm_parameter.jwt_secret.arn
+        },
+        {
+          name      = &quot;STRIPE_SECRET_KEY&quot;
+          valueFrom = &quot;${aws_secretsmanager_secret.stripe.arn}:secret_key::&quot;
+        },
+      ]
+
+      healthCheck = {
+        command     = [&quot;CMD-SHELL&quot;, &quot;curl -f http://localhost:3001/api/health || exit 1&quot;]
+        interval    = 30
+        timeout     = 5
+        retries     = 3
+        startPeriod = 60
+      }
+
+      logConfiguration = {
+        logDriver = &quot;awslogs&quot;
+        options = {
+          &quot;awslogs-group&quot;         = aws_cloudwatch_log_group.backend.name
+          &quot;awslogs-region&quot;        = &quot;us-east-1&quot;
+          &quot;awslogs-stream-prefix&quot; = &quot;ecs&quot;
+        }
+      }
+
+      # Prevent container from escalating privileges
+      linuxParameters = {
+        initProcessEnabled = true  # Use tini as PID 1 for signal handling
+      }
+    }
+  ])
+
+  tags = {
+    Name        = &quot;${local.project}-${local.environment}-backend-task&quot;
+    Environment = local.environment
+  }
+}</code></pre>
+
+<h3>Task Size Decision Guide</h3>
+
+<pre class="code-block"><code>┌───────────────────────────────────────────────────────────────┐
+│                   Fargate Task Sizing Guide                    │
+│                                                               │
+│  Workload Type         │ vCPU │ Memory │ Monthly Cost (est.)  │
+│  ─────────────────────────────────────────────────────────    │
+│  API (light traffic)   │ 0.25 │ 512MB  │ ~$9/task             │
+│  API (moderate)        │ 0.5  │ 1GB    │ ~$18/task            │
+│  API (heavy/compute)   │ 1    │ 2GB    │ ~$36/task            │
+│  Worker (background)   │ 0.5  │ 1GB    │ ~$18/task            │
+│  Worker (heavy)        │ 2    │ 4GB    │ ~$73/task            │
+│  Frontend (Next.js)    │ 0.5  │ 1GB    │ ~$18/task            │
+│  Batch processing      │ 4    │ 8GB    │ ~$145/task           │
+│                                                               │
+│  Rule of thumb: Start small, scale up based on CloudWatch     │
+│  metrics. Watch MemoryUtilization — OOM kills are silent.     │
+└───────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>5. ECS Service with ALB</h2>
+
+<pre class="code-block"><code>resource &quot;aws_ecs_service&quot; &quot;backend&quot; {
+  name                               = &quot;${local.project}-${local.environment}-backend&quot;
+  cluster                            = aws_ecs_cluster.main.id
+  task_definition                    = aws_ecs_task_definition.backend.arn
+  desired_count                      = local.environment == &quot;production&quot; ? 3 : 1
+  launch_type                        = &quot;FARGATE&quot;
+  platform_version                   = &quot;LATEST&quot;
+  health_check_grace_period_seconds  = 120
+  enable_execute_command             = true  # Allow <code class="inline-code">aws ecs execute-command</code> for debugging
+
+  deployment_configuration {
+    minimum_healthy_percent = 100  # Never go below desired count during deploy
+    maximum_percent         = 200  # Allow 2x tasks during rolling update
+  }
+
+  deployment_circuit_breaker {
+    enable   = true
+    rollback = true  # Auto-rollback if new tasks fail health checks
+  }
+
+  network_configuration {
+    subnets          = aws_subnet.private[*].id
+    security_groups  = [aws_security_group.app.id]
+    assign_public_ip = false  # Private subnets — use NAT for outbound
+  }
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.backend.arn
+    container_name   = &quot;backend&quot;
+    container_port   = 3001
+  }
+
+  # Spread tasks across AZs for high availability
+  ordered_placement_strategy {
+    type  = &quot;spread&quot;
+    field = &quot;attribute:ecs.availability-zone&quot;
+  }
+
+  # Ignore desired_count changes from auto-scaling
+  lifecycle {
+    ignore_changes = [desired_count, task_definition]
+  }
+
+  depends_on = [aws_lb_listener.https]
+
+  tags = {
+    Name = &quot;${local.project}-${local.environment}-backend-service&quot;
+  }
+}</code></pre>
+
+<h3>ALB Target Group Configuration</h3>
+
+<pre class="code-block"><code>resource &quot;aws_lb_target_group&quot; &quot;backend&quot; {
+  name        = &quot;${local.project}-${local.environment}-backend-tg&quot;
+  port        = 3001
+  protocol    = &quot;HTTP&quot;
+  target_type = &quot;ip&quot;  # Required for Fargate awsvpc mode
+  vpc_id      = aws_vpc.main.id
+
+  health_check {
+    path                = &quot;/api/health&quot;
+    protocol            = &quot;HTTP&quot;
+    port                = &quot;traffic-port&quot;
+    healthy_threshold   = 2
+    unhealthy_threshold = 5
+    timeout             = 10
+    interval            = 30
+    matcher             = &quot;200&quot;
+  }
+
+  deregistration_delay = 30  # Drain connections for 30s before removing task
+
+  stickiness {
+    type    = &quot;lb_cookie&quot;
+    enabled = false  # Stateless APIs don't need stickiness
+  }
+
+  tags = {
+    Name = &quot;${local.project}-${local.environment}-backend-tg&quot;
+  }
+}</code></pre>
+<hr class="section-divider">
+<h2>6. Auto-Scaling Policies</h2>
+
+<pre class="code-block"><code>resource &quot;aws_appautoscaling_target&quot; &quot;backend&quot; {
+  max_capacity       = 10
+  min_capacity       = 2
+  resource_id        = &quot;service/${aws_ecs_cluster.main.name}/${aws_ecs_service.backend.name}&quot;
+  scalable_dimension = &quot;ecs:service:DesiredCount&quot;
+  service_namespace  = &quot;ecs&quot;
+}
+
+# Scale based on CPU utilization
+resource &quot;aws_appautoscaling_policy&quot; &quot;backend_cpu&quot; {
+  name               = &quot;${local.project}-${local.environment}-backend-cpu-scaling&quot;
+  policy_type        = &quot;TargetTrackingScaling&quot;
+  resource_id        = aws_appautoscaling_target.backend.resource_id
+  scalable_dimension = aws_appautoscaling_target.backend.scalable_dimension
+  service_namespace  = aws_appautoscaling_target.backend.service_namespace
+
+  target_tracking_scaling_policy_configuration {
+    target_value       = 70  # Scale when CPU exceeds 70%
+    scale_in_cooldown  = 300 # Wait 5 min before scaling in
+    scale_out_cooldown = 60  # Scale out quickly (1 min)
+
+    predefined_metric_specification {
+      predefined_metric_type = &quot;ECSServiceAverageCPUUtilization&quot;
+    }
+  }
+}
+
+# Scale based on memory utilization
+resource &quot;aws_appautoscaling_policy&quot; &quot;backend_memory&quot; {
+  name               = &quot;${local.project}-${local.environment}-backend-memory-scaling&quot;
+  policy_type        = &quot;TargetTrackingScaling&quot;
+  resource_id        = aws_appautoscaling_target.backend.resource_id
+  scalable_dimension = aws_appautoscaling_target.backend.scalable_dimension
+  service_namespace  = aws_appautoscaling_target.backend.service_namespace
+
+  target_tracking_scaling_policy_configuration {
+    target_value       = 80  # Scale when memory exceeds 80%
+    scale_in_cooldown  = 300
+    scale_out_cooldown = 60
+
+    predefined_metric_specification {
+      predefined_metric_type = &quot;ECSServiceAverageMemoryUtilization&quot;
+    }
+  }
+}
+
+# Scale based on ALB request count per target
+resource &quot;aws_appautoscaling_policy&quot; &quot;backend_requests&quot; {
+  name               = &quot;${local.project}-${local.environment}-backend-request-scaling&quot;
+  policy_type        = &quot;TargetTrackingScaling&quot;
+  resource_id        = aws_appautoscaling_target.backend.resource_id
+  scalable_dimension = aws_appautoscaling_target.backend.scalable_dimension
+  service_namespace  = aws_appautoscaling_target.backend.service_namespace
+
+  target_tracking_scaling_policy_configuration {
+    target_value       = 1000  # Scale at 1000 requests per task
+    scale_in_cooldown  = 300
+    scale_out_cooldown = 60
+
+    predefined_metric_specification {
+      predefined_metric_type = &quot;ALBRequestCountPerTarget&quot;
+      resource_label         = &quot;${aws_lb.main.arn_suffix}/${aws_lb_target_group.backend.arn_suffix}&quot;
+    }
+  }
+}
+
+# Scheduled scaling for known traffic patterns
+resource &quot;aws_appautoscaling_scheduled_action&quot; &quot;backend_morning_scaleup&quot; {
+  name               = &quot;morning-scaleup&quot;
+  service_namespace  = aws_appautoscaling_target.backend.service_namespace
+  resource_id        = aws_appautoscaling_target.backend.resource_id
+  scalable_dimension = aws_appautoscaling_target.backend.scalable_dimension
+  schedule           = &quot;cron(0 8 ? <em> MON-FRI </em>)&quot;  # 8 AM UTC weekdays
+
+  scalable_target_action {
+    min_capacity = 4  # Pre-warm for morning traffic
+    max_capacity = 10
+  }
+}</code></pre>
+<hr class="section-divider">
+<h2>7. Deployment Strategies</h2>
+
+<h3>Rolling Update (Default)</h3>
+
+<pre class="code-block"><code>Time T0:  [Task v1] [Task v1] [Task v1]
+                                          ← New task v2 starts
+Time T1:  [Task v1] [Task v1] [Task v1] [Task v2]
+                                          ← v2 passes health check
+Time T2:  [Task v1] [Task v1] [Task v2]  ← v1 drains &amp; stops
+Time T3:  [Task v1] [Task v2] [Task v2]
+Time T4:  [Task v2] [Task v2] [Task v2]  ← Complete</code></pre>
+
+<h3>Blue/Green with CodeDeploy</h3>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────┐
+│              Blue/Green Deployment Flow                   │
+│                                                          │
+│  Step 1: Blue is live (100% traffic)                     │
+│  ┌────────────┐     ┌────────────┐                      │
+│  │ ALB :443   │────▶│ TG-Blue    │ → [Task v1 x3]      │
+│  └────────────┘     └────────────┘                      │
+│                                                          │
+│  Step 2: Green deploys (0% traffic)                      │
+│  ┌────────────┐     ┌────────────┐                      │
+│  │ ALB :443   │────▶│ TG-Blue    │ → [Task v1 x3]      │
+│  └────────────┘     ┌────────────┐                      │
+│  (test :8443) ─────▶│ TG-Green   │ → [Task v2 x3]      │
+│                     └────────────┘                      │
+│                                                          │
+│  Step 3: Traffic shift (linear 10% every 5 min)          │
+│  ┌────────────┐     ┌────────────┐                      │
+│  │ ALB :443   │──┬─▶│ TG-Blue    │ → [Task v1] (90%)   │
+│  └────────────┘  └─▶│ TG-Green   │ → [Task v2] (10%)   │
+│                     └────────────┘                      │
+│                                                          │
+│  Step 4: Complete (100% green, blue terminates)          │
+│  ┌────────────┐     ┌────────────┐                      │
+│  │ ALB :443   │────▶│ TG-Green   │ → [Task v2 x3]      │
+│  └────────────┘     └────────────┘                      │
+└─────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>CodeDeploy Terraform Setup</h3>
+
+<pre class="code-block"><code>resource &quot;aws_codedeploy_app&quot; &quot;backend&quot; {
+  compute_platform = &quot;ECS&quot;
+  name             = &quot;${local.project}-${local.environment}-backend&quot;
+}
+
+resource &quot;aws_codedeploy_deployment_group&quot; &quot;backend&quot; {
+  app_name               = aws_codedeploy_app.backend.name
+  deployment_group_name  = &quot;${local.project}-${local.environment}-backend&quot;
+  deployment_config_name = &quot;CodeDeployDefault.ECSLinear10PercentEvery3Minutes&quot;
+  service_role_arn       = aws_iam_role.codedeploy.arn
+
+  auto_rollback_configuration {
+    enabled = true
+    events  = [&quot;DEPLOYMENT_FAILURE&quot;, &quot;DEPLOYMENT_STOP_ON_ALARM&quot;]
+  }
+
+  blue_green_deployment_config {
+    deployment_ready_option {
+      action_on_timeout = &quot;CONTINUE_DEPLOYMENT&quot;
+    }
+
+    terminate_blue_instances_on_deployment_success {
+      action                           = &quot;TERMINATE&quot;
+      termination_wait_time_in_minutes = 5
+    }
+  }
+
+  deployment_style {
+    deployment_option = &quot;WITH_TRAFFIC_CONTROL&quot;
+    deployment_type   = &quot;BLUE_GREEN&quot;
+  }
+
+  ecs_service {
+    cluster_name = aws_ecs_cluster.main.name
+    service_name = aws_ecs_service.backend.name
+  }
+
+  load_balancer_info {
+    target_group_pair_info {
+      prod_traffic_route {
+        listener_arns = [aws_lb_listener.https.arn]
+      }
+      test_traffic_route {
+        listener_arns = [aws_lb_listener.test.arn]
+      }
+      target_group {
+        name = aws_lb_target_group.blue.name
+      }
+      target_group {
+        name = aws_lb_target_group.green.name
+      }
+    }
+  }
+
+  alarm_configuration {
+    alarms  = [aws_cloudwatch_metric_alarm.backend_5xx.alarm_name]
+    enabled = true
+  }
+}</code></pre>
+<hr class="section-divider">
+<h2>8. IAM Roles for ECS</h2>
+
+<pre class="code-block"><code># Execution Role — used by ECS agent to pull images, write logs, read secrets
+resource &quot;aws_iam_role&quot; &quot;ecs_execution&quot; {
+  name = &quot;${local.project}-${local.environment}-ecs-execution&quot;
+
+  assume_role_policy = jsonencode({
+    Version = &quot;2012-10-17&quot;
+    Statement = [{
+      Action = &quot;sts:AssumeRole&quot;
+      Effect = &quot;Allow&quot;
+      Principal = { Service = &quot;ecs-tasks.amazonaws.com&quot; }
+    }]
+  })
+}
+
+resource &quot;aws_iam_role_policy_attachment&quot; &quot;ecs_execution_base&quot; {
+  role       = aws_iam_role.ecs_execution.name
+  policy_arn = &quot;arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy&quot;
+}
+
+resource &quot;aws_iam_role_policy&quot; &quot;ecs_execution_secrets&quot; {
+  name = &quot;secrets-access&quot;
+  role = aws_iam_role.ecs_execution.id
+
+  policy = jsonencode({
+    Version = &quot;2012-10-17&quot;
+    Statement = [
+      {
+        Effect = &quot;Allow&quot;
+        Action = [
+          &quot;ssm:GetParameters&quot;,
+          &quot;ssm:GetParameter&quot;,
+        ]
+        Resource = &quot;arn:aws:ssm:us-east-1:<em>:parameter/${local.project}/${local.environment}/</em>&quot;
+      },
+      {
+        Effect = &quot;Allow&quot;
+        Action = [
+          &quot;secretsmanager:GetSecretValue&quot;,
+        ]
+        Resource = &quot;arn:aws:secretsmanager:us-east-1:<em>:secret:${local.project}/${local.environment}/</em>&quot;
+      }
+    ]
+  })
+}
+
+# Task Role — used by your application code at runtime
+resource &quot;aws_iam_role&quot; &quot;ecs_task&quot; {
+  name = &quot;${local.project}-${local.environment}-ecs-task&quot;
+
+  assume_role_policy = jsonencode({
+    Version = &quot;2012-10-17&quot;
+    Statement = [{
+      Action = &quot;sts:AssumeRole&quot;
+      Effect = &quot;Allow&quot;
+      Principal = { Service = &quot;ecs-tasks.amazonaws.com&quot; }
+    }]
+  })
+}
+
+resource &quot;aws_iam_role_policy&quot; &quot;ecs_task_s3&quot; {
+  name = &quot;s3-access&quot;
+  role = aws_iam_role.ecs_task.id
+
+  policy = jsonencode({
+    Version = &quot;2012-10-17&quot;
+    Statement = [{
+      Effect = &quot;Allow&quot;
+      Action = [
+        &quot;s3:GetObject&quot;,
+        &quot;s3:PutObject&quot;,
+        &quot;s3:DeleteObject&quot;,
+      ]
+      Resource = &quot;arn:aws:s3:::${local.project}-${local.environment}-uploads/*&quot;
+    }]
+  })
+}</code></pre>
+<hr class="section-divider">
+<h2>9. ECS Exec (Debugging)</h2>
+
+<pre class="code-block"><code># Enable ECS Exec on a running service (if not already enabled via Terraform)
+aws ecs update-service \
+  --cluster production \
+  --service myapp-backend \
+  --enable-execute-command
+
+# Connect to a running container
+aws ecs execute-command \
+  --cluster production \
+  --task arn:aws:ecs:us-east-1:123456789012:task/production/abc123def456 \
+  --container backend \
+  --interactive \
+  --command &quot;/bin/sh&quot;
+
+# Run a one-off command (e.g., database migration)
+aws ecs execute-command \
+  --cluster production \
+  --task arn:aws:ecs:us-east-1:123456789012:task/production/abc123def456 \
+  --container backend \
+  --command &quot;npx prisma migrate deploy&quot;</code></pre>
+<hr class="section-divider">
+<h2>10. Cost Implications</h2>
+<div class="table-wrap"><table><thead><tr><th>Resource</th><th>Monthly Cost (us-east-1)</th><th>Notes</th><th></th></tr></thead><tbody><tr><td>Fargate 0.25 vCPU + 0.5GB</td><td>~$9/task</td><td>Minimum task size</td><td></td></tr><tr><td>Fargate 0.5 vCPU + 1GB</td><td>~$18/task</td><td>Good for Node.js APIs</td><td></td></tr><tr><td>Fargate 1 vCPU + 2GB</td><td>~$36/task</td><td>Heavy compute</td><td></td></tr><tr><td>ALB</td><td>~$16/month</td><td>+ $0.008/LCU-hour</td><td></td></tr><tr><td>ECR storage</td><td>$0.10/GB/month</td><td>First 500MB free</td><td></td></tr><tr><td>CloudWatch Logs</td><td>$0.50/GB ingested</td><td>Set log retention</td><td></td></tr><tr><td>Container Insights</td><td>~$0.30/task/month</td><td>Per-container metrics</td><td></td></tr></tbody></table></div>
+<h3>Cost Optimization</h3>
+
+<ul class="skill-list"><li>Use Fargate Spot for non-critical workloads (up to 70% savings)</li>
+<li>Set ECR lifecycle policies to clean old images</li>
+<li>Right-size tasks based on actual CPU/memory CloudWatch metrics</li>
+<li>Set CloudWatch log retention (7 days staging, 30 days production)</li>
+<li>Use <code class="inline-code">deployment_circuit_breaker</code> to auto-rollback failed deploys (avoids runaway task launches)</li>
+</ul><hr class="section-divider">
+<h2>11. Common Mistakes / Anti-Patterns</h2>
+<div class="table-wrap"><table><thead><tr><th>Mistake</th><th>Why It's Bad</th><th>Fix</th><th></th></tr></thead><tbody><tr><td>Using <code class="inline-code">bridge</code> network mode with Fargate</td><td>Fargate requires <code class="inline-code">awsvpc</code></td><td>Always use <code class="inline-code">awsvpc</code> for Fargate</td><td></td></tr><tr><td>No health check grace period</td><td>Tasks killed before app starts</td><td>Set <code class="inline-code">health_check_grace_period_seconds = 120</code></td><td></td></tr><tr><td><code class="inline-code">desired_count</code> not in <code class="inline-code">ignore_changes</code></td><td>Terraform overrides auto-scaling</td><td>Add to <code class="inline-code">lifecycle.ignore_changes</code></td><td></td></tr><tr><td>Hardcoded image tag in task def</td><td>Terraform redeploys constantly</td><td>Use <code class="inline-code">ignore_changes = [task_definition]</code> on service</td><td></td></tr><tr><td>No circuit breaker</td><td>Failed deploys spin up tasks forever</td><td>Enable <code class="inline-code">deployment_circuit_breaker</code> with rollback</td><td></td></tr><tr><td>Assigning public IP in private subnet</td><td>Security risk, bypasses NAT</td><td>Set <code class="inline-code">assign_public_ip = false</code></td><td></td></tr><tr><td>No log retention policy</td><td>CloudWatch costs grow unbounded</td><td>Set <code class="inline-code">retention_in_days</code> on log group</td><td></td></tr><tr><td>Missing <code class="inline-code">initProcessEnabled</code></td><td>Zombie processes, signal handling issues</td><td>Enable init process in <code class="inline-code">linuxParameters</code></td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>12. Deployment Verification</h2>
+
+<pre class="code-block"><code># Check service status
+aws ecs describe-services --cluster production --services myapp-backend \
+  --query &quot;services[0].{Status:status,Running:runningCount,Desired:desiredCount,Deployments:deployments[*].{Status:status,Running:runningCount,Desired:desiredCount,TaskDef:taskDefinition}}&quot; \
+  --output json
+
+# Check recent task failures
+aws ecs list-tasks --cluster production --service-name myapp-backend --desired-status STOPPED \
+  --query &quot;taskArns[:5]&quot; --output text | \
+  xargs -I {} aws ecs describe-tasks --cluster production --tasks {} \
+  --query &quot;tasks[*].{StopCode:stopCode,StopReason:stoppedReason,StartedAt:startedAt,StoppedAt:stoppedAt}&quot; --output table
+
+# Check ALB target health
+aws elbv2 describe-target-health --target-group-arn arn:aws:elasticloadbalancing:us-east-1:123456789012:targetgroup/myapp-backend-tg/xxxx \
+  --query &quot;TargetHealthDescriptions[*].{Target:Target.Id,Port:Target.Port,Health:TargetHealth.State,Reason:TargetHealth.Reason}&quot; --output table
+
+# Watch deployment progress
+watch -n 5 'aws ecs describe-services --cluster production --services myapp-backend --query &quot;services[0].deployments[*].{Status:status,Running:runningCount,Desired:desiredCount,Pending:pendingCount}&quot; --output table'</code></pre>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="ci-cd-pipeline.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">Build CI/CD Pipeline</span></span></a>
+    <a href="vpc-design.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Design VPC</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    66 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

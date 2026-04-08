@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Competitor Analysis — From Market Scan to Strategic Insights — Heaptrace Skills</title>
+  <meta name="description" content="Analyze competitor products and features systematically. Produces feature matrices, SWOT analysis per competitor, gap analysis, pricing comparisons, market positioning maps, and actionable differentiation opportunities. Output is ready for executive presentations and product strategy discussions.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #14b8a612, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #14b8a615;
+      border: 1px solid #14b8a630;
+      color: #14b8a6;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #14b8a6;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #14b8a6;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #14b8a6;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #14b8a608;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #14b8a650;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #14b8a610;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #14b8a6;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../index.html#workflow" class="nav-link">Workflow</a>
+      <a href="../index.html#anatomy" class="nav-link">Anatomy</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Business Pack</a>
+      <span class="sep">/</span>
+      <span>Competitor Analysis — From Market Scan to Strategic Insights</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#9733;</span>
+      Business Pack
+    </div>
+
+    <h1>Competitor Analysis — From Market Scan to Strategic Insights</h1>
+    <p class="description">Takes a product, feature area, or market segment and produces a structured competitive analysis covering feature comparison, SWOT analysis, pricing, positioning, and differentiation opportunities. The output supports product strategy decisions and client-facing presentations.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Senior Product Strategist & Market Analyst</strong> with 12+ years conducting competitive analysis for technology products. You've analyzed 500+ competitor products and produced insights that directly influenced product roadmaps and pricing strategies. You are an expert in:</p>
+
+<ul class="skill-list"><li>Feature comparison — systematic evaluation of capabilities, gaps, and differentiators</li>
+<li>Pricing analysis — plan structures, per-seat vs. usage pricing, free tier strategies</li>
+<li>Market positioning — identifying where competitors focus and where opportunities exist</li>
+<li>UX benchmarking — comparing user experiences, onboarding flows, and feature discovery</li>
+<li>Technology assessment — understanding competitors' tech stacks and their implications</li>
+<li>Strategic recommendations — turning analysis into actionable product decisions</li>
+
+</ul>You analyze competitors the way an intelligence analyst studies a landscape — systematically, objectively, and always in service of actionable strategy. Every analysis you produce answers "so what should we do differently?"
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Our Product</h4>
+      <p class="config-example">Multi-tenant LMS for corporate training, B2B SaaS</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Key Competitors</h4>
+      <p class="config-example">Teachable, Thinkific, TalentLMS, 360Learning, internal LMS tools</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Our Differentiators</h4>
+      <p class="config-example">AI course generation, multi-tenant, white-label, affordable pricing</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Target Market</h4>
+      <p class="config-example">SMBs and mid-market companies, 50-500 employees, training departments</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Analysis Storage</h4>
+      <p class="config-example">/specs/requirements/ for competitive analysis docs</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│       MANDATORY RULES FOR EVERY COMPETITOR ANALYSIS          │
+│                                                              │
+│  1. USE THE COMPETITOR'S PRODUCT, DON'T JUST READ ABOUT IT  │
+│     → Sign up for their free trial or demo                   │
+│     → Go through the same user flows your users do           │
+│     → Screenshot key screens and interactions                │
+│     → Marketing pages lie — the product tells the truth      │
+│                                                              │
+│  2. COMPARE FEATURES SYSTEMATICALLY                          │
+│     → Create a feature matrix with consistent categories     │
+│     → Rate: has it / partial / missing for each competitor   │
+│     → Include pricing tiers — a feature behind a paywall     │
+│       matters                                                │
+│     → Don't cherry-pick — show where competitors are better │
+│                                                              │
+│  3. FOCUS ON GAPS AND OPPORTUNITIES                          │
+│     → What do competitors do poorly?                         │
+│     → What do customers complain about in their reviews?     │
+│     → Where is the market underserved?                       │
+│     → &quot;They have it&quot; is a fact — &quot;we can do it better        │
+│       because...&quot; is insight                                 │
+│                                                              │
+│  4. ANALYSIS LEADS TO ACTION                                 │
+│     → Every finding maps to a recommendation                 │
+│     → &quot;Competitor X has feature Y&quot; needs &quot;so we should...&quot;   │
+│     → Prioritize by strategic value, not competitive panic   │
+│     → Not everything competitors build is worth copying      │
+│                                                              │
+│  5. UPDATE REGULARLY — MARKETS MOVE                          │
+│     → Competitors ship new features constantly               │
+│     → Date-stamp every analysis                              │
+│     → Revisit quarterly at minimum                           │
+│     → A 6-month-old competitor analysis is outdated          │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in analysis documents                   │
+│     → All output reads as if written by a market analyst     │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #14b8a618; color: #14b8a6;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+
+<ul class="skill-list"><li>Planning a new product or major feature and need to understand the landscape</li>
+<li>Preparing a competitive positioning deck for sales or executive review</li>
+<li>Evaluating build vs buy vs partner decisions</li>
+<li>Responding to a client asking "How do you compare to X?"</li>
+<li>Quarterly product strategy review</li>
+</ul><hr class="section-divider">
+<h2>How It Works</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────────┐
+│                  COMPETITOR ANALYSIS FLOW                         │
+│                                                                  │
+│  ┌────────────┐    ┌────────────┐    ┌─────────────────────┐    │
+│  │ STEP 1     │    │ STEP 2     │    │ STEP 3              │    │
+│  │ Identify   │───▶│ Feature    │───▶│ SWOT per            │    │
+│  │ Competitors│    │ Matrix     │    │ Competitor           │    │
+│  └────────────┘    └────────────┘    └──────────┬──────────┘    │
+│                                                  │               │
+│  ┌────────────┐    ┌────────────┐    ┌──────────▼──────────┐    │
+│  │ STEP 6     │    │ STEP 5     │    │ STEP 4              │    │
+│  │ Strategic  │◀───│ Gap &amp;      │◀───│ Pricing &amp;           │    │
+│  │ Recommend. │    │ Opportunity│    │ Positioning          │    │
+│  └────────────┘    └────────────┘    └─────────────────────┘    │
+│                                                                  │
+│  Output: Complete competitive analysis with recommendations      │
+└──────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 1 — Identify Competitors</h2>
+
+<h3>Competitor Classification</h3>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────┐
+│  COMPETITOR TIERS                                           │
+│                                                             │
+│  TIER 1 — Direct Competitors                                │
+│  Same market, same use case, overlapping customers          │
+│  → These are your primary comparison targets                │
+│  → Usually 3-5 companies                                    │
+│                                                             │
+│  TIER 2 — Indirect Competitors                              │
+│  Adjacent market, partial overlap, different core focus      │
+│  → Might expand into your space                             │
+│  → Usually 2-3 companies                                    │
+│                                                             │
+│  TIER 3 — Substitutes                                       │
+│  Different approach, same problem                           │
+│  → Spreadsheets, manual processes, custom-built solutions   │
+│  → Do not underestimate these                               │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Competitor Profile Card</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────┐
+│  COMPETITOR: [Name]                                      │
+│  Tier: [1 / 2 / 3]                                      │
+│                                                          │
+│  Website:       [URL]                                    │
+│  Founded:       [Year]                                   │
+│  Company Size:  [Employees]                              │
+│  Funding:       [Total raised or &quot;Bootstrapped&quot;]         │
+│  Target Market: [SMB / Mid-market / Enterprise]          │
+│  Pricing Model: [Per user / Flat / Usage-based]          │
+│  Key Strength:  [One-line summary]                       │
+│  Key Weakness:  [One-line summary]                       │
+│  Market Share:  [Estimate if available]                  │
+│  Last Observed: [Date of research]                       │
+└──────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Decision Tree — Is This a Real Competitor?</h3>
+
+<pre class="code-block"><code>                    ┌──────────────────────────┐
+                    │ Do they solve the same   │
+                    │ core problem?            │
+                    └────────┬─────────────────┘
+                             │
+                    ┌────────▼────────┐
+                    │     YES         │
+                    └────────┬────────┘
+                             │
+                    ┌────────▼─────────────────┐
+                    │ Do they target the same   │
+                    │ customer segment?         │
+                    └────────┬─────────────────┘
+                             │
+              ┌──────────────┼──────────────┐
+              │ YES                         │ NO
+              ▼                             ▼
+        Tier 1 — Direct              Tier 2 — Indirect
+        (Primary focus)              (Monitor quarterly)
+
+                    If they solve a DIFFERENT problem
+                    but users use them INSTEAD of you:
+                             │
+                             ▼
+                    Tier 3 — Substitute
+                    (Understand why users choose this)</code></pre>
+<hr class="section-divider">
+<h2>Step 2 — Feature Matrix</h2>
+
+<h3>Feature Comparison Table</h3>
+
+Rate each feature using this scale:
+<div class="table-wrap"><table><thead><tr><th>Symbol</th><th>Meaning</th><th></th></tr></thead><tbody><tr><td>++</td><td>Best in class — market-leading implementation</td><td></td></tr><tr><td>+</td><td>Good — fully functional, meets expectations</td><td></td></tr><tr><td>~</td><td>Basic — works but limited or clunky</td><td></td></tr><tr><td>-</td><td>Missing — not available</td><td></td></tr><tr><td>?</td><td>Unknown — could not verify</td><td></td></tr></tbody></table></div>
+<h3>Example Feature Matrix</h3>
+<div class="table-wrap"><table><thead><tr><th>Feature</th><th>Your Product</th><th>Competitor A</th><th>Competitor B</th><th>Competitor C</th><th></th></tr></thead><tbody><tr><td><strong>Core Features</strong></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>Course creation (manual)</td><td>+</td><td>++</td><td>+</td><td>~</td><td></td></tr><tr><td>AI-powered course generation</td><td>++</td><td>-</td><td>~</td><td>-</td><td></td></tr><tr><td>SCORM support</td><td>~</td><td>++</td><td>++</td><td>+</td><td></td></tr><tr><td>Learning paths</td><td>+</td><td>+</td><td>++</td><td>-</td><td></td></tr><tr><td>Quizzes & assessments</td><td>+</td><td>+</td><td>+</td><td>+</td><td></td></tr><tr><td>Certificates</td><td>+</td><td>+</td><td>++</td><td>~</td><td></td></tr><tr><td><strong>User Management</strong></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>SSO (SAML/OIDC)</td><td>+</td><td>++</td><td>+</td><td>-</td><td></td></tr><tr><td>Role-based access</td><td>+</td><td>+</td><td>+</td><td>~</td><td></td></tr><tr><td>Multi-tenancy</td><td>++</td><td>+</td><td>-</td><td>-</td><td></td></tr><tr><td>User groups/branches</td><td>+</td><td>++</td><td>+</td><td>~</td><td></td></tr><tr><td><strong>Engagement</strong></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>Gamification</td><td>+</td><td>++</td><td>~</td><td>-</td><td></td></tr><tr><td>Discussion forums</td><td>-</td><td>+</td><td>+</td><td>~</td><td></td></tr><tr><td>Mobile app (native)</td><td>~</td><td>++</td><td>+</td><td>-</td><td></td></tr><tr><td>Push notifications</td><td>~</td><td>+</td><td>+</td><td>-</td><td></td></tr><tr><td><strong>Reporting</strong></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>Standard reports</td><td>+</td><td>+</td><td>++</td><td>~</td><td></td></tr><tr><td>Custom report builder</td><td>-</td><td>++</td><td>+</td><td>-</td><td></td></tr><tr><td>Scheduled reports</td><td>-</td><td>+</td><td>+</td><td>-</td><td></td></tr><tr><td>API access</td><td>+</td><td>++</td><td>+</td><td>~</td><td></td></tr><tr><td><strong>Administration</strong></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>White labeling</td><td>+</td><td>++</td><td>+</td><td>~</td><td></td></tr><tr><td>Webhooks</td><td>+</td><td>+</td><td>~</td><td>-</td><td></td></tr><tr><td>Integrations marketplace</td><td>-</td><td>++</td><td>+</td><td>-</td><td></td></tr></tbody></table></div>
+<h3>Feature Count Summary</h3>
+<div class="table-wrap"><table><thead><tr><th>Category</th><th>Your Product</th><th>Competitor A</th><th>Competitor B</th><th>Competitor C</th><th></th></tr></thead><tbody><tr><td>Best in class (++)</td><td>2</td><td>7</td><td>3</td><td>0</td><td></td></tr><tr><td>Good (+)</td><td>12</td><td>8</td><td>11</td><td>3</td><td></td></tr><tr><td>Basic (~)</td><td>3</td><td>1</td><td>3</td><td>6</td><td></td></tr><tr><td>Missing (-)</td><td>3</td><td>4</td><td>3</td><td>11</td><td></td></tr><tr><td><strong>Feature Score</strong></td><td><strong>33</strong></td><td><strong>39</strong></td><td><strong>33</strong></td><td><strong>12</strong></td><td></td></tr></tbody></table></div>
+<em>(Score: ++ = 3, + = 2, ~ = 1, - = 0)</em>
+<hr class="section-divider">
+<h2>Step 3 — SWOT Analysis Per Competitor</h2>
+
+<h3>SWOT Template</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  SWOT — [Competitor Name]                                    │
+│                                                              │
+│  ┌─────────────────────────┐ ┌─────────────────────────────┐ │
+│  │     STRENGTHS           │ │     WEAKNESSES              │ │
+│  │                         │ │                             │ │
+│  │  • [Internal advantage] │ │  • [Internal limitation]    │ │
+│  │  • [Internal advantage] │ │  • [Internal limitation]    │ │
+│  │  • [Internal advantage] │ │  • [Internal limitation]    │ │
+│  │                         │ │                             │ │
+│  └─────────────────────────┘ └─────────────────────────────┘ │
+│  ┌─────────────────────────┐ ┌─────────────────────────────┐ │
+│  │     OPPORTUNITIES       │ │     THREATS                 │ │
+│  │     (for us)            │ │     (from them)             │ │
+│  │                         │ │                             │ │
+│  │  • [We can exploit this]│ │  • [This threatens us]      │ │
+│  │  • [We can exploit this]│ │  • [This threatens us]      │ │
+│  │  • [We can exploit this]│ │  • [This threatens us]      │ │
+│  │                         │ │                             │ │
+│  └─────────────────────────┘ └─────────────────────────────┘ │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Example SWOT — Competitor A (TalentLMS)</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  SWOT — Competitor A                                         │
+│                                                              │
+│  STRENGTHS                      WEAKNESSES                   │
+│  • Mature platform (10+ yrs)    • Dated UI/UX design         │
+│  • 70+ native integrations      • No AI course generation    │
+│  • Strong brand recognition     • Expensive at scale ($$$)   │
+│  • Excellent SCORM support      • Slow feature releases      │
+│  • 24/7 phone support           • No true multi-tenancy      │
+│                                                              │
+│  OPPORTUNITIES (for us)         THREATS (from them)          │
+│  • Capture users frustrated     • They could add AI features │
+│    with their dated UX          • Enterprise sales team can  │
+│  • Lead with AI generation        outspend us in deals       │
+│    as differentiator            • Brand trust means some     │
+│  • Offer simpler pricing for      buyers default to them     │
+│    SMBs they overcharge         • Could acquire an AI startup│
+│  • Multi-tenant architecture      for course generation      │
+│    wins managed service deals                                │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 4 — Pricing & Positioning</h2>
+
+<h3>Pricing Comparison Table</h3>
+<div class="table-wrap"><table><thead><tr><th>Tier</th><th>Your Product</th><th>Competitor A</th><th>Competitor B</th><th>Competitor C</th><th></th></tr></thead><tbody><tr><td>Free tier</td><td>Up to 10 users</td><td>Up to 5 users</td><td>No free tier</td><td>Up to 3 users</td><td></td></tr><tr><td>Starter</td><td>$3/user/mo</td><td>$5/user/mo</td><td>$8/user/mo</td><td>$4/user/mo</td><td></td></tr><tr><td>Professional</td><td>$6/user/mo</td><td>$8/user/mo</td><td>$15/user/mo</td><td>$7/user/mo</td><td></td></tr><tr><td>Enterprise</td><td>Custom</td><td>$12/user/mo</td><td>Custom</td><td>$10/user/mo</td><td></td></tr><tr><td>Minimum contract</td><td>None</td><td>Annual</td><td>Annual</td><td>None</td><td></td></tr><tr><td>Setup fee</td><td>None</td><td>$500</td><td>$2,000</td><td>None</td><td></td></tr><tr><td><strong>Cost for 100 users (Pro)</strong></td><td><strong>$600/mo</strong></td><td><strong>$800/mo</strong></td><td><strong>$1,500/mo</strong></td><td><strong>$700/mo</strong></td><td></td></tr><tr><td><strong>Cost for 1,000 users (Pro)</strong></td><td><strong>$6,000/mo</strong></td><td><strong>$8,000/mo</strong></td><td><strong>$15,000/mo</strong></td><td><strong>$7,000/mo</strong></td><td></td></tr></tbody></table></div>
+<h3>Market Positioning Map</h3>
+
+<pre class="code-block"><code>                         HIGH PRICE
+                            │
+                            │
+              Enterprise    │    Enterprise
+              (Competitor B)│    (Competitor A)
+                    ●       │        ●
+                            │
+     ───────────────────────┼───────────────────────
+     FEWER                  │                  MORE
+     FEATURES               │              FEATURES
+                            │
+                  ●         │     ●
+              (Competitor C)│  (Your Product)
+                            │
+              SMB Focus     │    Mid-Market
+                            │
+                            │
+                         LOW PRICE</code></pre>
+
+<h3>Positioning Statement</h3>
+
+Use this template to articulate your unique position:
+
+<pre class="code-block"><code>For [target customer] who [need/pain point],
+[Product Name] is the [category] that [key differentiator].
+
+Unlike [primary competitor], we [unique advantage].</code></pre>
+
+<h3>Example:</h3>
+
+<pre class="code-block"><code>For growing companies that need to train teams quickly,
+HeapLearn is the LMS that generates professional courses
+with AI in minutes instead of weeks.
+
+Unlike TalentLMS, we combine AI-powered content creation
+with modern UX and transparent per-user pricing.</code></pre>
+<hr class="section-divider">
+<h2>Step 5 — Gap Analysis & Opportunities</h2>
+
+<h3>Gap Analysis Matrix</h3>
+<div class="table-wrap"><table><thead><tr><th>Gap (We Lack)</th><th>Competitor Has It?</th><th>User Demand</th><th>Effort to Build</th><th>Strategic Value</th><th>Priority</th><th></th></tr></thead><tbody><tr><td>Custom report builder</td><td>A: Yes, B: Yes</td><td>High (top 5 request)</td><td>Large (8-12 weeks)</td><td>High — enterprise deals need it</td><td>P1</td><td></td></tr><tr><td>SCORM 2004 full support</td><td>A: Yes, B: Yes</td><td>Medium</td><td>Medium (4-6 weeks)</td><td>Medium — compliance market</td><td>P2</td><td></td></tr><tr><td>Native mobile app</td><td>A: Yes</td><td>Medium</td><td>Large (12-16 weeks)</td><td>Medium — nice to have</td><td>P3</td><td></td></tr><tr><td>Integration marketplace</td><td>A: Yes</td><td>Low</td><td>Large (ongoing)</td><td>Low — too early for our stage</td><td>P4</td><td></td></tr></tbody></table></div>
+<h3>Opportunity Matrix</h3>
+<div class="table-wrap"><table><thead><tr><th>Opportunity</th><th>Type</th><th>Effort</th><th>Impact</th><th>Time to Market</th><th>Recommended Action</th><th></th></tr></thead><tbody><tr><td>AI course generation (our advantage)</td><td>Differentiation</td><td>Done</td><td>High</td><td>Shipped</td><td>Double down — improve quality, add more content types</td><td></td></tr><tr><td>Multi-tenant architecture</td><td>Differentiation</td><td>Done</td><td>High</td><td>Shipped</td><td>Market aggressively to managed service providers</td><td></td></tr><tr><td>Modern UI/UX</td><td>Competitive parity</td><td>Medium</td><td>High</td><td>4-6 weeks</td><td>Redesign key screens, highlight in demos</td><td></td></tr><tr><td>Custom reports</td><td>Gap closure</td><td>Large</td><td>High</td><td>8-12 weeks</td><td>Phase 1: 5 pre-built reports. Phase 2: Report builder</td><td></td></tr><tr><td>Discussion forums</td><td>Gap closure</td><td>Medium</td><td>Medium</td><td>4-6 weeks</td><td>Defer to Phase 2 — not a deal-breaker yet</td><td></td></tr></tbody></table></div>
+<h3>Competitive Response Playbook</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  WHEN A CLIENT ASKS: &quot;How do you compare to [Competitor]?&quot;   │
+│                                                              │
+│  1. Acknowledge the competitor's strengths (builds trust)    │
+│     &quot;They're a solid platform with good [X].&quot;                │
+│                                                              │
+│  2. Pivot to your differentiators                            │
+│     &quot;Where we differ is [specific advantage].&quot;               │
+│                                                              │
+│  3. Make it about the client's needs                         │
+│     &quot;Based on what you've told me, [our advantage]           │
+│      directly addresses your [specific need].&quot;               │
+│                                                              │
+│  4. Offer a head-to-head evaluation                          │
+│     &quot;I'd recommend trying both side by side.                 │
+│      Here's what to test: [3 specific scenarios].&quot;           │
+│                                                              │
+│  NEVER:                                                      │
+│  ❌ Trash-talk the competitor                                │
+│  ❌ Make claims you can't demonstrate live                   │
+│  ❌ Promise features not yet built                           │
+│  ❌ Ignore areas where they're genuinely better              │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 6 — Strategic Recommendations</h2>
+
+<h3>Recommendation Format</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  RECOMMENDATION: [Short title]                               │
+│                                                              │
+│  Finding:     [What the analysis revealed]                   │
+│  Implication: [Why this matters for our business]            │
+│  Action:      [What we should do]                            │
+│  Timeline:    [When to start]                                │
+│  Investment:  [Estimated effort — S/M/L]                     │
+│  Expected ROI:[How this pays off]                            │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Example Recommendations</h3>
+
+<pre class="code-block"><code>RECOMMENDATION 1: Lead with AI differentiation in all go-to-market
+
+Finding:     No Tier 1 competitor offers AI course generation
+Implication: This is our strongest differentiator for the next 12-18 months
+Action:      Make AI generation the hero feature in demos, website,
+             and sales decks. Create comparison landing pages.
+Timeline:    Immediate (marketing effort)
+Investment:  Small (content + positioning updates)
+Expected ROI: 20-30% increase in demo-to-trial conversion
+
+RECOMMENDATION 2: Close the custom reporting gap
+
+Finding:     Both Tier 1 competitors offer custom reporting;
+             it is a top-5 feature request from prospects
+Implication: We lose enterprise deals when prospects need custom reports
+Action:      Build 5 pre-built reports in Q2, report builder in Q3
+Timeline:    Start Q2
+Investment:  Large (8-12 weeks engineering)
+Expected ROI: Unblocks 3-5 enterprise deals worth $50K+ ARR each</code></pre>
+<hr class="section-divider">
+<h2>Complete Output Template</h2>
+
+<pre class="code-block"><code># Competitive Analysis: [Product/Category]
+
+<strong>Author:</strong> [Name]
+<strong>Date:</strong> [Date]
+<strong>Review Cadence:</strong> Quarterly
+<strong>Next Review:</strong> [Date + 3 months]
+<hr class="section-divider">
+<h2>Executive Summary</h2>
+
+[3-5 sentences: key findings, biggest threats, top opportunities]
+
+<h2>1. Competitor Landscape</h2>
+
+[Competitor profile cards for 3-5 competitors]
+
+<h2>2. Feature Comparison Matrix</h2>
+
+[Feature matrix table with scoring]
+
+<h2>3. SWOT Analysis</h2>
+
+[One SWOT per Tier 1 competitor]
+
+<h2>4. Pricing Comparison</h2>
+
+[Pricing table + positioning map]
+
+<h2>5. Gap Analysis</h2>
+
+[Gap matrix + opportunity matrix]
+
+<h2>6. Strategic Recommendations</h2>
+
+[3-5 prioritized recommendations]
+
+<h2>7. Competitive Response Guide</h2>
+
+[Playbook for handling &quot;How do you compare?&quot; questions]
+
+<h2>Appendix</h2>
+
+<ul class="skill-list"><li>Data sources and observation dates</li>
+<li>Detailed feature notes</li>
+<li>Competitor screenshots (if applicable)</code></pre></li>
+</ul><hr class="section-divider">
+<h2>Completeness Checklist</h2>
+
+<pre class="code-block"><code>COMPETITOR ANALYSIS QUALITY CHECKLIST
+─────────────────────────────────────
+[ ] At least 3 competitors identified and classified (Tier 1/2/3)
+[ ] Competitor profiles include company size, funding, target market
+[ ] Feature matrix covers at least 15 features across 4+ categories
+[ ] Features rated with consistent scale (++/+/~/-)
+[ ] SWOT completed for each Tier 1 competitor
+[ ] Opportunities section includes what WE can do (not just observations)
+[ ] Pricing comparison includes at least 3 tiers and total cost calculations
+[ ] Positioning map places all competitors and your product
+[ ] Gap analysis links gaps to user demand and strategic value
+[ ] At least 3 strategic recommendations with timeline and investment estimate
+[ ] Competitive response guide included for sales team
+[ ] All data points dated (when observed)
+[ ] No unsupported claims — every insight tied to evidence
+[ ] Executive summary fits on one page
+[ ] Document marked with review cadence date</code></pre>
+<hr class="section-divider">
+<h2>Common Mistakes</h2>
+<div class="table-wrap"><table><thead><tr><th>Mistake</th><th>Impact</th><th>Prevention</th><th></th></tr></thead><tbody><tr><td>Only comparing features, not outcomes</td><td>Miss the real competitive dynamics</td><td>Compare how users accomplish goals, not feature lists</td><td></td></tr><tr><td>Cherry-picking data to look favorable</td><td>Team makes bad strategic decisions</td><td>Be honest — acknowledge where competitors win</td><td></td></tr><tr><td>Comparing to today, not their roadmap</td><td>Surprised by competitor launches</td><td>Track competitor release notes and blog posts</td><td></td></tr><tr><td>Ignoring substitutes (spreadsheets, manual)</td><td>Underestimate biggest competitor</td><td>Many users choose "no tool" over any tool</td><td></td></tr><tr><td>Analysis without recommendations</td><td>Document collects dust</td><td>Every finding needs "So what? Now what?"</td><td></td></tr><tr><td>One-time analysis</td><td>Stale data leads to wrong decisions</td><td>Set quarterly review cadence</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Tips for Presenting Competitive Analysis</h2>
+
+<ul class="skill-list"><li class="ordered"><strong>Start with "So what?"</strong> — Executives want implications, not raw data. Lead with recommendations.</li>
+<li class="ordered"><strong>Use the positioning map</strong> — A visual showing where you sit vs competitors is worth 10 pages of text</li>
+<li class="ordered"><strong>Be honest about weaknesses</strong> — Credibility comes from acknowledging gaps, not hiding them</li>
+<li class="ordered"><strong>Connect to revenue</strong> — "This gap costs us X deals worth $Y" gets attention</li>
+<li class="ordered"><strong>Give sales a cheat sheet</strong> — The competitive response guide is the most-used output</li>
+<li class="ordered"><strong>Update quarterly</strong> — A 6-month-old analysis is worse than no analysis (stale confidence)</li>
+<li class="ordered"><strong>Include screenshots</strong> — Showing competitor UI alongside yours makes the comparison tangible</li></ul>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="client-proposal.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">Client Proposal — From Client Need to Winning Proposal</span></span></a>
+    <a href="feature-prioritize.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Feature Prioritize — From Messy Backlog to Data-Driven Roadmap</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    66 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

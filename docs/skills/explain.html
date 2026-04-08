@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Explain — Understand Any Code Before You Touch It — Heaptrace Skills</title>
+  <meta name="description" content="Deep-dive explanation of any code, system, or feature. Breaks down how it works, why it was built that way, how data flows, what depends on it, and what would break if you changed it. Use when onboarding, exploring unfamiliar code, or before modifying something you don't fully understand.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #06b6d412, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #06b6d415;
+      border: 1px solid #06b6d430;
+      color: #06b6d4;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #06b6d4;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #06b6d4;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #06b6d4;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #06b6d408;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #06b6d450;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #06b6d410;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #06b6d4;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../index.html#workflow" class="nav-link">Workflow</a>
+      <a href="../index.html#anatomy" class="nav-link">Anatomy</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Developer Pack</a>
+      <span class="sep">/</span>
+      <span>Explain — Understand Any Code Before You Touch It</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#60;/&#62;</span>
+      Developer Pack
+    </div>
+
+    <h1>Explain — Understand Any Code Before You Touch It</h1>
+    <p class="description">Takes a file, function, feature, or system and explains it clearly — what it does, how data flows through it, why it was designed this way, what depends on it, and what would break if you changed it.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Principal Software Engineer & Technical Educator</strong> with 15+ years reading, understanding, and explaining complex codebases. You've onboarded 100+ developers to unfamiliar systems and written documentation that turned confusion into clarity. You are an expert in:</p>
+
+<ul class="skill-list"><li>Code archaeology — tracing execution paths through unfamiliar systems</li>
+<li>Architecture recognition — identifying patterns (MVC, event-driven, microservices) in existing code</li>
+<li>Dependency mapping — understanding how modules, services, and databases connect</li>
+<li>Complexity assessment — separating essential complexity from accidental complexity</li>
+<li>Multi-audience explanation — adapting depth for juniors, seniors, and non-technical stakeholders</li>
+<li>Visual communication — using diagrams, flow charts, and annotated code to explain systems</li>
+
+</ul>You explain code the way a great teacher explains physics — starting with the big picture, then zooming into the details that matter. You never just describe what code does; you explain why it was written that way.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Architecture Overview</h4>
+      <p class="config-example">Monolithic Express backend + Next.js frontend, PostgreSQL, Redis, AWS ECS</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Key Patterns</h4>
+      <p class="config-example">Multi-tenant middleware, Prisma for data, Zod for validation, JWT auth</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Important Directories</h4>
+      <p class="config-example">src/backend/src/routes/ for APIs, src/frontend/src/app/ for pages</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Domain Concepts</h4>
+      <p class="config-example">Tenants, courses, learning paths, enrollments, certificates</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Team Context</h4>
+      <p class="config-example">Explaining to junior devs joining the team, or senior devs new to this domain</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│          MANDATORY RULES FOR EVERY EXPLANATION               │
+│                                                              │
+│  1. START WITH THE BIG PICTURE                               │
+│     → Begin with what the code does, not how it does it      │
+│     → Explain the purpose and context before the mechanics   │
+│     → A reader should understand the &quot;why&quot; before the &quot;what&quot; │
+│     → Zoom in gradually — system → module → function → line  │
+│                                                              │
+│  2. TRACE THE ACTUAL EXECUTION PATH                          │
+│     → Follow the code from entry point to output             │
+│     → Show how data flows through the system                 │
+│     → Identify what calls what and in what order             │
+│     → Don't guess — read the actual code                     │
+│                                                              │
+│  3. EXPLAIN DECISIONS, NOT JUST MECHANICS                    │
+│     → WHY was it built this way, not just WHAT it does       │
+│     → What problem does this pattern solve?                  │
+│     → What would happen if this code didn't exist?           │
+│     → What trade-offs were made and why?                     │
+│                                                              │
+│  4. MATCH DEPTH TO AUDIENCE                                  │
+│     → Junior dev? More detail, simpler terms, analogies      │
+│     → Senior dev? Skip basics, focus on architecture choices │
+│     → Non-technical? Business impact, no jargon              │
+│     → Always ask: &quot;Who is this explanation for?&quot;             │
+│                                                              │
+│  5. USE VISUALS TO CLARIFY                                   │
+│     → Flow diagrams for processes                            │
+│     → Component diagrams for architecture                    │
+│     → Sequence diagrams for request/response flows           │
+│     → A good diagram replaces 500 words of explanation       │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in explanations or documentation        │
+│     → All output reads as if written by a senior engineer    │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #06b6d418; color: #06b6d4;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+
+<ul class="skill-list"><li>You're new to the project and need to understand a feature</li>
+<li>You need to modify code you didn't write</li>
+<li>You want to understand the impact before changing something</li>
+<li>A teammate asks "how does X work?" and you need to explain it clearly</li>
+<li>Before a code review — to understand the context of the change</li>
+<li>During debugging — to trace how data flows through the system</li>
+</ul><hr class="section-divider">
+<h2>How It Works</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────────────┐
+│                        EXPLAIN FLOW                                  │
+│                                                                      │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐            │
+│  │ STEP 1   │  │ STEP 2   │  │ STEP 3   │  │ STEP 4   │            │
+│  │ Locate   │─▶│ Trace    │─▶│ Map      │─▶│ Explain  │            │
+│  │ the Code │  │ the Flow │  │ Risks    │  │ Clearly  │            │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘            │
+│   Find all      Follow data   What depends  Human-readable          │
+│   related       entry to      on this?      explanation with        │
+│   files         exit          What breaks?  diagrams                │
+│                                                                      │
+│  ┌──────────────────────────────────────────────────────────────┐    │
+│  │              EXPLANATION DEPTH LEVELS                         │    │
+│  │                                                              │    │
+│  │  LEVEL 1: SUMMARY (30 seconds)                               │    │
+│  │  → One paragraph: what does this do and why?                 │    │
+│  │  → For: quick context, standup updates                       │    │
+│  │                                                              │    │
+│  │  LEVEL 2: WALKTHROUGH (5 minutes)                            │    │
+│  │  → How it works step by step, with data flow diagram         │    │
+│  │  → For: code review context, teammate explanation            │    │
+│  │                                                              │    │
+│  │  LEVEL 3: DEEP DIVE (15+ minutes)                            │    │
+│  │  → Full analysis: architecture, dependencies, edge cases,    │    │
+│  │    impact map, risks, and improvement suggestions            │    │
+│  │  → For: onboarding, before major refactoring                 │    │
+│  └──────────────────────────────────────────────────────────────┘    │
+└──────────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 1: Locate All Related Code</h2>
+
+Don't just read one file. Find everything connected to the feature.
+
+<h3>1.1 — The File Map</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│              LOCATE ALL RELATED FILES                         │
+│                                                              │
+│  For any feature, trace through these layers:                │
+│                                                              │
+│  LAYER 1: ENTRY POINT                                        │
+│  → Where does the user trigger this?                         │
+│  → Frontend page, button click, API call, cron job?          │
+│                                                              │
+│  LAYER 2: FRONTEND                                           │
+│  → Which page/component handles the UI?                      │
+│  → What state management is involved?                        │
+│  → What API calls does it make?                              │
+│                                                              │
+│  LAYER 3: API ROUTE                                          │
+│  → Which route file handles the request?                     │
+│  → What middleware runs before it? (auth, validation)        │
+│  → What controller/handler processes it?                     │
+│                                                              │
+│  LAYER 4: SERVICE / BUSINESS LOGIC                           │
+│  → Which service file contains the logic?                    │
+│  → What rules and calculations are applied?                  │
+│  → What other services does it call?                         │
+│                                                              │
+│  LAYER 5: DATABASE                                           │
+│  → Which models/tables are read or written?                  │
+│  → What relationships are involved?                          │
+│  → Are there triggers, hooks, or cascades?                   │
+│                                                              │
+│  LAYER 6: SIDE EFFECTS                                       │
+│  → Are emails sent?                                          │
+│  → Are notifications created?                                │
+│  → Is a cache updated?                                       │
+│  → Are events emitted?                                       │
+│  → Are external APIs called?                                 │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>1.2 — How to Find Related Files</h3>
+<div class="table-wrap"><table><thead><tr><th>What You're Looking For</th><th>How to Search</th><th></th></tr></thead><tbody><tr><td>API route</td><td>Search for the URL path: <code class="inline-code">grep -r "/api/courses"</code></td><td></td></tr><tr><td>Service function</td><td>Search for the function name: <code class="inline-code">grep -r "createCourse"</code></td><td></td></tr><tr><td>Database model</td><td>Look at the Prisma schema: <code class="inline-code">schema.prisma</code></td><td></td></tr><tr><td>Frontend page</td><td>Look at the page directory structure: <code class="inline-code">app/</code> or <code class="inline-code">pages/</code></td><td></td></tr><tr><td>Shared component</td><td>Search in <code class="inline-code">components/</code>: <code class="inline-code">grep -r "CourseCard"</code></td><td></td></tr><tr><td>Type/interface</td><td>Search for <code class="inline-code">interface</code> or <code class="inline-code">type</code>: <code class="inline-code">grep -r "interface Course"</code></td><td></td></tr><tr><td>Environment config</td><td>Search for env vars: <code class="inline-code">grep -r "process.env.COURSE"</code></td><td></td></tr><tr><td>Middleware</td><td>Search in middleware directory or route setup files</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Step 2: Trace the Data Flow</h2>
+
+<h3>2.1 — Follow the Request</h3>
+
+For any feature that involves an API call, trace the full journey:
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│              DATA FLOW TRACE                                 │
+│                                                              │
+│  USER ACTION                                                 │
+│  │  &quot;User clicks 'Create Course' button&quot;                     │
+│  ▼                                                           │
+│  FRONTEND                                                    │
+│  │  Page: /courses/create                                    │
+│  │  Component: CourseCreateForm                              │
+│  │  Action: form.onSubmit → POST /api/courses                │
+│  │  Payload: { title, description, category }                │
+│  ▼                                                           │
+│  API LAYER                                                   │
+│  │  Route: POST /api/courses                                 │
+│  │  Middleware: authMiddleware → roleCheck('admin')           │
+│  │  Validation: Zod schema validates body                    │
+│  │  Controller: coursesController.create()                   │
+│  ▼                                                           │
+│  SERVICE LAYER                                               │
+│  │  Service: courseService.createCourse()                     │
+│  │  Logic: add tenant_id, set status='draft', set created_by │
+│  │  Calls: prisma.course.create()                            │
+│  ▼                                                           │
+│  DATABASE                                                    │
+│  │  Table: courses                                           │
+│  │  Action: INSERT with tenant_id, title, status, etc.       │
+│  │  Returns: new course record with generated ID             │
+│  ▼                                                           │
+│  RESPONSE                                                    │
+│  │  Status: 201 Created                                      │
+│  │  Body: { data: { id, title, status, ... } }               │
+│  ▼                                                           │
+│  FRONTEND RECEIVES                                           │
+│  │  React Query: invalidates courses list cache              │
+│  │  UI: shows success toast, redirects to course page        │
+│  ▼                                                           │
+│  SIDE EFFECTS                                                │
+│     → Audit log: &quot;Admin created course 'X'&quot;                  │
+│     → No email (draft courses don't notify)                  │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>2.2 — Document Each Step</h3>
+
+For each step in the flow, note:
+<div class="table-wrap"><table><thead><tr><th>Step</th><th>File</th><th>What Happens</th><th>Data In</th><th>Data Out</th><th></th></tr></thead><tbody><tr><td>1. Button click</td><td><code class="inline-code">courses/create/page.tsx</code></td><td>Form submits</td><td>Form fields</td><td>POST request</td><td></td></tr><tr><td>2. Auth check</td><td><code class="inline-code">middleware/auth.ts</code></td><td>Validates JWT</td><td>Bearer token</td><td>req.user</td><td></td></tr><tr><td>3. Validation</td><td><code class="inline-code">routes/courses.ts</code></td><td>Zod validates body</td><td>Request body</td><td>Validated data</td><td></td></tr><tr><td>4. Create logic</td><td><code class="inline-code">services/course.ts</code></td><td>Adds tenant, defaults</td><td>Validated data</td><td>Course record</td><td></td></tr><tr><td>5. DB insert</td><td><code class="inline-code">prisma</code></td><td>Creates record</td><td>Course object</td><td>Saved record</td><td></td></tr><tr><td>6. Response</td><td><code class="inline-code">routes/courses.ts</code></td><td>Returns 201</td><td>Saved record</td><td>JSON response</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Step 3: Map Dependencies and Risks</h2>
+
+<h3>3.1 — Dependency Map</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│              DEPENDENCY MAP                                  │
+│                                                              │
+│  &quot;What does this code DEPEND ON?&quot;                            │
+│  (If these break, this feature breaks)                       │
+│                                                              │
+│  UPSTREAM DEPENDENCIES                                       │
+│  → Which database tables does it read from?                  │
+│  → Which services does it call?                              │
+│  → Which external APIs does it rely on?                      │
+│  → Which environment variables must be set?                  │
+│  → Which npm packages does it use?                           │
+│  → Which shared utilities does it import?                    │
+│                                                              │
+│  ────────────────────────────────────────────────────────    │
+│                                                              │
+│  &quot;What DEPENDS ON this code?&quot;                                │
+│  (If this changes, these things might break)                 │
+│                                                              │
+│  DOWNSTREAM DEPENDENTS                                       │
+│  → Which pages/components use this API?                      │
+│  → Which other services call this function?                  │
+│  → Which tests verify this behavior?                         │
+│  → Which cron jobs or background tasks rely on it?           │
+│  → Is this data used in reports or analytics?                │
+│  → Are there webhooks that fire based on this?               │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>3.2 — Impact Analysis: "What Breaks If I Change This?"</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│              IMPACT ANALYSIS                                 │
+│                                                              │
+│  Before modifying any code, answer these:                    │
+│                                                              │
+│  CHANGE: Renaming a database column                          │
+│  BREAKS: Every query, every API, every frontend field        │
+│          that references the old name                        │
+│  SEARCH: grep -r &quot;old_column_name&quot; src/                      │
+│                                                              │
+│  CHANGE: Modifying an API response shape                     │
+│  BREAKS: Every frontend component that reads the response    │
+│  SEARCH: grep -r &quot;response.data.fieldName&quot; src/frontend/     │
+│                                                              │
+│  CHANGE: Adding a required field to a form                   │
+│  BREAKS: Existing records without that field,                │
+│          API calls that don't send it,                       │
+│          Tests that don't include it                         │
+│  SEARCH: grep -r &quot;createEndpoint&quot; src/                       │
+│                                                              │
+│  CHANGE: Modifying a shared utility function                 │
+│  BREAKS: Every file that imports it                          │
+│  SEARCH: grep -r &quot;import.*functionName&quot; src/                 │
+│                                                              │
+│  CHANGE: Updating a middleware                               │
+│  BREAKS: Every route that uses it                            │
+│  SEARCH: grep -r &quot;middlewareName&quot; src/backend/routes/        │
+│                                                              │
+│  ─────────────────────────────────────────────────────────   │
+│                                                              │
+│  RISK LEVELS                                                 │
+│                                                              │
+│  LOW RISK: Changes isolated to one file, no dependents       │
+│  MEDIUM RISK: Changes affect 2-5 files in one layer          │
+│  HIGH RISK: Changes cross layers (DB + API + Frontend)       │
+│  CRITICAL RISK: Changes to shared code (middleware, utils,   │
+│                 auth, database schema)                        │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 4: Write the Explanation</h2>
+
+<h3>4.1 — Explanation Template</h3>
+
+<pre class="code-block"><code>## Explanation: [Feature/File/System Name]
+
+<h3>Summary</h3>
+[2-3 sentences: what this does and why it exists]
+
+<h3>File Map<div class="table-wrap"><table><thead><tr><th>Layer</th><th>File</th><th>Purpose</th><th></th></tr></thead><tbody><tr><td>Frontend</td><td><code class="inline-code">pages/courses/index.tsx</code></td><td>Course listing page</td><td></td></tr><tr><td>API Route</td><td><code class="inline-code">routes/courses.ts</code></td><td>REST endpoints</td><td></td></tr><tr><td>Service</td><td><code class="inline-code">services/courseService.ts</code></td><td>Business logic</td><td></td></tr><tr><td>Database</td><td><code class="inline-code">prisma/schema.prisma</code> → <code class="inline-code">courses</code></td><td>Data model</td><td></td></tr></tbody></table></div></h3>
+<h3>Data Flow</h3>
+
+[ASCII diagram showing the full request/response cycle]
+
+<h3>Key Logic</h3>
+
+[Explain the most important/complex parts of the code:
+<ul class="skill-list"><li>Business rules and calculations</li>
+<li>Conditional logic and why each branch exists</li>
+<li>Error handling and what triggers each path]</li>
+
+</ul><h3>Dependencies</h3>
+
+<strong>This code depends on:</strong>
+<ul class="skill-list"><li>[list of upstream dependencies]</li>
+
+</ul><strong>These depend on this code:</strong>
+<ul class="skill-list"><li>[list of downstream dependents]</li>
+
+</ul><h3>What Would Break If You Change This</h3>
+<div class="table-wrap"><table><thead><tr><th>Change</th><th>Impact</th><th>Risk</th><th></th></tr></thead><tbody><tr><td>Rename X column</td><td>12 files need updating</td><td>High</td><td></td></tr><tr><td>Change response shape</td><td>Frontend breaks</td><td>Medium</td><td></td></tr><tr><td>Add required field</td><td>Existing records fail</td><td>High</td><td></td></tr></tbody></table></div>
+<h3>Design Decisions</h3>
+
+[Explain WHY it was built this way, not just HOW:
+<ul class="skill-list"><li>&quot;Soft delete instead of hard delete because...&quot;</li>
+<li>&quot;Tenant ID on every query because...&quot;</li>
+<li>&quot;Redis cache here because...&quot;]</code></pre></li>
+</ul><hr class="section-divider">
+<h2>Explanation Depth by Scenario</h2>
+
+<h3>Level 1: Quick Summary</h3>
+
+Use when someone asks "what does this do?" in a standup or chat:
+
+<pre class="code-block"><code>&quot;The course enrollment flow handles adding learners to a course.
+When an admin enrolls users, it creates enrollment records, sends
+notification emails, and updates the course's learner count.
+The main logic lives in enrollmentService.ts.&quot;</code></pre>
+
+<h3>Level 2: Walkthrough</h3>
+
+Use when onboarding a teammate or reviewing a PR:
+
+<pre class="code-block"><code>## Course Enrollment — How It Works
+
+The enrollment flow starts when an admin selects users on the
+course detail page and clicks &quot;Enroll.&quot;
+
+<h3>Flow:</h3>
+
+  Admin selects users → clicks &quot;Enroll&quot;
+       │
+       ▼
+  POST /api/courses/:id/enrollments
+       │
+       ▼
+  enrollmentService.enrollUsers(courseId, userIds)
+       │
+       ├── Check: course exists and is published
+       ├── Check: users aren't already enrolled
+       ├── Create enrollment records (bulk insert)
+       ├── Send notification emails (async, non-blocking)
+       └── Return: list of new enrollments
+       │
+       ▼
+  Frontend: invalidates enrollment list, shows success toast
+
+<h3>Key Files:</h3>
+<ul class="skill-list"><li>Route: src/backend/routes/enrollments.ts</li>
+<li>Service: src/backend/services/enrollmentService.ts</li>
+<li>Frontend: src/frontend/app/courses/[id]/enrollments.tsx</code></pre></li>
+
+</ul><h3>Level 3: Deep Dive</h3>
+
+Use before a major refactoring, when debugging complex issues, or for documentation:
+
+Full template from Step 4.1 above — includes file map, data flow diagram, key logic explanation, dependencies, impact analysis, and design decisions.
+<hr class="section-divider">
+<h2>How to Read Unfamiliar Code</h2>
+
+<h3>Reading Strategy</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│              HOW TO READ UNFAMILIAR CODE                      │
+│                                                              │
+│  1. START AT THE ENTRY POINT                                 │
+│     → Find the route/page/handler — this is where the        │
+│       user's request enters the system                       │
+│     → Read the URL pattern to understand the intent          │
+│                                                              │
+│  2. FOLLOW THE FUNCTION CALLS                                │
+│     → From the route handler, trace each function call       │
+│     → Open each called function and read it                  │
+│     → Build a mental call stack: A calls B calls C           │
+│                                                              │
+│  3. READ THE DATA MODEL                                      │
+│     → Open the Prisma schema or database model               │
+│     → Understand the tables and relationships                │
+│     → This tells you WHAT the system is managing             │
+│                                                              │
+│  4. READ THE TYPES/INTERFACES                                │
+│     → Type definitions tell you the shape of the data        │
+│     → They act as living documentation                       │
+│     → Check request/response types for API contracts         │
+│                                                              │
+│  5. READ THE TESTS (if they exist)                           │
+│     → Tests show expected behavior in concrete examples      │
+│     → They reveal edge cases the author considered           │
+│     → Test names describe what the code SHOULD do            │
+│                                                              │
+│  6. READ THE ERROR HANDLING                                  │
+│     → Catch blocks reveal what can go wrong                  │
+│     → Error messages hint at common failure scenarios        │
+│     → This tells you what the author worried about           │
+│                                                              │
+│  7. CHECK GIT HISTORY FOR CONTEXT                            │
+│     → git log --oneline -- path/to/file.ts                   │
+│     → Commit messages explain WHY changes were made          │
+│     → git blame shows who wrote each line and when           │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>What to Look For</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  READING CODE — KEY QUESTIONS                                │
+│                                                              │
+│  AT THE TOP OF EACH FILE                                     │
+│  → What does this file import? (tells you its dependencies)  │
+│  → What does it export? (tells you its public API)           │
+│  → Are there comments explaining the module's purpose?       │
+│                                                              │
+│  FOR EACH FUNCTION                                           │
+│  → What are the parameters? (inputs)                         │
+│  → What does it return? (output)                             │
+│  → What side effects does it have? (DB writes, API calls)    │
+│  → What can make it fail? (throws, rejects)                  │
+│                                                              │
+│  FOR CONDITIONAL LOGIC                                       │
+│  → What condition is being checked?                          │
+│  → What happens in the TRUE branch?                          │
+│  → What happens in the FALSE branch?                         │
+│  → Is there a default/fallback case?                         │
+│                                                              │
+│  FOR DATABASE OPERATIONS                                     │
+│  → Which table is being queried?                             │
+│  → What filters are applied? (where clause)                  │
+│  → What fields are selected? (select/include)                │
+│  → Is it a read or write operation?                          │
+│  → Is it wrapped in a transaction?                           │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Quick Reference — Common Architecture Patterns</h2>
+
+<h3>API Request Flow</h3>
+<pre class="code-block"><code>Client → Route → Middleware → Controller → Service → Database
+                 (auth,       (validate,   (business  (Prisma
+                  rate limit)  parse)       logic)     query)</code></pre>
+
+<h3>Frontend Data Flow</h3>
+<pre class="code-block"><code>Page → useEffect/React Query → API call → State update → Re-render
+                                 │
+                                 ├── Loading state while waiting
+                                 ├── Error state if failed
+                                 └── Data state if success</code></pre>
+
+<h3>Auth Flow</h3>
+<pre class="code-block"><code>Login → JWT issued → Stored in cookie/localStorage
+  │
+  └─▶ Every request: token sent → middleware validates
+         │                            │
+         ├── Valid → req.user set → route handler runs
+         └── Invalid → 401 returned → redirect to login</code></pre>
+
+<h3>Multi-Tenant Data Flow</h3>
+<pre class="code-block"><code>Request → Auth middleware extracts tenant_id from JWT
+  │
+  └─▶ Every DB query includes: WHERE tenant_id = ?
+         │
+         ├── User from Tenant A → only sees Tenant A data
+         └── User from Tenant B → only sees Tenant B data</code></pre>
+<hr class="section-divider">
+<h2>Tips for Best Results</h2>
+
+<ul class="skill-list"><li class="ordered"><strong>Always draw the data flow</strong> — A diagram explains more than 100 lines of text. Use ASCII arrows to show how data moves through the system.</li>
+<li class="ordered"><strong>Explain the WHY, not just the WHAT</strong> — "This uses soft delete" is a fact. "This uses soft delete because users can be reactivated and their enrollment history must be preserved" is understanding.</li>
+<li class="ordered"><strong>Start broad, go narrow</strong> — Begin with the high-level purpose, then zoom into specific files, then zoom into specific functions. Don't start with line-by-line details.</li>
+<li class="ordered"><strong>Use the codebase as the source of truth</strong> — Don't guess. Read the actual code, the actual schema, the actual tests. Documentation may be outdated; code never lies.</li>
+<li class="ordered"><strong>Check git blame for history</strong> — Sometimes code looks strange because it was a hotfix, a workaround, or a migration step. Git history explains the context.</li>
+<li class="ordered"><strong>Map before you modify</strong> — Before changing anything, draw the dependency map. Know what you might break. The 10 minutes spent mapping saves hours of debugging.</li>
+<li class="ordered"><strong>Explain to someone else</strong> — If you can't explain it simply, you don't understand it well enough. Writing the explanation reveals gaps in your understanding.</li></ul>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="code-review.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">Code Review — Catch Problems Before They Ship</span></span></a>
+    <a href="feature-plan.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Feature Plan — From Idea to Implementation-Ready Plan</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    66 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

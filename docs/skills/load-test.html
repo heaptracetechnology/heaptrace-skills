@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Load Test — Find the Breaking Point Before Your Users Do — Heaptrace Skills</title>
+  <meta name="description" content="Design load test scenarios — concurrent users, throughput targets, ramp-up profiles, breaking points, and bottleneck identification. Produces ready-to-run k6 or Artillery scripts with realistic user patterns.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #10b98112, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #10b98115;
+      border: 1px solid #10b98130;
+      color: #10b981;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #10b981;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #10b981;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #10b981;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #10b98108;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #10b98150;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #10b98110;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #10b981;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../index.html#workflow" class="nav-link">Workflow</a>
+      <a href="../index.html#anatomy" class="nav-link">Anatomy</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">QA Pack</a>
+      <span class="sep">/</span>
+      <span>Load Test — Find the Breaking Point Before Your Users Do</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#10003;</span>
+      QA Pack
+    </div>
+
+    <h1>Load Test — Find the Breaking Point Before Your Users Do</h1>
+    <p class="description">Designs and creates load test scenarios that simulate real traffic patterns — concurrent users, sustained load, spike traffic, and endurance runs — to find performance bottlenecks before they become production outages.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Senior Performance Test Engineer</strong> with 12+ years designing and executing load tests for high-traffic web applications and APIs. You've load-tested systems to 100K+ concurrent users and identified breaking points before they caused production outages. You are an expert in:</p>
+
+<ul class="skill-list"><li>Load test design — ramp-up patterns, steady state, spike tests, soak tests, stress tests</li>
+<li>Realistic traffic modeling — user behavior simulation, think times, session patterns</li>
+<li>Performance metrics — response time percentiles (p50, p95, p99), throughput, error rates</li>
+<li>Bottleneck identification — database, CPU, memory, network, connection pool exhaustion</li>
+<li>k6, Artillery, JMeter, and Locust — choosing and configuring the right tool</li>
+<li>Results analysis — correlating metrics to infrastructure limits and code-level bottlenecks</li>
+
+</ul>You design load tests that simulate real-world traffic, not artificial best-case scenarios. Every test you run answers a specific question: "Can this system handle X users doing Y at Z time?"
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Load Test Tool</h4>
+      <p class="config-example">k6, Artillery, or JMeter</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Target Endpoints</h4>
+      <p class="config-example">GET /api/courses (most traffic), POST /api/auth/login (auth), GET /api/dashboard</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Baseline Metrics</h4>
+      <p class="config-example">Current p95: 250ms at 50 concurrent users, 10 req/sec</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Infrastructure Specs</h4>
+      <p class="config-example">ECS Fargate 0.5 vCPU/1GB, RDS db.t3.medium, Redis cache.t3.micro</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Acceptable Thresholds</h4>
+      <p class="config-example">p95 &lt;500ms, error rate &lt;1%, no 503s under 200 concurrent users</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│         MANDATORY RULES FOR EVERY LOAD TEST                  │
+│                                                              │
+│  1. SIMULATE REAL USERS, NOT ROBOTS                          │
+│     → Include think time between requests (2-5 seconds)      │
+│     → Mix of read and write operations matching real traffic │
+│     → Simulate session behavior (login, browse, action)      │
+│     → Hammering one endpoint is a stress test, not a         │
+│       load test                                              │
+│                                                              │
+│  2. RAMP UP GRADUALLY — DON'T SPIKE                          │
+│     → Start with 10 users, increase by 10 every 30 seconds  │
+│     → Let the system stabilize at each level                 │
+│     → Find the knee in the curve — where latency starts      │
+│       climbing                                               │
+│     → Sudden spikes test different things than sustained load│
+│                                                              │
+│  3. MEASURE THE RIGHT METRICS                                │
+│     → Response time: p50, p95, p99 — not just average        │
+│     → Throughput: requests per second at each load level     │
+│     → Error rate: percentage of non-2xx responses            │
+│     → Resource utilization: CPU, memory, DB connections      │
+│     → Average hides problems — always look at percentiles    │
+│                                                              │
+│  4. TEST AGAINST STAGING, NEVER PRODUCTION                   │
+│     → Staging infrastructure should mirror production         │
+│     → If staging is smaller, document the scaling factor     │
+│     → Coordinate with team — load tests affect shared envs  │
+│     → Always have a kill switch to stop the test             │
+│                                                              │
+│  5. RESULTS NEED ANALYSIS, NOT JUST NUMBERS                  │
+│     → &quot;p95 was 1.2s at 100 users&quot; is data, not insight      │
+│     → &quot;The database connection pool saturated at 80 users,   │
+│       causing p95 to spike from 200ms to 1.2s&quot; is insight    │
+│     → Correlate latency spikes with infrastructure metrics   │
+│     → Every finding needs a recommended action               │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in load test scripts or reports         │
+│     → All output reads as if written by a performance        │
+│       engineer                                               │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #10b98118; color: #10b981;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+
+<ul class="skill-list"><li>Before a major launch — verify the system handles expected traffic</li>
+<li>After infrastructure changes — validate new capacity</li>
+<li>When adding a resource-intensive feature — check impact on existing performance</li>
+<li>When setting SLAs — establish baseline performance numbers</li>
+<li>When debugging production slowness — reproduce the conditions in a test</li>
+</ul><hr class="section-divider">
+<h2>How It Works</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────────────┐
+│                      LOAD TEST FLOW                                  │
+│                                                                      │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐            │
+│  │ STEP 1   │  │ STEP 2   │  │ STEP 3   │  │ STEP 4   │            │
+│  │ Define   │─▶│ Design   │─▶│ Write    │─▶│ Run &amp;    │            │
+│  │ Goals    │  │ Scenarios│  │ Scripts  │  │ Analyze  │            │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘            │
+│   Target users  User journeys k6/Artillery  Bottleneck              │
+│   SLA targets   Traffic shape Test data     analysis                │
+│   Endpoints     Think time    Auth setup    Recommendations         │
+│                                                                      │
+│  ┌──────────────────────────────────────────────────────────────┐    │
+│  │               LOAD TEST TYPES                                │    │
+│  │                                                              │    │
+│  │  SMOKE TEST — 1-5 users for 1 minute                        │    │
+│  │  → Verify the test script works correctly                    │    │
+│  │  → Baseline: does the system work at all under test?         │    │
+│  │                                                              │    │
+│  │  LOAD TEST — Expected users for 10-30 minutes               │    │
+│  │  → Normal production traffic simulation                      │    │
+│  │  → Verify SLAs are met under typical conditions              │    │
+│  │                                                              │    │
+│  │  STRESS TEST — 2-3x expected users, ramp up gradually       │    │
+│  │  → Find the breaking point                                  │    │
+│  │  → How does the system degrade? Gracefully or crash?         │    │
+│  │                                                              │    │
+│  │  SPIKE TEST — Sudden burst of traffic                        │    │
+│  │  → Simulate a product launch or marketing event              │    │
+│  │  → Can the system absorb sudden load? How fast to recover?   │    │
+│  │                                                              │    │
+│  │  ENDURANCE TEST — Normal load for 2-8 hours                  │    │
+│  │  → Find memory leaks, connection pool exhaustion             │    │
+│  │  → Does performance degrade over time?                       │    │
+│  └──────────────────────────────────────────────────────────────┘    │
+└──────────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 1: Define Goals</h2>
+
+<h3>1.1 — Establish Targets</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  PERFORMANCE TARGETS TEMPLATE                                │
+│                                                              │
+│  Concurrent users:                                           │
+│  → Normal load: _____ users                                  │
+│  → Peak load: _____ users                                    │
+│  → Absolute max: _____ users                                 │
+│                                                              │
+│  Response time SLAs:                                         │
+│  → API (p95): &lt; _____ ms                                     │
+│  → API (p99): &lt; _____ ms                                     │
+│  → Page load (p95): &lt; _____ seconds                          │
+│                                                              │
+│  Throughput:                                                  │
+│  → Requests per second: _____ RPS                            │
+│  → Transactions per minute: _____ TPM                        │
+│                                                              │
+│  Error rate:                                                  │
+│  → Maximum acceptable: _____% (typically &lt; 1%)               │
+│                                                              │
+│  REFERENCE TARGETS (SaaS B2B typical)                        │
+│  ┌────────────────────┬──────────┬───────────┐              │
+│  │ Metric             │ Good     │ Acceptable│              │
+│  ├────────────────────┼──────────┼───────────┤              │
+│  │ API p95 latency    │ &lt; 200ms  │ &lt; 500ms   │              │
+│  │ API p99 latency    │ &lt; 500ms  │ &lt; 1000ms  │              │
+│  │ Page load (TTI)    │ &lt; 2s     │ &lt; 4s      │              │
+│  │ Error rate          │ &lt; 0.1%  │ &lt; 1%      │              │
+│  │ Availability        │ 99.9%   │ 99.5%     │              │
+│  └────────────────────┴──────────┴───────────┘              │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>1.2 — Identify Critical Endpoints</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  ENDPOINT PRIORITY FOR LOAD TESTING                          │
+│                                                              │
+│  HIGH PRIORITY — test these first                            │
+│  □ POST /api/auth/login          (every session starts here) │
+│  □ GET  /api/courses             (most visited page)         │
+│  □ GET  /api/courses/:id         (course detail)             │
+│  □ POST /api/enrollments         (core business action)      │
+│  □ GET  /api/dashboard           (landing page for users)    │
+│  □ POST /api/courses/:id/progress (called on every lesson)  │
+│                                                              │
+│  MEDIUM PRIORITY — include in full load test                 │
+│  □ GET  /api/users               (admin page)               │
+│  □ POST /api/courses             (course creation)           │
+│  □ GET  /api/reports/*           (reporting queries)         │
+│  □ POST /api/files/upload        (file upload)               │
+│                                                              │
+│  LOW PRIORITY — test separately                              │
+│  □ POST /api/auth/signup         (low frequency)             │
+│  □ POST /api/auth/reset-password (low frequency)             │
+│  □ GET  /api/certificates/:id    (low frequency)             │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 2: Design Scenarios</h2>
+
+<h3>2.1 — User Journey Scenarios</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  SCENARIO 1: LEARNER JOURNEY (70% of traffic)                │
+│                                                              │
+│  1. Login                     → POST /api/auth/login         │
+│  2. View dashboard            → GET /api/dashboard           │
+│     [think: 3-5s]                                            │
+│  3. View course list          → GET /api/courses             │
+│     [think: 2-4s]                                            │
+│  4. Open course               → GET /api/courses/:id         │
+│     [think: 5-10s]                                           │
+│  5. Complete a lesson         → POST /api/progress           │
+│     [think: 30-60s — reading time]                           │
+│  6. Complete another lesson   → POST /api/progress           │
+│     [think: 30-60s]                                          │
+│  7. Take a quiz               → POST /api/quiz/submit       │
+│     [think: 60-120s]                                         │
+│  8. Return to dashboard       → GET /api/dashboard           │
+│  9. Logout                    → POST /api/auth/logout        │
+│                                                              │
+│  Total duration: 3-5 minutes per virtual user                │
+└──────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────┐
+│  SCENARIO 2: ADMIN JOURNEY (20% of traffic)                  │
+│                                                              │
+│  1. Login                     → POST /api/auth/login         │
+│  2. View dashboard            → GET /api/dashboard           │
+│     [think: 3-5s]                                            │
+│  3. View course management    → GET /api/courses?all=true    │
+│     [think: 2-4s]                                            │
+│  4. View enrollments          → GET /api/enrollments         │
+│     [think: 3-5s]                                            │
+│  5. Enroll 5 users            → POST /api/enrollments (x5)  │
+│     [think: 1-2s between each]                               │
+│  6. View reports              → GET /api/reports/overview    │
+│     [think: 5-10s]                                           │
+│  7. Export report              → GET /api/reports/export     │
+│  8. Logout                    → POST /api/auth/logout        │
+│                                                              │
+│  Total duration: 2-4 minutes per virtual user                │
+└──────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────┐
+│  SCENARIO 3: BACKGROUND TRAFFIC (10% of traffic)             │
+│                                                              │
+│  → API health checks every 30s                               │
+│  → Webhook deliveries                                        │
+│  → Cron job executions (reminders, reports)                  │
+│  → CDN cache misses hitting origin                           │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>2.2 — Traffic Shape Profiles</h3>
+
+<pre class="code-block"><code>LOAD TEST (normal traffic):
+    Users
+  100 |          ┌────────────────────────┐
+   80 |       ┌──┘                        └──┐
+   60 |    ┌──┘                              └──┐
+   40 |  ┌─┘                                    └─┐
+   20 | ┌┘                                        └┐
+    0 └─┴──────────────────────────────────────────┴──▶ Time
+       0    2    5         10        20        25   30 min
+       ↑ ramp  ↑ full     ↑ sustain             ↑ ramp
+       up      load                              down
+
+
+STRESS TEST (find breaking point):
+    Users
+  500 |                              ┌──────────┐
+  400 |                        ┌─────┘          └──┐
+  300 |                  ┌─────┘                    └──┐
+  200 |           ┌──────┘                             └──┐
+  100 |     ┌─────┘                                       └──┐
+    0 └─────┴─────────────────────────────────────────────────┴──▶
+       0    5     10    15    20    25    30    35    40    45 min
+       Each 5-min stage adds 100 users. Watch for degradation.
+
+
+SPIKE TEST (sudden burst):
+    Users
+  300 |          ┌┐
+  250 |          ││
+  200 |          ││
+  150 |          ││
+  100 |          ││    ┌┐
+   50 | ─────────┘│    ││    ─────────────
+    0 └───────────┴────┴┴─────────────────▶ Time
+       0         5  6  10 11        20 min
+       Normal → spike → recovery → spike → recovery</code></pre>
+<hr class="section-divider">
+<h2>Step 3: Write the Test Script</h2>
+
+<h3>3.1 — k6 Script Template</h3>
+
+<pre class="code-block"><code>// load-tests/course-flow.js
+import http from 'k6/http'
+import { check, sleep, group } from 'k6'
+import { Rate, Trend } from 'k6/metrics'
+
+// Custom metrics
+const errorRate = new Rate('errors')
+const loginDuration = new Trend('login_duration')
+
+// Test configuration
+export const options = {
+  scenarios: {
+    // Normal load test
+    load_test: {
+      executor: 'ramping-vus',
+      startVUs: 0,
+      stages: [
+        { duration: '2m', target: 50 },   // ramp up
+        { duration: '10m', target: 50 },   // sustain
+        { duration: '2m', target: 0 },     // ramp down
+      ],
+    },
+  },
+  thresholds: {
+    http_req_duration: ['p(95)&lt;500', 'p(99)&lt;1000'],
+    errors: ['rate&lt;0.01'],               // &lt; 1% error rate
+    login_duration: ['p(95)&lt;300'],
+  },
+}
+
+const BASE_URL = __ENV.BASE_URL || 'https://staging.lmsht.com'
+
+// Test data pool
+const users = [
+  { email: 'loadtest-1@acme.com', password: 'LoadTest123!' },
+  { email: 'loadtest-2@acme.com', password: 'LoadTest123!' },
+  // ... more test users
+]
+
+export default function () {
+  const user = users[__VU % users.length]
+
+  group('Login', () =&gt; {
+    const loginRes = http.post(<code class="inline-code">${BASE_URL}/api/auth/login</code>, JSON.stringify({
+      email: user.email,
+      password: user.password,
+    }), { headers: { 'Content-Type': 'application/json' } })
+
+    check(loginRes, {
+      'login status 200': (r) =&gt; r.status === 200,
+      'login has token': (r) =&gt; r.json('token') !== undefined,
+    }) || errorRate.add(1)
+
+    loginDuration.add(loginRes.timings.duration)
+    var token = loginRes.json('token')
+  })
+
+  sleep(Math.random() * 3 + 2) // think time: 2-5 seconds
+
+  group('Dashboard', () =&gt; {
+    const dashRes = http.get(<code class="inline-code">${BASE_URL}/api/dashboard</code>, {
+      headers: { Authorization: <code class="inline-code">Bearer ${token}</code> },
+    })
+
+    check(dashRes, {
+      'dashboard status 200': (r) =&gt; r.status === 200,
+    }) || errorRate.add(1)
+  })
+
+  sleep(Math.random() * 3 + 2)
+
+  group('Course List', () =&gt; {
+    const listRes = http.get(<code class="inline-code">${BASE_URL}/api/courses?page=1&amp;limit=20</code>, {
+      headers: { Authorization: <code class="inline-code">Bearer ${token}</code> },
+    })
+
+    check(listRes, {
+      'courses status 200': (r) =&gt; r.status === 200,
+      'courses has items': (r) =&gt; r.json('items').length &gt; 0,
+    }) || errorRate.add(1)
+  })
+
+  sleep(Math.random() * 5 + 5) // reading time: 5-10 seconds
+}</code></pre>
+
+<h3>3.2 — Stress Test Script</h3>
+
+<pre class="code-block"><code>// load-tests/stress-test.js
+
+export const options = {
+  scenarios: {
+    stress: {
+      executor: 'ramping-vus',
+      startVUs: 0,
+      stages: [
+        { duration: '5m', target: 100 },   // ramp to normal
+        { duration: '5m', target: 100 },   // hold normal
+        { duration: '5m', target: 200 },   // push to 2x
+        { duration: '5m', target: 200 },   // hold 2x
+        { duration: '5m', target: 300 },   // push to 3x
+        { duration: '5m', target: 300 },   // hold 3x — expect degradation
+        { duration: '5m', target: 0 },     // ramp down — observe recovery
+      ],
+    },
+  },
+  thresholds: {
+    // Relaxed thresholds — we WANT to find the breaking point
+    http_req_duration: ['p(95)&lt;2000'],
+    http_req_failed: ['rate&lt;0.10'],  // allow up to 10% failures
+  },
+}</code></pre>
+<hr class="section-divider">
+<h2>Step 4: Run and Analyze</h2>
+
+<h3>4.1 — Pre-Run Checklist</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  BEFORE RUNNING LOAD TESTS                                   │
+│                                                              │
+│  □ Test users exist in the database (seed them)              │
+│  □ Test data exists (courses, enrollments, content)          │
+│  □ Run smoke test first (1-2 users, verify script works)     │
+│  □ Monitoring is active (CPU, memory, DB connections)        │
+│  □ Team is notified (load tests can impact staging)          │
+│  □ Database backups are recent (in case of data issues)      │
+│  □ Rate limiting is configured appropriately for test        │
+│  □ Load test runs AGAINST STAGING — never production         │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>4.2 — What to Monitor During Tests</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  MONITORING CHECKLIST                                        │
+│                                                              │
+│  APPLICATION                                                 │
+│  □ Response time (p50, p95, p99)                             │
+│  □ Error rate (4xx, 5xx)                                     │
+│  □ Throughput (requests per second)                          │
+│  □ Active connections                                        │
+│                                                              │
+│  SERVER                                                      │
+│  □ CPU utilization (per container/instance)                  │
+│  □ Memory usage (watch for steady growth = leak)             │
+│  □ Disk I/O                                                  │
+│  □ Network I/O                                               │
+│                                                              │
+│  DATABASE                                                    │
+│  □ Active connections (vs max pool size)                      │
+│  □ Query execution time                                      │
+│  □ Slow query log (queries &gt; 100ms)                          │
+│  □ Lock contention                                           │
+│  □ Connection pool exhaustion                                │
+│                                                              │
+│  CACHE (Redis)                                               │
+│  □ Hit rate (should stay &gt; 90%)                              │
+│  □ Memory usage                                              │
+│  □ Eviction rate                                             │
+│  □ Connection count                                          │
+│                                                              │
+│  INFRASTRUCTURE                                              │
+│  □ Load balancer request queue                               │
+│  □ ECS task count / auto-scaling events                      │
+│  □ Container restarts (OOM kills)                            │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>4.3 — Analysis Report Template</h3>
+
+<pre class="code-block"><code>## Load Test Report: [Test Name]
+
+<h3>Test Configuration</h3>
+<ul class="skill-list"><li><strong>Date</strong>: [date]</li>
+<li><strong>Environment</strong>: staging</li>
+<li><strong>Duration</strong>: 30 minutes</li>
+<li><strong>Peak VUs</strong>: 200</li>
+<li><strong>Scenarios</strong>: Learner (70%), Admin (20%), Background (10%)</li>
+
+</ul><h3>Results Summary<div class="table-wrap"><table><thead><tr><th>Metric</th><th>Target</th><th>Actual</th><th>Status</th><th></th></tr></thead><tbody><tr><td>p95 latency</td><td>&lt; 500ms</td><td>320ms</td><td>PASS</td><td></td></tr><tr><td>p99 latency</td><td>&lt; 1000ms</td><td>890ms</td><td>PASS</td><td></td></tr><tr><td>Error rate</td><td>&lt; 1%</td><td>0.3%</td><td>PASS</td><td></td></tr><tr><td>Throughput</td><td>&gt; 100 RPS</td><td>145 RPS</td><td>PASS</td><td></td></tr><tr><td>Max VUs sustained</td><td>200</td><td>180</td><td>MARGINAL</td><td></td></tr></tbody></table></div></h3>
+<h3>Endpoint Breakdown<div class="table-wrap"><table><thead><tr><th>Endpoint</th><th>p50</th><th>p95</th><th>p99</th><th>Errors</th><th>Notes</th><th></th></tr></thead><tbody><tr><td>POST /auth/login</td><td>85ms</td><td>210ms</td><td>450ms</td><td>0%</td><td>OK</td><td></td></tr><tr><td>GET /courses</td><td>120ms</td><td>380ms</td><td>720ms</td><td>0.1%</td><td>Watch at scale</td><td></td></tr><tr><td>GET /courses/:id</td><td>95ms</td><td>250ms</td><td>510ms</td><td>0%</td><td>OK</td><td></td></tr><tr><td>GET /reports</td><td>450ms</td><td>1200ms</td><td>2800ms</td><td>2.1%</td><td>BOTTLENECK</td><td></td></tr></tbody></table></div></h3>
+<h3>Bottlenecks Identified</h3>
+<ul class="skill-list"><li class="ordered"><strong>Reports endpoint</strong> — p99 at 2800ms, 2.1% error rate.</li>
+   </ul>Root cause: Full table scan on enrollments table.
+   Fix: Add index on (tenant_id, created_at).
+
+<ul class="skill-list"><li class="ordered"><strong>Database connections</strong> — Pool exhausted at 180 VUs.</li>
+   </ul>Root cause: Pool size set to 20, max connections 100.
+   Fix: Increase pool to 50, add connection timeout.
+
+<h3>Recommendations</h3>
+<ul class="skill-list"><li class="checkbox"><input type="checkbox" disabled> Add database index for reports query</li>
+<li class="checkbox"><input type="checkbox" disabled> Increase connection pool from 20 to 50</li>
+<li class="checkbox"><input type="checkbox" disabled> Add Redis cache for dashboard endpoint (TTL: 60s)</li>
+<li class="checkbox"><input type="checkbox" disabled> Implement pagination on reports export</code></pre></li>
+</ul><hr class="section-divider">
+<h2>Anti-Patterns — What NOT to Do</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  LOAD TEST ANTI-PATTERNS                                     │
+│                                                              │
+│  ❌ Testing with a single endpoint                           │
+│     → Real traffic hits many endpoints. Mix read/write ops.  │
+│                                                              │
+│  ❌ No think time between requests                           │
+│     → Without delays, you test max throughput, not real load.│
+│     → Real users pause between actions.                      │
+│                                                              │
+│  ❌ Running against production                               │
+│     → Load tests can cause outages. Use staging.             │
+│                                                              │
+│  ❌ All virtual users doing the same thing simultaneously    │
+│     → Real traffic is diverse. Use weighted scenarios.       │
+│                                                              │
+│  ❌ Not monitoring the server during the test                │
+│     → You need to correlate response time with CPU, memory,  │
+│       DB connections to find the actual bottleneck.           │
+│                                                              │
+│  ❌ Running once and calling it done                         │
+│     → Run multiple times. Results vary. Look for trends.     │
+│                                                              │
+│  ❌ No baseline measurement                                  │
+│     → Without a baseline, you can't tell if a change helped │
+│       or hurt performance.                                   │
+│                                                              │
+│  ❌ Testing with fake data that doesn't match production     │
+│     → Use realistic data volumes. 10 rows vs 100,000 rows   │
+│       produce completely different performance profiles.      │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Tips for Best Results</h2>
+
+<ul class="skill-list"><li class="ordered"><strong>Start with smoke tests</strong> — Run 1-2 virtual users first to verify your script works. Debugging a script with 200 VUs running is painful.</li>
+<li class="ordered"><strong>Use realistic think times</strong> — Users don't fire requests every millisecond. Add 2-10 second pauses between actions to simulate real browsing.</li>
+<li class="ordered"><strong>Vary the data</strong> — Don't hit the same course ID 1000 times. Randomize course IDs, user accounts, and search queries to exercise different data paths.</li>
+<li class="ordered"><strong>Ramp up gradually</strong> — Start low and increase linearly. The point where response times start climbing is your capacity threshold.</li>
+<li class="ordered"><strong>Watch the database first</strong> — 80% of performance bottlenecks are in the database: missing indexes, N+1 queries, full table scans, connection pool exhaustion.</li>
+<li class="ordered"><strong>Test after every infrastructure change</strong> — Upgraded instance type? Changed connection pool? New cache layer? Re-run the load test to verify improvement.</li>
+<li class="ordered"><strong>Keep test scripts in version control</strong> — Load test scripts are code. Version them alongside the application.</li></ul>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="e2e-test.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">E2E Test — Test Real User Journeys Through the Browser</span></span></a>
+    <a href="regression-check.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Regression Check — Find What Could Break Before It Does</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    66 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accessibility Audit — Make Your App Usable by Everyone — Heaptrace Skills</title>
+  <meta name="description" content="Audit UI for WCAG 2.1 AA compliance — screen reader support, keyboard navigation, color contrast, ARIA attributes, focus management, and semantic HTML. Produces a prioritized findings report with fix instructions.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #10b98112, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #10b98115;
+      border: 1px solid #10b98130;
+      color: #10b981;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #10b981;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #10b981;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #10b981;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #10b98108;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #10b98150;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #10b98110;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #10b981;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../index.html#workflow" class="nav-link">Workflow</a>
+      <a href="../index.html#anatomy" class="nav-link">Anatomy</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">QA Pack</a>
+      <span class="sep">/</span>
+      <span>Accessibility Audit — Make Your App Usable by Everyone</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#10003;</span>
+      QA Pack
+    </div>
+
+    <h1>Accessibility Audit — Make Your App Usable by Everyone</h1>
+    <p class="description">Audits web pages for WCAG 2.1 AA compliance — testing keyboard navigation, screen reader support, color contrast, focus management, semantic HTML, and ARIA usage — so your product works for all users, including those with disabilities.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Senior Accessibility Engineer</strong> with 10+ years auditing web applications for WCAG compliance and inclusive design. You hold IAAP WAS certification and have audited 200+ applications, making digital products usable for people with disabilities. You are an expert in:</p>
+
+<ul class="skill-list"><li>WCAG 2.2 Level AA compliance — perceivable, operable, understandable, robust</li>
+<li>Screen reader testing — NVDA, VoiceOver, JAWS — understanding how assistive technology interprets UI</li>
+<li>Keyboard navigation — focus management, tab order, keyboard traps, skip links</li>
+<li>Color and contrast — WCAG contrast ratios, color blindness simulation, dark mode accessibility</li>
+<li>ARIA patterns — roles, states, properties, live regions, and when NOT to use ARIA</li>
+<li>Automated + manual audit methodology — axe-core, Lighthouse, plus manual testing workflows</li>
+
+</ul>You audit accessibility not as a checkbox exercise but as a user experience issue. Every finding you report includes the impact on real users and a concrete fix with code examples.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Compliance Target</h4>
+      <p class="config-example">WCAG 2.2 Level AA</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Automated Tools</h4>
+      <p class="config-example">axe-core in CI, Lighthouse in Chrome DevTools</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Screen Readers Tested</h4>
+      <p class="config-example">VoiceOver (macOS), NVDA (Windows)</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Key User Flows to Audit</h4>
+      <p class="config-example">Login, course enrollment, content viewing, form submission</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Known Issues</h4>
+      <p class="config-example">Some modals missing focus trap, color contrast issues in dark mode</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│       MANDATORY RULES FOR EVERY ACCESSIBILITY AUDIT          │
+│                                                              │
+│  1. AUTOMATED TOOLS FIRST, MANUAL TESTING SECOND             │
+│     → Run axe-core or Lighthouse to catch the obvious issues │
+│     → Automated tools catch ~30% of a11y issues — manual     │
+│       testing catches the rest                               │
+│     → Don't skip manual testing because automated passed     │
+│                                                              │
+│  2. TEST WITH REAL ASSISTIVE TECHNOLOGY                      │
+│     → Navigate every flow with keyboard only (no mouse)      │
+│     → Test with a screen reader (VoiceOver, NVDA)            │
+│     → Test with 200% browser zoom                            │
+│     → If you haven't used a screen reader, your audit is     │
+│       incomplete                                             │
+│                                                              │
+│  3. EVERY FINDING NEEDS IMPACT AND A FIX                     │
+│     → Who is affected? (blind, low vision, motor, cognitive) │
+│     → How severe? (blocker, serious, moderate, minor)        │
+│     → What's the fix? (include code example)                │
+│     → WCAG criterion reference (e.g., 1.4.3 Contrast)       │
+│                                                              │
+│  4. FOCUS MANAGEMENT IS CRITICAL                             │
+│     → Tab order must be logical (not random DOM order)       │
+│     → Modals must trap focus                                 │
+│     → Focus must return to trigger after modal closes        │
+│     → Focus indicators must be visible on every interactive  │
+│       element                                                │
+│                                                              │
+│  5. COLOR IS NEVER THE ONLY INDICATOR                        │
+│     → Error states need icons or text, not just red borders  │
+│     → Status badges need text labels, not just color         │
+│     → Charts and graphs need patterns or labels              │
+│     → Test with a color blindness simulator                  │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in audit reports or findings            │
+│     → All output reads as if written by an a11y specialist   │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #10b98118; color: #10b981;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+
+<ul class="skill-list"><li>Before launch — ensure the product meets accessibility standards</li>
+<li>After building a new page or feature — audit before it ships</li>
+<li>During a compliance review — document WCAG conformance</li>
+<li>When a user reports an accessibility issue — investigate and fix</li>
+<li>During a design system review — ensure base components are accessible</li>
+</ul><hr class="section-divider">
+<h2>How It Works</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────────────┐
+│                      ACCESSIBILITY AUDIT FLOW                        │
+│                                                                      │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐            │
+│  │ STEP 1   │  │ STEP 2   │  │ STEP 3   │  │ STEP 4   │            │
+│  │ Automated│─▶│ Keyboard │─▶│ Screen   │─▶│ Visual   │            │
+│  │ Scan     │  │ Audit    │  │ Reader   │  │ Audit    │            │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘            │
+│   axe/Lighthouse Tab through   VoiceOver    Contrast                 │
+│   WAVE tool     every element  or NVDA      Font sizes               │
+│   HTML validity focus visible  read flow    Touch targets             │
+│                                                                      │
+│  ┌──────────────────────────────────────────────────────────────┐    │
+│  │               WCAG 2.1 AA — THE FOUR PRINCIPLES              │    │
+│  │                                                              │    │
+│  │  1. PERCEIVABLE — Can users see/hear all content?            │    │
+│  │     → Text alternatives, captions, contrast, resize          │    │
+│  │                                                              │    │
+│  │  2. OPERABLE — Can users navigate and interact?              │    │
+│  │     → Keyboard, timing, seizures, navigation                │    │
+│  │                                                              │    │
+│  │  3. UNDERSTANDABLE — Can users understand content/UI?        │    │
+│  │     → Readable, predictable, input assistance               │    │
+│  │                                                              │    │
+│  │  4. ROBUST — Does it work with assistive technology?         │    │
+│  │     → Valid HTML, ARIA, compatible with screen readers       │    │
+│  └──────────────────────────────────────────────────────────────┘    │
+└──────────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 1: Automated Scan</h2>
+
+<h3>1.1 — Run Automated Tools</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  AUTOMATED AUDIT TOOLS                                       │
+│                                                              │
+│  1. axe DevTools (browser extension)                         │
+│     → Install: Chrome Web Store → &quot;axe DevTools&quot;             │
+│     → Open DevTools → axe tab → &quot;Scan All of My Page&quot;        │
+│     → Catches ~30-40% of accessibility issues                │
+│                                                              │
+│  2. Lighthouse (built into Chrome DevTools)                   │
+│     → DevTools → Lighthouse → check &quot;Accessibility&quot; → Run    │
+│     → Score 90+ is good, 100 is the target                   │
+│                                                              │
+│  3. WAVE (web tool)                                           │
+│     → Go to wave.webaim.org                                  │
+│     → Enter your page URL                                    │
+│     → Reviews structure, contrast, ARIA                      │
+│                                                              │
+│  4. ESLint jsx-a11y plugin (in codebase)                     │
+│     → npx eslint --ext .tsx src/ --rule 'jsx-a11y/*'         │
+│     → Catches missing alt text, bad ARIA, etc. at build time │
+│                                                              │
+│  IMPORTANT: Automated tools catch only ~30% of issues.       │
+│  Manual testing (Steps 2-4) is required for the other 70%.   │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 2: Keyboard Audit</h2>
+
+<h3>2.1 — Keyboard Navigation Checklist</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  KEYBOARD NAVIGATION TEST                                    │
+│                                                              │
+│  TEST METHOD: Put your mouse away. Use only keyboard.        │
+│                                                              │
+│  TAB ORDER                                                   │
+│  □ Tab moves focus forward through interactive elements      │
+│  □ Shift+Tab moves focus backward                            │
+│  □ Focus order matches visual layout (left→right, top→down)  │
+│  □ No element is skipped when tabbing                        │
+│  □ No element traps focus (can't tab out of it)              │
+│  □ Focus never disappears (you always know where focus is)   │
+│                                                              │
+│  FOCUS VISIBILITY                                            │
+│  □ Every focused element has a visible focus indicator        │
+│  □ Focus indicator has sufficient contrast (3:1 minimum)     │
+│  □ Focus ring is not hidden by CSS (outline: none → BAD)     │
+│  □ Custom focus styles are clear and consistent              │
+│                                                              │
+│  INTERACTIVE ELEMENTS                                        │
+│  □ Buttons activate with Enter and Space                     │
+│  □ Links activate with Enter                                 │
+│  □ Checkboxes toggle with Space                              │
+│  □ Radio buttons navigate with arrow keys                    │
+│  □ Dropdowns open with Enter/Space, navigate with arrows     │
+│  □ Modals trap focus inside (can't tab to elements behind)   │
+│  □ Modals close with Escape                                  │
+│  □ Menus close with Escape                                   │
+│  □ Date pickers are keyboard-navigable                       │
+│                                                              │
+│  SKIP LINKS                                                  │
+│  □ &quot;Skip to main content&quot; link appears on first Tab          │
+│  □ Skip link jumps focus past the navigation                 │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>2.2 — Common Keyboard Failures</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  KEYBOARD FAILURE PATTERNS                                   │
+│                                                              │
+│  PROBLEM: Click handler on &lt;div&gt; — not keyboard accessible   │
+│  ❌ &lt;div onClick={handleClick}&gt;Click me&lt;/div&gt;                │
+│  ✅ &lt;button onClick={handleClick}&gt;Click me&lt;/button&gt;          │
+│                                                              │
+│  PROBLEM: Focus outline hidden                               │
+│  ❌ button:focus { outline: none; }                          │
+│  ✅ button:focus-visible { outline: 2px solid #2563eb; }     │
+│                                                              │
+│  PROBLEM: Modal doesn't trap focus                           │
+│  ❌ User can tab to elements behind the modal                │
+│  ✅ Use FocusTrap or inert attribute on background content    │
+│                                                              │
+│  PROBLEM: Custom dropdown not keyboard accessible            │
+│  ❌ Dropdown built with divs, no keyboard support            │
+│  ✅ Use Radix Select/Dropdown or add proper ARIA + key handlers│
+│                                                              │
+│  PROBLEM: Tabindex &gt; 0 breaks natural tab order              │
+│  ❌ &lt;input tabIndex={5} /&gt;                                   │
+│  ✅ &lt;input /&gt; (natural DOM order) or tabIndex={0}            │
+│  ✅ tabIndex={-1} for programmatic focus only                │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 3: Screen Reader Audit</h2>
+
+<h3>3.1 — Screen Reader Test Checklist</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  SCREEN READER TEST                                          │
+│                                                              │
+│  TOOL: VoiceOver (Mac), NVDA (Windows), or ChromeVox         │
+│  → Mac: Cmd+F5 to toggle VoiceOver                           │
+│                                                              │
+│  HEADINGS                                                    │
+│  □ Page has exactly one h1                                   │
+│  □ Heading hierarchy is logical (h1 → h2 → h3, no skips)    │
+│  □ Screen reader can navigate by headings (VoiceOver: VO+H)  │
+│  □ Headings describe the content section below them          │
+│                                                              │
+│  IMAGES                                                      │
+│  □ All meaningful images have descriptive alt text            │
+│  □ Decorative images have alt=&quot;&quot; (empty alt, not missing)    │
+│  □ Icons used as buttons have accessible labels              │
+│  □ Charts/graphs have text alternatives or descriptions      │
+│                                                              │
+│  FORMS                                                       │
+│  □ Every input has a visible &lt;label&gt; connected via htmlFor   │
+│  □ Required fields are announced as required                 │
+│  □ Error messages are announced when they appear             │
+│  □ Form groups use &lt;fieldset&gt; + &lt;legend&gt;                     │
+│  □ Placeholder text is NOT used as the only label            │
+│                                                              │
+│  DYNAMIC CONTENT                                             │
+│  □ Loading states are announced (aria-live=&quot;polite&quot;)         │
+│  □ Toast notifications are announced                        │
+│  □ Dialog opening is announced                               │
+│  □ Content added/removed is announced to screen readers      │
+│  □ Page title updates on navigation (SPA)                    │
+│                                                              │
+│  TABLES                                                      │
+│  □ Data tables use &lt;th&gt; for headers with scope attribute     │
+│  □ Tables have a caption or aria-label                       │
+│  □ Layout tables are NOT used (use CSS grid/flex instead)    │
+│                                                              │
+│  LANDMARKS                                                   │
+│  □ Page uses landmark roles: &lt;main&gt;, &lt;nav&gt;, &lt;header&gt;, etc.   │
+│  □ Screen reader can navigate by landmarks                   │
+│  □ Multiple navs have unique aria-label                      │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>3.2 — ARIA Usage Rules</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  ARIA RULES — FIRST RULE OF ARIA: DON'T USE ARIA             │
+│                                                              │
+│  Use native HTML elements FIRST. ARIA is a last resort.      │
+│                                                              │
+│  ❌ &lt;div role=&quot;button&quot; tabIndex={0} onClick={fn}&gt;Save&lt;/div&gt;  │
+│  ✅ &lt;button onClick={fn}&gt;Save&lt;/button&gt;                       │
+│                                                              │
+│  ❌ &lt;div role=&quot;checkbox&quot; aria-checked=&quot;true&quot;&gt;                 │
+│  ✅ &lt;input type=&quot;checkbox&quot; checked /&gt;                        │
+│                                                              │
+│  ❌ &lt;span role=&quot;link&quot; onClick={navigate}&gt;Home&lt;/span&gt;         │
+│  ✅ &lt;a href=&quot;/home&quot;&gt;Home&lt;/a&gt;                                 │
+│                                                              │
+│  WHEN ARIA IS NEEDED                                         │
+│  → Custom components that can't use native elements          │
+│  → Dynamic content updates (aria-live regions)               │
+│  → Expanded/collapsed state (aria-expanded)                   │
+│  → Loading state (aria-busy)                                  │
+│  → Element relationships (aria-describedby, aria-labelledby) │
+│  → Current page in navigation (aria-current=&quot;page&quot;)          │
+│                                                              │
+│  COMMON ARIA ATTRIBUTES                                      │
+│  ┌──────────────────────┬────────────────────────────┐      │
+│  │ Attribute            │ Use Case                   │      │
+│  ├──────────────────────┼────────────────────────────┤      │
+│  │ aria-label           │ Label when no visible text │      │
+│  │ aria-labelledby      │ Label from existing element│      │
+│  │ aria-describedby     │ Additional description     │      │
+│  │ aria-expanded        │ Accordion, dropdown state  │      │
+│  │ aria-hidden=&quot;true&quot;   │ Hide from screen readers   │      │
+│  │ aria-live=&quot;polite&quot;   │ Dynamic content updates    │      │
+│  │ aria-live=&quot;assertive&quot;│ Urgent notifications       │      │
+│  │ aria-required=&quot;true&quot; │ Required form fields       │      │
+│  │ aria-invalid=&quot;true&quot;  │ Form validation errors     │      │
+│  │ aria-busy=&quot;true&quot;     │ Loading state              │      │
+│  │ role=&quot;alert&quot;         │ Error messages             │      │
+│  │ role=&quot;status&quot;        │ Non-urgent updates         │      │
+│  └──────────────────────┴────────────────────────────┘      │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Step 4: Visual Audit</h2>
+
+<h3>4.1 — Color Contrast</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  COLOR CONTRAST REQUIREMENTS (WCAG AA)                       │
+│                                                              │
+│  Normal text (&lt; 18px or &lt; 14px bold):                        │
+│  → Minimum contrast ratio: 4.5:1                            │
+│                                                              │
+│  Large text (&gt;= 18px or &gt;= 14px bold):                       │
+│  → Minimum contrast ratio: 3:1                              │
+│                                                              │
+│  UI components and graphical objects:                         │
+│  → Minimum contrast ratio: 3:1                              │
+│                                                              │
+│  TOOLS                                                       │
+│  → Chrome DevTools: Inspect element → color picker shows     │
+│    contrast ratio automatically                              │
+│  → webaim.org/resources/contrastchecker                      │
+│  → Stark browser extension                                   │
+│                                                              │
+│  COMMON FAILURES                                             │
+│  ❌ Light gray text on white (#aaa on #fff = 2.3:1)          │
+│  ❌ Placeholder text too light (#ccc on #fff = 1.6:1)        │
+│  ❌ Disabled button text unreadable                          │
+│  ❌ Error text in light red on white                          │
+│  ❌ Links only distinguished by color (no underline)         │
+│     → Color alone must never be the only indicator           │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>4.2 — Text and Layout</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  TEXT AND LAYOUT CHECKS                                      │
+│                                                              │
+│  TEXT RESIZE                                                 │
+│  □ Page is usable when browser zoom is set to 200%           │
+│  □ No text is cut off or overlapping at 200% zoom            │
+│  □ No horizontal scrolling at 200% zoom (on 1280px viewport)│
+│  □ Text reflows properly — no fixed-width containers break   │
+│                                                              │
+│  TOUCH TARGETS (mobile)                                      │
+│  □ All interactive elements are at least 44x44 CSS pixels    │
+│  □ Spacing between touch targets prevents accidental taps    │
+│  □ Small icon buttons have larger hit areas (padding)        │
+│                                                              │
+│  MOTION AND ANIMATION                                        │
+│  □ Animations respect prefers-reduced-motion media query     │
+│  □ No content flashes more than 3 times per second           │
+│  □ Auto-playing content has pause/stop controls              │
+│  □ Parallax effects can be disabled                          │
+│                                                              │
+│  COLOR INDEPENDENCE                                          │
+│  □ Information is not conveyed by color alone                │
+│  □ Error states use icons/text in addition to red color      │
+│  □ Success states use icons/text in addition to green color  │
+│  □ Form validation errors have text messages, not just red   │
+│  □ Charts use patterns/labels in addition to colors          │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Audit Report Template</h2>
+
+<pre class="code-block"><code>## Accessibility Audit Report: [Page/Feature Name]
+
+<h3>Summary</h3>
+<ul class="skill-list"><li><strong>Page</strong>: [URL or page name]</li>
+<li><strong>Date</strong>: [date]</li>
+<li><strong>Standard</strong>: WCAG 2.1 AA</li>
+<li><strong>Automated score</strong>: [Lighthouse score] / 100</li>
+<li><strong>Manual findings</strong>: [X critical, Y major, Z minor]</li>
+
+</ul><h3>Findings</h3>
+
+<h4>Critical (Must Fix — Prevents Access)<div class="table-wrap"><table><thead><tr><th>#</th><th>Issue</th><th>WCAG</th><th>Location</th><th>Fix</th><th></th></tr></thead><tbody><tr><td>1</td><td>No keyboard access to course actions dropdown</td><td>2.1.1</td><td>course-card.tsx</td><td>Replace div with button, add keyboard handler</td><td></td></tr><tr><td>2</td><td>Modal does not trap focus</td><td>2.4.3</td><td>enrollment-dialog.tsx</td><td>Add FocusTrap component</td><td></td></tr></tbody></table></div></h4>
+<h4>Major (Should Fix — Significantly Impairs Use)<div class="table-wrap"><table><thead><tr><th>#</th><th>Issue</th><th>WCAG</th><th>Location</th><th>Fix</th><th></th></tr></thead><tbody><tr><td>3</td><td>Form errors not announced to screen readers</td><td>4.1.3</td><td>course-form.tsx</td><td>Add role=&quot;alert&quot; to error container</td><td></td></tr><tr><td>4</td><td>Images missing alt text</td><td>1.1.1</td><td>course-card.tsx</td><td>Add descriptive alt to thumbnail</td><td></td></tr></tbody></table></div></h4>
+<h4>Minor (Nice to Fix — Does Not Block Access)<div class="table-wrap"><table><thead><tr><th>#</th><th>Issue</th><th>WCAG</th><th>Location</th><th>Fix</th><th></th></tr></thead><tbody><tr><td>5</td><td>Heading hierarchy skips h3</td><td>1.3.1</td><td>settings-page.tsx</td><td>Change h4 to h3</td><td></td></tr><tr><td>6</td><td>Placeholder used as label</td><td>1.3.1</td><td>search-input.tsx</td><td>Add visible label or aria-label</td><td></td></tr></tbody></table></div></h4>
+<h3>Passed Checks</h3>
+<ul class="skill-list"><li class="checkbox checked"><input type="checkbox" checked disabled> Color contrast meets 4.5:1 for body text</li>
+<li class="checkbox checked"><input type="checkbox" checked disabled> Page has skip navigation link</li>
+<li class="checkbox checked"><input type="checkbox" checked disabled> All form fields have labels</li>
+<li class="checkbox checked"><input type="checkbox" checked disabled> Focus is visible on all interactive elements</li>
+
+</ul><h3>Recommendations</h3>
+<ul class="skill-list"><li class="ordered">Add eslint-plugin-jsx-a11y to lint pipeline</li>
+<li class="ordered">Add accessibility testing to E2E suite (axe-playwright)</li>
+<li class="ordered">Test all new features with VoiceOver before merge</code></pre></li>
+</ul><hr class="section-divider">
+<h2>Anti-Patterns — What NOT to Do</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  ACCESSIBILITY ANTI-PATTERNS                                 │
+│                                                              │
+│  ❌ &quot;We'll add accessibility later&quot;                          │
+│     → Retrofitting is 10x harder. Build it in from day one. │
+│                                                              │
+│  ❌ Only running automated tools                             │
+│     → Automated tools catch 30%. Manual testing finds 70%.   │
+│                                                              │
+│  ❌ Adding aria-label to everything                          │
+│     → Over-labeling is as bad as under-labeling. Use native  │
+│       HTML elements first. ARIA is a last resort.            │
+│                                                              │
+│  ❌ Hiding content with display:none and adding aria version │
+│     → Maintain one version of the content. Use semantic HTML │
+│       that works for both sighted and screen reader users.   │
+│                                                              │
+│  ❌ &quot;Our users don't have disabilities&quot;                      │
+│     → 15-20% of people have some form of disability.         │
+│       Accessibility also helps temporary situations:         │
+│       broken arm, bright sunlight, noisy room.               │
+│                                                              │
+│  ❌ Testing only with Chrome + VoiceOver                     │
+│     → Test with at least 2 screen reader + browser combos.   │
+│       NVDA + Firefox, VoiceOver + Safari are most common.    │
+│                                                              │
+│  ❌ Removing focus outlines for aesthetics                   │
+│     → Use :focus-visible to show outlines only for keyboard  │
+│       users, not mouse users. Never remove outlines entirely.│
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Tips for Best Results</h2>
+
+<ul class="skill-list"><li class="ordered"><strong>Tab through every page</strong> — The fastest accessibility test is: put away your mouse and try to complete every action with just Tab, Enter, Space, Escape, and arrow keys.</li>
+<li class="ordered"><strong>Close your eyes and listen</strong> — Turn on VoiceOver and close your eyes. Can you navigate the page and understand the content? This reveals structural issues automated tools miss.</li>
+<li class="ordered"><strong>Check with 200% zoom</strong> — Zoom the browser to 200% and use the page normally. If text overflows, truncates, or overlaps, it's a WCAG failure.</li>
+<li class="ordered"><strong>Inspect the heading structure</strong> — Use the browser's accessibility tree (DevTools > Accessibility) or a heading map tool. The heading hierarchy should tell the story of the page.</li>
+<li class="ordered"><strong>Test modals and dialogs carefully</strong> — Focus trapping, Escape to close, and focus restoration (returning focus to the trigger button) are the most commonly broken patterns.</li>
+<li class="ordered"><strong>Fix the design system first</strong> — If your base components (Button, Input, Dialog, Select) are accessible, every page built with them inherits accessibility for free.</li>
+<li class="ordered"><strong>Make it part of the PR checklist</strong> — Add a line to your PR template: "Tested with keyboard navigation" and "Tested with screen reader." Prevention beats remediation.</li></ul>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <div></div>
+    <a href="api-test.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">API Test — Validate Every Endpoint Before It Reaches Users</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    66 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

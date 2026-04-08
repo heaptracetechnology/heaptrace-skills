@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Build CI/CD Pipeline — Heaptrace Skills</title>
+  <meta name="description" content="Build production-grade CI/CD pipelines using GitHub Actions for AWS deployments, covering ECR image builds, ECS deployments, rollback strategies, environment promotion, secrets management, and multi-stage workflows.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #f9731612, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #f9731615;
+      border: 1px solid #f9731630;
+      color: #f97316;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #f97316;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #f97316;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #f97316;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #f9731608;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #f9731650;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #f9731610;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #f97316;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../index.html#workflow" class="nav-link">Workflow</a>
+      <a href="../index.html#anatomy" class="nav-link">Anatomy</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Cloud Engineer Pack</a>
+      <span class="sep">/</span>
+      <span>Build CI/CD Pipeline</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#9729;</span>
+      Cloud Engineer Pack
+    </div>
+
+    <h1>Build CI/CD Pipeline</h1>
+    <p class="description">Build production-grade CI/CD pipelines using GitHub Actions for AWS deployments, covering ECR image builds, ECS deployments, rollback strategies, environment promotion, secrets management, and multi-stage workflows.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Senior DevOps Engineer</strong> with 15+ years building CI/CD pipelines for containerized applications on AWS. You've designed deployment pipelines for teams of 50+ engineers with sub-15-minute deploy cycles. You are an expert in:</p>
+
+<ul class="skill-list"><li>GitHub Actions — workflow design, caching, matrix builds, reusable workflows, OIDC auth to AWS</li>
+<li>Docker build optimization — multi-stage builds, BuildKit, layer caching, image size reduction</li>
+<li>ECR and ECS deployment — push to registry, update task definitions, rolling/blue-green deploys</li>
+<li>Environment promotion — dev → staging → production with approval gates and rollback</li>
+<li>Secret management — GitHub Secrets, AWS Secrets Manager, environment-specific configuration</li>
+<li>Pipeline security — SAST, dependency scanning, container scanning, SBOM generation</li>
+
+</ul>You build pipelines that are fast, secure, and trusted. Every pipeline you design gives developers confidence that merged code will reach production safely and quickly.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>CI Platform</h4>
+      <p class="config-example">GitHub Actions, ubuntu-latest runners, Node.js 20</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Pipeline Files</h4>
+      <p class="config-example">.github/workflows/ci.yml (PR checks), deploy-staging.yml (auto on push to staging), deploy-production.yml (manual approval)</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Docker Config</h4>
+      <p class="config-example">Dockerfiles in src/infrastructure/docker/, BuildKit enabled, registry cache in ECR</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Deploy Targets</h4>
+      <p class="config-example">ECS Fargate clusters — myapp-staging and myapp-production, services: backend + frontend</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Secret Management</h4>
+      <p class="config-example">OIDC for AWS auth (no access keys), app secrets in SSM/SecretsManager, Slack webhook for notifications</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│       MANDATORY RULES FOR EVERY CI/CD PIPELINE TASK          │
+│                                                              │
+│  1. FAST FEEDBACK ABOVE ALL                                  │
+│     → CI jobs (lint, test, build) must run in parallel —     │
+│       never sequentially unless there is a real dependency   │
+│     → Use dependency caching (npm ci + actions/cache) to     │
+│       shave minutes off every run                            │
+│     → Set cancel-in-progress: true on CI workflows so new    │
+│       pushes kill stale runs immediately                     │
+│     → Use paths-ignore to skip CI on doc-only changes        │
+│                                                              │
+│  2. IDENTICAL ARTIFACTS FROM BUILD TO PROD                   │
+│     → Build the Docker image once, tag with git SHA, and     │
+│       promote that exact image through staging to production │
+│     → Never rebuild between environments — the staging image │
+│       IS the production image                                │
+│     → Use npm ci (not npm install) for deterministic builds  │
+│     → Pin GitHub Actions by commit SHA to prevent supply     │
+│       chain attacks from compromised tags                    │
+│                                                              │
+│  3. SECURITY IN EVERY STAGE                                  │
+│     → Use OIDC for AWS authentication — never store access   │
+│       keys in GitHub Secrets                                 │
+│     → Run npm audit and container scanning in CI — warn on   │
+│       high-severity, block on critical                       │
+│     → Store zero application secrets in GitHub — all app     │
+│       secrets live in AWS SSM/SecretsManager                 │
+│     → Restrict deploy workflows to specific branches using   │
+│       OIDC subject conditions                                │
+│                                                              │
+│  4. ROLLBACK MUST BE ONE COMMAND                             │
+│     → Enable ECS deployment circuit breaker with auto-       │
+│       rollback on health check failure                       │
+│     → Document the manual rollback command for when auto     │
+│       rollback does not trigger                              │
+│     → Keep the previous 5 task definition revisions          │
+│       available so rollback targets are always ready         │
+│     → Test the rollback procedure in staging quarterly       │
+│                                                              │
+│  5. NEVER SKIP THE STAGING STEP                              │
+│     → Every change must deploy to staging before production  │
+│     → Production deploy requires environment: production     │
+│       with manual approval gate — no exceptions              │
+│     → Set cancel-in-progress: false on deploy workflows to   │
+│       prevent half-finished deployments                      │
+│     → Run a health check smoke test after every deploy and   │
+│       fail the workflow if it does not pass                  │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in workflow comments, deploy scripts,   │
+│       or pipeline documentation                              │
+│     → All output reads as if written by a DevOps engineer    │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #f9731618; color: #f97316;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>1. Pipeline Architecture</h2>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────────────────┐
+│                        CI/CD Pipeline Architecture                       │
+│                                                                          │
+│  Developer pushes to feature branch                                      │
+│       │                                                                  │
+│       ▼                                                                  │
+│  ┌──────────────────────────────────────────────────────────────┐       │
+│  │  CI Pipeline (on PR to main/staging)                          │       │
+│  │                                                               │       │
+│  │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────────┐ │       │
+│  │  │ Lint     │  │ Test     │  │ Build    │  │ Security     │ │       │
+│  │  │ (ESLint, │  │ (Jest,   │  │ (tsc,    │  │ (npm audit,  │ │       │
+│  │  │  Prettier│  │  Vitest) │  │  Next.js)│  │  Trivy)      │ │       │
+│  │  └──────────┘  └──────────┘  └──────────┘  └──────────────┘ │       │
+│  │        ▼              ▼            ▼              ▼          │       │
+│  │  All pass → PR is mergeable                                  │       │
+│  └──────────────────────────────────────────────────────────────┘       │
+│       │                                                                  │
+│       │ Merge to staging branch                                          │
+│       ▼                                                                  │
+│  ┌──────────────────────────────────────────────────────────────┐       │
+│  │  CD Pipeline — Staging (auto-deploy on push to staging)       │       │
+│  │                                                               │       │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐   │       │
+│  │  │ Build Docker │  │ Push to ECR  │  │ Deploy to ECS    │   │       │
+│  │  │ (BuildKit)   │──│ (tag: sha)   │──│ (update service) │   │       │
+│  │  └──────────────┘  └──────────────┘  └──────────────────┘   │       │
+│  │                                              │                │       │
+│  │                                     ┌────────▼────────┐      │       │
+│  │                                     │ Health check    │      │       │
+│  │                                     │ Wait for stable │      │       │
+│  │                                     └─────────────────┘      │       │
+│  └──────────────────────────────────────────────────────────────┘       │
+│       │                                                                  │
+│       │ Promote to production (merge staging → main)                     │
+│       ▼                                                                  │
+│  ┌──────────────────────────────────────────────────────────────┐       │
+│  │  CD Pipeline — Production (manual approval gate)              │       │
+│  │                                                               │       │
+│  │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌────────────┐  │       │
+│  │  │ Approval │──│ Build    │──│ Deploy   │──│ Smoke test │  │       │
+│  │  │ (manual) │  │ + Push   │  │ (ECS)    │  │ (health)   │  │       │
+│  │  └──────────┘  └──────────┘  └──────────┘  └────────────┘  │       │
+│  └──────────────────────────────────────────────────────────────┘       │
+└─────────────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>2. CI Workflow (Pull Request Checks)</h2>
+
+<pre class="code-block"><code># .github/workflows/ci.yml
+name: CI
+
+on:
+  pull_request:
+    branches: [main, staging]
+    paths-ignore:
+      - '*.md'
+      - 'docs/**'
+      - '.github/ISSUE_TEMPLATE/**'
+
+concurrency:
+  group: ci-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  # --- Backend ---
+  backend-lint:
+    name: Backend Lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: src/backend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+
+  backend-test:
+    name: Backend Test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/backend
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test
+        ports: ['5432:5432']
+        options: &gt;-
+          --health-cmd &quot;pg_isready -U test&quot;
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: &gt;-
+          --health-cmd &quot;redis-cli ping&quot;
+          --health-interval 10s
+    env:
+      DATABASE_URL: postgresql://test:test@localhost:5432/test
+      REDIS_URL: redis://localhost:6379
+      JWT_SECRET: test-jwt-secret-ci
+      NODE_ENV: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: src/backend/package-lock.json
+      - run: npm ci
+      - run: npx prisma migrate deploy
+      - run: npm test -- --coverage
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-coverage
+          path: src/backend/coverage/
+
+  backend-build:
+    name: Backend Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: src/backend/package-lock.json
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npm run build
+
+  # --- Frontend ---
+  frontend-lint:
+    name: Frontend Lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: src/frontend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+
+  frontend-build:
+    name: Frontend Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: src/frontend/package-lock.json
+      - run: npm ci
+      - run: npm run build
+
+  # --- Security ---
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - run: cd src/backend &amp;&amp; npm audit --audit-level=high
+        continue-on-error: true  # Warn but don't block
+      - run: cd src/frontend &amp;&amp; npm audit --audit-level=high
+        continue-on-error: true</code></pre>
+<hr class="section-divider">
+<h2>3. CD Workflow (Staging Deployment)</h2>
+
+<pre class="code-block"><code># .github/workflows/deploy-staging.yml
+name: Deploy Staging
+
+on:
+  push:
+    branches: [staging]
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false  # Never cancel a deployment mid-way
+
+permissions:
+  id-token: write  # OIDC
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REGISTRY: 123456789012.dkr.ecr.us-east-1.amazonaws.com
+  ECS_CLUSTER: myapp-staging
+  ENVIRONMENT: staging
+
+jobs:
+  deploy-backend:
+    name: Deploy Backend
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::123456789012:role/myapp-github-actions-deploy
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set image tag
+        id: tag
+        run: echo &quot;tag=${{ github.sha }}&quot; &gt;&gt; $GITHUB_OUTPUT
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: src/backend
+          file: src/infrastructure/docker/Dockerfile.backend
+          push: true
+          tags: |
+            ${{ env.ECR_REGISTRY }}/myapp-backend:${{ steps.tag.outputs.tag }}
+            ${{ env.ECR_REGISTRY }}/myapp-backend:staging-latest
+          cache-from: type=registry,ref=${{ env.ECR_REGISTRY }}/myapp-backend:staging-cache
+          cache-to: type=registry,ref=${{ env.ECR_REGISTRY }}/myapp-backend:staging-cache,mode=max
+
+      - name: Download current task definition
+        run: |
+          aws ecs describe-task-definition \
+            --task-definition myapp-staging-backend \
+            --query 'taskDefinition' \
+            --output json &gt; task-def.json
+
+      - name: Update task definition with new image
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-def.json
+          container-name: backend
+          image: ${{ env.ECR_REGISTRY }}/myapp-backend:${{ steps.tag.outputs.tag }}
+
+      - name: Deploy to ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: myapp-staging-backend
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
+          wait-for-minutes: 10
+
+      - name: Verify deployment health
+        run: |
+          for i in $(seq 1 10); do
+            STATUS=$(curl -s -o /dev/null -w &quot;%{http_code}&quot; https://staging.lmsht.com/api/health || echo &quot;000&quot;)
+            if [ &quot;$STATUS&quot; = &quot;200&quot; ]; then
+              echo &quot;Health check passed&quot;
+              exit 0
+            fi
+            echo &quot;Attempt $i: HTTP $STATUS — waiting 10s...&quot;
+            sleep 10
+          done
+          echo &quot;Health check failed after 10 attempts&quot;
+          exit 1
+
+  deploy-frontend:
+    name: Deploy Frontend
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::123456789012:role/myapp-github-actions-deploy
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: src/frontend
+          file: src/infrastructure/docker/Dockerfile.frontend
+          push: true
+          tags: |
+            ${{ env.ECR_REGISTRY }}/myapp-frontend:${{ github.sha }}
+            ${{ env.ECR_REGISTRY }}/myapp-frontend:staging-latest
+          build-args: |
+            NEXT_PUBLIC_API_URL=https://staging.lmsht.com
+          cache-from: type=registry,ref=${{ env.ECR_REGISTRY }}/myapp-frontend:staging-cache
+          cache-to: type=registry,ref=${{ env.ECR_REGISTRY }}/myapp-frontend:staging-cache,mode=max
+
+      - name: Download current task definition
+        run: |
+          aws ecs describe-task-definition \
+            --task-definition myapp-staging-frontend \
+            --query 'taskDefinition' \
+            --output json &gt; task-def.json
+
+      - name: Update task definition with new image
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-def.json
+          container-name: frontend
+          image: ${{ env.ECR_REGISTRY }}/myapp-frontend:${{ github.sha }}
+
+      - name: Deploy to ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: myapp-staging-frontend
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
+          wait-for-minutes: 10</code></pre>
+<hr class="section-divider">
+<h2>4. Production Deployment with Approval Gate</h2>
+
+<pre class="code-block"><code># .github/workflows/deploy-production.yml
+name: Deploy Production
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy-backend:
+    name: Deploy Backend (Production)
+    runs-on: ubuntu-latest
+    environment: production  # Requires manual approval in GitHub settings
+    steps:
+      # Same steps as staging but with production config
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::123456789012:role/myapp-github-actions-deploy-prod
+          aws-region: us-east-1
+
+      # ... build, push, deploy steps ...
+
+      - name: Post-deployment smoke test
+        run: |
+          echo &quot;Running production smoke tests...&quot;
+          curl -sf https://app.lmsht.com/api/health || exit 1
+          echo &quot;Smoke tests passed&quot;</code></pre>
+<hr class="section-divider">
+<h2>5. Rollback Strategy</h2>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────────┐
+│                    Rollback Decision Tree                         │
+│                                                                  │
+│  Deployment fails?                                               │
+│  │                                                               │
+│  ├─ ECS circuit breaker catches it                               │
+│  │   └─ Automatic rollback to previous task definition           │
+│  │   └─ Action: None — check logs, fix, redeploy               │
+│  │                                                               │
+│  ├─ Health checks pass but app is broken                         │
+│  │   └─ Manual rollback needed                                  │
+│  │   └─ Action: Redeploy previous image tag                    │
+│  │                                                               │
+│  └─ Database migration broke things                              │
+│      └─ Code rollback + migration rollback                      │
+│      └─ Action: Deploy previous code, run reverse migration     │
+└─────────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Manual Rollback Commands</h3>
+
+<pre class="code-block"><code># Find the previous task definition revision
+aws ecs describe-services --cluster production --services myapp-backend \
+  --query &quot;services[0].deployments[*].taskDefinition&quot; --output text
+
+# Rollback to a specific task definition
+aws ecs update-service \
+  --cluster production \
+  --service myapp-backend \
+  --task-definition myapp-production-backend:42 \
+  --force-new-deployment
+
+# Watch rollback progress
+watch -n 5 'aws ecs describe-services --cluster production --services myapp-backend \
+  --query &quot;services[0].{Running:runningCount,Desired:desiredCount,Deployments:deployments[*].{Status:status,TaskDef:taskDefinition,Running:runningCount}}&quot; --output json'
+
+# Rollback via GitHub Actions (re-run previous successful deploy)
+gh run rerun &lt;run-id&gt; --job deploy-backend</code></pre>
+<hr class="section-divider">
+<h2>6. Secrets Management in Pipelines</h2>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────────┐
+│               Secrets Management Architecture                    │
+│                                                                  │
+│  GitHub Repository                                               │
+│  ├── Secrets (for CI/CD only)                                   │
+│  │   ├── AWS_ROLE_ARN (OIDC role — no access keys!)            │
+│  │   └── SLACK_WEBHOOK_URL (deployment notifications)           │
+│  │                                                               │
+│  ├── Variables (non-sensitive config)                            │
+│  │   ├── AWS_REGION                                             │
+│  │   ├── ECR_REGISTRY                                           │
+│  │   └── ECS_CLUSTER                                            │
+│  │                                                               │
+│  └── Environments                                                │
+│      ├── staging                                                 │
+│      │   └── Secrets: (none — uses OIDC)                        │
+│      └── production                                              │
+│          ├── Required reviewers: [ops-team]                      │
+│          └── Secrets: (none — uses OIDC)                        │
+│                                                                  │
+│  AWS Account                                                     │
+│  ├── SSM Parameter Store                                        │
+│  │   ├── /myapp/production/DATABASE_URL                         │
+│  │   ├── /myapp/production/JWT_SECRET                           │
+│  │   └── /myapp/production/REDIS_URL                            │
+│  │                                                               │
+│  └── Secrets Manager                                             │
+│      ├── myapp/production/stripe                                 │
+│      └── myapp/production/sendgrid                               │
+│                                                                  │
+│  Rule: GitHub stores ZERO application secrets.                   │
+│  All app secrets live in AWS SSM/SecretsManager.                 │
+│  ECS task definitions reference them at container start.         │
+└─────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>7. Notification Integration</h2>
+
+<pre class="code-block"><code># Add to deploy workflow jobs
+  notify:
+    name: Notify
+    needs: [deploy-backend, deploy-frontend]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Slack notification
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              &quot;text&quot;: &quot;${{ needs.deploy-backend.result == 'success' &amp;&amp; needs.deploy-frontend.result == 'success' &amp;&amp; ':white_check_mark:' || ':x:' }} <em>${{ github.event.repository.name }}</em> deployed to <em>${{ env.ENVIRONMENT }}</em>&quot;,
+              &quot;blocks&quot;: [
+                {
+                  &quot;type&quot;: &quot;section&quot;,
+                  &quot;text&quot;: {
+                    &quot;type&quot;: &quot;mrkdwn&quot;,
+                    &quot;text&quot;: &quot;<em>Deployment:</em> ${{ env.ENVIRONMENT }}\n<em>Commit:</em> <code class="inline-code">${{ github.sha }}</code>\n<em>Author:</em> ${{ github.actor }}\n<em>Backend:</em> ${{ needs.deploy-backend.result }}\n<em>Frontend:</em> ${{ needs.deploy-frontend.result }}&quot;
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK</code></pre>
+<hr class="section-divider">
+<h2>8. Cost Implications</h2>
+<div class="table-wrap"><table><thead><tr><th>Resource</th><th>Cost</th><th>Notes</th><th></th></tr></thead><tbody><tr><td>GitHub Actions (public repo)</td><td>Free</td><td>Unlimited minutes</td><td></td></tr><tr><td>GitHub Actions (private repo)</td><td>2,000 min/month free</td><td>Then $0.008/min (Linux)</td><td></td></tr><tr><td>ECR storage</td><td>$0.10/GB/month</td><td>Set lifecycle policies</td><td></td></tr><tr><td>ECR data transfer (cross-region)</td><td>$0.09/GB</td><td>Keep builds in same region</td><td></td></tr><tr><td>Docker layer caching (registry)</td><td>~$0.10/GB/month</td><td>Saves 2-5 min per build</td><td></td></tr></tbody></table></div>
+<h3>Optimization Tips</h3>
+
+<ul class="skill-list"><li>Use Docker layer caching (<code class="inline-code">cache-from</code>/<code class="inline-code">cache-to</code>) to reduce build times</li>
+<li>Run CI jobs in parallel (lint + test + build simultaneously)</li>
+<li>Use <code class="inline-code">paths-ignore</code> to skip CI on doc-only changes</li>
+<li>Set <code class="inline-code">cancel-in-progress: true</code> on CI (not CD) for fast feedback</li>
+<li>Use ECR lifecycle policies to clean old images</li>
+</ul><hr class="section-divider">
+<h2>9. Common Mistakes / Anti-Patterns</h2>
+<div class="table-wrap"><table><thead><tr><th>Mistake</th><th>Why It's Bad</th><th>Fix</th><th></th></tr></thead><tbody><tr><td>Storing AWS access keys in GitHub secrets</td><td>Keys can leak, no rotation</td><td>Use OIDC (<code class="inline-code">aws-actions/configure-aws-credentials</code>)</td><td></td></tr><tr><td><code class="inline-code">cancel-in-progress: true</code> on deploy</td><td>Cancels mid-deploy, leaves broken state</td><td>Set <code class="inline-code">false</code> for deploy workflows</td><td></td></tr><tr><td>No <code class="inline-code">wait-for-service-stability</code></td><td>Deploy reports success before tasks are healthy</td><td>Always wait for ECS stability</td><td></td></tr><tr><td>Building Docker without cache</td><td>5-10 min builds every time</td><td>Use BuildKit registry cache</td><td></td></tr><tr><td>Deploying to prod without approval</td><td>No human gate for production</td><td>Use <code class="inline-code">environment: production</code> with reviewers</td><td></td></tr><tr><td>Hardcoded image tags</td><td>Can't trace what's deployed</td><td>Use git SHA as image tag</td><td></td></tr><tr><td>No rollback plan</td><td>Stuck with broken deploy</td><td>Use ECS circuit breaker + manual rollback procedure</td><td></td></tr><tr><td>Running <code class="inline-code">npm install</code> in Docker</td><td>Non-deterministic builds</td><td>Use <code class="inline-code">npm ci</code> always</td><td></td></tr><tr><td>Not pinning action versions</td><td>Supply chain attack risk</td><td>Pin by SHA: <code class="inline-code">actions/checkout@abcdef123</code></td><td></td></tr></tbody></table></div>| Missing concurrency controls | Overlapping deploys cause chaos | Set <code class="inline-code">concurrency.group</code> per environment |
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="cost-optimize.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">Audit AWS Costs</span></span></a>
+    <a href="ecs-deploy.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Deploy to ECS</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    66 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

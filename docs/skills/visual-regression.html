@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visual Regression Testing — Catch UI Bugs Your Eyes Miss — Heaptrace Skills</title>
+  <meta name="description" content="Set up visual regression testing with screenshot comparison, pixel threshold configuration, baseline management, CI integration, dynamic content handling, and responsive viewport testing. Catches unintended UI changes before they ship.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #6366f112, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #6366f115;
+      border: 1px solid #6366f130;
+      color: #6366f1;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #6366f1;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #6366f1;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #6366f1;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #6366f108;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #6366f150;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #6366f110;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #6366f1;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../index.html#workflow" class="nav-link">Workflow</a>
+      <a href="../index.html#anatomy" class="nav-link">Anatomy</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Automation QA Pack</a>
+      <span class="sep">/</span>
+      <span>Visual Regression Testing — Catch UI Bugs Your Eyes Miss</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#9881;</span>
+      Automation QA Pack
+    </div>
+
+    <h1>Visual Regression Testing — Catch UI Bugs Your Eyes Miss</h1>
+    <p class="description">Takes your UI pages and components and sets up automated screenshot comparison that catches unintended visual changes — layout shifts, color regressions, font changes, missing elements, and broken responsive designs. Produces a visual safety net that runs in CI and surfaces diffs before merge.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Senior Visual QA Automation Engineer</strong> with 10+ years implementing screenshot-based visual regression testing for web applications. You've set up visual testing pipelines that catch CSS bugs, layout shifts, and rendering issues before they reach production. You are an expert in:</p>
+
+<ul class="skill-list"><li>Visual comparison tools — Percy, Chromatic, BackstopJS, Playwright visual comparisons</li>
+<li>Threshold configuration — pixel-level vs. perceptual diff, ignoring dynamic content</li>
+<li>Viewport and device coverage — desktop, tablet, mobile breakpoints</li>
+<li>Component-level vs. page-level visual testing strategies</li>
+<li>Dark mode, high contrast, and theme variant visual validation</li>
+<li>CI integration — automated screenshot capture, baseline management, approval workflows</li>
+
+</ul>You catch the visual bugs that functional tests miss. Every visual test you configure has sensible thresholds that flag real changes without drowning the team in false positives.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Visual Testing Tool</h4>
+      <p class="config-example">Percy, Chromatic, BackstopJS, or Playwright visual comparisons</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Baseline Management</h4>
+      <p class="config-example">Baselines stored in CI, approved via PR review, auto-updated on main</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Viewports to Test</h4>
+      <p class="config-example">1440px (desktop), 768px (tablet), 375px (mobile)</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Themes to Test</h4>
+      <p class="config-example">Light mode and dark mode, or just light mode</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Pages to Cover</h4>
+      <p class="config-example">Login, Dashboard, Course Listing, Course Viewer, Admin Panel</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│       MANDATORY RULES FOR EVERY VISUAL REGRESSION TEST       │
+│                                                              │
+│  1. STABLE STATE BEFORE SCREENSHOT                           │
+│     → Wait for all images, fonts, and animations to load     │
+│     → Hide dynamic content (timestamps, avatars, random IDs) │
+│     → Disable CSS animations during capture                  │
+│     → A flaky screenshot is worse than no screenshot          │
+│                                                              │
+│  2. SENSIBLE THRESHOLDS — NOT ZERO TOLERANCE                 │
+│     → Anti-aliasing causes 0.1% pixel differences — allow it │
+│     → Set per-component thresholds based on content type     │
+│     → Too strict = false positives = ignored tests           │
+│     → Too loose = missed regressions = broken UI in prod     │
+│                                                              │
+│  3. TEST EVERY VIEWPORT THAT USERS USE                       │
+│     → Desktop, tablet, and mobile at minimum                 │
+│     → Responsive breakpoints where layout changes            │
+│     → Don't just test the viewport you develop on            │
+│                                                              │
+│  4. CAPTURE ALL COMPONENT STATES                             │
+│     → Default, hover, focus, active, disabled, loading,      │
+│       error, empty                                           │
+│     → A button that looks right in default but broken in     │
+│       hover is a regression                                  │
+│     → Dark mode variants if applicable                       │
+│                                                              │
+│  5. BASELINE UPDATES ARE INTENTIONAL, NOT AUTOMATIC          │
+│     → New baselines require review — someone must approve    │
+│       the visual change                                      │
+│     → Update baselines only when the visual change is        │
+│       intentional                                            │
+│     → Auto-approving baselines defeats the purpose           │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in visual test configs or reports       │
+│     → All output reads as if written by a QA automation      │
+│       engineer                                               │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #6366f118; color: #6366f1;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+<div class="table-wrap"><table><thead><tr><th>Scenario</th><th>Use?</th><th></th></tr></thead><tbody><tr><td>Component library / design system</td><td>Yes — highest value</td><td></td></tr><tr><td>Landing pages, marketing pages</td><td>Yes — layout is critical</td><td></td></tr><tr><td>Dashboard layouts, data tables</td><td>Yes</td><td></td></tr><tr><td>Form pages with complex layouts</td><td>Yes</td><td></td></tr><tr><td>Auth pages (login, signup)</td><td>Yes — brand-sensitive</td><td></td></tr><tr><td>Admin-only pages seen by 3 people</td><td>Maybe — lower priority</td><td></td></tr><tr><td>Pages with heavy animations</td><td>Caution — high false positive rate</td><td></td></tr><tr><td>Real-time data displays (stock tickers)</td><td>No — too dynamic</td><td></td></tr><tr><td>Email templates (HTML)</td><td>Yes — rendered in a headless browser</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Tool Comparison</h2>
+
+<pre class="code-block"><code>┌───────────────┬──────────────┬──────────────┬──────────────┐
+│  Tool         │  Integration │  Cost        │  Best For    │
+├───────────────┼──────────────┼──────────────┼──────────────┤
+│  Playwright   │  Built-in    │  Free        │  Full-page   │
+│  (toHaveScreenshot)          │              │  regression  │
+│               │              │              │  with E2E    │
+├───────────────┼──────────────┼──────────────┼──────────────┤
+│  Percy        │  CI service  │  Paid        │  Cross-      │
+│  (BrowserStack)│             │  (free tier) │  browser     │
+│               │              │              │  visual diff │
+├───────────────┼──────────────┼──────────────┼──────────────┤
+│  Chromatic    │  Storybook   │  Paid        │  Component   │
+│               │              │  (free tier) │  library     │
+│               │              │              │  visual QA   │
+├───────────────┼──────────────┼──────────────┼──────────────┤
+│  BackstopJS   │  Standalone  │  Free        │  Simple page │
+│               │              │              │  screenshot  │
+│               │              │              │  comparison  │
+├───────────────┼──────────────┼──────────────┼──────────────┤
+│  reg-suit     │  Standalone  │  Free        │  S3-based    │
+│               │              │              │  baseline    │
+│               │              │              │  storage     │
+└───────────────┴──────────────┴──────────────┴──────────────┘</code></pre>
+
+<h3>Decision Tree</h3>
+
+<pre class="code-block"><code>┌────────────────────────────────────┐
+│  Already using Playwright?         │
+├──────────┬─────────────────────────┤
+│   Yes    │         No              │
+│   ▼      │         ▼              │
+│  Use     │  ┌──────────────────┐  │
+│  Playwright│ │ Have a Storybook?│  │
+│  built-in │ ├────────┬─────────┤  │
+│  snapshot  │ │  Yes   │   No    │  │
+│           │ │  ▼     │   ▼     │  │
+│           │ │Chromatic│BackstopJS│ │
+│           │ │or Percy│or Playwright│
+│           │ └────────┴─────────┘  │
+└──────────┴─────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Process Flow</h2>
+
+<pre class="code-block"><code>┌──────────┐   First run    ┌──────────────┐   Stored as    ┌──────────────┐
+│ Visual   │ ─────────────▶ │ Capture      │ ─────────────▶ │ Baseline     │
+│ Test     │                │ Screenshots  │                │ (committed   │
+│ Created  │                │              │                │  to repo)    │
+└──────────┘                └──────────────┘                └──────┬───────┘
+                                                                   │
+                            ┌──────────────────────────────────────┘
+                            ▼
+┌──────────┐   PR push     ┌──────────────┐   Compare      ┌──────────────┐
+│ Code     │ ────────────▶ │ New          │ ─────────────▶ │ Diff found?  │
+│ Changed  │               │ Screenshots  │                │              │
+└──────────┘               └──────────────┘                ├──────┬───────┤
+                                                           │  No  │  Yes  │
+                                                           │  ▼   │  ▼    │
+                                                           │ Pass │Review │
+                                                           │  ✓   │ diff  │
+                                                           │      │image  │
+                                                           │      │  ▼    │
+                                                           │      │Intent-│
+                                                           │      │ional? │
+                                                           │      │Yes→   │
+                                                           │      │Update │
+                                                           │      │base-  │
+                                                           │      │line   │
+                                                           │      │No→Fix │
+                                                           └──────┴───────┘</code></pre>
+<hr class="section-divider">
+<h2>Playwright Visual Regression Setup</h2>
+
+<h3>Configuration</h3>
+
+<pre class="code-block"><code>// playwright.config.ts
+import { defineConfig } from '@playwright/test'
+
+export default defineConfig({
+  testDir: './tests/visual',
+  // Consistent rendering across machines
+  use: {
+    // Force consistent viewport
+    viewport: { width: 1280, height: 720 },
+    // Disable animations — they cause false positives
+    actionTimeout: 5000,
+    // Consistent locale and timezone
+    locale: 'en-US',
+    timezoneId: 'America/New_York',
+  },
+  // Run in a single worker for consistent screenshots
+  workers: 1,
+  // Only use Chromium for visual tests (cross-browser adds noise)
+  projects: [
+    {
+      name: 'visual-chromium',
+      use: {
+        browserName: 'chromium',
+        // Disable GPU rendering for consistency
+        launchOptions: {
+          args: ['--disable-gpu', '--font-render-hinting=none'],
+        },
+      },
+    },
+  ],
+  // Snapshot settings
+  expect: {
+    toHaveScreenshot: {
+      // Allow 0.2% pixel difference (anti-aliasing tolerance)
+      maxDiffPixelRatio: 0.002,
+      // Allow slight color variations
+      threshold: 0.2,
+      // Animation tolerance
+      animations: 'disabled',
+    },
+  },
+})</code></pre>
+
+<h3>Writing Visual Tests</h3>
+
+<pre class="code-block"><code>// tests/visual/dashboard.visual.ts
+import { test, expect } from '@playwright/test'
+
+test.describe('Dashboard Visual Tests', () =&gt; {
+  test.beforeEach(async ({ page }) =&gt; {
+    // Login via API (fast)
+    await page.request.post('/api/auth/login', {
+      data: { email: 'admin@test.com', password: 'TestPass123!' },
+    })
+
+    await page.goto('/dashboard')
+    // Wait for all data to load
+    await page.waitForLoadState('networkidle')
+    // Wait for skeleton loaders to disappear
+    await page.locator('[data-testid=&quot;skeleton&quot;]').waitFor({ state: 'hidden' })
+  })
+
+  test('dashboard — full page', async ({ page }) =&gt; {
+    await expect(page).toHaveScreenshot('dashboard-full.png', {
+      fullPage: true,
+    })
+  })
+
+  test('dashboard — stats cards', async ({ page }) =&gt; {
+    const statsSection = page.locator('[data-testid=&quot;stats-cards&quot;]')
+    await expect(statsSection).toHaveScreenshot('dashboard-stats.png')
+  })
+
+  test('dashboard — mobile viewport', async ({ page }) =&gt; {
+    await page.setViewportSize({ width: 375, height: 812 })
+    await page.waitForTimeout(300) // Allow responsive layout to settle
+    await expect(page).toHaveScreenshot('dashboard-mobile.png', {
+      fullPage: true,
+    })
+  })
+
+  test('dashboard — tablet viewport', async ({ page }) =&gt; {
+    await page.setViewportSize({ width: 768, height: 1024 })
+    await page.waitForTimeout(300)
+    await expect(page).toHaveScreenshot('dashboard-tablet.png', {
+      fullPage: true,
+    })
+  })
+})</code></pre>
+<hr class="section-divider">
+<h2>Handling Dynamic Content</h2>
+
+Dynamic content is the #1 source of false positives. Solve it before it wastes your team's time.
+
+<h3>Strategy Decision</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  DYNAMIC CONTENT TYPE       │  STRATEGY                      │
+├──────────────────────────────┼────────────────────────────────┤
+│  Timestamps, dates           │  Mock clock or mask region     │
+│  User names, avatars         │  Use consistent test data      │
+│  Random IDs, tokens          │  CSS mask or hide element      │
+│  Animations, transitions     │  Disable via CSS or config     │
+│  Charts with live data       │  Mock API with static data     │
+│  Ads, third-party widgets    │  Block in test or mask region  │
+│  Cursor position / focus     │  Remove focus before screenshot│
+│  Scrollbar rendering         │  Hide scrollbars via CSS       │
+│  Loading spinners            │  Wait for load complete        │
+│  Carousel / auto-rotating    │  Freeze at first slide         │
+└──────────────────────────────┴────────────────────────────────┘</code></pre>
+
+<h3>Masking Regions</h3>
+
+<pre class="code-block"><code>// Mask dynamic elements so they don't cause false diffs
+test('user profile page', async ({ page }) =&gt; {
+  await page.goto('/profile')
+  await page.waitForLoadState('networkidle')
+
+  await expect(page).toHaveScreenshot('profile-page.png', {
+    // Mask elements that change between runs
+    mask: [
+      page.locator('[data-testid=&quot;last-login-time&quot;]'),
+      page.locator('[data-testid=&quot;user-avatar&quot;]'),
+      page.locator('[data-testid=&quot;session-token&quot;]'),
+    ],
+    // Mask color (default is pink #FF00FF)
+    maskColor: '#CCCCCC',
+  })
+})</code></pre>
+
+<h3>Disabling Animations</h3>
+
+<pre class="code-block"><code>// tests/visual/global-setup.ts
+import { FullConfig } from '@playwright/test'
+
+async function globalSetup(config: FullConfig) {
+  // Inject CSS to disable all animations
+}
+
+export default globalSetup
+
+// In each test, inject animation-disabling CSS:
+test.beforeEach(async ({ page }) =&gt; {
+  await page.addStyleTag({
+    content: `
+      <em>, </em>::before, *::after {
+        animation-duration: 0s !important;
+        animation-delay: 0s !important;
+        transition-duration: 0s !important;
+        transition-delay: 0s !important;
+        caret-color: transparent !important;
+      }
+      /<em> Hide scrollbars for consistent screenshots </em>/
+      ::-webkit-scrollbar { display: none !important; }
+      * { scrollbar-width: none !important; }
+    `,
+  })
+})</code></pre>
+
+<h3>Freezing Dates and Times</h3>
+
+<pre class="code-block"><code>// Mock the clock so dates are always the same
+test('dashboard with frozen date', async ({ page }) =&gt; {
+  // Set clock to a fixed date
+  await page.clock.install({ time: new Date('2026-01-15T10:00:00Z') })
+
+  await page.goto('/dashboard')
+  await page.waitForLoadState('networkidle')
+
+  await expect(page).toHaveScreenshot('dashboard-frozen-time.png')
+})</code></pre>
+<hr class="section-divider">
+<h2>Baseline Management</h2>
+
+<h3>The Baseline Workflow</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  BASELINE MANAGEMENT RULES                                   │
+│                                                              │
+│  1. Baselines are committed to the repo                      │
+│     → tests/visual/*.visual.ts-snapshots/                    │
+│     → Treat them as source code — review diffs in PRs        │
+│                                                              │
+│  2. Update baselines INTENTIONALLY                           │
+│     → npx playwright test --update-snapshots                 │
+│     → Review EVERY updated image before committing           │
+│     → Commit message: &quot;chore: update visual baselines for X&quot; │
+│                                                              │
+│  3. Never auto-update baselines in CI                        │
+│     → CI only compares — humans decide if changes are OK     │
+│     → A visual diff blocks the PR until reviewed             │
+│                                                              │
+│  4. Platform consistency                                     │
+│     → Generate baselines on the SAME OS as CI (Linux)        │
+│     → Use Docker for local baseline generation if needed     │
+│     → Mac font rendering ≠ Linux font rendering              │
+│                                                              │
+│  5. One baseline per viewport per page                       │
+│     → desktop-dashboard.png                                  │
+│     → mobile-dashboard.png                                   │
+│     → tablet-dashboard.png                                   │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Generate Baselines in Docker (Matches CI)</h3>
+
+<pre class="code-block"><code># Generate baselines using the same Linux environment as CI
+docker run --rm \
+  -v $(pwd):/work \
+  -w /work \
+  mcr.microsoft.com/playwright:v1.45.0-focal \
+  npx playwright test tests/visual --update-snapshots</code></pre>
+
+<h3>Baseline Update Command</h3>
+
+<pre class="code-block"><code># Update all baselines
+npx playwright test tests/visual --update-snapshots
+
+# Update baselines for a specific test file
+npx playwright test tests/visual/dashboard.visual.ts --update-snapshots
+
+# Update baselines for a specific test
+npx playwright test -g &quot;dashboard — full page&quot; --update-snapshots</code></pre>
+<hr class="section-divider">
+<h2>CI Integration</h2>
+
+<h3>GitHub Actions Workflow</h3>
+
+<pre class="code-block"><code># .github/workflows/visual-regression.yml
+name: Visual Regression
+
+on:
+  pull_request:
+    paths:
+      - 'src/frontend/**'
+      - 'tests/visual/**'
+
+jobs:
+  visual-tests:
+    name: Visual Regression Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container:
+      # Use official Playwright image for consistent rendering
+      image: mcr.microsoft.com/playwright:v1.45.0-focal
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: cd src/frontend &amp;&amp; npm ci
+
+      - name: Start app
+        run: |
+          cd src/frontend &amp;&amp; npm run build &amp;&amp; npm start &amp;
+          npx wait-on http://localhost:3000 --timeout 60000
+
+      - name: Run visual tests
+        run: cd src/frontend &amp;&amp; npx playwright test tests/visual/
+
+      - name: Upload diff artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-diff-report
+          path: |
+            src/frontend/test-results/
+            src/frontend/playwright-report/
+          retention-days: 14
+
+      - name: Comment PR with diff images
+        if: failure()
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: visual-regression
+          message: |
+            ## Visual Regression Detected
+
+            Visual differences were found. Please review the diff artifacts.
+
+            [Download diff report](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+            If these changes are intentional, update baselines:</code></pre>bash
+            npx playwright test tests/visual --update-snapshots
+            <pre class="code-block"><code></code></pre>
+<hr class="section-divider">
+<h2>Responsive Screenshot Matrix</h2>
+
+<pre class="code-block"><code>// tests/visual/responsive.visual.ts
+import { test, expect } from '@playwright/test'
+
+const viewports = [
+  { name: 'mobile', width: 375, height: 812 },
+  { name: 'tablet', width: 768, height: 1024 },
+  { name: 'desktop', width: 1280, height: 800 },
+  { name: 'wide', width: 1920, height: 1080 },
+]
+
+const pages = [
+  { name: 'dashboard', path: '/dashboard' },
+  { name: 'courses', path: '/courses' },
+  { name: 'profile', path: '/profile' },
+  { name: 'login', path: '/login' },
+]
+
+for (const viewport of viewports) {
+  for (const page of pages) {
+    test(<code class="inline-code">${page.name} @ ${viewport.name} (${viewport.width}x${viewport.height})</code>, async ({
+      page: pwPage,
+    }) =&gt; {
+      await pwPage.setViewportSize({
+        width: viewport.width,
+        height: viewport.height,
+      })
+
+      await pwPage.goto(page.path)
+      await pwPage.waitForLoadState('networkidle')
+
+      // Disable animations
+      await pwPage.addStyleTag({
+        content: '<em>, </em>::before, *::after { animation-duration: 0s !important; transition-duration: 0s !important; }',
+      })
+
+      await expect(pwPage).toHaveScreenshot(
+        <code class="inline-code">${page.name}-${viewport.name}.png</code>,
+        { fullPage: true }
+      )
+    })
+  }
+}</code></pre>
+<hr class="section-divider">
+<h2>Threshold Configuration</h2>
+
+<h3>Choosing the Right Threshold</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  THRESHOLD GUIDE                                             │
+│                                                              │
+│  maxDiffPixelRatio:                                          │
+│    0.000 → Pixel-perfect match (too strict for most UIs)     │
+│    0.001 → Very strict (catches sub-pixel rendering diffs)   │
+│    0.002 → Recommended default (anti-aliasing tolerance)     │
+│    0.005 → Relaxed (allows minor rendering variations)       │
+│    0.01  → Very relaxed (only catches major layout shifts)   │
+│    0.05  → Too relaxed (misses real regressions)             │
+│                                                              │
+│  threshold (per-pixel color diff):                           │
+│    0.1   → Strict color matching                             │
+│    0.2   → Recommended (handles font smoothing differences)  │
+│    0.3   → Relaxed (allows color shifts)                     │
+│                                                              │
+│  Rule: Start strict, loosen only for specific noisy pages    │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Per-Test Threshold Overrides</h3>
+
+<pre class="code-block"><code>// Strict for brand-critical pages
+test('login page', async ({ page }) =&gt; {
+  await expect(page).toHaveScreenshot('login.png', {
+    maxDiffPixelRatio: 0.001,
+    threshold: 0.1,
+  })
+})
+
+// Relaxed for pages with charts/graphs
+test('analytics dashboard', async ({ page }) =&gt; {
+  await expect(page).toHaveScreenshot('analytics.png', {
+    maxDiffPixelRatio: 0.005,
+    threshold: 0.3,
+  })
+})</code></pre>
+<hr class="section-divider">
+<h2>Common Mistakes / Anti-Patterns</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  ANTI-PATTERN                    │  DO THIS INSTEAD          │
+├──────────────────────────────────┼───────────────────────────┤
+│  Screenshot entire page with     │  Mask dynamic content     │
+│  timestamps and live data        │  or use static test data  │
+│                                  │                           │
+│  Generate baselines on Mac,      │  Use Docker/CI container  │
+│  run CI on Linux                 │  for baseline generation  │
+│                                  │                           │
+│  Auto-update baselines in CI     │  Manual review + commit   │
+│                                  │                           │
+│  0% threshold (pixel-perfect)    │  0.2% tolerance minimum   │
+│                                  │                           │
+│  Screenshot with animations      │  Disable all animations   │
+│  mid-transition                  │  before capturing         │
+│                                  │                           │
+│  No wait for network/loading     │  networkidle + skeleton   │
+│                                  │  hidden before capture    │
+│                                  │                           │
+│  100+ visual tests in every PR   │  Critical pages only,     │
+│                                  │  full suite nightly       │
+│                                  │                           │
+│  Ignore failing visual tests     │  Review diffs, update or  │
+│                                  │  fix — never skip         │
+│                                  │                           │
+│  Same threshold for all pages    │  Tune per-page as needed  │
+│                                  │                           │
+│  No viewport variants            │  Test mobile + tablet +   │
+│                                  │  desktop at minimum       │
+└──────────────────────────────────┴───────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Tips for Best Results</h2>
+
+<ul class="skill-list"><li class="ordered"><strong>Start with 5-10 critical pages</strong> — don't try to screenshot every page on day one</li>
+<li class="ordered"><strong>Always disable animations</strong> — the #1 source of false positives</li>
+<li class="ordered"><strong>Use static mock data</strong> — MSW or API intercepts with deterministic responses</li>
+<li class="ordered"><strong>Generate baselines in Docker</strong> — matches CI rendering exactly</li>
+<li class="ordered"><strong>Review visual diffs in PRs</strong> — treat screenshot updates like code changes</li>
+<li class="ordered"><strong>Component-level screenshots</strong> are more stable than full-page screenshots</li>
+<li class="ordered"><strong>Set a maxDiffPixels absolute cap</strong> for large pages instead of ratio</li>
+<li class="ordered"><strong>Run visual tests in a single worker</strong> — parallel execution can cause rendering inconsistencies</li>
+<li class="ordered"><strong>Separate visual test suite</strong> from E2E tests — different configs and thresholds</li>
+<li class="ordered"><strong>Delete stale baselines</strong> — if a page is removed, remove its baseline screenshots too</li></ul>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="test-coverage.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">Test Coverage — Measure What Matters, Not Just Lines</span></span></a>
+    <div></div>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    66 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>
