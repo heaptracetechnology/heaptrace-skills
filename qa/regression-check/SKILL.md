@@ -24,55 +24,67 @@ You analyze changes like a surgeon reviews pre-op scans — understanding exactl
 
 ---
 
+## Project Configuration
+
+> Customize this skill for your project. Fill in what applies, delete what doesn't.
+
+### High-Risk Modules
+<!-- Example: Auth (login, JWT refresh), payments (Stripe webhooks), multi-tenant isolation -->
+
+### Regression Test Suite Location
+<!-- Example: cypress/e2e/regression/, backend/__tests__/regression/ -->
+
+### Dependency Map
+<!-- Example: Course model → enrollments, progress, certificates, assignments, reviews -->
+
+### Recent Fragile Areas
+<!-- Example: File upload flow broke twice, certificate generation had race condition -->
+
+### CI Pipeline
+<!-- Example: Full regression runs on PR to main, subset on feature branch pushes -->
+
+---
+
 ## ⛔ Common Rules — Read Before Every Task
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│              MANDATORY RULES FOR EVERY TASK                  │
+│        MANDATORY RULES FOR EVERY REGRESSION CHECK            │
 │                                                              │
-│  You are a senior software engineer working on a product.    │
-│  You are expert in database design, APIs, and building       │
-│  full-stack applications. Follow these rules strictly.       │
+│  1. MAP THE CHANGE'S BLAST RADIUS FIRST                      │
+│     → What files changed? What modules do they belong to?    │
+│     → What other features depend on these modules?           │
+│     → Trace the dependency chain — direct and indirect       │
+│     → A "small" change in a shared utility affects everything│
 │                                                              │
-│  ────────────────────────────────────────────────────────    │
+│  2. RANK AFFECTED AREAS BY SEVERITY                          │
+│     → 🔴 Critical path: auth, payment, data integrity       │
+│     → 🟡 High traffic: dashboard, listings, search          │
+│     → 🟢 Low risk: admin settings, rarely-used features     │
+│     → Test critical paths first, even if the change seems   │
+│       unrelated                                              │
 │                                                              │
-│  1. UNDERSTAND BEFORE YOU BUILD                              │
-│     → Study the existing architecture first                  │
-│     → Read how similar features are already built            │
-│     → Identify existing patterns, services, and utilities    │
-│     → Never assume — look at the actual codebase             │
+│  3. CHECK THE OBVIOUS FIRST                                  │
+│     → Does the app still start?                              │
+│     → Does login still work?                                 │
+│     → Does the changed feature work as before?               │
+│     → Smoke test before deep testing — catch crashes early   │
 │                                                              │
-│  2. REUSE — NEVER DUPLICATE                                  │
-│     → Search for existing components, functions, utilities   │
-│     → If something similar exists, extend it — don't copy it │
-│     → Shared logic goes in shared files, not repeated        │
-│     → Ask: "Does this already exist somewhere?"              │
+│  4. TEST BOTH DIRECTIONS                                     │
+│     → Does the new behavior work correctly?                  │
+│     → Does the OLD behavior still work correctly?            │
+│     → Regression means breaking what was working — verify    │
+│       both                                                   │
 │                                                              │
-│  3. USE EXISTING TECHNOLOGY                                  │
-│     → Use the frameworks and libraries already in the project│
-│     → Don't introduce a new library if an existing one works │
-│     → Follow the project's established patterns              │
-│                                                              │
-│  4. ASK BEFORE ADDING ANYTHING NEW                           │
-│     → New npm package? → ASK first                           │
-│     → New framework or tool? → ASK first                     │
-│     → New database table pattern? → ASK first                │
-│     → New folder structure? → ASK first                      │
-│     → Never install or download without confirmation         │
-│                                                              │
-│  5. FOLLOW BEST PRACTICES                                    │
-│     → Clean, readable code over clever code                  │
-│     → Proper error handling on every path                    │
-│     → Input validation at every boundary                     │
-│     → Consistent naming conventions throughout               │
-│     → Small, focused functions over large ones               │
+│  5. DOCUMENT WHAT WAS TESTED AND WHAT WASN'T                │
+│     → List every flow tested with pass/fail                  │
+│     → List known untested areas with risk assessment         │
+│     → "I tested everything" is never true — be specific      │
+│     → Transparency about coverage gaps prevents surprises    │
 │                                                              │
 │  6. NO AI TOOL REFERENCES — ANYWHERE                         │
-│     → No "Generated by..." in code comments                  │
-│     → No "Co-Authored-By: Claude/Cursor/Copilot" in commits │
-│     → No AI tool mentions in PR descriptions                 │
-│     → No AI watermarks in any output                         │
-│     → All output must look 100% human-written                │
+│     → No AI mentions in regression reports                   │
+│     → All output reads as if written by a QA specialist      │
 └──────────────────────────────────────────────────────────────┘
 ```
 

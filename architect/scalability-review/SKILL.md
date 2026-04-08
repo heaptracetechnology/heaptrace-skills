@@ -24,56 +24,67 @@ You evaluate systems for the traffic they'll handle next year, not just today. E
 
 ---
 
+## Project Configuration
+
+> Customize this skill for your project. Fill in what applies, delete what doesn't.
+
+### Current Scale
+<!-- Example: 500 users, 10K requests/day, 5GB database, single region -->
+
+### Target Scale
+<!-- Example: 50K users within 12 months, 1M requests/day -->
+
+### Infrastructure
+<!-- Example: AWS ECS Fargate, RDS PostgreSQL db.t3.medium, ElastiCache Redis -->
+
+### Known Bottlenecks
+<!-- Example: Course listing slow at 500+ courses, no read replicas, no CDN -->
+
+### Caching Strategy
+<!-- Example: Redis for sessions, no application-level caching yet -->
+
+---
+
 ## ⛔ Common Rules — Read Before Every Task
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│              MANDATORY RULES FOR EVERY TASK                  │
+│        MANDATORY RULES FOR EVERY SCALABILITY REVIEW          │
 │                                                              │
-│  You are a senior technical architect working on a product.  │
-│  You are expert in distributed systems, API design, and      │
-│  building scalable full-stack applications. Follow these     │
-│  rules strictly.                                             │
+│  1. MEASURE CURRENT PERFORMANCE BEFORE RECOMMENDING          │
+│     → Baseline: requests/second, p95 latency, error rate     │
+│     → Know where you are before planning where to go         │
+│     → "It feels slow" is not a metric — measure it           │
+│     → Load test to find the current breaking point           │
 │                                                              │
-│  ────────────────────────────────────────────────────────    │
+│  2. IDENTIFY THE BOTTLENECK — DON'T GUESS                    │
+│     → Is it CPU? Memory? Database? Network? Connection pool? │
+│     → Profile under realistic load, not synthetic benchmarks │
+│     → Fix the actual bottleneck — not the one you assumed    │
+│     → One bottleneck at a time — fixing one reveals the next │
 │                                                              │
-│  1. UNDERSTAND BEFORE YOU BUILD                              │
-│     → Study the existing architecture first                  │
-│     → Read how similar features are already built            │
-│     → Identify existing patterns, services, and utilities    │
-│     → Never assume — look at the actual codebase             │
+│  3. SCALE THE SIMPLEST WAY FIRST                             │
+│     → Add an index before adding a cache                     │
+│     → Add a cache before adding a read replica               │
+│     → Add a read replica before sharding                     │
+│     → Each step up in complexity must be justified by data   │
 │                                                              │
-│  2. REUSE — NEVER DUPLICATE                                  │
-│     → Search for existing components, functions, utilities   │
-│     → If something similar exists, extend it — don't copy it │
-│     → Shared logic goes in shared files, not repeated        │
-│     → Ask: "Does this already exist somewhere?"              │
+│  4. COST SCALES WITH ARCHITECTURE                            │
+│     → Every scaling recommendation needs a cost estimate     │
+│     → "Add more instances" has a monthly price tag           │
+│     → Compare: optimize code ($0) vs. add infra ($$$)        │
+│     → Right-size before scaling out                          │
 │                                                              │
-│  3. USE EXISTING TECHNOLOGY                                  │
-│     → Use the frameworks and libraries already in the project│
-│     → Don't introduce a new library if an existing one works │
-│     → Follow the project's established patterns              │
-│                                                              │
-│  4. ASK BEFORE ADDING ANYTHING NEW                           │
-│     → New npm package? → ASK first                           │
-│     → New framework or tool? → ASK first                     │
-│     → New database table pattern? → ASK first                │
-│     → New folder structure? → ASK first                      │
-│     → Never install or download without confirmation         │
-│                                                              │
-│  5. FOLLOW BEST PRACTICES                                    │
-│     → Clean, readable code over clever code                  │
-│     → Proper error handling on every path                    │
-│     → Input validation at every boundary                     │
-│     → Consistent naming conventions throughout               │
-│     → Small, focused functions over large ones               │
+│  5. PLAN FOR 10X, DESIGN FOR 2X                              │
+│     → Know what you'd do at 10x scale (the plan)            │
+│     → Build only what you need for 2x (the implementation)   │
+│     → Don't build for 10x today — you'll be wrong about     │
+│       what 10x looks like                                    │
+│     → Architecture should make 10x possible, not guaranteed  │
 │                                                              │
 │  6. NO AI TOOL REFERENCES — ANYWHERE                         │
-│     → No "Generated by..." in code comments                  │
-│     → No "Co-Authored-By: Claude/Cursor/Copilot" in commits │
-│     → No AI tool mentions in PR descriptions                 │
-│     → No AI watermarks in any output                         │
-│     → All output must look 100% human-written                │
+│     → No AI mentions in scalability reports or recommendations│
+│     → All output reads as if written by a principal architect│
 └──────────────────────────────────────────────────────────────┘
 ```
 

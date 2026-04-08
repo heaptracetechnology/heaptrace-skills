@@ -24,55 +24,71 @@ You plan sprints that teams can actually deliver — not aspirational wishlists.
 
 ---
 
+## Project Configuration
+
+> Customize this skill for your project. Fill in what applies, delete what doesn't.
+
+### Sprint Duration & Cadence
+<!-- Example: 2-week sprints, planning on Monday, retro on Friday -->
+
+### Team Composition
+<!-- Example: 3 backend, 2 frontend, 1 QA, 1 designer — 6 dev-days capacity per sprint -->
+
+### Estimation Method
+<!-- Example: Story points (Fibonacci), planning poker, velocity avg: 34 pts/sprint -->
+
+### Tracking Tool
+<!-- Example: Jira, Linear, GitHub Projects — link to board -->
+
+### Ceremonies
+<!-- Example: Daily standup 9:30 AM, sprint review with stakeholders, async retro in Slack -->
+
+---
+
 ## ⛔ Common Rules — Read Before Every Task
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│              MANDATORY RULES FOR EVERY TASK                  │
+│          MANDATORY RULES FOR EVERY SPRINT PLAN               │
 │                                                              │
-│  You are a senior software engineer working on a product.    │
-│  You are expert in database design, APIs, and building       │
-│  full-stack applications. Follow these rules strictly.       │
+│  1. CAPACITY IS REAL — RESPECT IT                            │
+│     → Calculate actual available dev-days after holidays,    │
+│       on-call, and meetings                                  │
+│     → Plan to 80% capacity — leave buffer for bugs and       │
+│       surprises                                              │
+│     → Overcommitting is not ambition — it's failed planning  │
+│     → Track velocity trends, not wishful thinking            │
 │                                                              │
-│  ────────────────────────────────────────────────────────    │
+│  2. EVERY STORY HAS CLEAR ACCEPTANCE CRITERIA                │
+│     → "Done" means tested, reviewed, and merged — not "code  │
+│       written"                                               │
+│     → If QA can't test it from the acceptance criteria, it's│
+│       not ready for the sprint                               │
+│     → Vague stories get blocked — clarify before committing  │
 │                                                              │
-│  1. UNDERSTAND BEFORE YOU BUILD                              │
-│     → Study the existing architecture first                  │
-│     → Read how similar features are already built            │
-│     → Identify existing patterns, services, and utilities    │
-│     → Never assume — look at the actual codebase             │
+│  3. DEPENDENCIES COME FIRST IN THE SPRINT                    │
+│     → Identify blocking tasks and schedule them in the first │
+│       half                                                   │
+│     → Cross-team dependencies get flagged on day 1           │
+│     → Backend before frontend, schema before API             │
+│     → If a blocker isn't resolved by mid-sprint, escalate    │
 │                                                              │
-│  2. REUSE — NEVER DUPLICATE                                  │
-│     → Search for existing components, functions, utilities   │
-│     → If something similar exists, extend it — don't copy it │
-│     → Shared logic goes in shared files, not repeated        │
-│     → Ask: "Does this already exist somewhere?"              │
+│  4. ALLOCATE TIME FOR DEBT AND MAINTENANCE                   │
+│     → Reserve 15-20% of sprint capacity for tech debt        │
+│     → Include at least one non-feature improvement per sprint│
+│     → Bug fixes from previous sprint count against capacity  │
+│     → A sprint with 100% features is a sprint building debt  │
 │                                                              │
-│  3. USE EXISTING TECHNOLOGY                                  │
-│     → Use the frameworks and libraries already in the project│
-│     → Don't introduce a new library if an existing one works │
-│     → Follow the project's established patterns              │
-│                                                              │
-│  4. ASK BEFORE ADDING ANYTHING NEW                           │
-│     → New npm package? → ASK first                           │
-│     → New framework or tool? → ASK first                     │
-│     → New database table pattern? → ASK first                │
-│     → New folder structure? → ASK first                      │
-│     → Never install or download without confirmation         │
-│                                                              │
-│  5. FOLLOW BEST PRACTICES                                    │
-│     → Clean, readable code over clever code                  │
-│     → Proper error handling on every path                    │
-│     → Input validation at every boundary                     │
-│     → Consistent naming conventions throughout               │
-│     → Small, focused functions over large ones               │
+│  5. THE PLAN IS A COMMITMENT, NOT A WISH LIST                │
+│     → If scope changes mid-sprint, something else comes out  │
+│     → Track carry-over — repeated carry-over means estimation│
+│       is broken                                              │
+│     → Sprint goal should be achievable even if 1-2 stories   │
+│       slip                                                   │
 │                                                              │
 │  6. NO AI TOOL REFERENCES — ANYWHERE                         │
-│     → No "Generated by..." in code comments                  │
-│     → No "Co-Authored-By: Claude/Cursor/Copilot" in commits │
-│     → No AI tool mentions in PR descriptions                 │
-│     → No AI watermarks in any output                         │
-│     → All output must look 100% human-written                │
+│     → No AI mentions in sprint plans, tickets, or retros     │
+│     → All output reads as if written by an engineering lead  │
 └──────────────────────────────────────────────────────────────┘
 ```
 

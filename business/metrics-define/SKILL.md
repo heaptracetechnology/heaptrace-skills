@@ -24,49 +24,67 @@ You define metrics that drive better decisions, not just bigger dashboards. Ever
 
 ---
 
+## Project Configuration
+
+> Customize this skill for your project. Fill in what applies, delete what doesn't.
+
+### Analytics Platform
+<!-- Example: Mixpanel, Amplitude, Google Analytics 4 -->
+
+### Data Warehouse
+<!-- Example: BigQuery, Snowflake, PostgreSQL analytics replica -->
+
+### Dashboard Tool
+<!-- Example: Metabase, Looker, Grafana -->
+
+### Event Tracking
+<!-- Example: Segment for event collection, custom backend events -->
+
+### Reporting Cadence
+<!-- Example: Weekly metrics review, monthly business review -->
+
+---
+
 ## Common Rules — Read Before Every Task
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│              MANDATORY RULES FOR EVERY TASK                  │
+│          MANDATORY RULES FOR EVERY METRICS PLAN              │
 │                                                              │
-│  You are a product analyst defining metrics that will        │
-│  determine whether a feature succeeds or fails. Your work   │
-│  informs roadmap decisions and resource allocation.          │
-│  Follow these rules strictly.                                │
+│  1. EVERY METRIC NEEDS AN OWNER                              │
+│     → If no one checks the metric weekly, it doesn't exist; │
+│       assign a name to every KPI                             │
+│     → Ownership means action: the owner decides what to do   │
+│       when the number moves                                  │
+│     → An unowned metric is a vanity metric                   │
 │                                                              │
-│  ────────────────────────────────────────────────────────    │
+│  2. LEADING OVER LAGGING                                     │
+│     → Prioritize metrics you can act on today (activation    │
+│       rate) over metrics you can only observe (monthly       │
+│       revenue)                                               │
+│     → Leading indicators let you course-correct before it's  │
+│       too late                                               │
+│     → Track both, but rely on leading for weekly decisions   │
 │                                                              │
-│  1. MEASURE WHAT MATTERS, NOT WHAT'S EASY                    │
-│     → Vanity metrics (page views, sign-ups) are not enough  │
-│     → Focus on outcome metrics (task completion, retention)  │
-│     → If it doesn't change a decision, don't track it       │
-│     → Ask: "What would we do differently if this number     │
-│       went up or down?"                                      │
-│                                                              │
-│  2. EVERY METRIC NEEDS A THRESHOLD                           │
-│     → "Track retention" is useless without a target          │
-│     → Define baseline, target, and failure thresholds        │
-│     → Specify the time period for evaluation                 │
+│  3. DEFINE THE THRESHOLD                                     │
+│     → Every metric needs a target, a warning threshold, and  │
+│       a critical threshold; a number without context is      │
+│       useless                                                │
+│     → "Track retention" means nothing without a target       │
 │     → No open-ended "monitor and see" — commit to a number  │
 │                                                              │
-│  3. INSTRUMENT BEFORE YOU SHIP                               │
-│     → Analytics events must be in the code before launch     │
+│  4. INSTRUMENT BEFORE YOU SHIP                               │
+│     → Event tracking goes into the feature spec, not added   │
+│       after launch; if you can't measure it, don't ship it  │
 │     → Test that events fire correctly in staging             │
 │     → Missing instrumentation means missing data forever     │
-│     → Retroactive analytics is expensive and incomplete      │
 │                                                              │
-│  4. BALANCE LEADING AND LAGGING INDICATORS                   │
-│     → Lagging: did it work? (revenue, churn, NPS)           │
-│     → Leading: is it working? (adoption, engagement)        │
-│     → Leading indicators let you course-correct early        │
-│     → Track both — rely on leading for weekly decisions      │
-│                                                              │
-│  5. CORRELATION IS NOT CAUSATION                             │
-│     → Feature launched AND metric improved ≠ feature caused  │
-│     → Use A/B tests to prove causation when possible        │
-│     → Control for external factors (seasonality, marketing) │
-│     → Be honest about what you can and cannot attribute      │
+│  5. ONE METRIC, ONE DEFINITION                               │
+│     → Write the SQL/calculation for every metric; "active    │
+│       users" means nothing until you define the exact query  │
+│     → Two people computing the same metric must get the      │
+│       same number                                            │
+│     → Document the definition next to every dashboard widget │
 │                                                              │
 │  6. NO AI TOOL REFERENCES — ANYWHERE                         │
 │     → No "Generated by..." in document headers               │

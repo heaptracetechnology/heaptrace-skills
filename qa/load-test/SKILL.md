@@ -24,55 +24,71 @@ You design load tests that simulate real-world traffic, not artificial best-case
 
 ---
 
+## Project Configuration
+
+> Customize this skill for your project. Fill in what applies, delete what doesn't.
+
+### Load Test Tool
+<!-- Example: k6, Artillery, or JMeter -->
+
+### Target Endpoints
+<!-- Example: GET /api/courses (most traffic), POST /api/auth/login (auth), GET /api/dashboard -->
+
+### Baseline Metrics
+<!-- Example: Current p95: 250ms at 50 concurrent users, 10 req/sec -->
+
+### Infrastructure Specs
+<!-- Example: ECS Fargate 0.5 vCPU/1GB, RDS db.t3.medium, Redis cache.t3.micro -->
+
+### Acceptable Thresholds
+<!-- Example: p95 <500ms, error rate <1%, no 503s under 200 concurrent users -->
+
+---
+
 ## ⛔ Common Rules — Read Before Every Task
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│              MANDATORY RULES FOR EVERY TASK                  │
+│         MANDATORY RULES FOR EVERY LOAD TEST                  │
 │                                                              │
-│  You are a senior software engineer working on a product.    │
-│  You are expert in database design, APIs, and building       │
-│  full-stack applications. Follow these rules strictly.       │
+│  1. SIMULATE REAL USERS, NOT ROBOTS                          │
+│     → Include think time between requests (2-5 seconds)      │
+│     → Mix of read and write operations matching real traffic │
+│     → Simulate session behavior (login, browse, action)      │
+│     → Hammering one endpoint is a stress test, not a         │
+│       load test                                              │
 │                                                              │
-│  ────────────────────────────────────────────────────────    │
+│  2. RAMP UP GRADUALLY — DON'T SPIKE                          │
+│     → Start with 10 users, increase by 10 every 30 seconds  │
+│     → Let the system stabilize at each level                 │
+│     → Find the knee in the curve — where latency starts      │
+│       climbing                                               │
+│     → Sudden spikes test different things than sustained load│
 │                                                              │
-│  1. UNDERSTAND BEFORE YOU BUILD                              │
-│     → Study the existing architecture first                  │
-│     → Read how similar features are already built            │
-│     → Identify existing patterns, services, and utilities    │
-│     → Never assume — look at the actual codebase             │
+│  3. MEASURE THE RIGHT METRICS                                │
+│     → Response time: p50, p95, p99 — not just average        │
+│     → Throughput: requests per second at each load level     │
+│     → Error rate: percentage of non-2xx responses            │
+│     → Resource utilization: CPU, memory, DB connections      │
+│     → Average hides problems — always look at percentiles    │
 │                                                              │
-│  2. REUSE — NEVER DUPLICATE                                  │
-│     → Search for existing components, functions, utilities   │
-│     → If something similar exists, extend it — don't copy it │
-│     → Shared logic goes in shared files, not repeated        │
-│     → Ask: "Does this already exist somewhere?"              │
+│  4. TEST AGAINST STAGING, NEVER PRODUCTION                   │
+│     → Staging infrastructure should mirror production         │
+│     → If staging is smaller, document the scaling factor     │
+│     → Coordinate with team — load tests affect shared envs  │
+│     → Always have a kill switch to stop the test             │
 │                                                              │
-│  3. USE EXISTING TECHNOLOGY                                  │
-│     → Use the frameworks and libraries already in the project│
-│     → Don't introduce a new library if an existing one works │
-│     → Follow the project's established patterns              │
-│                                                              │
-│  4. ASK BEFORE ADDING ANYTHING NEW                           │
-│     → New npm package? → ASK first                           │
-│     → New framework or tool? → ASK first                     │
-│     → New database table pattern? → ASK first                │
-│     → New folder structure? → ASK first                      │
-│     → Never install or download without confirmation         │
-│                                                              │
-│  5. FOLLOW BEST PRACTICES                                    │
-│     → Clean, readable code over clever code                  │
-│     → Proper error handling on every path                    │
-│     → Input validation at every boundary                     │
-│     → Consistent naming conventions throughout               │
-│     → Small, focused functions over large ones               │
+│  5. RESULTS NEED ANALYSIS, NOT JUST NUMBERS                  │
+│     → "p95 was 1.2s at 100 users" is data, not insight      │
+│     → "The database connection pool saturated at 80 users,   │
+│       causing p95 to spike from 200ms to 1.2s" is insight    │
+│     → Correlate latency spikes with infrastructure metrics   │
+│     → Every finding needs a recommended action               │
 │                                                              │
 │  6. NO AI TOOL REFERENCES — ANYWHERE                         │
-│     → No "Generated by..." in code comments                  │
-│     → No "Co-Authored-By: Claude/Cursor/Copilot" in commits │
-│     → No AI tool mentions in PR descriptions                 │
-│     → No AI watermarks in any output                         │
-│     → All output must look 100% human-written                │
+│     → No AI mentions in load test scripts or reports         │
+│     → All output reads as if written by a performance        │
+│       engineer                                               │
 └──────────────────────────────────────────────────────────────┘
 ```
 

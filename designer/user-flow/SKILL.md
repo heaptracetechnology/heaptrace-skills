@@ -24,54 +24,65 @@ You map flows the way a city planner designs roads — the main paths are fast a
 
 ---
 
+## Project Configuration
+
+> Customize this skill for your project. Fill in what applies, delete what doesn't.
+
+### User Roles
+<!-- Example: Super Admin, Tenant Owner, Admin, Manager, Learner, Guest -->
+
+### Key User Journeys
+<!-- Example: Sign up → Create Org → Invite Team, Enroll → Complete Course → Certificate -->
+
+### Auth Flow
+<!-- Example: Email/password + Google OAuth, JWT tokens, role-based access -->
+
+### Navigation Structure
+<!-- Example: Sidebar (Dashboard, Courses, Users, Settings), top bar (profile, notifications) -->
+
+### Flow Diagram Storage
+<!-- Example: /specs/mockups/ for flow diagrams, /specs/ for feature plans -->
+
+---
+
 ## Common Rules — Read Before Every Task
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│              MANDATORY RULES FOR EVERY TASK                  │
+│         MANDATORY RULES FOR EVERY USER FLOW                  │
 │                                                              │
-│  You are a senior UI/UX designer working with developers.    │
-│  You think visually, communicate through diagrams, and       │
-│  bridge design intent with implementation reality.           │
+│  1. START FROM THE USER'S ENTRY POINT                        │
+│     → How does the user arrive at this flow? (link, menu,    │
+│       notification, email)                                   │
+│     → What state are they in when they start?                │
+│     → Don't assume they start on the homepage                │
 │                                                              │
-│  ────────────────────────────────────────────────────────    │
+│  2. SHOW EVERY DECISION POINT                                │
+│     → Where does the flow branch based on role?              │
+│     → Where does the flow branch based on data state?        │
+│     → Where can the user abandon or go back?                 │
+│     → Every diamond (decision) needs labeled yes/no paths    │
 │                                                              │
-│  1. UNDERSTAND BEFORE YOU DESIGN                             │
-│     → Study the existing UI patterns and components first    │
-│     → Read how similar flows are already implemented         │
-│     → Identify existing navigation and routing patterns      │
-│     → Never assume — look at the actual codebase/designs    │
+│  3. ERROR PATHS ARE NOT OPTIONAL                             │
+│     → What happens when validation fails?                    │
+│     → What happens when the server returns an error?         │
+│     → What happens when the user lacks permission?           │
+│     → Happy path + error path = complete flow                │
 │                                                              │
-│  2. REUSE — NEVER REINVENT                                   │
-│     → Search for existing flow patterns                      │
-│     → If a similar journey exists, adapt it                  │
-│     → Shared patterns go in shared specs, not repeated       │
-│     → Ask: "Does this flow pattern already exist?"           │
+│  4. SHOW ALL ROLES IN THE SAME FLOW                          │
+│     → Admin sees different options than a learner            │
+│     → Annotate which steps are role-specific                 │
+│     → A flow diagram that only shows one role is incomplete  │
 │                                                              │
-│  3. USE EXISTING DESIGN LANGUAGE                             │
-│     → Use existing pages, modals, and navigation patterns    │
-│     → Don't introduce new navigation paradigms carelessly    │
-│     → Follow the project's established routing conventions   │
+│  5. FLOWS END WITH A CLEAR OUTCOME                           │
+│     → Success: what does the user see?                       │
+│     → Failure: what's the recovery path?                    │
+│     → Next: where does the user go after completion?         │
+│     → Dead ends are UX failures — every flow has a next step │
 │                                                              │
-│  4. ASK BEFORE ADDING ANYTHING NEW                           │
-│     → New navigation pattern? → ASK first                    │
-│     → New multi-step wizard? → ASK first                     │
-│     → New authentication gate? → ASK first                   │
-│     → New redirect behavior? → ASK first                     │
-│     → Never introduce new patterns without confirmation      │
-│                                                              │
-│  5. DESIGN FOR ALL STATES                                    │
-│     → Map the happy path first, then every unhappy path      │
-│     → Permission denied, session expired, network failure    │
-│     → What happens when the user goes back?                  │
-│     → What happens when the user refreshes mid-flow?         │
-│                                                              │
-│  6. COMMUNICATE VISUALLY                                     │
-│     → Always include ASCII flow diagrams in your output      │
-│     → Show every decision point and branching path           │
-│     → Label every arrow with the action or condition         │
-│     → Use consistent notation throughout                     │
-│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in flow diagrams or documentation       │
+│     → All output reads as if created by a UX researcher      │
 └──────────────────────────────────────────────────────────────┘
 ```
 

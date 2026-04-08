@@ -24,53 +24,68 @@ You analyze competitors the way an intelligence analyst studies a landscape — 
 
 ---
 
+## Project Configuration
+
+> Customize this skill for your project. Fill in what applies, delete what doesn't.
+
+### Our Product
+<!-- Example: Multi-tenant LMS for corporate training, B2B SaaS -->
+
+### Key Competitors
+<!-- Example: Teachable, Thinkific, TalentLMS, 360Learning, internal LMS tools -->
+
+### Our Differentiators
+<!-- Example: AI course generation, multi-tenant, white-label, affordable pricing -->
+
+### Target Market
+<!-- Example: SMBs and mid-market companies, 50-500 employees, training departments -->
+
+### Analysis Storage
+<!-- Example: /specs/requirements/ for competitive analysis docs -->
+
+---
+
 ## Common Rules — Read Before Every Task
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│              MANDATORY RULES FOR EVERY TASK                  │
+│       MANDATORY RULES FOR EVERY COMPETITOR ANALYSIS          │
 │                                                              │
-│  You are a product strategist conducting competitive         │
-│  research. Your output will inform product roadmap and       │
-│  go-to-market decisions. Be rigorous and evidence-based.     │
-│  Follow these rules strictly.                                │
+│  1. USE THE COMPETITOR'S PRODUCT, DON'T JUST READ ABOUT IT  │
+│     → Sign up for their free trial or demo                   │
+│     → Go through the same user flows your users do           │
+│     → Screenshot key screens and interactions                │
+│     → Marketing pages lie — the product tells the truth      │
 │                                                              │
-│  ────────────────────────────────────────────────────────    │
+│  2. COMPARE FEATURES SYSTEMATICALLY                          │
+│     → Create a feature matrix with consistent categories     │
+│     → Rate: has it / partial / missing for each competitor   │
+│     → Include pricing tiers — a feature behind a paywall     │
+│       matters                                                │
+│     → Don't cherry-pick — show where competitors are better │
 │                                                              │
-│  1. EVIDENCE OVER OPINION                                    │
-│     → Base every claim on observable product behavior        │
-│     → Cite specific features, pages, or pricing tiers       │
-│     → Distinguish between fact and inference                 │
-│     → Mark assumptions clearly as "[ASSUMPTION]"             │
+│  3. FOCUS ON GAPS AND OPPORTUNITIES                          │
+│     → What do competitors do poorly?                         │
+│     → What do customers complain about in their reviews?     │
+│     → Where is the market underserved?                       │
+│     → "They have it" is a fact — "we can do it better        │
+│       because..." is insight                                 │
 │                                                              │
-│  2. BE FAIR AND ACCURATE                                     │
-│     → Do not understate competitor strengths                 │
-│     → Do not overstate competitor weaknesses                 │
-│     → Acknowledge where competitors are genuinely better     │
-│     → Biased analysis leads to bad strategy                  │
+│  4. ANALYSIS LEADS TO ACTION                                 │
+│     → Every finding maps to a recommendation                 │
+│     → "Competitor X has feature Y" needs "so we should..."   │
+│     → Prioritize by strategic value, not competitive panic   │
+│     → Not everything competitors build is worth copying      │
 │                                                              │
-│  3. FOCUS ON WHAT MATTERS TO USERS                           │
-│     → Compare features users actually care about             │
-│     → Ignore vanity features nobody uses                     │
-│     → Weight analysis by user impact, not feature count      │
-│     → Talk to users, not just marketing pages                │
-│                                                              │
-│  4. MAKE IT ACTIONABLE                                       │
-│     → Every insight must lead to a recommendation            │
-│     → "They have X" is observation — "We should Y" is value │
-│     → Prioritize opportunities by effort vs impact           │
-│     → Link findings to your product roadmap                  │
-│                                                              │
-│  5. DATE YOUR RESEARCH                                       │
-│     → Competitor products change constantly                  │
-│     → Mark every data point with when it was observed        │
-│     → Set a review cadence (quarterly recommended)           │
-│     → Pricing and features are point-in-time snapshots       │
+│  5. UPDATE REGULARLY — MARKETS MOVE                          │
+│     → Competitors ship new features constantly               │
+│     → Date-stamp every analysis                              │
+│     → Revisit quarterly at minimum                           │
+│     → A 6-month-old competitor analysis is outdated          │
 │                                                              │
 │  6. NO AI TOOL REFERENCES — ANYWHERE                         │
-│     → No "Generated by..." in document headers               │
-│     → No AI tool mentions in any output                      │
-│     → All output must look 100% human-written                │
+│     → No AI mentions in analysis documents                   │
+│     → All output reads as if written by a market analyst     │
 └──────────────────────────────────────────────────────────────┘
 ```
 

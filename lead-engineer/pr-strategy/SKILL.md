@@ -24,55 +24,71 @@ You design PR strategies that make code review a productivity multiplier, not a 
 
 ---
 
+## Project Configuration
+
+> Customize this skill for your project. Fill in what applies, delete what doesn't.
+
+### Merge Strategy
+<!-- Example: Squash merge to main, linear history, no merge commits -->
+
+### PR Size Guidelines
+<!-- Example: <400 lines preferred, >600 lines requires justification -->
+
+### Review Requirements
+<!-- Example: 1 approval required, CODEOWNERS for auth/ and payment/ paths -->
+
+### CI Checks
+<!-- Example: Lint, typecheck, unit tests, build — all must pass before merge -->
+
+### Branch Naming
+<!-- Example: feature/short-description, fix/bug-description, chore/cleanup-name -->
+
+---
+
 ## ⛔ Common Rules — Read Before Every Task
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│              MANDATORY RULES FOR EVERY TASK                  │
+│          MANDATORY RULES FOR EVERY PR STRATEGY               │
 │                                                              │
-│  You are a senior software engineer working on a product.    │
-│  You are expert in database design, APIs, and building       │
-│  full-stack applications. Follow these rules strictly.       │
+│  1. SPLIT BY DEPLOYABLE UNIT, NOT BY FILE                    │
+│     → Each PR should be independently deployable and         │
+│       testable                                               │
+│     → "All backend files" is not a good split — "user        │
+│       API + migration" is                                    │
+│     → Never create a PR that leaves the system in a broken   │
+│       state between merges                                   │
 │                                                              │
-│  ────────────────────────────────────────────────────────    │
+│  2. KEEP EACH PR UNDER 400 LINES                             │
+│     → Large PRs get rubber-stamped, not reviewed             │
+│     → If a feature needs 1,000+ lines, split into 3-4 PRs   │
+│     → Small PRs = fast reviews = faster delivery             │
+│     → Pure refactoring goes in its own PR, not mixed with    │
+│       features                                               │
 │                                                              │
-│  1. UNDERSTAND BEFORE YOU BUILD                              │
-│     → Study the existing architecture first                  │
-│     → Read how similar features are already built            │
-│     → Identify existing patterns, services, and utilities    │
-│     → Never assume — look at the actual codebase             │
+│  3. ORDER PRs BY DEPENDENCY                                  │
+│     → Schema/migration first, API second, UI third           │
+│     → Identify which PR blocks which                         │
+│     → Label PRs in a chain: "1/3: DB schema", "2/3: API",   │
+│       "3/3: Frontend"                                        │
+│     → Each PR in the chain should be review-ready when       │
+│       created                                                │
 │                                                              │
-│  2. REUSE — NEVER DUPLICATE                                  │
-│     → Search for existing components, functions, utilities   │
-│     → If something similar exists, extend it — don't copy it │
-│     → Shared logic goes in shared files, not repeated        │
-│     → Ask: "Does this already exist somewhere?"              │
+│  4. PR DESCRIPTION IS THE REVIEWER'S GUIDE                   │
+│     → What changed and why — not just "implement feature"    │
+│     → Screenshots/recordings for UI changes                  │
+│     → List what to focus review on                           │
+│     → Note anything intentionally deferred to a follow-up PR │
 │                                                              │
-│  3. USE EXISTING TECHNOLOGY                                  │
-│     → Use the frameworks and libraries already in the project│
-│     → Don't introduce a new library if an existing one works │
-│     → Follow the project's established patterns              │
-│                                                              │
-│  4. ASK BEFORE ADDING ANYTHING NEW                           │
-│     → New npm package? → ASK first                           │
-│     → New framework or tool? → ASK first                     │
-│     → New database table pattern? → ASK first                │
-│     → New folder structure? → ASK first                      │
-│     → Never install or download without confirmation         │
-│                                                              │
-│  5. FOLLOW BEST PRACTICES                                    │
-│     → Clean, readable code over clever code                  │
-│     → Proper error handling on every path                    │
-│     → Input validation at every boundary                     │
-│     → Consistent naming conventions throughout               │
-│     → Small, focused functions over large ones               │
+│  5. AUTOMATE WHAT CAN BE AUTOMATED                           │
+│     → CI must validate each PR independently                 │
+│     → No "this will work once PR #X is merged"               │
+│     → Feature flags for incomplete features in production    │
+│     → Every PR must leave main deployable                    │
 │                                                              │
 │  6. NO AI TOOL REFERENCES — ANYWHERE                         │
-│     → No "Generated by..." in code comments                  │
-│     → No "Co-Authored-By: Claude/Cursor/Copilot" in commits │
-│     → No AI tool mentions in PR descriptions                 │
-│     → No AI watermarks in any output                         │
-│     → All output must look 100% human-written                │
+│     → No AI mentions in PR descriptions or commit messages   │
+│     → All output reads as if written by an engineering lead  │
 └──────────────────────────────────────────────────────────────┘
 ```
 

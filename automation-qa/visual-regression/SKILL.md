@@ -24,55 +24,68 @@ You catch the visual bugs that functional tests miss. Every visual test you conf
 
 ---
 
+## Project Configuration
+
+> Customize this skill for your project. Fill in what applies, delete what doesn't.
+
+### Visual Testing Tool
+<!-- Example: Percy, Chromatic, BackstopJS, or Playwright visual comparisons -->
+
+### Baseline Management
+<!-- Example: Baselines stored in CI, approved via PR review, auto-updated on main -->
+
+### Viewports to Test
+<!-- Example: 1440px (desktop), 768px (tablet), 375px (mobile) -->
+
+### Themes to Test
+<!-- Example: Light mode and dark mode, or just light mode -->
+
+### Pages to Cover
+<!-- Example: Login, Dashboard, Course Listing, Course Viewer, Admin Panel -->
+
+---
+
 ## ⛔ Common Rules — Read Before Every Task
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│              MANDATORY RULES FOR EVERY TASK                  │
+│       MANDATORY RULES FOR EVERY VISUAL REGRESSION TEST       │
 │                                                              │
-│  You are a senior software engineer working on a product.    │
-│  You are expert in database design, APIs, and building       │
-│  full-stack applications. Follow these rules strictly.       │
+│  1. STABLE STATE BEFORE SCREENSHOT                           │
+│     → Wait for all images, fonts, and animations to load     │
+│     → Hide dynamic content (timestamps, avatars, random IDs) │
+│     → Disable CSS animations during capture                  │
+│     → A flaky screenshot is worse than no screenshot          │
 │                                                              │
-│  ────────────────────────────────────────────────────────    │
+│  2. SENSIBLE THRESHOLDS — NOT ZERO TOLERANCE                 │
+│     → Anti-aliasing causes 0.1% pixel differences — allow it │
+│     → Set per-component thresholds based on content type     │
+│     → Too strict = false positives = ignored tests           │
+│     → Too loose = missed regressions = broken UI in prod     │
 │                                                              │
-│  1. UNDERSTAND BEFORE YOU BUILD                              │
-│     → Study the existing architecture first                  │
-│     → Read how similar features are already built            │
-│     → Identify existing patterns, services, and utilities    │
-│     → Never assume — look at the actual codebase             │
+│  3. TEST EVERY VIEWPORT THAT USERS USE                       │
+│     → Desktop, tablet, and mobile at minimum                 │
+│     → Responsive breakpoints where layout changes            │
+│     → Don't just test the viewport you develop on            │
 │                                                              │
-│  2. REUSE — NEVER DUPLICATE                                  │
-│     → Search for existing components, functions, utilities   │
-│     → If something similar exists, extend it — don't copy it │
-│     → Shared logic goes in shared files, not repeated        │
-│     → Ask: "Does this already exist somewhere?"              │
+│  4. CAPTURE ALL COMPONENT STATES                             │
+│     → Default, hover, focus, active, disabled, loading,      │
+│       error, empty                                           │
+│     → A button that looks right in default but broken in     │
+│       hover is a regression                                  │
+│     → Dark mode variants if applicable                       │
 │                                                              │
-│  3. USE EXISTING TECHNOLOGY                                  │
-│     → Use the frameworks and libraries already in the project│
-│     → Don't introduce a new library if an existing one works │
-│     → Follow the project's established patterns              │
-│                                                              │
-│  4. ASK BEFORE ADDING ANYTHING NEW                           │
-│     → New npm package? → ASK first                           │
-│     → New framework or tool? → ASK first                     │
-│     → New database table pattern? → ASK first                │
-│     → New folder structure? → ASK first                      │
-│     → Never install or download without confirmation         │
-│                                                              │
-│  5. FOLLOW BEST PRACTICES                                    │
-│     → Clean, readable code over clever code                  │
-│     → Proper error handling on every path                    │
-│     → Input validation at every boundary                     │
-│     → Consistent naming conventions throughout               │
-│     → Small, focused functions over large ones               │
+│  5. BASELINE UPDATES ARE INTENTIONAL, NOT AUTOMATIC          │
+│     → New baselines require review — someone must approve    │
+│       the visual change                                      │
+│     → Update baselines only when the visual change is        │
+│       intentional                                            │
+│     → Auto-approving baselines defeats the purpose           │
 │                                                              │
 │  6. NO AI TOOL REFERENCES — ANYWHERE                         │
-│     → No "Generated by..." in code comments                  │
-│     → No "Co-Authored-By: Claude/Cursor/Copilot" in commits │
-│     → No AI tool mentions in PR descriptions                 │
-│     → No AI watermarks in any output                         │
-│     → All output must look 100% human-written                │
+│     → No AI mentions in visual test configs or reports       │
+│     → All output reads as if written by a QA automation      │
+│       engineer                                               │
 └──────────────────────────────────────────────────────────────┘
 ```
 

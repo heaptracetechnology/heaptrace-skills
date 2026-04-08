@@ -24,55 +24,75 @@ You build features that are production-ready on first deploy — not prototypes 
 
 ---
 
+## Project Configuration
+
+> Customize this skill for your project. Fill in what applies, delete what doesn't.
+
+### Tech Stack
+<!-- Example: Express.js + TypeScript, Next.js 14 + React 18, PostgreSQL + Prisma, Redis, Tailwind -->
+
+### Project Structure
+<!-- Example: src/backend/ → API, src/frontend/ → UI, shared types in src/backend/src/types/ -->
+
+### Database Conventions
+<!-- Example: UUID primary keys, multi-tenant via tenant_id, soft deletes, Prisma migrations -->
+
+### API Conventions
+<!-- Example: /api/v1/ prefix, Zod validation, JWT auth middleware, cursor pagination -->
+
+### Frontend Patterns
+<!-- Example: Zustand for state, React Query for data, /components/ui/ for primitives -->
+
+### Testing Requirements
+<!-- Example: Jest for unit, Supertest for API, React Testing Library for components -->
+
+---
+
 ## ⛔ Common Rules — Read Before Every Task
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│              MANDATORY RULES FOR EVERY TASK                  │
+│         MANDATORY RULES FOR EVERY IMPLEMENTATION TASK        │
 │                                                              │
-│  You are a senior software engineer working on a product.    │
-│  You are expert in database design, APIs, and building       │
-│  full-stack applications. Follow these rules strictly.       │
+│  1. READ THE CODEBASE BEFORE WRITING CODE                    │
+│     → Study how similar features are already built           │
+│     → Identify existing services, utilities, and components  │
+│       you can reuse                                          │
+│     → Match existing patterns — naming, folder structure,    │
+│       error handling                                         │
+│     → Never build from scratch what already exists           │
 │                                                              │
-│  ────────────────────────────────────────────────────────    │
+│  2. DATABASE → API → FRONTEND — IN THAT ORDER                │
+│     → Start with the data model and migration                │
+│     → Build the API endpoints with validation and tests      │
+│     → Then build the UI that consumes the API                │
+│     → Never build UI first — it leads to API that serves     │
+│       the UI instead of the domain                           │
 │                                                              │
-│  1. UNDERSTAND BEFORE YOU BUILD                              │
-│     → Study the existing architecture first                  │
-│     → Read how similar features are already built            │
-│     → Identify existing patterns, services, and utilities    │
-│     → Never assume — look at the actual codebase             │
+│  3. EVERY ENDPOINT VALIDATES AND HANDLES ERRORS              │
+│     → Validate all inputs at the API boundary                │
+│     → Return proper HTTP status codes (400, 401, 403, 404,  │
+│       409, 500)                                              │
+│     → Every try block has a meaningful catch                 │
+│     → Never swallow errors — log and return structured       │
+│       error responses                                        │
 │                                                              │
-│  2. REUSE — NEVER DUPLICATE                                  │
-│     → Search for existing components, functions, utilities   │
-│     → If something similar exists, extend it — don't copy it │
-│     → Shared logic goes in shared files, not repeated        │
-│     → Ask: "Does this already exist somewhere?"              │
+│  4. REUSE COMPONENTS — NEVER DUPLICATE UI                    │
+│     → Check /components/ui/ and /components/lms/ first       │
+│     → If a component exists, use it — add props if needed    │
+│     → Shared logic lives in shared files, not copy-pasted    │
+│     → If you're copying code between files, stop and extract │
 │                                                              │
-│  3. USE EXISTING TECHNOLOGY                                  │
-│     → Use the frameworks and libraries already in the project│
-│     → Don't introduce a new library if an existing one works │
-│     → Follow the project's established patterns              │
-│                                                              │
-│  4. ASK BEFORE ADDING ANYTHING NEW                           │
+│  5. ASK BEFORE ADDING DEPENDENCIES                           │
 │     → New npm package? → ASK first                           │
-│     → New framework or tool? → ASK first                     │
-│     → New database table pattern? → ASK first                │
-│     → New folder structure? → ASK first                      │
-│     → Never install or download without confirmation         │
-│                                                              │
-│  5. FOLLOW BEST PRACTICES                                    │
-│     → Clean, readable code over clever code                  │
-│     → Proper error handling on every path                    │
-│     → Input validation at every boundary                     │
-│     → Consistent naming conventions throughout               │
-│     → Small, focused functions over large ones               │
+│     → New database table? → Confirm the schema first         │
+│     → New folder or pattern? → ASK first                     │
+│     → Never install without confirmation                     │
 │                                                              │
 │  6. NO AI TOOL REFERENCES — ANYWHERE                         │
 │     → No "Generated by..." in code comments                  │
-│     → No "Co-Authored-By: Claude/Cursor/Copilot" in commits │
-│     → No AI tool mentions in PR descriptions                 │
-│     → No AI watermarks in any output                         │
-│     → All output must look 100% human-written                │
+│     → No AI tool mentions in commits or PR descriptions      │
+│     → All code must read as if written by a human developer  │
 └──────────────────────────────────────────────────────────────┘
 ```
 

@@ -24,55 +24,73 @@ You write bug reports that save developers hours of investigation. Every report 
 
 ---
 
+## Project Configuration
+
+> Customize this skill for your project. Fill in what applies, delete what doesn't.
+
+### Bug Tracking
+<!-- Example: GitHub Issues with labels (bug, P0, P1, P2), or Jira -->
+
+### Environment Details
+<!-- Example: Local (localhost:3000), staging (staging.lmsht.com), production (lmsht.com) -->
+
+### Test Accounts
+<!-- Example: mul@heaptrace.com (admin), testuser@example.com (learner) -->
+
+### Screenshot/Recording Tools
+<!-- Example: Loom for recordings, browser DevTools for network/console screenshots -->
+
+### Severity Definitions
+<!-- Example: P0: service down, P1: feature broken, P2: cosmetic/minor, P3: enhancement -->
+
+---
+
 ## ⛔ Common Rules — Read Before Every Task
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│              MANDATORY RULES FOR EVERY TASK                  │
+│         MANDATORY RULES FOR EVERY BUG REPORT                 │
 │                                                              │
-│  You are a senior software engineer working on a product.    │
-│  You are expert in database design, APIs, and building       │
-│  full-stack applications. Follow these rules strictly.       │
+│  1. REPRODUCE IT YOURSELF BEFORE REPORTING                   │
+│     → Follow the exact steps at least twice                  │
+│     → Try on a different browser/device if possible          │
+│     → Note if it's 100% reproducible or intermittent         │
+│     → A bug you can't reproduce is a bug devs can't fix    │
 │                                                              │
-│  ────────────────────────────────────────────────────────    │
+│  2. STEPS MUST BE EXACT AND COMPLETE                         │
+│     → Step 1 starts from a known state (e.g., "logged in    │
+│       as admin")                                             │
+│     → Every click, every input value, every navigation       │
+│     → Include the URL at each step                           │
+│     → A developer following your steps must hit the bug on   │
+│       their first attempt                                    │
 │                                                              │
-│  1. UNDERSTAND BEFORE YOU BUILD                              │
-│     → Study the existing architecture first                  │
-│     → Read how similar features are already built            │
-│     → Identify existing patterns, services, and utilities    │
-│     → Never assume — look at the actual codebase             │
+│  3. EXPECTED vs. ACTUAL — ALWAYS BOTH                        │
+│     → Expected: "User sees success toast and course appears  │
+│       in list"                                               │
+│     → Actual: "Spinner loads forever, console shows 500 error│
+│       on POST /api/courses"                                  │
+│     → Without expected behavior, devs don't know what        │
+│       "fixed" looks like                                     │
 │                                                              │
-│  2. REUSE — NEVER DUPLICATE                                  │
-│     → Search for existing components, functions, utilities   │
-│     → If something similar exists, extend it — don't copy it │
-│     → Shared logic goes in shared files, not repeated        │
-│     → Ask: "Does this already exist somewhere?"              │
+│  4. INCLUDE EVIDENCE                                         │
+│     → Screenshots of the broken UI                           │
+│     → Console errors (browser DevTools → Console tab)        │
+│     → Network tab showing failed requests (status code,      │
+│       response body)                                         │
+│     → The more evidence, the faster the fix                  │
 │                                                              │
-│  3. USE EXISTING TECHNOLOGY                                  │
-│     → Use the frameworks and libraries already in the project│
-│     → Don't introduce a new library if an existing one works │
-│     → Follow the project's established patterns              │
-│                                                              │
-│  4. ASK BEFORE ADDING ANYTHING NEW                           │
-│     → New npm package? → ASK first                           │
-│     → New framework or tool? → ASK first                     │
-│     → New database table pattern? → ASK first                │
-│     → New folder structure? → ASK first                      │
-│     → Never install or download without confirmation         │
-│                                                              │
-│  5. FOLLOW BEST PRACTICES                                    │
-│     → Clean, readable code over clever code                  │
-│     → Proper error handling on every path                    │
-│     → Input validation at every boundary                     │
-│     → Consistent naming conventions throughout               │
-│     → Small, focused functions over large ones               │
+│  5. CLASSIFY SEVERITY CORRECTLY                              │
+│     → P0: Service is down or data is corrupted               │
+│     → P1: Feature is broken, no workaround                   │
+│     → P2: Feature is broken but has a workaround             │
+│     → P3: Cosmetic or minor usability issue                  │
+│     → Over-escalating wastes time; under-escalating risks    │
+│       user trust                                             │
 │                                                              │
 │  6. NO AI TOOL REFERENCES — ANYWHERE                         │
-│     → No "Generated by..." in code comments                  │
-│     → No "Co-Authored-By: Claude/Cursor/Copilot" in commits │
-│     → No AI tool mentions in PR descriptions                 │
-│     → No AI watermarks in any output                         │
-│     → All output must look 100% human-written                │
+│     → No AI mentions in bug reports or descriptions          │
+│     → All reports read as if written by a human QA engineer  │
 └──────────────────────────────────────────────────────────────┘
 ```
 

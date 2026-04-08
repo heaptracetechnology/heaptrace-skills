@@ -24,55 +24,70 @@ You write decision documents that prevent the same debates from happening twice.
 
 ---
 
+## Project Configuration
+
+> Customize this skill for your project. Fill in what applies, delete what doesn't.
+
+### ADR Storage Location
+<!-- Example: docs/decisions/ or specs/decisions/ — one ADR per file -->
+
+### Naming Convention
+<!-- Example: ADR-001-use-prisma-over-typeorm.md, ADR-002-choose-ecs-over-eks.md -->
+
+### Decision Makers
+<!-- Example: Tech lead + architect approve, team provides input async -->
+
+### Key Constraints
+<!-- Example: Must run on AWS, TypeScript only, PostgreSQL required, budget <$5K/month -->
+
+### Previous Decisions
+<!-- Example: Chose Prisma (ADR-001), Chose ECS (ADR-002), Chose Next.js (ADR-003) -->
+
+---
+
 ## ⛔ Common Rules — Read Before Every Task
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│              MANDATORY RULES FOR EVERY TASK                  │
+│        MANDATORY RULES FOR EVERY DECISION DOCUMENT           │
 │                                                              │
-│  You are a senior software engineer working on a product.    │
-│  You are expert in database design, APIs, and building       │
-│  full-stack applications. Follow these rules strictly.       │
+│  1. FRAME THE PROBLEM BEFORE PROPOSING SOLUTIONS             │
+│     → What decision needs to be made and why NOW?            │
+│     → What constraints limit our options?                    │
+│     → What happens if we do nothing?                         │
+│     → A well-framed problem eliminates half the options      │
 │                                                              │
-│  ────────────────────────────────────────────────────────    │
+│  2. ALWAYS PRESENT AT LEAST 3 OPTIONS                        │
+│     → Never present one option as inevitable                 │
+│     → Include "do nothing" or "defer" as a valid option      │
+│     → Each option needs: pros, cons, cost, risk, and         │
+│       reversibility                                          │
+│     → Make it easy for readers to compare side-by-side       │
 │                                                              │
-│  1. UNDERSTAND BEFORE YOU BUILD                              │
-│     → Study the existing architecture first                  │
-│     → Read how similar features are already built            │
-│     → Identify existing patterns, services, and utilities    │
-│     → Never assume — look at the actual codebase             │
+│  3. DISTINGUISH ONE-WAY DOORS FROM TWO-WAY DOORS             │
+│     → One-way: Database schema changes, public API contracts,│
+│       vendor lock-in                                         │
+│     → Two-way: Library choices, internal architecture, UI    │
+│       patterns                                               │
+│     → One-way doors need deep analysis; two-way doors need   │
+│       speed                                                  │
 │                                                              │
-│  2. REUSE — NEVER DUPLICATE                                  │
-│     → Search for existing components, functions, utilities   │
-│     → If something similar exists, extend it — don't copy it │
-│     → Shared logic goes in shared files, not repeated        │
-│     → Ask: "Does this already exist somewhere?"              │
+│  4. DOCUMENT THE WHY, NOT JUST THE WHAT                      │
+│     → "We chose X" is not enough — "We chose X because Y    │
+│       and Z, despite tradeoff W" is                          │
+│     → Future teams will want to know the reasoning           │
+│     → Context decays fast — capture it while it's fresh      │
+│     → A good ADR prevents the same debate 6 months later     │
 │                                                              │
-│  3. USE EXISTING TECHNOLOGY                                  │
-│     → Use the frameworks and libraries already in the project│
-│     → Don't introduce a new library if an existing one works │
-│     → Follow the project's established patterns              │
-│                                                              │
-│  4. ASK BEFORE ADDING ANYTHING NEW                           │
-│     → New npm package? → ASK first                           │
-│     → New framework or tool? → ASK first                     │
-│     → New database table pattern? → ASK first                │
-│     → New folder structure? → ASK first                      │
-│     → Never install or download without confirmation         │
-│                                                              │
-│  5. FOLLOW BEST PRACTICES                                    │
-│     → Clean, readable code over clever code                  │
-│     → Proper error handling on every path                    │
-│     → Input validation at every boundary                     │
-│     → Consistent naming conventions throughout               │
-│     → Small, focused functions over large ones               │
+│  5. INCLUDE THE DECISION DATE AND STATUS                     │
+│     → Status: Proposed → Accepted → Superseded → Deprecated  │
+│     → Date: When was this decided?                           │
+│     → Who: Who approved this decision?                       │
+│     → Decisions without metadata become tribal knowledge     │
 │                                                              │
 │  6. NO AI TOOL REFERENCES — ANYWHERE                         │
-│     → No "Generated by..." in code comments                  │
-│     → No "Co-Authored-By: Claude/Cursor/Copilot" in commits │
-│     → No AI tool mentions in PR descriptions                 │
-│     → No AI watermarks in any output                         │
-│     → All output must look 100% human-written                │
+│     → No AI mentions in ADRs or decision documents           │
+│     → All output reads as if written by a principal engineer │
 └──────────────────────────────────────────────────────────────┘
 ```
 

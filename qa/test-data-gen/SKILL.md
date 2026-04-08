@@ -24,55 +24,69 @@ You generate test data that exercises the same code paths as real data. Every da
 
 ---
 
+## Project Configuration
+
+> Customize this skill for your project. Fill in what applies, delete what doesn't.
+
+### Database & ORM
+<!-- Example: PostgreSQL + Prisma, UUID primary keys, tenant_id on all tables -->
+
+### Key Entities
+<!-- Example: users, tenants, courses, enrollments, learning_paths, certificates -->
+
+### Data Relationships
+<!-- Example: tenant → users → enrollments → courses, courses → sections → content -->
+
+### Seed Script Location
+<!-- Example: src/backend/prisma/seed.ts, run via: npx prisma db seed -->
+
+### PII Rules
+<!-- Example: Never use real names/emails in test data, use faker or synthetic data -->
+
+---
+
 ## ⛔ Common Rules — Read Before Every Task
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│              MANDATORY RULES FOR EVERY TASK                  │
+│        MANDATORY RULES FOR EVERY TEST DATA TASK              │
 │                                                              │
-│  You are a senior software engineer working on a product.    │
-│  You are expert in database design, APIs, and building       │
-│  full-stack applications. Follow these rules strictly.       │
+│  1. DATA MUST LOOK REAL BUT BE FAKE                          │
+│     → Use realistic names, emails, dates — not "test123"     │
+│     → Never use real customer data for testing               │
+│     → Use faker/chance libraries for consistent fake data    │
+│     → Test data should exercise the same code paths as       │
+│       real data                                              │
 │                                                              │
-│  ────────────────────────────────────────────────────────    │
+│  2. RESPECT REFERENTIAL INTEGRITY                            │
+│     → Every foreign key must point to an existing record     │
+│     → Create entities in dependency order: tenant → user →   │
+│       course → enrollment                                    │
+│     → Orphaned records cause confusing test failures         │
 │                                                              │
-│  1. UNDERSTAND BEFORE YOU BUILD                              │
-│     → Study the existing architecture first                  │
-│     → Read how similar features are already built            │
-│     → Identify existing patterns, services, and utilities    │
-│     → Never assume — look at the actual codebase             │
+│  3. INCLUDE EDGE CASE DATA                                   │
+│     → Empty strings, very long strings, Unicode characters   │
+│     → Users with no enrollments, courses with no content     │
+│     → Dates in the past, dates in the future, timezone edge  │
+│       cases                                                  │
+│     → Zero items, one item, maximum items scenarios          │
 │                                                              │
-│  2. REUSE — NEVER DUPLICATE                                  │
-│     → Search for existing components, functions, utilities   │
-│     → If something similar exists, extend it — don't copy it │
-│     → Shared logic goes in shared files, not repeated        │
-│     → Ask: "Does this already exist somewhere?"              │
+│  4. SEED SCRIPTS MUST BE IDEMPOTENT                          │
+│     → Running the seed twice produces the same result        │
+│     → Use upsert or check-then-create patterns               │
+│     → Clear seed data before re-seeding, or use unique keys │
+│     → Broken seeds block the entire team                     │
 │                                                              │
-│  3. USE EXISTING TECHNOLOGY                                  │
-│     → Use the frameworks and libraries already in the project│
-│     → Don't introduce a new library if an existing one works │
-│     → Follow the project's established patterns              │
-│                                                              │
-│  4. ASK BEFORE ADDING ANYTHING NEW                           │
-│     → New npm package? → ASK first                           │
-│     → New framework or tool? → ASK first                     │
-│     → New database table pattern? → ASK first                │
-│     → New folder structure? → ASK first                      │
-│     → Never install or download without confirmation         │
-│                                                              │
-│  5. FOLLOW BEST PRACTICES                                    │
-│     → Clean, readable code over clever code                  │
-│     → Proper error handling on every path                    │
-│     → Input validation at every boundary                     │
-│     → Consistent naming conventions throughout               │
-│     → Small, focused functions over large ones               │
+│  5. DOCUMENT THE TEST DATA SHAPE                             │
+│     → What entities are created and how many?                │
+│     → What are the known IDs for key test records?           │
+│     → What login credentials work for each role?             │
+│     → New developers should know what data exists without    │
+│       querying the database                                  │
 │                                                              │
 │  6. NO AI TOOL REFERENCES — ANYWHERE                         │
-│     → No "Generated by..." in code comments                  │
-│     → No "Co-Authored-By: Claude/Cursor/Copilot" in commits │
-│     → No AI tool mentions in PR descriptions                 │
-│     → No AI watermarks in any output                         │
-│     → All output must look 100% human-written                │
+│     → No AI mentions in seed scripts or data documentation   │
+│     → All output reads as if written by a test engineer      │
 └──────────────────────────────────────────────────────────────┘
 ```
 

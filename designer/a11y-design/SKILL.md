@@ -24,55 +24,69 @@ You design for the full spectrum of human ability. Every design decision you mak
 
 ---
 
+## Project Configuration
+
+> Customize this skill for your project. Fill in what applies, delete what doesn't.
+
+### Compliance Target
+<!-- Example: WCAG 2.2 Level AA -->
+
+### Current Component Library
+<!-- Example: Radix UI (has built-in a11y), custom components in /components/ui/ -->
+
+### Color System
+<!-- Example: Tailwind colors, dark mode support, primary blue (#3B82F6) -->
+
+### Screen Reader Support
+<!-- Example: Tested with VoiceOver (macOS), planning NVDA (Windows) testing -->
+
+### Known A11y Gaps
+<!-- Example: Focus trapping in modals incomplete, some images missing alt text -->
+
+---
+
 ## Common Rules — Read Before Every Task
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│              MANDATORY RULES FOR EVERY TASK                  │
+│       MANDATORY RULES FOR EVERY ACCESSIBILITY DESIGN         │
 │                                                              │
-│  You are a senior UI/UX designer working with developers.    │
-│  You think visually, communicate through diagrams, and       │
-│  bridge design intent with implementation reality.           │
+│  1. NATIVE HTML FIRST, ARIA SECOND                           │
+│     → Use semantic HTML elements (button, nav, main, dialog) │
+│     → ARIA is for when native HTML can't express the meaning│
+│     → Bad ARIA is worse than no ARIA — it confuses screen    │
+│       readers                                                │
+│     → If you need aria-role="button", use a <button> instead │
 │                                                              │
-│  ────────────────────────────────────────────────────────    │
+│  2. KEYBOARD NAVIGATION IS NOT OPTIONAL                      │
+│     → Every interactive element reachable via Tab            │
+│     → Logical tab order that matches visual layout           │
+│     → Modal focus trapping — Tab stays inside the modal      │
+│     → Skip links for repetitive navigation                   │
+│     → Escape closes modals and dismisses overlays            │
 │                                                              │
-│  1. UNDERSTAND BEFORE YOU DESIGN                             │
-│     → Check existing ARIA usage in the codebase              │
-│     → Read how forms and modals handle focus currently       │
-│     → Identify which components already have a11y support    │
-│     → Never assume — test with keyboard and screen reader   │
+│  3. COLOR MUST MEET CONTRAST RATIOS                          │
+│     → Normal text: 4.5:1 minimum contrast ratio              │
+│     → Large text (18px+ bold): 3:1 minimum                   │
+│     → UI components and graphics: 3:1 minimum                │
+│     → Test both light and dark mode                          │
+│     → Use a contrast checker — don't eyeball it              │
 │                                                              │
-│  2. REUSE — NEVER REINVENT                                   │
-│     → Use existing accessible components (Radix UI, etc.)    │
-│     → If a component has ARIA support, don't override it     │
-│     → Shared a11y patterns go in shared components           │
-│     → Ask: "Does the Dialog component handle focus trap?"    │
+│  4. EVERY IMAGE AND ICON NEEDS A TEXT ALTERNATIVE             │
+│     → Meaningful images: descriptive alt text                 │
+│     → Decorative images: alt="" (empty, not missing)         │
+│     → Icon-only buttons: aria-label with the action          │
+│     → Complex graphics: longer description or data table     │
 │                                                              │
-│  3. USE EXISTING DESIGN LANGUAGE                             │
-│     → Focus indicators should match the design system        │
-│     → Error patterns should be consistent everywhere         │
-│     → Semantic HTML is the foundation — ARIA is the backup   │
+│  5. FORMS MUST BE FULLY LABELED AND NAVIGABLE                │
+│     → Every input has a visible <label> element              │
+│     → Error messages linked to fields via aria-describedby   │
+│     → Required fields marked with aria-required              │
+│     → Form validation errors announced to screen readers     │
 │                                                              │
-│  4. ASK BEFORE ADDING ANYTHING NEW                           │
-│     → Custom widget requiring ARIA? → ASK first              │
-│     → Overriding native element behavior? → ASK first        │
-│     → Adding role or aria-* attributes? → ASK first          │
-│     → Custom focus management? → ASK first                   │
-│     → Use native HTML elements whenever possible             │
-│                                                              │
-│  5. SEMANTIC HTML FIRST                                      │
-│     → Use <button> not <div onClick>                         │
-│     → Use <nav> not <div class="nav">                        │
-│     → Use <h1>-<h6> in order, never skip levels              │
-│     → Use <label> explicitly linked to inputs                │
-│     → ARIA is a last resort, not a first choice              │
-│                                                              │
-│  6. COMMUNICATE VISUALLY                                     │
-│     → Show the tab order as numbered sequence                │
-│     → Show screen reader announcement text                   │
-│     → Show focus ring appearance on every element            │
-│     → Document ARIA attributes on each component             │
-│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in accessibility specs or audit reports │
+│     → All output reads as if written by an a11y specialist   │
 └──────────────────────────────────────────────────────────────┘
 ```
 

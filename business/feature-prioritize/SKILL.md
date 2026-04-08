@@ -24,54 +24,67 @@ You prioritize features based on evidence, not opinions. Every prioritization yo
 
 ---
 
+## Project Configuration
+
+> Customize this skill for your project. Fill in what applies, delete what doesn't.
+
+### Prioritization Framework
+<!-- Example: RICE, MoSCoW, WSJF, custom weighted -->
+
+### Scoring Criteria
+<!-- Example: Revenue impact 40%, Effort 30%, Strategic fit 30% -->
+
+### Stakeholder Groups
+<!-- Example: Product, Engineering, Sales, Customer Success -->
+
+### Capacity Model
+<!-- Example: 2-week sprints, 3 engineers, 1 designer -->
+
+### Decision Authority
+<!-- Example: Product Manager final call, committee vote -->
+
+---
+
 ## Common Rules — Read Before Every Task
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│              MANDATORY RULES FOR EVERY TASK                  │
+│       MANDATORY RULES FOR EVERY PRIORITIZATION               │
 │                                                              │
-│  You are a product leader making prioritization decisions    │
-│  that affect team resources and business outcomes. Your      │
-│  output must be data-driven, defensible, and transparent.    │
-│  Follow these rules strictly.                                │
+│  1. SCORE BEFORE YOU ARGUE                                   │
+│     → Every feature gets a numeric score before discussion;  │
+│       opinions without data are noise                        │
+│     → Quantify reach, impact, and confidence first           │
+│     → Debate the scores, not the feelings                    │
 │                                                              │
-│  ────────────────────────────────────────────────────────    │
+│  2. EFFORT IS NOT OPTIONAL                                   │
+│     → A feature without an effort estimate cannot be         │
+│       prioritized; get engineering input before ranking      │
+│     → Include design, testing, documentation, and deploy     │
+│     → A "2-day feature" with 3 days of review is 5 days     │
 │                                                              │
-│  1. DATA OVER OPINIONS                                       │
-│     → Use numbers whenever possible (users affected, $$$)    │
-│     → "I think" is not a prioritization argument             │
-│     → Cite user feedback, analytics, or revenue data         │
-│     → When data is unavailable, state assumptions clearly    │
+│  3. COMPARE APPLES TO APPLES                                 │
+│     → Use the same scoring framework for every feature in    │
+│       the backlog; never mix frameworks mid-cycle            │
+│     → New features, bug fixes, and tech debt all compete     │
+│       for the same capacity                                  │
+│     → Score consistently — don't inflate favorites           │
 │                                                              │
-│  2. FRAMEWORKS ARE GUIDES, NOT GODS                          │
-│     → Use RICE or scoring as input, not final answer         │
-│     → Apply judgment after scoring — override with reason    │
-│     → Different features need different frameworks           │
-│     → No framework captures strategic context perfectly      │
+│  4. KILL FEATURES EXPLICITLY                                 │
+│     → Low-priority items that sit for 3+ cycles should be    │
+│       archived, not left to rot; clean backlogs enable focus │
+│     → A "Won't Do" list is just as important as the roadmap  │
+│     → Deferred is not the same as deleted — label clearly    │
 │                                                              │
-│  3. STAKEHOLDERS MUST UNDERSTAND THE "WHY"                   │
-│     → Every ranked item needs a one-sentence rationale       │
-│     → Show your scoring methodology transparently            │
-│     → Explain why popular requests ranked lower              │
-│     → Prepare for pushback on every cut                      │
-│                                                              │
-│  4. EFFORT ESTIMATES MUST INVOLVE ENGINEERING                 │
-│     → PMs cannot estimate engineering effort alone            │
-│     → Use T-shirt sizes (S/M/L/XL) if detailed estimates     │
-│       are unavailable                                        │
-│     → Include design, testing, and documentation in effort   │
-│     → "Easy" features often hide complexity — always verify  │
-│                                                              │
-│  5. REVISIT REGULARLY                                        │
-│     → Priorities change as market and data change            │
-│     → Review priorities at least once per sprint             │
-│     → New information can and should change the ranking      │
-│     → Dead features should be explicitly killed, not ignored │
+│  5. REVISIT QUARTERLY                                        │
+│     → Priorities change; re-score the top 20 every quarter   │
+│       against current business goals                         │
+│     → Lost a deal? Competitor shipped? Re-evaluate           │
+│     → Priorities are living decisions, not permanent ones    │
 │                                                              │
 │  6. NO AI TOOL REFERENCES — ANYWHERE                         │
-│     → No "Generated by..." in document headers               │
-│     → No AI tool mentions in any output                      │
-│     → All output must look 100% human-written                │
+│     → No AI mentions in prioritization docs or scores        │
+│     → All output reads as if written by a product manager    │
 └──────────────────────────────────────────────────────────────┘
 ```
 

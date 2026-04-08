@@ -24,55 +24,66 @@ You write e2e tests that simulate real users, not robots clicking buttons. Every
 
 ---
 
+## Project Configuration
+
+> Customize this skill for your project. Fill in what applies, delete what doesn't.
+
+### E2E Framework
+<!-- Example: Cypress 13 with cypress-testing-library, or Playwright -->
+
+### Test Directory
+<!-- Example: cypress/e2e/ organized by feature, support/ for commands -->
+
+### Authentication
+<!-- Example: cy.login() via API shortcut, test user: mul@heaptrace.com -->
+
+### Base URL
+<!-- Example: http://localhost:3000 for local, https://staging.lmsht.com for CI -->
+
+### Critical User Flows
+<!-- Example: Login → Dashboard, Create Course → Publish, Enroll → Complete → Certificate -->
+
+---
+
 ## ⛔ Common Rules — Read Before Every Task
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│              MANDATORY RULES FOR EVERY TASK                  │
+│         MANDATORY RULES FOR EVERY E2E TEST                   │
 │                                                              │
-│  You are a senior software engineer working on a product.    │
-│  You are expert in database design, APIs, and building       │
-│  full-stack applications. Follow these rules strictly.       │
+│  1. EACH TEST IS INDEPENDENT AND ISOLATED                    │
+│     → No shared state between tests                          │
+│     → Set up data via API calls, not UI interactions         │
+│     → Clean up after each test                               │
+│     → Tests must pass in any order, including parallel       │
 │                                                              │
-│  ────────────────────────────────────────────────────────    │
+│  2. TEST THE USER JOURNEY, NOT THE IMPLEMENTATION            │
+│     → Click what users click, see what users see             │
+│     → Assert on visible text and behavior, not DOM structure │
+│     → If the UI is redesigned but behavior stays, tests      │
+│       should still pass                                      │
 │                                                              │
-│  1. UNDERSTAND BEFORE YOU BUILD                              │
-│     → Study the existing architecture first                  │
-│     → Read how similar features are already built            │
-│     → Identify existing patterns, services, and utilities    │
-│     → Never assume — look at the actual codebase             │
+│  3. NO ARBITRARY WAITS — EVER                                │
+│     → Use cy.intercept() + cy.wait('@alias') for API calls  │
+│     → Use assertions as implicit waits                       │
+│     → cy.wait(5000) is ALWAYS wrong — find the real signal  │
+│     → Flaky waits = flaky tests = ignored test suite         │
 │                                                              │
-│  2. REUSE — NEVER DUPLICATE                                  │
-│     → Search for existing components, functions, utilities   │
-│     → If something similar exists, extend it — don't copy it │
-│     → Shared logic goes in shared files, not repeated        │
-│     → Ask: "Does this already exist somewhere?"              │
+│  4. STABLE SELECTORS ONLY                                    │
+│     → Use data-testid, aria-label, or role selectors         │
+│     → Never use CSS classes, tag names, or DOM position      │
+│     → If a selector doesn't exist, add the data-testid to   │
+│       the code                                               │
 │                                                              │
-│  3. USE EXISTING TECHNOLOGY                                  │
-│     → Use the frameworks and libraries already in the project│
-│     → Don't introduce a new library if an existing one works │
-│     → Follow the project's established patterns              │
-│                                                              │
-│  4. ASK BEFORE ADDING ANYTHING NEW                           │
-│     → New npm package? → ASK first                           │
-│     → New framework or tool? → ASK first                     │
-│     → New database table pattern? → ASK first                │
-│     → New folder structure? → ASK first                      │
-│     → Never install or download without confirmation         │
-│                                                              │
-│  5. FOLLOW BEST PRACTICES                                    │
-│     → Clean, readable code over clever code                  │
-│     → Proper error handling on every path                    │
-│     → Input validation at every boundary                     │
-│     → Consistent naming conventions throughout               │
-│     → Small, focused functions over large ones               │
+│  5. TEST NAME DESCRIBES THE USER STORY                       │
+│     → "admin can create a course and publish it"             │
+│     → NOT "test create course" or "course spec"              │
+│     → A failing test name should immediately explain what    │
+│       broke for the user                                     │
 │                                                              │
 │  6. NO AI TOOL REFERENCES — ANYWHERE                         │
-│     → No "Generated by..." in code comments                  │
-│     → No "Co-Authored-By: Claude/Cursor/Copilot" in commits │
-│     → No AI tool mentions in PR descriptions                 │
-│     → No AI watermarks in any output                         │
-│     → All output must look 100% human-written                │
+│     → No AI mentions in test descriptions or comments        │
+│     → All tests read as if written by a human QA engineer    │
 └──────────────────────────────────────────────────────────────┘
 ```
 

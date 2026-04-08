@@ -24,55 +24,71 @@ You write tests that act as a safety net, not a burden. Every test you create ha
 
 ---
 
+## Project Configuration
+
+> Customize this skill for your project. Fill in what applies, delete what doesn't.
+
+### Test Framework
+<!-- Example: Jest + ts-jest for backend, React Testing Library for frontend -->
+
+### Test Structure
+<!-- Example: __tests__/ folders colocated with source, *.test.ts naming -->
+
+### Mocking Strategy
+<!-- Example: jest.mock() for modules, MSW for HTTP, Prisma mock client for DB -->
+
+### Coverage Requirements
+<!-- Example: 80% line coverage for new code, 100% for auth/payment paths -->
+
+### Test Data Approach
+<!-- Example: Factory functions in tests/factories/, no shared mutable fixtures -->
+
+---
+
 ## ⛔ Common Rules — Read Before Every Task
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│              MANDATORY RULES FOR EVERY TASK                  │
+│          MANDATORY RULES FOR EVERY TEST YOU WRITE            │
 │                                                              │
-│  You are a senior software engineer working on a product.    │
-│  You are expert in database design, APIs, and building       │
-│  full-stack applications. Follow these rules strictly.       │
+│  1. READ EXISTING TESTS BEFORE WRITING NEW ONES              │
+│     → Match the project's test patterns and conventions      │
+│     → Reuse existing test utilities, factories, and helpers  │
+│     → Don't create a new testing pattern when one exists     │
+│     → Consistency across the test suite matters               │
 │                                                              │
-│  ────────────────────────────────────────────────────────    │
+│  2. TEST BEHAVIOR, NOT IMPLEMENTATION                        │
+│     → Test what the function returns, not how it works       │
+│     → Changing internal logic shouldn't break tests          │
+│     → Mock at boundaries (HTTP, DB, filesystem) not internal │
+│       functions                                              │
+│     → If refactoring breaks your test but not the feature,   │
+│       the test is wrong                                      │
 │                                                              │
-│  1. UNDERSTAND BEFORE YOU BUILD                              │
-│     → Study the existing architecture first                  │
-│     → Read how similar features are already built            │
-│     → Identify existing patterns, services, and utilities    │
-│     → Never assume — look at the actual codebase             │
+│  3. COVER THE EDGES, NOT JUST THE HAPPY PATH                 │
+│     → What happens with null, undefined, empty string?       │
+│     → What happens with 0 items? 10,000 items?               │
+│     → What happens when the API returns 500?                 │
+│     → What happens with special characters and Unicode?      │
+│     → The happy path already works — test what breaks        │
 │                                                              │
-│  2. REUSE — NEVER DUPLICATE                                  │
-│     → Search for existing components, functions, utilities   │
-│     → If something similar exists, extend it — don't copy it │
-│     → Shared logic goes in shared files, not repeated        │
-│     → Ask: "Does this already exist somewhere?"              │
+│  4. EACH TEST HAS ONE CLEAR PURPOSE                          │
+│     → Test name describes the scenario and expected outcome  │
+│     → One assertion per concept (multiple related asserts    │
+│       are OK)                                                │
+│     → If a test fails, the name alone should explain what    │
+│       broke                                                  │
+│     → Arrange → Act → Assert — keep the structure clear      │
 │                                                              │
-│  3. USE EXISTING TECHNOLOGY                                  │
-│     → Use the frameworks and libraries already in the project│
-│     → Don't introduce a new library if an existing one works │
-│     → Follow the project's established patterns              │
-│                                                              │
-│  4. ASK BEFORE ADDING ANYTHING NEW                           │
-│     → New npm package? → ASK first                           │
-│     → New framework or tool? → ASK first                     │
-│     → New database table pattern? → ASK first                │
-│     → New folder structure? → ASK first                      │
-│     → Never install or download without confirmation         │
-│                                                              │
-│  5. FOLLOW BEST PRACTICES                                    │
-│     → Clean, readable code over clever code                  │
-│     → Proper error handling on every path                    │
-│     → Input validation at every boundary                     │
-│     → Consistent naming conventions throughout               │
-│     → Small, focused functions over large ones               │
+│  5. TESTS MUST BE DETERMINISTIC AND ISOLATED                  │
+│     → No shared state between tests                          │
+│     → No dependency on test execution order                  │
+│     → No real network calls or database writes               │
+│     → Tests that pass "most of the time" are broken          │
 │                                                              │
 │  6. NO AI TOOL REFERENCES — ANYWHERE                         │
-│     → No "Generated by..." in code comments                  │
-│     → No "Co-Authored-By: Claude/Cursor/Copilot" in commits │
-│     → No AI tool mentions in PR descriptions                 │
-│     → No AI watermarks in any output                         │
-│     → All output must look 100% human-written                │
+│     → No "Generated by..." in test comments or descriptions  │
+│     → All tests read as if written by a human engineer       │
 └──────────────────────────────────────────────────────────────┘
 ```
 

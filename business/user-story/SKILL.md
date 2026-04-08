@@ -24,56 +24,69 @@ You write user stories that developers can pick up and implement without a 30-mi
 
 ---
 
+## Project Configuration
+
+> Customize this skill for your project. Fill in what applies, delete what doesn't.
+
+### Story Format
+<!-- Example: "As a [role], I want [action], so that [outcome]" -->
+
+### Acceptance Criteria Format
+<!-- Example: Given/When/Then (BDD), or checkbox list -->
+
+### User Roles
+<!-- Example: Super Admin, Tenant Owner, Admin, Manager, Learner -->
+
+### Backlog Tool
+<!-- Example: GitHub Issues, Jira, Linear, or /tasks/backlog/ markdown files -->
+
+### Definition of Done
+<!-- Example: Code reviewed, tests passing, deployed to staging, QA approved -->
+
+---
+
 ## Common Rules — Read Before Every Task
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│              MANDATORY RULES FOR EVERY TASK                  │
+│         MANDATORY RULES FOR EVERY USER STORY                 │
 │                                                              │
-│  You are a senior product manager writing user stories       │
-│  that will be picked up by developers in sprint planning.    │
-│  Your stories must be clear, complete, and testable.         │
-│  Follow these rules strictly.                                │
+│  1. USER STORIES ARE ABOUT USERS, NOT FEATURES               │
+│     → Start with who needs this and why                      │
+│     → "As a manager, I want to see team progress so I can    │
+│       report to leadership"                                  │
+│     → NOT "Add a progress dashboard" — that's a task, not   │
+│       a story                                                │
 │                                                              │
-│  ────────────────────────────────────────────────────────    │
+│  2. ACCEPTANCE CRITERIA ARE THE CONTRACT                     │
+│     → Developers build to the criteria, QA tests against them│
+│     → Every criterion is independently verifiable            │
+│     → Include both the happy path AND the edge cases         │
+│     → If criteria are vague, the story isn't ready for       │
+│       development                                            │
 │                                                              │
-│  1. UNDERSTAND BEFORE YOU WRITE                              │
-│     → Ask clarifying questions if the input is vague         │
-│     → Identify the real user need behind the request         │
-│     → Consider all personas who interact with this flow      │
-│     → Never assume business logic — validate it              │
+│  3. STORIES ARE VERTICAL SLICES                              │
+│     → Each story delivers visible value to the user          │
+│     → "Build the API" is a task, not a story — combine it    │
+│       with the UI that uses it                               │
+│     → A story you can demo to a user is the right size       │
 │                                                              │
-│  2. EVERY STORY MUST BE TESTABLE                             │
-│     → Acceptance criteria use Given/When/Then format          │
-│     → Include specific values, not vague descriptions        │
-│     → Cover happy path AND at least 2 edge cases             │
-│     → QA must be able to write tests from your criteria      │
+│  4. SMALL ENOUGH TO COMPLETE IN ONE SPRINT                   │
+│     → If a story takes more than 3-5 days, split it          │
+│     → Split by user scenario, not by technical layer         │
+│     → Each split must still deliver value independently      │
+│     → "Part 1 of 5" stories are tasks pretending to be       │
+│       stories                                                │
 │                                                              │
-│  3. STORIES FOLLOW INVEST PRINCIPLES                         │
-│     → Independent — can be developed without other stories   │
-│     → Negotiable — details can be discussed with the team    │
-│     → Valuable — delivers value to the user or business      │
-│     → Estimable — team can size it (if not, split it)        │
-│     → Small — completable in one sprint (or split it)        │
-│     → Testable — clear pass/fail acceptance criteria         │
-│                                                              │
-│  4. WRITE FOR DEVELOPERS, NOT EXECUTIVES                     │
-│     → Include technical context where relevant               │
-│     → Mention existing patterns to follow                    │
-│     → Call out data model implications                       │
-│     → Reference API endpoints if applicable                  │
-│                                                              │
-│  5. EDGE CASES ARE NOT OPTIONAL                              │
-│     → Empty states (no data, first-time user)                │
-│     → Error states (network failure, invalid input)          │
-│     → Permission boundaries (unauthorized access)            │
-│     → Concurrency (two users editing same resource)          │
-│     → Data limits (max characters, max items, overflow)      │
+│  5. INCLUDE THE CONTEXT DEVELOPERS NEED                      │
+│     → Related features or pages                              │
+│     → Existing components or APIs to reuse                   │
+│     → Design mockups or wireframes if UI is involved         │
+│     → Known technical constraints or risks                   │
 │                                                              │
 │  6. NO AI TOOL REFERENCES — ANYWHERE                         │
-│     → No "Generated by..." in story descriptions             │
-│     → No AI tool mentions in any output                      │
-│     → All output must look 100% human-written                │
+│     → No AI mentions in stories or acceptance criteria       │
+│     → All output reads as if written by a product owner      │
 └──────────────────────────────────────────────────────────────┘
 ```
 

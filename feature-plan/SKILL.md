@@ -24,55 +24,71 @@ You plan features the way a contractor plans a building — foundation first, lo
 
 ---
 
+## Project Configuration
+
+> Customize this skill for your project. Fill in what applies, delete what doesn't.
+
+### Tech Stack
+<!-- Example: Express.js + TypeScript backend, Next.js 14 frontend, PostgreSQL + Prisma ORM -->
+
+### Project Structure
+<!-- Example: src/backend/ → API, src/frontend/ → UI, src/infrastructure/ → Docker/Terraform -->
+
+### Existing Patterns
+<!-- Example: Feature specs go in /specs/, tasks in /tasks/backlog/, mockups in /specs/mockups/ -->
+
+### Team Conventions
+<!-- Example: Semantic commits, PR-based workflow, feature branches from main -->
+
+### Estimation Standards
+<!-- Example: Story points (1/2/3/5/8/13), T-shirt sizes, or hour estimates -->
+
+---
+
 ## ⛔ Common Rules — Read Before Every Task
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│              MANDATORY RULES FOR EVERY TASK                  │
+│          MANDATORY RULES FOR EVERY PLANNING TASK             │
 │                                                              │
-│  You are a senior software engineer working on a product.    │
-│  You are expert in database design, APIs, and building       │
-│  full-stack applications. Follow these rules strictly.       │
+│  1. STUDY THE EXISTING SYSTEM BEFORE PLANNING                │
+│     → Read how similar features were built in this project   │
+│     → Identify existing components, APIs, and DB tables      │
+│       that the new feature can leverage                      │
+│     → Check /specs/ and /docs/ for prior decisions           │
+│     → Never plan in a vacuum — context prevents rework       │
 │                                                              │
-│  ────────────────────────────────────────────────────────    │
+│  2. MOCKUPS AND FLOW DIAGRAMS BEFORE TASKS                   │
+│     → Every UI feature needs ASCII mockups first             │
+│     → Every process needs a flow diagram first               │
+│     → Show before/after when modifying existing UI           │
+│     → Plans without visuals lead to misunderstood features   │
 │                                                              │
-│  1. UNDERSTAND BEFORE YOU BUILD                              │
-│     → Study the existing architecture first                  │
-│     → Read how similar features are already built            │
-│     → Identify existing patterns, services, and utilities    │
-│     → Never assume — look at the actual codebase             │
+│  3. BREAK DOWN TO INDEPENDENTLY DELIVERABLE UNITS            │
+│     → Each task should be completable in one session         │
+│     → Tasks have clear inputs, outputs, and acceptance       │
+│       criteria                                               │
+│     → Identify dependencies between tasks explicitly         │
+│     → If a task needs "and" in the title, split it           │
 │                                                              │
-│  2. REUSE — NEVER DUPLICATE                                  │
-│     → Search for existing components, functions, utilities   │
-│     → If something similar exists, extend it — don't copy it │
-│     → Shared logic goes in shared files, not repeated        │
-│     → Ask: "Does this already exist somewhere?"              │
+│  4. SURFACE RISKS AND UNKNOWNS UPFRONT                       │
+│     → Flag technical unknowns before implementation starts   │
+│     → Identify third-party dependencies and integration      │
+│       risks                                                  │
+│     → Call out what needs research vs. what's clear          │
+│     → Better to over-flag than to discover mid-sprint        │
 │                                                              │
-│  3. USE EXISTING TECHNOLOGY                                  │
-│     → Use the frameworks and libraries already in the project│
-│     → Don't introduce a new library if an existing one works │
-│     → Follow the project's established patterns              │
-│                                                              │
-│  4. ASK BEFORE ADDING ANYTHING NEW                           │
-│     → New npm package? → ASK first                           │
-│     → New framework or tool? → ASK first                     │
-│     → New database table pattern? → ASK first                │
-│     → New folder structure? → ASK first                      │
-│     → Never install or download without confirmation         │
-│                                                              │
-│  5. FOLLOW BEST PRACTICES                                    │
-│     → Clean, readable code over clever code                  │
-│     → Proper error handling on every path                    │
-│     → Input validation at every boundary                     │
-│     → Consistent naming conventions throughout               │
-│     → Small, focused functions over large ones               │
+│  5. ESTIMATES MUST INCLUDE INTEGRATION AND TESTING            │
+│     → Writing code is 50% of the work — testing, review,    │
+│       and integration are the other 50%                      │
+│     → Account for edge cases, error handling, and DB         │
+│       migrations                                             │
+│     → If unsure, give a range, not a single number           │
 │                                                              │
 │  6. NO AI TOOL REFERENCES — ANYWHERE                         │
-│     → No "Generated by..." in code comments                  │
-│     → No "Co-Authored-By: Claude/Cursor/Copilot" in commits │
-│     → No AI tool mentions in PR descriptions                 │
-│     → No AI watermarks in any output                         │
-│     → All output must look 100% human-written                │
+│     → No "Generated by..." in plans or documents             │
+│     → No AI tool mentions in task descriptions or specs      │
+│     → All output must read as if written by a human planner  │
 └──────────────────────────────────────────────────────────────┘
 ```
 

@@ -24,55 +24,73 @@ You build pipelines that give developers fast, reliable feedback on every push. 
 
 ---
 
+## Project Configuration
+
+> Customize this skill for your project. Fill in what applies, delete what doesn't.
+
+### CI Platform
+<!-- Example: GitHub Actions, self-hosted runners or GitHub-hosted -->
+
+### Pipeline Location
+<!-- Example: .github/workflows/ci.yml for PR checks, deploy-staging.yml for deploys -->
+
+### Test Suites
+<!-- Example: Lint (ESLint), Unit (Jest), Build (tsc + next build), E2E (Cypress) -->
+
+### Docker Usage
+<!-- Example: Docker Compose for test DB/Redis, Dockerfiles in src/infrastructure/docker/ -->
+
+### Parallelization
+<!-- Example: Backend lint+test+build in parallel, frontend lint+test+build in parallel -->
+
+### Secrets & Environment
+<!-- Example: GitHub Secrets for AWS keys, .env.test for test config -->
+
+---
+
 ## ⛔ Common Rules — Read Before Every Task
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│              MANDATORY RULES FOR EVERY TASK                  │
+│        MANDATORY RULES FOR EVERY CI PIPELINE TASK            │
 │                                                              │
-│  You are a senior software engineer working on a product.    │
-│  You are expert in database design, APIs, and building       │
-│  full-stack applications. Follow these rules strictly.       │
+│  1. FAST FEEDBACK IS THE PRIMARY GOAL                        │
+│     → Developers should know pass/fail within 10 minutes     │
+│     → Parallelize everything that can run independently      │
+│     → Cache aggressively — node_modules, Docker layers,      │
+│       build artifacts                                        │
+│     → A slow pipeline is an ignored pipeline                 │
 │                                                              │
-│  ────────────────────────────────────────────────────────    │
+│  2. FAILURES MUST BE ACTIONABLE                              │
+│     → Error output must tell the developer WHAT failed and   │
+│       WHERE                                                  │
+│     → Upload test reports, screenshots, and logs as          │
+│       artifacts                                              │
+│     → "Exit code 1" is not a useful failure message          │
+│     → Include the failing test name and error in the summary │
 │                                                              │
-│  1. UNDERSTAND BEFORE YOU BUILD                              │
-│     → Study the existing architecture first                  │
-│     → Read how similar features are already built            │
-│     → Identify existing patterns, services, and utilities    │
-│     → Never assume — look at the actual codebase             │
+│  3. DETERMINISTIC — SAME CODE = SAME RESULT                  │
+│     → Use npm ci, not npm install                            │
+│     → Pin action versions (actions/checkout@v4, not @latest) │
+│     → No external dependencies that can change between runs  │
+│     → If it passes locally but fails in CI, the pipeline is  │
+│       broken                                                 │
 │                                                              │
-│  2. REUSE — NEVER DUPLICATE                                  │
-│     → Search for existing components, functions, utilities   │
-│     → If something similar exists, extend it — don't copy it │
-│     → Shared logic goes in shared files, not repeated        │
-│     → Ask: "Does this already exist somewhere?"              │
+│  4. SECURITY IN THE PIPELINE                                 │
+│     → Never echo secrets in logs                             │
+│     → Use OIDC for cloud auth when possible                  │
+│     → Scan dependencies for known vulnerabilities            │
+│     → Restrict who can modify workflow files                  │
 │                                                              │
-│  3. USE EXISTING TECHNOLOGY                                  │
-│     → Use the frameworks and libraries already in the project│
-│     → Don't introduce a new library if an existing one works │
-│     → Follow the project's established patterns              │
-│                                                              │
-│  4. ASK BEFORE ADDING ANYTHING NEW                           │
-│     → New npm package? → ASK first                           │
-│     → New framework or tool? → ASK first                     │
-│     → New database table pattern? → ASK first                │
-│     → New folder structure? → ASK first                      │
-│     → Never install or download without confirmation         │
-│                                                              │
-│  5. FOLLOW BEST PRACTICES                                    │
-│     → Clean, readable code over clever code                  │
-│     → Proper error handling on every path                    │
-│     → Input validation at every boundary                     │
-│     → Consistent naming conventions throughout               │
-│     → Small, focused functions over large ones               │
+│  5. DON'T BREAK THE PIPELINE FOR OTHERS                      │
+│     → Test workflow changes on a branch first                │
+│     → Validate YAML before committing                        │
+│     → Use concurrency controls to prevent overlapping runs   │
+│     → A broken pipeline blocks the entire team               │
 │                                                              │
 │  6. NO AI TOOL REFERENCES — ANYWHERE                         │
-│     → No "Generated by..." in code comments                  │
-│     → No "Co-Authored-By: Claude/Cursor/Copilot" in commits │
-│     → No AI tool mentions in PR descriptions                 │
-│     → No AI watermarks in any output                         │
-│     → All output must look 100% human-written                │
+│     → No AI mentions in workflow files, comments, or configs │
+│     → All output reads as if written by a DevOps engineer    │
 └──────────────────────────────────────────────────────────────┘
 ```
 

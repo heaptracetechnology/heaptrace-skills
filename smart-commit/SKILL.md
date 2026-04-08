@@ -24,55 +24,68 @@ You write commit messages that a developer joining the project 2 years from now 
 
 ---
 
+## Project Configuration
+
+> Customize this skill for your project. Fill in what applies, delete what doesn't.
+
+### Commit Convention
+<!-- Example: Conventional Commits — feat:, fix:, refactor:, chore:, docs:, test: -->
+
+### Ticket References
+<!-- Example: Include JIRA ticket in footer: "Refs: PROJ-123" -->
+
+### Branch Strategy
+<!-- Example: feature/ branches from main, squash merge PRs -->
+
+### Scope Prefixes
+<!-- Example: feat(auth):, fix(lms):, refactor(api): — scope matches module name -->
+
+### Breaking Change Format
+<!-- Example: BREAKING CHANGE: in commit body, triggers major version bump -->
+
+---
+
 ## ⛔ Common Rules — Read Before Every Task
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│              MANDATORY RULES FOR EVERY TASK                  │
+│        MANDATORY RULES FOR EVERY COMMIT MESSAGE              │
 │                                                              │
-│  You are a senior software engineer working on a product.    │
-│  You are expert in database design, APIs, and building       │
-│  full-stack applications. Follow these rules strictly.       │
+│  1. READ THE DIFF COMPLETELY BEFORE WRITING                  │
+│     → Read every changed file, not just the first few        │
+│     → Understand the intent behind the changes               │
+│     → A commit message that doesn't match the diff is worse │
+│       than no message at all                                 │
 │                                                              │
-│  ────────────────────────────────────────────────────────    │
+│  2. EXPLAIN WHY, NOT WHAT                                    │
+│     → The diff shows WHAT changed — the message explains WHY │
+│     → Bad: "Update user.ts" — Good: "Fix password reset      │
+│       failing for OAuth users without local credentials"     │
+│     → If someone reads only the message, they should         │
+│       understand the motivation                              │
 │                                                              │
-│  1. UNDERSTAND BEFORE YOU BUILD                              │
-│     → Study the existing architecture first                  │
-│     → Read how similar features are already built            │
-│     → Identify existing patterns, services, and utilities    │
-│     → Never assume — look at the actual codebase             │
+│  3. ONE COMMIT = ONE LOGICAL CHANGE                          │
+│     → If you need "and" in the subject, consider two commits │
+│     → Separate refactoring from feature work                 │
+│     → Separate formatting changes from logic changes         │
+│     → Each commit should be revertable without side effects  │
 │                                                              │
-│  2. REUSE — NEVER DUPLICATE                                  │
-│     → Search for existing components, functions, utilities   │
-│     → If something similar exists, extend it — don't copy it │
-│     → Shared logic goes in shared files, not repeated        │
-│     → Ask: "Does this already exist somewhere?"              │
+│  4. SUBJECT LINE IS A COMMAND, NOT A DESCRIPTION             │
+│     → Use imperative mood: "Add", "Fix", "Remove", "Update" │
+│     → Keep under 72 characters                               │
+│     → No period at the end of the subject line               │
+│     → Capitalize the first word after the type prefix        │
 │                                                              │
-│  3. USE EXISTING TECHNOLOGY                                  │
-│     → Use the frameworks and libraries already in the project│
-│     → Don't introduce a new library if an existing one works │
-│     → Follow the project's established patterns              │
-│                                                              │
-│  4. ASK BEFORE ADDING ANYTHING NEW                           │
-│     → New npm package? → ASK first                           │
-│     → New framework or tool? → ASK first                     │
-│     → New database table pattern? → ASK first                │
-│     → New folder structure? → ASK first                      │
-│     → Never install or download without confirmation         │
-│                                                              │
-│  5. FOLLOW BEST PRACTICES                                    │
-│     → Clean, readable code over clever code                  │
-│     → Proper error handling on every path                    │
-│     → Input validation at every boundary                     │
-│     → Consistent naming conventions throughout               │
-│     → Small, focused functions over large ones               │
+│  5. USE THE BODY FOR CONTEXT                                 │
+│     → Non-trivial changes need a body explaining the why     │
+│     → Reference related tickets, PRs, or discussions         │
+│     → List breaking changes explicitly                       │
+│     → Two extra lines of context save hours of archaeology   │
 │                                                              │
 │  6. NO AI TOOL REFERENCES — ANYWHERE                         │
-│     → No "Generated by..." in code comments                  │
 │     → No "Co-Authored-By: Claude/Cursor/Copilot" in commits │
-│     → No AI tool mentions in PR descriptions                 │
-│     → No AI watermarks in any output                         │
-│     → All output must look 100% human-written                │
+│     → No "Generated by..." or "AI-assisted" anywhere         │
+│     → All commits must read as if written by a human         │
 └──────────────────────────────────────────────────────────────┘
 ```
 

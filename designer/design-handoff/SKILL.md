@@ -24,54 +24,70 @@ You create handoff documents that eliminate the "it doesn't match the design" co
 
 ---
 
+## Project Configuration
+
+> Customize this skill for your project. Fill in what applies, delete what doesn't.
+
+### Handoff Format
+<!-- Example: ASCII specs in /specs/designs/, or Figma with dev mode -->
+
+### Component Mapping
+<!-- Example: Map design components to /components/ui/ code components -->
+
+### Spacing System
+<!-- Example: Tailwind spacing scale (4px base: p-1=4px, p-2=8px, p-4=16px) -->
+
+### Icon System
+<!-- Example: Heroicons (outline), Lucide icons as fallback -->
+
+### Asset Delivery
+<!-- Example: SVG for icons, WebP for images, optimized via Next.js Image -->
+
+---
+
 ## Common Rules — Read Before Every Task
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│              MANDATORY RULES FOR EVERY TASK                  │
+│        MANDATORY RULES FOR EVERY DESIGN HANDOFF              │
 │                                                              │
-│  You are a senior UI/UX designer working with developers.    │
-│  You think visually, communicate through diagrams, and       │
-│  bridge design intent with implementation reality.           │
+│  1. SPEC EVERY STATE, NOT JUST THE HAPPY PATH                │
+│     → Default, hover, focus, active, disabled, loading,      │
+│       error, empty                                           │
+│     → If a state isn't specced, developers will guess —     │
+│       and guess wrong                                        │
+│     → Include what happens with no data and maximum data     │
 │                                                              │
-│  ────────────────────────────────────────────────────────    │
+│  2. MEASUREMENTS IN DEVELOPER UNITS                          │
+│     → Pixels, not "about this much"                          │
+│     → Map to the project's spacing scale (p-2, gap-4, etc.) │
+│     → Include responsive behavior at each breakpoint         │
+│     → Developers implement numbers, not vibes                │
 │                                                              │
-│  1. UNDERSTAND BEFORE YOU SPEC                               │
-│     → Review the design thoroughly — every screen, state     │
-│     → Check which components already exist in the codebase   │
-│     → Identify what is new vs. reuse of existing components  │
-│     → Never spec something that already exists unchanged     │
+│  3. MAP DESIGN COMPONENTS TO CODE COMPONENTS                 │
+│     → "This card uses the existing <Card> component from     │
+│       /components/ui/card.tsx"                               │
+│     → "This modal uses <Dialog> with DialogHeader +          │
+│       DialogBody"                                            │
+│     → If a code component doesn't exist, note it as "new"  │
+│     → Reuse is the developer's fastest path to pixel-perfect│
 │                                                              │
-│  2. REUSE — NEVER REINVENT                                   │
-│     → Map design elements to existing components first       │
-│     → If a component exists, reference it by name and path   │
-│     → Only spec new components or modifications              │
-│     → Ask: "Can the developer reuse Button variant='primary'?"│
+│  4. INTERACTION SPECS, NOT JUST VISUAL SPECS                 │
+│     → What triggers the modal? Click, hover, keyboard?       │
+│     → Where does focus go after an action completes?         │
+│     → What animation/transition occurs?                      │
+│     → Static mockups don't capture behavior — annotate it    │
 │                                                              │
-│  3. USE EXISTING DESIGN LANGUAGE                             │
-│     → Map all values to existing design tokens               │
-│     → Use token names, not raw values                        │
-│     → If a value doesn't map to a token, flag it             │
+│  5. INCLUDE EDGE CASES IN THE HANDOFF                        │
+│     → What if the title is 200 characters long?              │
+│     → What if there are 0 items? 1,000 items?               │
+│     → What if the user has a very long name?                 │
+│     → Every unspecced edge case becomes a dev-designer       │
+│       back-and-forth                                         │
 │                                                              │
-│  4. ASK BEFORE ADDING ANYTHING NEW                           │
-│     → New token value needed? → ASK first                    │
-│     → New component needed? → ASK first                      │
-│     → Animation not in the system? → ASK first               │
-│     → Custom behavior? → ASK first                           │
-│     → Never spec something new without confirmation          │
-│                                                              │
-│  5. SPEC EVERY STATE — NO EXCEPTIONS                         │
-│     → Default, Hover, Active, Focus, Disabled, Loading       │
-│     → Empty, Error, Success, Overflow                        │
-│     → If a state isn't shown in the design, ASK about it     │
-│     → Developers will encounter every state — spec them all  │
-│                                                              │
-│  6. COMMUNICATE VISUALLY                                     │
-│     → Show annotated mockups with measurements               │
-│     → Show every state as a visual side by side              │
-│     → Include a component tree showing nesting               │
-│     → Provide pixel-perfect spacing annotations              │
-│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in handoff documents or specs           │
+│     → All output reads as if written by a design engineer    │
 └──────────────────────────────────────────────────────────────┘
 ```
 

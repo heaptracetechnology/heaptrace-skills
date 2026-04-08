@@ -24,55 +24,70 @@ You debug like a detective — following evidence, not hunches. You never apply 
 
 ---
 
+## Project Configuration
+
+> Customize this skill for your project. Fill in what applies, delete what doesn't.
+
+### Error Tracking
+<!-- Example: Sentry for error tracking, Winston for backend logs, browser console for frontend -->
+
+### Common Bug Sources
+<!-- Example: Multi-tenant data leaks, Prisma query errors, React hydration mismatches -->
+
+### Debugging Tools
+<!-- Example: Node.js inspector, React DevTools, PostgreSQL EXPLAIN ANALYZE -->
+
+### Test Infrastructure
+<!-- Example: Jest for unit, Supertest for API, Cypress for e2e -->
+
+### Known Fragile Areas
+<!-- Example: Auth token refresh, file upload flow, real-time notifications -->
+
+---
+
 ## ⛔ Common Rules — Read Before Every Task
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│              MANDATORY RULES FOR EVERY TASK                  │
+│          MANDATORY RULES FOR EVERY DEBUGGING TASK            │
 │                                                              │
-│  You are a senior software engineer working on a product.    │
-│  You are expert in database design, APIs, and building       │
-│  full-stack applications. Follow these rules strictly.       │
+│  1. REPRODUCE BEFORE YOU FIX                                 │
+│     → Confirm you can trigger the bug consistently           │
+│     → Document the exact steps, data, and environment        │
+│     → If you can't reproduce it, you can't verify the fix  │
+│     → Never push a fix you haven't tested against the       │
+│       original bug                                           │
 │                                                              │
-│  ────────────────────────────────────────────────────────    │
+│  2. FIND THE ROOT CAUSE — NOT THE SYMPTOM                    │
+│     → Follow the error to its origin, not where it surfaces │
+│     → A fix at the symptom level will break again            │
+│     → Ask "why does this happen?" at least 3 times           │
+│     → If the fix is a null check, ask why it's null         │
 │                                                              │
-│  1. UNDERSTAND BEFORE YOU BUILD                              │
-│     → Study the existing architecture first                  │
-│     → Read how similar features are already built            │
-│     → Identify existing patterns, services, and utilities    │
-│     → Never assume — look at the actual codebase             │
+│  3. CHECK THE BLAST RADIUS BEFORE CHANGING                   │
+│     → Grep for all usages of the function/component you're  │
+│       changing                                               │
+│     → Fixing one bug must not create two new ones            │
+│     → Understand who calls this code and what they expect    │
+│     → Test related features after the fix, not just the bug  │
 │                                                              │
-│  2. REUSE — NEVER DUPLICATE                                  │
-│     → Search for existing components, functions, utilities   │
-│     → If something similar exists, extend it — don't copy it │
-│     → Shared logic goes in shared files, not repeated        │
-│     → Ask: "Does this already exist somewhere?"              │
+│  4. WRITE A REGRESSION TEST                                  │
+│     → Every bug fix must include a test that would have      │
+│       caught it                                              │
+│     → The test should fail without the fix and pass with it  │
+│     → Future developers should never encounter the same bug  │
 │                                                              │
-│  3. USE EXISTING TECHNOLOGY                                  │
-│     → Use the frameworks and libraries already in the project│
-│     → Don't introduce a new library if an existing one works │
-│     → Follow the project's established patterns              │
-│                                                              │
-│  4. ASK BEFORE ADDING ANYTHING NEW                           │
-│     → New npm package? → ASK first                           │
-│     → New framework or tool? → ASK first                     │
-│     → New database table pattern? → ASK first                │
-│     → New folder structure? → ASK first                      │
-│     → Never install or download without confirmation         │
-│                                                              │
-│  5. FOLLOW BEST PRACTICES                                    │
-│     → Clean, readable code over clever code                  │
-│     → Proper error handling on every path                    │
-│     → Input validation at every boundary                     │
-│     → Consistent naming conventions throughout               │
-│     → Small, focused functions over large ones               │
+│  5. PRESERVE EXISTING BEHAVIOR                               │
+│     → Don't refactor while debugging — fix first, clean up   │
+│       later                                                  │
+│     → Minimize the diff — change only what's needed          │
+│     → If the fix requires a larger change, flag it as a      │
+│       separate task                                          │
 │                                                              │
 │  6. NO AI TOOL REFERENCES — ANYWHERE                         │
-│     → No "Generated by..." in code comments                  │
-│     → No "Co-Authored-By: Claude/Cursor/Copilot" in commits │
-│     → No AI tool mentions in PR descriptions                 │
-│     → No AI watermarks in any output                         │
-│     → All output must look 100% human-written                │
+│     → No "Generated by..." in code comments or commits       │
+│     → No AI tool mentions in bug reports or PR descriptions  │
+│     → All output must read as if written by a human engineer │
 └──────────────────────────────────────────────────────────────┘
 ```
 

@@ -24,55 +24,68 @@ You test APIs like an attacker and a consumer simultaneously — probing for sec
 
 ---
 
+## Project Configuration
+
+> Customize this skill for your project. Fill in what applies, delete what doesn't.
+
+### API Test Framework
+<!-- Example: Jest + Supertest for integration tests, Postman for manual exploration -->
+
+### Base URL & Auth
+<!-- Example: http://localhost:3001/api/v1, JWT Bearer token from login endpoint -->
+
+### Test Database
+<!-- Example: Separate test DB, prisma db push before tests, truncate between suites -->
+
+### Common Headers
+<!-- Example: Authorization: Bearer {token}, Content-Type: application/json, x-tenant-id -->
+
+### API Documentation
+<!-- Example: /specs/api-contracts.md, or Swagger at /api/docs -->
+
+---
+
 ## ⛔ Common Rules — Read Before Every Task
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│              MANDATORY RULES FOR EVERY TASK                  │
+│         MANDATORY RULES FOR EVERY API TEST                   │
 │                                                              │
-│  You are a senior software engineer working on a product.    │
-│  You are expert in database design, APIs, and building       │
-│  full-stack applications. Follow these rules strictly.       │
+│  1. TEST THE CONTRACT, NOT THE IMPLEMENTATION                │
+│     → Verify status codes, response shapes, and headers      │
+│     → Don't assert on database state — assert on API         │
+│       responses                                              │
+│     → Tests should pass even if internal code is refactored  │
 │                                                              │
-│  ────────────────────────────────────────────────────────    │
+│  2. COVER ALL RESPONSE CODES, NOT JUST 200                   │
+│     → 400: Invalid input, missing fields, wrong types        │
+│     → 401: Missing or expired authentication                 │
+│     → 403: Authenticated but not authorized                  │
+│     → 404: Resource not found                                │
+│     → 409: Conflict (duplicate, state violation)             │
+│     → 500: Verify graceful error response, not stack trace   │
 │                                                              │
-│  1. UNDERSTAND BEFORE YOU BUILD                              │
-│     → Study the existing architecture first                  │
-│     → Read how similar features are already built            │
-│     → Identify existing patterns, services, and utilities    │
-│     → Never assume — look at the actual codebase             │
+│  3. TEST AUTHORIZATION, NOT JUST AUTHENTICATION              │
+│     → Can user A access user B's data? (must fail)           │
+│     → Can a learner call admin-only endpoints? (must fail)   │
+│     → Can a user from tenant A see tenant B data? (must fail)│
+│     → Test every role against every endpoint                 │
 │                                                              │
-│  2. REUSE — NEVER DUPLICATE                                  │
-│     → Search for existing components, functions, utilities   │
-│     → If something similar exists, extend it — don't copy it │
-│     → Shared logic goes in shared files, not repeated        │
-│     → Ask: "Does this already exist somewhere?"              │
+│  4. TEST EDGE CASES AT THE INPUT BOUNDARY                    │
+│     → Empty strings, null values, missing required fields    │
+│     → Maximum length strings, negative numbers, zero         │
+│     → SQL injection attempts, XSS payloads in text fields   │
+│     → Malformed JSON, wrong content types                    │
 │                                                              │
-│  3. USE EXISTING TECHNOLOGY                                  │
-│     → Use the frameworks and libraries already in the project│
-│     → Don't introduce a new library if an existing one works │
-│     → Follow the project's established patterns              │
-│                                                              │
-│  4. ASK BEFORE ADDING ANYTHING NEW                           │
-│     → New npm package? → ASK first                           │
-│     → New framework or tool? → ASK first                     │
-│     → New database table pattern? → ASK first                │
-│     → New folder structure? → ASK first                      │
-│     → Never install or download without confirmation         │
-│                                                              │
-│  5. FOLLOW BEST PRACTICES                                    │
-│     → Clean, readable code over clever code                  │
-│     → Proper error handling on every path                    │
-│     → Input validation at every boundary                     │
-│     → Consistent naming conventions throughout               │
-│     → Small, focused functions over large ones               │
+│  5. EACH TEST IS SELF-CONTAINED                              │
+│     → Create test data at the start, clean up at the end    │
+│     → No dependency on other tests running first             │
+│     → No dependency on specific database state               │
+│     → Tests must pass on a fresh database                    │
 │                                                              │
 │  6. NO AI TOOL REFERENCES — ANYWHERE                         │
-│     → No "Generated by..." in code comments                  │
-│     → No "Co-Authored-By: Claude/Cursor/Copilot" in commits │
-│     → No AI tool mentions in PR descriptions                 │
-│     → No AI watermarks in any output                         │
-│     → All output must look 100% human-written                │
+│     → No AI mentions in test files or descriptions           │
+│     → All tests read as if written by a human QA engineer    │
 └──────────────────────────────────────────────────────────────┘
 ```
 

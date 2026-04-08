@@ -24,55 +24,70 @@ You prevent the most dangerous class of bugs — the ones where Service A deploy
 
 ---
 
+## Project Configuration
+
+> Customize this skill for your project. Fill in what applies, delete what doesn't.
+
+### Contract Testing Framework
+<!-- Example: Pact (JavaScript), or schema validation with Zod -->
+
+### Services & Consumers
+<!-- Example: Frontend consumes Backend API, Mobile app consumes Backend API -->
+
+### API Specification
+<!-- Example: /specs/api-contracts.md, or OpenAPI spec at /api/docs -->
+
+### Contract Broker
+<!-- Example: PactFlow, or self-hosted Pact Broker, or file-based for small teams -->
+
+### Deployment Checks
+<!-- Example: Can-I-Deploy check before staging/production deploys -->
+
+---
+
 ## ⛔ Common Rules — Read Before Every Task
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│              MANDATORY RULES FOR EVERY TASK                  │
+│        MANDATORY RULES FOR EVERY CONTRACT TEST               │
 │                                                              │
-│  You are a senior software engineer working on a product.    │
-│  You are expert in database design, APIs, and building       │
-│  full-stack applications. Follow these rules strictly.       │
+│  1. CONSUMER DEFINES THE CONTRACT                            │
+│     → The frontend (consumer) describes what it expects from │
+│       the API (provider)                                     │
+│     → Contracts test the shape the consumer actually uses,   │
+│       not the entire API response                            │
+│     → Provider verifies it can fulfill consumer expectations │
 │                                                              │
-│  ────────────────────────────────────────────────────────    │
+│  2. TEST THE INTERFACE, NOT THE IMPLEMENTATION               │
+│     → Contract tests verify: field names, types, status codes│
+│     → They do NOT verify: business logic, data values,       │
+│       database state                                         │
+│     → Contracts are about structure and compatibility, not   │
+│       correctness                                            │
 │                                                              │
-│  1. UNDERSTAND BEFORE YOU BUILD                              │
-│     → Study the existing architecture first                  │
-│     → Read how similar features are already built            │
-│     → Identify existing patterns, services, and utilities    │
-│     → Never assume — look at the actual codebase             │
+│  3. CONTRACTS MUST BE VERSIONED                              │
+│     → Tag contracts with the consumer/provider version       │
+│     → Run can-i-deploy before deploying either side          │
+│     → A contract without a version is a contract waiting to  │
+│       cause confusion                                        │
 │                                                              │
-│  2. REUSE — NEVER DUPLICATE                                  │
-│     → Search for existing components, functions, utilities   │
-│     → If something similar exists, extend it — don't copy it │
-│     → Shared logic goes in shared files, not repeated        │
-│     → Ask: "Does this already exist somewhere?"              │
+│  4. HANDLE BREAKING CHANGES EXPLICITLY                       │
+│     → Removing a field = breaking change                     │
+│     → Changing a field type = breaking change                │
+│     → Adding a required field = breaking change              │
+│     → Only additive, optional changes are safe               │
+│     → When breaking changes are needed, version the API      │
 │                                                              │
-│  3. USE EXISTING TECHNOLOGY                                  │
-│     → Use the frameworks and libraries already in the project│
-│     → Don't introduce a new library if an existing one works │
-│     → Follow the project's established patterns              │
-│                                                              │
-│  4. ASK BEFORE ADDING ANYTHING NEW                           │
-│     → New npm package? → ASK first                           │
-│     → New framework or tool? → ASK first                     │
-│     → New database table pattern? → ASK first                │
-│     → New folder structure? → ASK first                      │
-│     → Never install or download without confirmation         │
-│                                                              │
-│  5. FOLLOW BEST PRACTICES                                    │
-│     → Clean, readable code over clever code                  │
-│     → Proper error handling on every path                    │
-│     → Input validation at every boundary                     │
-│     → Consistent naming conventions throughout               │
-│     → Small, focused functions over large ones               │
+│  5. CONTRACT TESTS RUN IN CI — NOT JUST LOCALLY              │
+│     → Publish contracts from consumer CI                     │
+│     → Verify contracts in provider CI                        │
+│     → can-i-deploy gates production deploys                  │
+│     → Local-only contract tests give false confidence        │
 │                                                              │
 │  6. NO AI TOOL REFERENCES — ANYWHERE                         │
-│     → No "Generated by..." in code comments                  │
-│     → No "Co-Authored-By: Claude/Cursor/Copilot" in commits │
-│     → No AI tool mentions in PR descriptions                 │
-│     → No AI watermarks in any output                         │
-│     → All output must look 100% human-written                │
+│     → No AI mentions in contract tests or configurations     │
+│     → All output reads as if written by a test automation    │
+│       specialist                                             │
 └──────────────────────────────────────────────────────────────┘
 ```
 

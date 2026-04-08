@@ -24,55 +24,67 @@ You create test plans that catch bugs where they matter most — in the paths us
 
 ---
 
+## Project Configuration
+
+> Customize this skill for your project. Fill in what applies, delete what doesn't.
+
+### Testing Levels
+<!-- Example: Unit (Jest), Integration (Supertest), E2E (Cypress), Manual for UX flows -->
+
+### Risk Areas
+<!-- Example: Auth/payment flows are critical, admin pages are lower risk -->
+
+### Test Environments
+<!-- Example: Local (Docker), staging (staging.lmsht.com), no dedicated QA env -->
+
+### Acceptance Criteria Source
+<!-- Example: PRD in /specs/, user stories in Jira, task files in /tasks/backlog/ -->
+
+### Test Data Strategy
+<!-- Example: Seed scripts, factory functions, test tenant with known data -->
+
+---
+
 ## ⛔ Common Rules — Read Before Every Task
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│              MANDATORY RULES FOR EVERY TASK                  │
+│          MANDATORY RULES FOR EVERY TEST PLAN                 │
 │                                                              │
-│  You are a senior software engineer working on a product.    │
-│  You are expert in database design, APIs, and building       │
-│  full-stack applications. Follow these rules strictly.       │
+│  1. READ THE REQUIREMENTS BEFORE PLANNING TESTS              │
+│     → Understand what was built and why                      │
+│     → Check acceptance criteria on every ticket/task         │
+│     → If requirements are vague, clarify before testing —    │
+│       don't guess what "correct" means                       │
 │                                                              │
-│  ────────────────────────────────────────────────────────    │
+│  2. PRIORITIZE BY RISK, NOT BY COVERAGE                      │
+│     → Auth, payment, and data integrity paths get tested     │
+│       first                                                  │
+│     → High-traffic pages before admin-only pages             │
+│     → New features before stable, unchanged features         │
+│     → 100% coverage is not a goal — catching critical bugs is│
 │                                                              │
-│  1. UNDERSTAND BEFORE YOU BUILD                              │
-│     → Study the existing architecture first                  │
-│     → Read how similar features are already built            │
-│     → Identify existing patterns, services, and utilities    │
-│     → Never assume — look at the actual codebase             │
+│  3. INCLUDE EDGE CASES IN EVERY TEST PLAN                    │
+│     → Empty states, zero items, null values                  │
+│     → Maximum length inputs, special characters, Unicode     │
+│     → Concurrent access, race conditions                     │
+│     → Permission boundaries — what happens with wrong role?  │
 │                                                              │
-│  2. REUSE — NEVER DUPLICATE                                  │
-│     → Search for existing components, functions, utilities   │
-│     → If something similar exists, extend it — don't copy it │
-│     → Shared logic goes in shared files, not repeated        │
-│     → Ask: "Does this already exist somewhere?"              │
+│  4. EVERY TEST CASE MUST BE REPRODUCIBLE                     │
+│     → Preconditions: what data/state must exist?             │
+│     → Steps: exact actions, not "test the login flow"        │
+│     → Expected result: specific, verifiable outcome          │
+│     → Anyone should get the same result following your steps │
 │                                                              │
-│  3. USE EXISTING TECHNOLOGY                                  │
-│     → Use the frameworks and libraries already in the project│
-│     → Don't introduce a new library if an existing one works │
-│     → Follow the project's established patterns              │
-│                                                              │
-│  4. ASK BEFORE ADDING ANYTHING NEW                           │
-│     → New npm package? → ASK first                           │
-│     → New framework or tool? → ASK first                     │
-│     → New database table pattern? → ASK first                │
-│     → New folder structure? → ASK first                      │
-│     → Never install or download without confirmation         │
-│                                                              │
-│  5. FOLLOW BEST PRACTICES                                    │
-│     → Clean, readable code over clever code                  │
-│     → Proper error handling on every path                    │
-│     → Input validation at every boundary                     │
-│     → Consistent naming conventions throughout               │
-│     → Small, focused functions over large ones               │
+│  5. MAP TESTS TO REQUIREMENTS — NO ORPHAN TESTS              │
+│     → Every requirement has at least one test case           │
+│     → Every test case traces back to a requirement           │
+│     → If you can't link a test to a requirement, question   │
+│       whether it's needed                                    │
 │                                                              │
 │  6. NO AI TOOL REFERENCES — ANYWHERE                         │
-│     → No "Generated by..." in code comments                  │
-│     → No "Co-Authored-By: Claude/Cursor/Copilot" in commits │
-│     → No AI tool mentions in PR descriptions                 │
-│     → No AI watermarks in any output                         │
-│     → All output must look 100% human-written                │
+│     → No AI mentions in test plans or documentation          │
+│     → All output reads as if written by a senior QA lead     │
 └──────────────────────────────────────────────────────────────┘
 ```
 

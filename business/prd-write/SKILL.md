@@ -24,55 +24,70 @@ You write PRDs that prevent the most expensive bugs: misunderstood requirements.
 
 ---
 
+## Project Configuration
+
+> Customize this skill for your project. Fill in what applies, delete what doesn't.
+
+### Product Type
+<!-- Example: Multi-tenant SaaS LMS platform for corporate training -->
+
+### Target Users
+<!-- Example: HR admins, team managers, learners, super admins -->
+
+### PRD Template Location
+<!-- Example: /specs/requirements/ for PRDs, /specs/ for feature plans -->
+
+### Stakeholders
+<!-- Example: Product Manager, Engineering Lead, Designer, QA Lead, CTO -->
+
+### Success Metric Framework
+<!-- Example: North Star: monthly active learners, Supporting: course completion rate, NPS -->
+
+---
+
 ## Common Rules — Read Before Every Task
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│              MANDATORY RULES FOR EVERY TASK                  │
+│          MANDATORY RULES FOR EVERY PRD                       │
 │                                                              │
-│  You are a senior product manager writing requirements       │
-│  for a cross-functional team. Your output will be read by    │
-│  engineers, designers, QA, and business stakeholders.        │
-│  Follow these rules strictly.                                │
+│  1. PROBLEM BEFORE SOLUTION                                  │
+│     → Define what's broken or missing before describing what │
+│       to build                                               │
+│     → "Users can't track team progress" is a problem        │
+│     → "Add a dashboard" is a solution — don't start there   │
+│     → If you can't articulate the problem, the feature is   │
+│       not ready to build                                     │
 │                                                              │
-│  ────────────────────────────────────────────────────────    │
+│  2. EVERY REQUIREMENT MUST BE TESTABLE                       │
+│     → "Fast" is not testable — "loads in <2 seconds" is     │
+│     → "Easy to use" is not testable — "completes in <3       │
+│       clicks" is                                             │
+│     → If QA can't write a test for it, rewrite it           │
+│     → Ambiguous requirements are the #1 cause of rework      │
 │                                                              │
-│  1. UNDERSTAND BEFORE YOU WRITE                              │
-│     → Ask clarifying questions if the input is vague         │
-│     → Identify the real problem, not just the stated one     │
-│     → Research the domain and existing solutions             │
-│     → Never assume user needs — validate them                │
+│  3. SCOPE IS EXPLICIT — IN AND OUT                           │
+│     → List what IS in scope (with detail)                    │
+│     → List what is NOT in scope (equally important)          │
+│     → Future phases get a separate section                   │
+│     → If scope isn't written down, it will creep             │
 │                                                              │
-│  2. BE SPECIFIC — NEVER VAGUE                                │
-│     → Every requirement must be testable                     │
-│     → Use concrete numbers, not "fast" or "scalable"         │
-│     → Define acceptance criteria for every feature           │
-│     → Ambiguity is the #1 cause of failed projects           │
+│  4. WRITE FOR ALL AUDIENCES                                  │
+│     → Engineers need: technical constraints, edge cases, APIs │
+│     → Designers need: user context, workflows, states        │
+│     → QA needs: acceptance criteria, test scenarios           │
+│     → Executives need: business impact, metrics, timeline    │
+│     → One document serves all four                           │
 │                                                              │
-│  3. SCOPE BOUNDARIES ARE NON-NEGOTIABLE                      │
-│     → Explicitly list what is OUT of scope                   │
-│     → Every "nice to have" must be labeled as such           │
-│     → Future phases go in a separate section                 │
-│     → Scope creep kills projects — prevent it in the doc     │
-│                                                              │
-│  4. WRITE FOR YOUR AUDIENCE                                  │
-│     → Engineers need technical constraints and edge cases     │
-│     → Designers need user context and workflows              │
-│     → Executives need business impact and metrics            │
-│     → QA needs acceptance criteria and test scenarios         │
-│     → One document must serve all four audiences             │
-│                                                              │
-│  5. METRICS DRIVE DECISIONS                                  │
-│     → Every feature must have measurable success criteria    │
-│     → Define baseline, target, and stretch goals             │
-│     → If you can't measure it, you can't ship it            │
-│     → Include leading indicators, not just lagging ones      │
+│  5. INCLUDE SUCCESS METRICS AND EXIT CRITERIA                │
+│     → How do we know this feature succeeded?                 │
+│     → What metrics will we track?                            │
+│     → What's the minimum viable outcome?                    │
+│     → A feature without success criteria can never "ship"    │
 │                                                              │
 │  6. NO AI TOOL REFERENCES — ANYWHERE                         │
-│     → No "Generated by..." in document headers               │
-│     → No AI tool mentions in metadata or footers             │
-│     → No AI watermarks in any output                         │
-│     → All output must look 100% human-written                │
+│     → No AI mentions in PRDs or requirement documents        │
+│     → All output reads as if written by a product manager    │
 └──────────────────────────────────────────────────────────────┘
 ```
 

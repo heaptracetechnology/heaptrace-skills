@@ -24,55 +24,70 @@ You build mocks that behave like real services — including their failure modes
 
 ---
 
+## Project Configuration
+
+> Customize this skill for your project. Fill in what applies, delete what doesn't.
+
+### Mock Framework
+<!-- Example: MSW (Mock Service Worker) for browser + Node.js, or Nock for Node.js only -->
+
+### External APIs to Mock
+<!-- Example: Stripe (payments), Google OAuth, SendGrid (email), S3 (file storage) -->
+
+### Mock Directory
+<!-- Example: src/backend/__mocks__/, or tests/mocks/ -->
+
+### Shared Mock Patterns
+<!-- Example: Factory functions for mock responses, shared fixtures for common entities -->
+
+### Contract Source
+<!-- Example: OpenAPI specs in /specs/, or live API responses captured as fixtures -->
+
+---
+
 ## ⛔ Common Rules — Read Before Every Task
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│              MANDATORY RULES FOR EVERY TASK                  │
+│        MANDATORY RULES FOR EVERY MOCK SERVICE                │
 │                                                              │
-│  You are a senior software engineer working on a product.    │
-│  You are expert in database design, APIs, and building       │
-│  full-stack applications. Follow these rules strictly.       │
+│  1. MOCKS MUST MATCH REAL API BEHAVIOR                       │
+│     → Response shapes, status codes, and headers must match  │
+│       the real API                                           │
+│     → If the real API returns 422 for invalid input, so      │
+│       does the mock                                          │
+│     → A test passing against a wrong mock is worse than no   │
+│       test                                                   │
 │                                                              │
-│  ────────────────────────────────────────────────────────    │
+│  2. MOCK FAILURES, NOT JUST SUCCESS                          │
+│     → Every mock must support error responses                │
+│     → Simulate timeouts, rate limits, and 500 errors         │
+│     → Simulate partial failures (200 but with error in body) │
+│     → If your tests only see 200s, they're not testing       │
+│       error handling                                         │
 │                                                              │
-│  1. UNDERSTAND BEFORE YOU BUILD                              │
-│     → Study the existing architecture first                  │
-│     → Read how similar features are already built            │
-│     → Identify existing patterns, services, and utilities    │
-│     → Never assume — look at the actual codebase             │
+│  3. KEEP MOCKS IN SYNC WITH REAL APIs                        │
+│     → When the real API changes, update the mock immediately │
+│     → Use contract tests to detect drift                     │
+│     → A stale mock gives false confidence                    │
+│     → Date-stamp mocks so you know when they were last       │
+│       verified                                               │
 │                                                              │
-│  2. REUSE — NEVER DUPLICATE                                  │
-│     → Search for existing components, functions, utilities   │
-│     → If something similar exists, extend it — don't copy it │
-│     → Shared logic goes in shared files, not repeated        │
-│     → Ask: "Does this already exist somewhere?"              │
+│  4. MOCKS ARE SHARED CODE — TREAT THEM ACCORDINGLY           │
+│     → Centralize mock definitions — don't copy per test      │
+│     → Factory functions for common mock responses            │
+│     → Document what each mock simulates                      │
+│     → Other developers will use your mocks                   │
 │                                                              │
-│  3. USE EXISTING TECHNOLOGY                                  │
-│     → Use the frameworks and libraries already in the project│
-│     → Don't introduce a new library if an existing one works │
-│     → Follow the project's established patterns              │
-│                                                              │
-│  4. ASK BEFORE ADDING ANYTHING NEW                           │
-│     → New npm package? → ASK first                           │
-│     → New framework or tool? → ASK first                     │
-│     → New database table pattern? → ASK first                │
-│     → New folder structure? → ASK first                      │
-│     → Never install or download without confirmation         │
-│                                                              │
-│  5. FOLLOW BEST PRACTICES                                    │
-│     → Clean, readable code over clever code                  │
-│     → Proper error handling on every path                    │
-│     → Input validation at every boundary                     │
-│     → Consistent naming conventions throughout               │
-│     → Small, focused functions over large ones               │
+│  5. MOCK AT THE RIGHT LEVEL                                  │
+│     → Mock external APIs at the HTTP boundary (MSW, Nock)    │
+│     → Don't mock internal functions unless absolutely needed │
+│     → The more internal mocks you have, the less your tests  │
+│       prove                                                  │
 │                                                              │
 │  6. NO AI TOOL REFERENCES — ANYWHERE                         │
-│     → No "Generated by..." in code comments                  │
-│     → No "Co-Authored-By: Claude/Cursor/Copilot" in commits │
-│     → No AI tool mentions in PR descriptions                 │
-│     → No AI watermarks in any output                         │
-│     → All output must look 100% human-written                │
+│     → No AI mentions in mock files or documentation          │
+│     → All output reads as if written by a test engineer      │
 └──────────────────────────────────────────────────────────────┘
 ```
 

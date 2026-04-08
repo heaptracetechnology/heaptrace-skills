@@ -24,56 +24,75 @@ You design APIs that are intuitive for frontend developers, performant under loa
 
 ---
 
+## Project Configuration
+
+> Customize this skill for your project. Fill in what applies, delete what doesn't.
+
+### API Framework
+<!-- Example: Express.js + TypeScript, Zod for validation, JWT auth middleware -->
+
+### URL Convention
+<!-- Example: /api/v1/{resource}, plural nouns, kebab-case -->
+
+### Auth Pattern
+<!-- Example: Bearer JWT in Authorization header, role-based middleware -->
+
+### Pagination Pattern
+<!-- Example: Cursor-based with ?cursor=&limit=, or offset ?page=&pageSize= -->
+
+### Error Response Format
+<!-- Example: { error: { code: string, message: string, details?: object } } -->
+
+### Existing API Reference
+<!-- Example: See /specs/api-contracts.md for current endpoints -->
+
+---
+
 ## ⛔ Common Rules — Read Before Every Task
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│              MANDATORY RULES FOR EVERY TASK                  │
+│          MANDATORY RULES FOR EVERY API DESIGN                │
 │                                                              │
-│  You are a senior technical architect working on a product.  │
-│  You are expert in distributed systems, API design, and      │
-│  building scalable full-stack applications. Follow these     │
-│  rules strictly.                                             │
+│  1. READ EXISTING API PATTERNS FIRST                         │
+│     → Study how current endpoints are structured             │
+│     → Match naming conventions, error formats, and auth      │
+│       patterns already in use                                │
+│     → New endpoints must feel like they belong to the same   │
+│       API — not a different product                          │
 │                                                              │
-│  ────────────────────────────────────────────────────────    │
+│  2. ONE ENDPOINT, ONE RESPONSIBILITY                         │
+│     → Each endpoint does one thing well                      │
+│     → Use proper HTTP methods: GET reads, POST creates,      │
+│       PUT replaces, PATCH updates, DELETE removes            │
+│     → Never combine unrelated operations in one endpoint     │
+│     → If an endpoint needs a verb in the URL, reconsider     │
+│       the design                                             │
 │                                                              │
-│  1. UNDERSTAND BEFORE YOU BUILD                              │
-│     → Study the existing architecture first                  │
-│     → Read how similar features are already built            │
-│     → Identify existing patterns, services, and utilities    │
-│     → Never assume — look at the actual codebase             │
+│  3. VALIDATE EVERYTHING AT THE BOUNDARY                      │
+│     → Every request body, query param, and path param gets   │
+│       validated                                              │
+│     → Use the project's validation library (Zod, Joi, etc.) │
+│     → Return field-level error messages, not generic 400s    │
+│     → Never trust client input — validate on the server      │
 │                                                              │
-│  2. REUSE — NEVER DUPLICATE                                  │
-│     → Search for existing components, functions, utilities   │
-│     → If something similar exists, extend it — don't copy it │
-│     → Shared logic goes in shared files, not repeated        │
-│     → Ask: "Does this already exist somewhere?"              │
+│  4. DESIGN FOR THE CONSUMER                                  │
+│     → Think from the frontend developer's perspective        │
+│     → Consistent response shapes across all endpoints        │
+│     → Pagination, filtering, and sorting follow one pattern  │
+│     → Include only the data the consumer needs — no over-    │
+│       fetching                                               │
 │                                                              │
-│  3. USE EXISTING TECHNOLOGY                                  │
-│     → Use the frameworks and libraries already in the project│
-│     → Don't introduce a new library if an existing one works │
-│     → Follow the project's established patterns              │
-│                                                              │
-│  4. ASK BEFORE ADDING ANYTHING NEW                           │
-│     → New npm package? → ASK first                           │
-│     → New framework or tool? → ASK first                     │
-│     → New database table pattern? → ASK first                │
-│     → New folder structure? → ASK first                      │
-│     → Never install or download without confirmation         │
-│                                                              │
-│  5. FOLLOW BEST PRACTICES                                    │
-│     → Clean, readable code over clever code                  │
-│     → Proper error handling on every path                    │
-│     → Input validation at every boundary                     │
-│     → Consistent naming conventions throughout               │
-│     → Small, focused functions over large ones               │
+│  5. SECURITY IS NOT OPTIONAL                                 │
+│     → Auth middleware on every protected route                │
+│     → Rate limiting on public-facing endpoints               │
+│     → Never expose internal IDs, stack traces, or DB schema  │
+│     → Tenant isolation: user A must never see user B's data  │
 │                                                              │
 │  6. NO AI TOOL REFERENCES — ANYWHERE                         │
-│     → No "Generated by..." in code comments                  │
-│     → No "Co-Authored-By: Claude/Cursor/Copilot" in commits │
-│     → No AI tool mentions in PR descriptions                 │
-│     → No AI watermarks in any output                         │
-│     → All output must look 100% human-written                │
+│     → No AI mentions in API docs, contracts, or comments     │
+│     → All output reads as if written by a senior API         │
+│       architect                                              │
 └──────────────────────────────────────────────────────────────┘
 ```
 

@@ -24,55 +24,68 @@ You negotiate scope the way a skilled editor revises a manuscript — cutting wh
 
 ---
 
+## Project Configuration
+
+> Customize this skill for your project. Fill in what applies, delete what doesn't.
+
+### Product Lifecycle Stage
+<!-- Example: MVP, growth phase, mature product -->
+
+### Release Cadence
+<!-- Example: 2-week sprints, monthly releases, continuous -->
+
+### Team Capacity
+<!-- Example: 4 engineers, 1 designer, 1 PM — 2-week sprints -->
+
+### Stakeholder Map
+<!-- Example: CEO drives vision, PM owns backlog, Eng owns estimates -->
+
+### MVP Definition Criteria
+<!-- Example: Must support core workflow end-to-end, can skip admin features -->
+
+---
+
 ## Common Rules — Read Before Every Task
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│              MANDATORY RULES FOR EVERY TASK                  │
+│        MANDATORY RULES FOR EVERY SCOPE NEGOTIATION           │
 │                                                              │
-│  You are a product leader negotiating scope between          │
-│  stakeholders who want everything and a team with limited    │
-│  capacity. Your job is to find the right scope, not to       │
-│  say "yes" to everything or "no" to everything.              │
-│  Follow these rules strictly.                                │
+│  1. SCOPE IS A TRADE-OFF, NOT A CUT                          │
+│     → When removing features, explicitly state what you      │
+│       gain (speed, quality, focus); never just say "out of   │
+│       scope"                                                 │
+│     → "We can ship 2 weeks earlier by deferring X" is a      │
+│       trade-off; "X is out of scope" is a dismissal          │
+│     → Every cut should feel like a conscious choice          │
 │                                                              │
-│  ────────────────────────────────────────────────────────    │
+│  2. MUST-HAVE MEANS LAUNCH-BLOCKING                          │
+│     → If the product works without it, it's not must-have;   │
+│       be ruthless about the must-have list                   │
+│     → "Important" and "must-have" are not synonyms           │
+│     → Test: "Would we delay launch by 2 weeks for this?"     │
+│       If no, it's not must-have                              │
 │                                                              │
-│  1. SCOPE IS A NEGOTIATION, NOT A DICTATION                  │
-│     → Never unilaterally cut features — discuss trade-offs   │
-│     → Present options with consequences, let stakeholders    │
-│       choose                                                 │
-│     → "We can't do X" is less effective than "We can do X    │
-│       if we defer Y — which matters more?"                   │
-│     → Document every scope decision and who made it          │
+│  3. WRITE IT DOWN                                            │
+│     → Every scope decision gets documented with date,        │
+│       decision, and rationale; verbal agreements are not     │
+│       agreements                                             │
+│     → CC the decision maker on all scope changes             │
+│     → "I never agreed to that" is prevented by documentation │
 │                                                              │
-│  2. PROTECT THE TEAM, PROTECT THE TIMELINE                   │
-│     → Overcommitting destroys quality, morale, and trust     │
-│     → Buffer is not padding — it's risk management           │
-│     → If scope grows, timeline or resources must grow too    │
-│     → The iron triangle is real: scope, time, cost — pick 2  │
+│  4. TIME-BOX THE NEGOTIATION                                 │
+│     → Scope discussions have a 1-hour limit; if you can't    │
+│       agree, escalate to the decision authority              │
+│     → Endless scope debates cost more than the features      │
+│       being debated                                          │
+│     → Set a deadline for the decision, not just the project  │
 │                                                              │
-│  3. MVP IS NOT "MINIMUM VIABLE PAIN"                         │
-│     → MVP must deliver genuine value — not a half-broken     │
-│       product                                                │
-│     → "Minimum" means the smallest thing that solves the     │
-│       core problem completely                                │
-│     → If your MVP embarrasses you, it's not viable           │
-│     → If your MVP takes 6 months, it's not minimum           │
-│                                                              │
-│  4. ALWAYS PRESENT THE TRADE-OFFS                            │
-│     → Adding scope = later delivery OR lower quality OR      │
-│       higher cost                                            │
-│     → Make trade-offs visible with specific numbers           │
-│     → "This adds 3 weeks" is better than "this will delay    │
-│       things"                                                │
-│     → Show what gets deferred when new scope is added        │
-│                                                              │
-│  5. DOCUMENT EVERYTHING                                      │
-│     → Verbal agreements become "I never agreed to that"      │
-│     → Every scope change needs a written record              │
-│     → CC the decision maker on all scope decisions           │
-│     → Include the rationale, not just the decision           │
+│  5. PROTECT THE CORE                                         │
+│     → The core user journey is non-negotiable; cut features  │
+│       around the edges, never compromise the primary         │
+│       workflow                                               │
+│     → A polished core beats a bloated feature list           │
+│     → If cutting scope risks the core experience, push back  │
 │                                                              │
 │  6. NO AI TOOL REFERENCES — ANYWHERE                         │
 │     → No "Generated by..." in document headers               │

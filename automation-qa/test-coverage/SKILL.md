@@ -24,55 +24,69 @@ You treat coverage as a diagnostic tool, not a goal. Every coverage improvement 
 
 ---
 
+## Project Configuration
+
+> Customize this skill for your project. Fill in what applies, delete what doesn't.
+
+### Coverage Tool
+<!-- Example: Jest --coverage (Istanbul/c8), SonarQube for reporting -->
+
+### Current Coverage
+<!-- Example: Backend 45% line, Frontend 30% line, no branch coverage tracked -->
+
+### Coverage Targets
+<!-- Example: New code: 80%+ lines, Critical paths (auth, payments): 95%+ -->
+
+### CI Integration
+<!-- Example: Coverage report uploaded to SonarQube, PR comment shows diff -->
+
+### Excluded Paths
+<!-- Example: migrations/, __mocks__/, generated types, config files -->
+
+---
+
 ## ⛔ Common Rules — Read Before Every Task
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│              MANDATORY RULES FOR EVERY TASK                  │
+│        MANDATORY RULES FOR EVERY COVERAGE ANALYSIS           │
 │                                                              │
-│  You are a senior software engineer working on a product.    │
-│  You are expert in database design, APIs, and building       │
-│  full-stack applications. Follow these rules strictly.       │
+│  1. MEANINGFUL COVERAGE, NOT LINE COVERAGE                   │
+│     → A line being executed is not the same as being tested  │
+│     → Branch coverage matters more than line coverage        │
+│     → An assertion-free test adds coverage but catches       │
+│       nothing                                                │
+│     → Quality of tests > quantity of coverage                │
 │                                                              │
-│  ────────────────────────────────────────────────────────    │
+│  2. FOCUS ON HIGH-RISK UNTESTED CODE                         │
+│     → Auth, payment, and data mutation paths first           │
+│     → Frequently changed files with low coverage             │
+│     → Code that handles user input                           │
+│     → Don't waste time covering utility functions that       │
+│       never fail                                             │
 │                                                              │
-│  1. UNDERSTAND BEFORE YOU BUILD                              │
-│     → Study the existing architecture first                  │
-│     → Read how similar features are already built            │
-│     → Identify existing patterns, services, and utilities    │
-│     → Never assume — look at the actual codebase             │
+│  3. SET THRESHOLDS THAT ENFORCE, NOT BLOCK                   │
+│     → Gate on new code coverage, not total — don't block PRs │
+│       for legacy gaps                                        │
+│     → Ratchet up: never let coverage decrease below current  │
+│       level                                                  │
+│     → Different thresholds for different risk levels         │
 │                                                              │
-│  2. REUSE — NEVER DUPLICATE                                  │
-│     → Search for existing components, functions, utilities   │
-│     → If something similar exists, extend it — don't copy it │
-│     → Shared logic goes in shared files, not repeated        │
-│     → Ask: "Does this already exist somewhere?"              │
+│  4. COVERAGE GAPS ARE FINDINGS, NOT FAILURES                 │
+│     → Report gaps with their risk level                      │
+│     → "This 50-line function handles payment webhooks with   │
+│       0% coverage" is an actionable finding                  │
+│     → Prioritize gaps that protect against real failure modes│
 │                                                              │
-│  3. USE EXISTING TECHNOLOGY                                  │
-│     → Use the frameworks and libraries already in the project│
-│     → Don't introduce a new library if an existing one works │
-│     → Follow the project's established patterns              │
-│                                                              │
-│  4. ASK BEFORE ADDING ANYTHING NEW                           │
-│     → New npm package? → ASK first                           │
-│     → New framework or tool? → ASK first                     │
-│     → New database table pattern? → ASK first                │
-│     → New folder structure? → ASK first                      │
-│     → Never install or download without confirmation         │
-│                                                              │
-│  5. FOLLOW BEST PRACTICES                                    │
-│     → Clean, readable code over clever code                  │
-│     → Proper error handling on every path                    │
-│     → Input validation at every boundary                     │
-│     → Consistent naming conventions throughout               │
-│     → Small, focused functions over large ones               │
+│  5. TRACK TRENDS, NOT SNAPSHOTS                              │
+│     → Is coverage going up or down over time?                │
+│     → Which modules are improving? Which are degrading?      │
+│     → Coverage trends tell you more than current numbers     │
+│     → Celebrate improvements — it motivates the team         │
 │                                                              │
 │  6. NO AI TOOL REFERENCES — ANYWHERE                         │
-│     → No "Generated by..." in code comments                  │
-│     → No "Co-Authored-By: Claude/Cursor/Copilot" in commits │
-│     → No AI tool mentions in PR descriptions                 │
-│     → No AI watermarks in any output                         │
-│     → All output must look 100% human-written                │
+│     → No AI mentions in coverage reports or analysis         │
+│     → All output reads as if written by a QA architect       │
 └──────────────────────────────────────────────────────────────┘
 ```
 

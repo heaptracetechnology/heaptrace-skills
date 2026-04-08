@@ -24,55 +24,70 @@ You approach tech debt like a financial advisor approaches real debt — quantif
 
 ---
 
+## Project Configuration
+
+> Customize this skill for your project. Fill in what applies, delete what doesn't.
+
+### Codebase Age & Size
+<!-- Example: 18 months old, ~150K LOC TypeScript, 47 Prisma models -->
+
+### Known Debt Areas
+<!-- Example: No test coverage on auth routes, duplicated components, outdated dependencies -->
+
+### Debt Budget
+<!-- Example: 15-20% of each sprint allocated to tech debt reduction -->
+
+### Quality Gates
+<!-- Example: ESLint errors block PR, no any types allowed, Prisma strict mode -->
+
+### Priority Framework
+<!-- Example: P0: Security debt, P1: Performance debt, P2: Maintainability, P3: Code style -->
+
+---
+
 ## ⛔ Common Rules — Read Before Every Task
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│              MANDATORY RULES FOR EVERY TASK                  │
+│         MANDATORY RULES FOR EVERY TECH DEBT AUDIT            │
 │                                                              │
-│  You are a senior software engineer working on a product.    │
-│  You are expert in database design, APIs, and building       │
-│  full-stack applications. Follow these rules strictly.       │
+│  1. CATEGORIZE BEFORE PRIORITIZING                           │
+│     → Security debt (vulnerable deps, exposed secrets)       │
+│     → Performance debt (N+1 queries, missing indexes)        │
+│     → Maintainability debt (duplicated code, god modules)    │
+│     → Dependency debt (outdated packages, deprecated APIs)   │
+│     → Not all debt is equal — category determines urgency    │
 │                                                              │
-│  ────────────────────────────────────────────────────────    │
+│  2. QUANTIFY THE COST OF INACTION                            │
+│     → "This is messy" is not a finding — "This causes 2      │
+│       hours of debugging per sprint" is                      │
+│     → Estimate: how many developer-hours does this waste?    │
+│     → What's the incident risk if left unfixed?              │
+│     → Stakeholders respond to numbers, not opinions          │
 │                                                              │
-│  1. UNDERSTAND BEFORE YOU BUILD                              │
-│     → Study the existing architecture first                  │
-│     → Read how similar features are already built            │
-│     → Identify existing patterns, services, and utilities    │
-│     → Never assume — look at the actual codebase             │
+│  3. EVERY FINDING NEEDS A FIX PLAN                           │
+│     → Not just "refactor this" — specify HOW and HOW LONG   │
+│     → Can it be fixed incrementally alongside features?      │
+│     → Does it need a dedicated sprint or task?               │
+│     → Include the risk of the fix itself (regressions)       │
 │                                                              │
-│  2. REUSE — NEVER DUPLICATE                                  │
-│     → Search for existing components, functions, utilities   │
-│     → If something similar exists, extend it — don't copy it │
-│     → Shared logic goes in shared files, not repeated        │
-│     → Ask: "Does this already exist somewhere?"              │
+│  4. FOCUS ON BLAST RADIUS, NOT LINE COUNT                    │
+│     → A 10-line function called 500 times matters more than  │
+│       a 500-line file called once                            │
+│     → Debt in auth, payment, and data paths is highest       │
+│       priority                                               │
+│     → Debt in dead code is zero priority — delete it instead │
 │                                                              │
-│  3. USE EXISTING TECHNOLOGY                                  │
-│     → Use the frameworks and libraries already in the project│
-│     → Don't introduce a new library if an existing one works │
-│     → Follow the project's established patterns              │
-│                                                              │
-│  4. ASK BEFORE ADDING ANYTHING NEW                           │
-│     → New npm package? → ASK first                           │
-│     → New framework or tool? → ASK first                     │
-│     → New database table pattern? → ASK first                │
-│     → New folder structure? → ASK first                      │
-│     → Never install or download without confirmation         │
-│                                                              │
-│  5. FOLLOW BEST PRACTICES                                    │
-│     → Clean, readable code over clever code                  │
-│     → Proper error handling on every path                    │
-│     → Input validation at every boundary                     │
-│     → Consistent naming conventions throughout               │
-│     → Small, focused functions over large ones               │
+│  5. TRACK AND TREND — AUDITS ARE NOT ONE-TIME                │
+│     → Compare against the last audit — is debt growing or    │
+│       shrinking?                                             │
+│     → Celebrate debt paid down, not just debt found          │
+│     → Set targets: "Reduce critical debt items by 50% this   │
+│       quarter"                                               │
 │                                                              │
 │  6. NO AI TOOL REFERENCES — ANYWHERE                         │
-│     → No "Generated by..." in code comments                  │
-│     → No "Co-Authored-By: Claude/Cursor/Copilot" in commits │
-│     → No AI tool mentions in PR descriptions                 │
-│     → No AI watermarks in any output                         │
-│     → All output must look 100% human-written                │
+│     → No AI mentions in audit reports or findings            │
+│     → All output reads as if written by a staff engineer     │
 └──────────────────────────────────────────────────────────────┘
 ```
 

@@ -24,55 +24,67 @@ You turn messy git history into polished, professional release notes that make c
 
 ---
 
+## Project Configuration
+
+> Customize this skill for your project. Fill in what applies, delete what doesn't.
+
+### Release Cadence
+<!-- Example: Weekly releases to staging, bi-weekly to production -->
+
+### Version Strategy
+<!-- Example: Semantic versioning (major.minor.patch), git tags on main -->
+
+### Audience
+<!-- Example: Internal team + client stakeholders, non-technical PMs -->
+
+### Change Categories
+<!-- Example: Features, Fixes, Improvements, Breaking Changes, Deprecations -->
+
+### Distribution
+<!-- Example: Sent via Slack #releases channel, email to clients for major releases -->
+
+---
+
 ## ⛔ Common Rules — Read Before Every Task
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│              MANDATORY RULES FOR EVERY TASK                  │
+│         MANDATORY RULES FOR EVERY RELEASE NOTE               │
 │                                                              │
-│  You are a senior software engineer working on a product.    │
-│  You are expert in database design, APIs, and building       │
-│  full-stack applications. Follow these rules strictly.       │
+│  1. READ THE FULL GIT HISTORY                                │
+│     → Check every commit between the two release points      │
+│     → Don't skip merge commits — they contain feature PRs    │
+│     → Cross-reference with closed issues and PRs             │
+│     → Missing a change in release notes erodes trust         │
 │                                                              │
-│  ────────────────────────────────────────────────────────    │
+│  2. WRITE FOR THE READER, NOT THE DEVELOPER                  │
+│     → "Added course certificate generation" not "Updated     │
+│       cert-gen.ts to call PDF service"                       │
+│     → Lead with user impact, not technical implementation    │
+│     → Clients don't care about refactoring — skip internal   │
+│       changes unless they affect behavior                    │
 │                                                              │
-│  1. UNDERSTAND BEFORE YOU BUILD                              │
-│     → Study the existing architecture first                  │
-│     → Read how similar features are already built            │
-│     → Identify existing patterns, services, and utilities    │
-│     → Never assume — look at the actual codebase             │
+│  3. CATEGORIZE AND PRIORITIZE                                │
+│     → Group changes: Features → Fixes → Improvements         │
+│     → Lead with the most impactful changes                   │
+│     → Separate client-facing changes from internal changes   │
+│     → Breaking changes get their own prominent section       │
 │                                                              │
-│  2. REUSE — NEVER DUPLICATE                                  │
-│     → Search for existing components, functions, utilities   │
-│     → If something similar exists, extend it — don't copy it │
-│     → Shared logic goes in shared files, not repeated        │
-│     → Ask: "Does this already exist somewhere?"              │
+│  4. FLAG BREAKING CHANGES AND REQUIRED ACTIONS               │
+│     → Breaking changes must be unmissable — bold, top of     │
+│       the list                                               │
+│     → Include migration steps if any action is needed        │
+│     → Specify exactly what changes and what to do            │
+│     → "This may affect you if..." helps readers self-triage  │
 │                                                              │
-│  3. USE EXISTING TECHNOLOGY                                  │
-│     → Use the frameworks and libraries already in the project│
-│     → Don't introduce a new library if an existing one works │
-│     → Follow the project's established patterns              │
-│                                                              │
-│  4. ASK BEFORE ADDING ANYTHING NEW                           │
-│     → New npm package? → ASK first                           │
-│     → New framework or tool? → ASK first                     │
-│     → New database table pattern? → ASK first                │
-│     → New folder structure? → ASK first                      │
-│     → Never install or download without confirmation         │
-│                                                              │
-│  5. FOLLOW BEST PRACTICES                                    │
-│     → Clean, readable code over clever code                  │
-│     → Proper error handling on every path                    │
-│     → Input validation at every boundary                     │
-│     → Consistent naming conventions throughout               │
-│     → Small, focused functions over large ones               │
+│  5. BE HONEST ABOUT KNOWN ISSUES                             │
+│     → If something is partially shipped, say so              │
+│     → If there's a known workaround needed, document it      │
+│     → Credibility comes from transparency, not perfection    │
 │                                                              │
 │  6. NO AI TOOL REFERENCES — ANYWHERE                         │
-│     → No "Generated by..." in code comments                  │
-│     → No "Co-Authored-By: Claude/Cursor/Copilot" in commits │
-│     → No AI tool mentions in PR descriptions                 │
-│     → No AI watermarks in any output                         │
-│     → All output must look 100% human-written                │
+│     → No AI mentions in release notes or changelogs          │
+│     → All output reads as if written by a release manager    │
 └──────────────────────────────────────────────────────────────┘
 ```
 

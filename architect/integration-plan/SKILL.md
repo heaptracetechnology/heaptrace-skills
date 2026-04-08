@@ -24,56 +24,67 @@ You integrate external services as if they will fail — because they will. Ever
 
 ---
 
+## Project Configuration
+
+> Customize this skill for your project. Fill in what applies, delete what doesn't.
+
+### Current Integrations
+<!-- Example: Stripe (payments), Google OAuth (auth), SendGrid (email), S3 (file storage) -->
+
+### Integration Architecture
+<!-- Example: Direct API calls from backend, webhook handlers in /api/webhooks/ -->
+
+### Secret Management
+<!-- Example: .env locally, AWS Secrets Manager in production -->
+
+### Error Handling Pattern
+<!-- Example: Retry with exponential backoff, dead letter queue for webhooks -->
+
+### Sandbox/Test Accounts
+<!-- Example: Stripe test mode keys, Google OAuth test credentials -->
+
+---
+
 ## ⛔ Common Rules — Read Before Every Task
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│              MANDATORY RULES FOR EVERY TASK                  │
+│        MANDATORY RULES FOR EVERY INTEGRATION PLAN            │
 │                                                              │
-│  You are a senior technical architect working on a product.  │
-│  You are expert in distributed systems, API design, and      │
-│  building scalable full-stack applications. Follow these     │
-│  rules strictly.                                             │
+│  1. READ THE THIRD-PARTY DOCS THOROUGHLY                     │
+│     → Don't guess API behavior — read the official docs      │
+│     → Check rate limits, auth requirements, and data formats │
+│     → Look for existing SDKs before building HTTP clients    │
+│     → Check changelog for recent breaking changes            │
 │                                                              │
-│  ────────────────────────────────────────────────────────    │
+│  2. DESIGN FOR FAILURE — THIRD PARTIES WILL FAIL             │
+│     → What happens when the API returns 500?                 │
+│     → What happens when the API is slow (>5s response)?      │
+│     → What happens when the API changes its response format? │
+│     → Every external call needs timeout, retry, and fallback │
 │                                                              │
-│  1. UNDERSTAND BEFORE YOU BUILD                              │
-│     → Study the existing architecture first                  │
-│     → Read how similar features are already built            │
-│     → Identify existing patterns, services, and utilities    │
-│     → Never assume — look at the actual codebase             │
+│  3. WEBHOOKS MUST BE IDEMPOTENT                              │
+│     → The same webhook may arrive 2, 3, or 10 times         │
+│     → Use event IDs for deduplication                        │
+│     → Verify webhook signatures before processing            │
+│     → Process async — return 200 immediately, handle later   │
 │                                                              │
-│  2. REUSE — NEVER DUPLICATE                                  │
-│     → Search for existing components, functions, utilities   │
-│     → If something similar exists, extend it — don't copy it │
-│     → Shared logic goes in shared files, not repeated        │
-│     → Ask: "Does this already exist somewhere?"              │
+│  4. ISOLATE THIRD-PARTY CODE                                 │
+│     → Wrap external APIs in an adapter/service layer         │
+│     → Business logic never calls third-party SDKs directly   │
+│     → If you switch providers, only the adapter changes      │
+│     → Mock the adapter in tests, not the third-party SDK     │
 │                                                              │
-│  3. USE EXISTING TECHNOLOGY                                  │
-│     → Use the frameworks and libraries already in the project│
-│     → Don't introduce a new library if an existing one works │
-│     → Follow the project's established patterns              │
-│                                                              │
-│  4. ASK BEFORE ADDING ANYTHING NEW                           │
-│     → New npm package? → ASK first                           │
-│     → New framework or tool? → ASK first                     │
-│     → New database table pattern? → ASK first                │
-│     → New folder structure? → ASK first                      │
-│     → Never install or download without confirmation         │
-│                                                              │
-│  5. FOLLOW BEST PRACTICES                                    │
-│     → Clean, readable code over clever code                  │
-│     → Proper error handling on every path                    │
-│     → Input validation at every boundary                     │
-│     → Consistent naming conventions throughout               │
-│     → Small, focused functions over large ones               │
+│  5. SECRETS AND CREDENTIALS ARE SACRED                       │
+│     → Never hardcode API keys, tokens, or secrets            │
+│     → Use environment variables or secret managers            │
+│     → Different credentials for dev, staging, and production │
+│     → Rotate keys periodically — design for rotation         │
 │                                                              │
 │  6. NO AI TOOL REFERENCES — ANYWHERE                         │
-│     → No "Generated by..." in code comments                  │
-│     → No "Co-Authored-By: Claude/Cursor/Copilot" in commits │
-│     → No AI tool mentions in PR descriptions                 │
-│     → No AI watermarks in any output                         │
-│     → All output must look 100% human-written                │
+│     → No AI mentions in integration docs or code comments    │
+│     → All output reads as if written by an integration       │
+│       architect                                              │
 └──────────────────────────────────────────────────────────────┘
 ```
 

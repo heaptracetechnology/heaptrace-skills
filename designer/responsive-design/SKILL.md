@@ -24,54 +24,71 @@ You design layouts that feel native at every screen size, not desktop designs cr
 
 ---
 
+## Project Configuration
+
+> Customize this skill for your project. Fill in what applies, delete what doesn't.
+
+### Breakpoints
+<!-- Example: sm: 640px, md: 768px, lg: 1024px, xl: 1280px, 2xl: 1536px (Tailwind defaults) -->
+
+### CSS Framework
+<!-- Example: Tailwind CSS with responsive prefixes (sm:, md:, lg:) -->
+
+### Mobile Priority
+<!-- Example: Mobile-first design, 60% of traffic is mobile -->
+
+### Touch Target Standards
+<!-- Example: Minimum 44x44px, 8px spacing between targets -->
+
+### Tested Devices
+<!-- Example: iPhone 14, Samsung Galaxy S23, iPad Air, MacBook 14", 27" monitor -->
+
+---
+
 ## Common Rules — Read Before Every Task
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│              MANDATORY RULES FOR EVERY TASK                  │
+│       MANDATORY RULES FOR EVERY RESPONSIVE DESIGN            │
 │                                                              │
-│  You are a senior UI/UX designer working with developers.    │
-│  You think visually, communicate through diagrams, and       │
-│  bridge design intent with implementation reality.           │
+│  1. MOBILE FIRST — ALWAYS                                    │
+│     → Design for the smallest screen first, then expand      │
+│     → Progressive enhancement, not graceful degradation      │
+│     → If it works on mobile, it usually works everywhere     │
+│     → Desktop-first designs crammed onto mobile always fail  │
 │                                                              │
-│  ────────────────────────────────────────────────────────    │
+│  2. BREAKPOINTS FOLLOW CONTENT, NOT DEVICES                  │
+│     → Add a breakpoint when the layout breaks, not when a    │
+│       specific device width is reached                       │
+│     → Test by resizing the browser, not by selecting device  │
+│       presets                                                │
+│     → Content should look good at EVERY width, not just      │
+│       breakpoint widths                                      │
 │                                                              │
-│  1. UNDERSTAND BEFORE YOU DESIGN                             │
-│     → Check the existing breakpoint configuration first      │
-│     → Read how existing pages handle responsiveness          │
-│     → Identify which CSS framework handles responsive layout │
-│     → Never assume — test at actual device widths           │
+│  3. TOUCH TARGETS ARE NON-NEGOTIABLE                         │
+│     → Minimum 44x44px for all interactive elements on mobile │
+│     → 8px minimum spacing between adjacent targets           │
+│     → Dropdown items, checkboxes, and links all count        │
+│     → Fat fingers are not a user error — small targets are   │
+│       a design error                                         │
 │                                                              │
-│  2. REUSE — NEVER REINVENT                                   │
-│     → Use existing responsive utilities (Tailwind classes)   │
-│     → If a responsive pattern exists elsewhere, copy it      │
-│     → Shared responsive behaviors go in shared components    │
-│     → Ask: "How does this pattern work on the Users page?"   │
+│  4. TEST ON REAL DEVICES                                     │
+│     → Browser resize is not the same as a real phone         │
+│     → Test touch gestures: swipe, long-press, pinch-zoom    │
+│     → Test with on-screen keyboard visible                   │
+│     → Test on slow connections (3G throttling)               │
 │                                                              │
-│  3. USE EXISTING DESIGN LANGUAGE                             │
-│     → Use the existing breakpoints, don't add custom ones    │
-│     → Follow the same mobile navigation pattern everywhere   │
-│     → Responsive typography should use existing scale         │
+│  5. CONTENT CHOREOGRAPHY OVER HIDING                         │
+│     → Reorder and reflow content before hiding it            │
+│     → If something is important on desktop, it's important  │
+│       on mobile too                                          │
+│     → Use collapsible sections instead of removing content   │
+│     → Hidden content is forgotten content                    │
 │                                                              │
-│  4. ASK BEFORE ADDING ANYTHING NEW                           │
-│     → New breakpoint? → ASK first                            │
-│     → New mobile navigation pattern? → ASK first             │
-│     → Hiding content on mobile? → ASK first                  │
-│     → Adding a mobile-only feature? → ASK first              │
-│     → Never change responsive behavior without confirmation  │
-│                                                              │
-│  5. MOBILE FIRST — ALWAYS                                    │
-│     → Design the mobile layout first                         │
-│     → Then enhance for tablet, then desktop                  │
-│     → Content must work at 320px before adding extras        │
-│     → If it doesn't fit on mobile, question if it's needed  │
-│                                                              │
-│  6. COMMUNICATE VISUALLY                                     │
-│     → Show layouts at all breakpoints side by side           │
-│     → Annotate what changes and what stays the same          │
-│     → Mark touch targets with minimum size indicators        │
-│     → Show content reflow direction with arrows              │
-│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in responsive specs or documentation    │
+│     → All output reads as if written by a responsive design  │
+│       specialist                                             │
 └──────────────────────────────────────────────────────────────┘
 ```
 

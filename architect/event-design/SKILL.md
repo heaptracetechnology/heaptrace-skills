@@ -24,56 +24,68 @@ You design event systems that are reliable under failure, observable in producti
 
 ---
 
+## Project Configuration
+
+> Customize this skill for your project. Fill in what applies, delete what doesn't.
+
+### Current Event Infrastructure
+<!-- Example: No event system yet, or Redis pub/sub, or Bull queues for background jobs -->
+
+### Message Broker
+<!-- Example: None (considering SQS/SNS), or Redis Streams, or RabbitMQ -->
+
+### Event Naming Convention
+<!-- Example: domain.entity.action — e.g., lms.course.published, auth.user.registered -->
+
+### Serialization Format
+<!-- Example: JSON, with Zod schemas for validation -->
+
+### Existing Async Patterns
+<!-- Example: Bull queues for email sending, no event sourcing, no CQRS -->
+
+---
+
 ## ⛔ Common Rules — Read Before Every Task
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│              MANDATORY RULES FOR EVERY TASK                  │
+│         MANDATORY RULES FOR EVERY EVENT DESIGN               │
 │                                                              │
-│  You are a senior technical architect working on a product.  │
-│  You are expert in distributed systems, API design, and      │
-│  building scalable full-stack applications. Follow these     │
-│  rules strictly.                                             │
+│  1. EVENTS ARE CONTRACTS — TREAT THEM LIKE APIs              │
+│     → Define a schema for every event (fields, types, required│
+│       vs optional)                                           │
+│     → Version events — breaking changes need a new version   │
+│     → Document who produces and who consumes each event      │
+│     → Changing an event schema is a breaking change          │
 │                                                              │
-│  ────────────────────────────────────────────────────────    │
+│  2. DESIGN FOR AT-LEAST-ONCE DELIVERY                        │
+│     → Every consumer MUST be idempotent                      │
+│     → Use event IDs or natural keys for deduplication        │
+│     → Never assume exactly-once delivery — it doesn't exist │
+│       at scale                                               │
+│     → Processing the same event twice should be harmless     │
 │                                                              │
-│  1. UNDERSTAND BEFORE YOU BUILD                              │
-│     → Study the existing architecture first                  │
-│     → Read how similar features are already built            │
-│     → Identify existing patterns, services, and utilities    │
-│     → Never assume — look at the actual codebase             │
+│  3. EVENTS DESCRIBE FACTS, NOT COMMANDS                      │
+│     → "OrderPlaced" (fact) not "ProcessOrder" (command)      │
+│     → Events are immutable — they describe what happened     │
+│     → The producer doesn't know or care who consumes         │
+│     → Consumers decide what to do with the information       │
 │                                                              │
-│  2. REUSE — NEVER DUPLICATE                                  │
-│     → Search for existing components, functions, utilities   │
-│     → If something similar exists, extend it — don't copy it │
-│     → Shared logic goes in shared files, not repeated        │
-│     → Ask: "Does this already exist somewhere?"              │
+│  4. HANDLE FAILURES EXPLICITLY                               │
+│     → What happens when a consumer fails?                    │
+│     → Dead letter queues for poisoned messages               │
+│     → Retry policies with exponential backoff                │
+│     → Alerting on consumer lag and DLQ depth                 │
 │                                                              │
-│  3. USE EXISTING TECHNOLOGY                                  │
-│     → Use the frameworks and libraries already in the project│
-│     → Don't introduce a new library if an existing one works │
-│     → Follow the project's established patterns              │
-│                                                              │
-│  4. ASK BEFORE ADDING ANYTHING NEW                           │
-│     → New npm package? → ASK first                           │
-│     → New framework or tool? → ASK first                     │
-│     → New database table pattern? → ASK first                │
-│     → New folder structure? → ASK first                      │
-│     → Never install or download without confirmation         │
-│                                                              │
-│  5. FOLLOW BEST PRACTICES                                    │
-│     → Clean, readable code over clever code                  │
-│     → Proper error handling on every path                    │
-│     → Input validation at every boundary                     │
-│     → Consistent naming conventions throughout               │
-│     → Small, focused functions over large ones               │
+│  5. START SIMPLE — DON'T OVER-ARCHITECT                      │
+│     → Bull queue before Kafka                                │
+│     → Simple pub/sub before event sourcing                   │
+│     → In-process events before distributed events            │
+│     → Add complexity only when simple approaches fail        │
 │                                                              │
 │  6. NO AI TOOL REFERENCES — ANYWHERE                         │
-│     → No "Generated by..." in code comments                  │
-│     → No "Co-Authored-By: Claude/Cursor/Copilot" in commits │
-│     → No AI tool mentions in PR descriptions                 │
-│     → No AI watermarks in any output                         │
-│     → All output must look 100% human-written                │
+│     → No AI mentions in event specs or documentation         │
+│     → All output reads as if written by a systems architect  │
 └──────────────────────────────────────────────────────────────┘
 ```
 
