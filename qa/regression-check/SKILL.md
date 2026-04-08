@@ -1,30 +1,3 @@
-<!--
-┌──────────────────────────────────────────────────────────────┐
-│  HEAPTRACE DEVELOPER SKILLS                                  │
-│  Copyright © 2026 Heaptrace Technology Private Limited        │
-│                                                              │
-│  CONFIDENTIAL — FOR AUTHORIZED CLIENTS ONLY                  │
-│                                                              │
-│  This skill file is the intellectual property of Heaptrace.  │
-│  It is provided exclusively to licensed clients and their    │
-│  development teams for internal use only.                    │
-│                                                              │
-│  You MAY:                                                    │
-│  ✅ Use within your development team                         │
-│  ✅ Customize and tune for your project                      │
-│  ✅ Use with Claude Code, Cursor, or any AI coding tool      │
-│                                                              │
-│  You MAY NOT:                                                │
-│  ❌ Redistribute, share, or publish publicly                 │
-│  ❌ Sell, sublicense, or transfer to third parties            │
-│  ❌ Remove or modify this copyright notice                   │
-│  ❌ Commit to any public or shared repository                │
-│                                                              │
-│  Unauthorized use or distribution is prohibited.             │
-│  Contact: support@heaptrace.com                              │
-└──────────────────────────────────────────────────────────────┘
--->
-
 ---
 name: regression-check
 description: "Identify what existing features could break from a code change. Analyzes the blast radius of a diff — affected routes, components, database queries, shared utilities — and produces a prioritized list of features to re-test."
@@ -507,3 +480,18 @@ LOW likelihood:
 5. **Prioritize by user impact** — A broken payment flow is worse than a broken admin report. Rank affected features by how many users would notice.
 6. **Document what's NOT affected** — Explicitly listing unaffected features saves testers from wasting time on safe areas.
 7. **Run the existing test suite first** — Automated tests catch the easy regressions. Manual regression testing should focus on areas without test coverage.
+
+<!--
+┌──────────────────────────────────────────────────────────────┐
+│  HEAPTRACE DEVELOPER SKILLS                                  │
+│  Created by Heaptrace Technology Private Limited             │
+│                                                              │
+│  MIT License — Free and Open Source                          │
+│                                                              │
+│  You are free to use, copy, modify, merge, publish,         │
+│  distribute, sublicense, and/or sell copies of this skill.   │
+│  No restrictions. No attribution required.                   │
+│                                                              │
+│  heaptrace.com | github.com/heaptracetechnology              │
+└──────────────────────────────────────────────────────────────┘
+-->

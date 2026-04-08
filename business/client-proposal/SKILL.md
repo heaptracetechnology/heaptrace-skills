@@ -1,30 +1,3 @@
-<!--
-┌──────────────────────────────────────────────────────────────┐
-│  HEAPTRACE DEVELOPER SKILLS                                  │
-│  Copyright © 2026 Heaptrace Technology Private Limited        │
-│                                                              │
-│  CONFIDENTIAL — FOR AUTHORIZED CLIENTS ONLY                  │
-│                                                              │
-│  This skill file is the intellectual property of Heaptrace.  │
-│  It is provided exclusively to licensed clients and their    │
-│  development teams for internal use only.                    │
-│                                                              │
-│  You MAY:                                                    │
-│  ✅ Use within your development team                         │
-│  ✅ Customize and tune for your project                      │
-│  ✅ Use with Claude Code, Cursor, or any AI coding tool      │
-│                                                              │
-│  You MAY NOT:                                                │
-│  ❌ Redistribute, share, or publish publicly                 │
-│  ❌ Sell, sublicense, or transfer to third parties            │
-│  ❌ Remove or modify this copyright notice                   │
-│  ❌ Commit to any public or shared repository                │
-│                                                              │
-│  Unauthorized use or distribution is prohibited.             │
-│  Contact: support@heaptrace.com                              │
-└──────────────────────────────────────────────────────────────┘
--->
-
 ---
 name: client-proposal
 description: "Write a professional feature proposal for a client engagement. Produces executive summary, problem analysis, proposed solution, technical approach, phased timeline with milestones, cost breakdown, and ROI projection. Output is polished and ready for client-facing delivery."
@@ -596,3 +569,18 @@ technical stakeholders]
 6. **Follow up in person** — Never just email the proposal. Walk through it live.
 7. **Make the next step easy** — "Reply to this email to schedule the kickoff" beats a complex procurement process
 8. **Keep it under 15 pages** — Longer proposals are less likely to be read completely
+
+<!--
+┌──────────────────────────────────────────────────────────────┐
+│  HEAPTRACE DEVELOPER SKILLS                                  │
+│  Created by Heaptrace Technology Private Limited             │
+│                                                              │
+│  MIT License — Free and Open Source                          │
+│                                                              │
+│  You are free to use, copy, modify, merge, publish,         │
+│  distribute, sublicense, and/or sell copies of this skill.   │
+│  No restrictions. No attribution required.                   │
+│                                                              │
+│  heaptrace.com | github.com/heaptracetechnology              │
+└──────────────────────────────────────────────────────────────┘
+-->

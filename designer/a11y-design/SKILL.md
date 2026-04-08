@@ -1,30 +1,3 @@
-<!--
-┌──────────────────────────────────────────────────────────────┐
-│  HEAPTRACE DEVELOPER SKILLS                                  │
-│  Copyright © 2026 Heaptrace Technology Private Limited        │
-│                                                              │
-│  CONFIDENTIAL — FOR AUTHORIZED CLIENTS ONLY                  │
-│                                                              │
-│  This skill file is the intellectual property of Heaptrace.  │
-│  It is provided exclusively to licensed clients and their    │
-│  development teams for internal use only.                    │
-│                                                              │
-│  You MAY:                                                    │
-│  ✅ Use within your development team                         │
-│  ✅ Customize and tune for your project                      │
-│  ✅ Use with Claude Code, Cursor, or any AI coding tool      │
-│                                                              │
-│  You MAY NOT:                                                │
-│  ❌ Redistribute, share, or publish publicly                 │
-│  ❌ Sell, sublicense, or transfer to third parties            │
-│  ❌ Remove or modify this copyright notice                   │
-│  ❌ Commit to any public or shared repository                │
-│                                                              │
-│  Unauthorized use or distribution is prohibited.             │
-│  Contact: support@heaptrace.com                              │
-└──────────────────────────────────────────────────────────────┘
--->
-
 ---
 name: a11y-design
 description: "Design for accessibility following WCAG 2.1 AA standards — color contrast (4.5:1 minimum), focus management, screen reader flow, ARIA landmarks, keyboard navigation, form labeling, and error identification. Use when building inclusive interfaces or auditing existing pages."
@@ -582,3 +555,18 @@ When designing for accessibility, always deliver:
 8. **Alternative indicators** — non-color cues for status/errors
 9. **Testing plan** — keyboard, screen reader, automated checks
 10. **Issue list** — findings ranked by WCAG criterion and severity
+
+<!--
+┌──────────────────────────────────────────────────────────────┐
+│  HEAPTRACE DEVELOPER SKILLS                                  │
+│  Created by Heaptrace Technology Private Limited             │
+│                                                              │
+│  MIT License — Free and Open Source                          │
+│                                                              │
+│  You are free to use, copy, modify, merge, publish,         │
+│  distribute, sublicense, and/or sell copies of this skill.   │
+│  No restrictions. No attribution required.                   │
+│                                                              │
+│  heaptrace.com | github.com/heaptracetechnology              │
+└──────────────────────────────────────────────────────────────┘
+-->

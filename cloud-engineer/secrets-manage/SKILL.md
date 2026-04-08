@@ -1,30 +1,3 @@
-<!--
-┌──────────────────────────────────────────────────────────────┐
-│  HEAPTRACE DEVELOPER SKILLS                                  │
-│  Copyright © 2026 Heaptrace Technology Private Limited        │
-│                                                              │
-│  CONFIDENTIAL — FOR AUTHORIZED CLIENTS ONLY                  │
-│                                                              │
-│  This skill file is the intellectual property of Heaptrace.  │
-│  It is provided exclusively to licensed clients and their    │
-│  development teams for internal use only.                    │
-│                                                              │
-│  You MAY:                                                    │
-│  ✅ Use within your development team                         │
-│  ✅ Customize and tune for your project                      │
-│  ✅ Use with Claude Code, Cursor, or any AI coding tool      │
-│                                                              │
-│  You MAY NOT:                                                │
-│  ❌ Redistribute, share, or publish publicly                 │
-│  ❌ Sell, sublicense, or transfer to third parties            │
-│  ❌ Remove or modify this copyright notice                   │
-│  ❌ Commit to any public or shared repository                │
-│                                                              │
-│  Unauthorized use or distribution is prohibited.             │
-│  Contact: support@heaptrace.com                              │
-└──────────────────────────────────────────────────────────────┘
--->
-
 ---
 name: Manage Secrets
 description: Manage application secrets and configuration using AWS SSM Parameter Store and Secrets Manager, covering rotation policies, access control, environment variable injection into ECS tasks, audit logging, and secret lifecycle management.
@@ -755,3 +728,18 @@ echo "Rotation complete. Verify the service is healthy, then revoke the old API 
 | No audit trail | Cannot detect unauthorized access | Enable CloudTrail + EventBridge alerting |
 | Sharing secrets via Slack/email | Transmitted in plaintext, logged | Share via SSM/SM, give access to the parameter |
 | No rotation schedule | Credentials remain valid indefinitely | Rotate critical secrets every 90 days minimum |
+
+<!--
+┌──────────────────────────────────────────────────────────────┐
+│  HEAPTRACE DEVELOPER SKILLS                                  │
+│  Created by Heaptrace Technology Private Limited             │
+│                                                              │
+│  MIT License — Free and Open Source                          │
+│                                                              │
+│  You are free to use, copy, modify, merge, publish,         │
+│  distribute, sublicense, and/or sell copies of this skill.   │
+│  No restrictions. No attribution required.                   │
+│                                                              │
+│  heaptrace.com | github.com/heaptracetechnology              │
+└──────────────────────────────────────────────────────────────┘
+-->

@@ -1,30 +1,3 @@
-<!--
-┌──────────────────────────────────────────────────────────────┐
-│  HEAPTRACE DEVELOPER SKILLS                                  │
-│  Copyright © 2026 Heaptrace Technology Private Limited        │
-│                                                              │
-│  CONFIDENTIAL — FOR AUTHORIZED CLIENTS ONLY                  │
-│                                                              │
-│  This skill file is the intellectual property of Heaptrace.  │
-│  It is provided exclusively to licensed clients and their    │
-│  development teams for internal use only.                    │
-│                                                              │
-│  You MAY:                                                    │
-│  ✅ Use within your development team                         │
-│  ✅ Customize and tune for your project                      │
-│  ✅ Use with Claude Code, Cursor, or any AI coding tool      │
-│                                                              │
-│  You MAY NOT:                                                │
-│  ❌ Redistribute, share, or publish publicly                 │
-│  ❌ Sell, sublicense, or transfer to third parties            │
-│  ❌ Remove or modify this copyright notice                   │
-│  ❌ Commit to any public or shared repository                │
-│                                                              │
-│  Unauthorized use or distribution is prohibited.             │
-│  Contact: support@heaptrace.com                              │
-└──────────────────────────────────────────────────────────────┘
--->
-
 ---
 name: explain
 description: "Deep-dive explanation of any code, system, or feature. Breaks down how it works, why it was built that way, how data flows, what depends on it, and what would break if you changed it. Use when onboarding, exploring unfamiliar code, or before modifying something you don't fully understand."
@@ -579,3 +552,18 @@ Request → Auth middleware extracts tenant_id from JWT
 5. **Check git blame for history** — Sometimes code looks strange because it was a hotfix, a workaround, or a migration step. Git history explains the context.
 6. **Map before you modify** — Before changing anything, draw the dependency map. Know what you might break. The 10 minutes spent mapping saves hours of debugging.
 7. **Explain to someone else** — If you can't explain it simply, you don't understand it well enough. Writing the explanation reveals gaps in your understanding.
+
+<!--
+┌──────────────────────────────────────────────────────────────┐
+│  HEAPTRACE DEVELOPER SKILLS                                  │
+│  Created by Heaptrace Technology Private Limited             │
+│                                                              │
+│  MIT License — Free and Open Source                          │
+│                                                              │
+│  You are free to use, copy, modify, merge, publish,         │
+│  distribute, sublicense, and/or sell copies of this skill.   │
+│  No restrictions. No attribution required.                   │
+│                                                              │
+│  heaptrace.com | github.com/heaptracetechnology              │
+└──────────────────────────────────────────────────────────────┘
+-->

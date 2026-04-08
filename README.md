@@ -2,6 +2,7 @@
   <img src="https://img.shields.io/badge/Skills-66-06b6d4?style=for-the-badge&labelColor=0f172a" alt="66 Skills">
   <img src="https://img.shields.io/badge/Packs-8-a855f7?style=for-the-badge&labelColor=0f172a" alt="8 Packs">
   <img src="https://img.shields.io/badge/Works_With-Claude_|_Cursor-10b981?style=for-the-badge&labelColor=0f172a" alt="Claude & Cursor">
+  <img src="https://img.shields.io/badge/License-MIT-f59e0b?style=for-the-badge&labelColor=0f172a" alt="MIT License">
 </p>
 
 <h1 align="center">Heaptrace Developer Skills</h1>
@@ -285,19 +286,10 @@ heaptrace-skills/
 
 ## License
 
-Copyright © 2026 **Heaptrace Technology Private Limited**
+**MIT License** — Free and open source.
 
-This repository and its contents are **confidential and proprietary**. Skills are provided exclusively to licensed clients and their development teams for internal use only.
+You are free to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of these skills. No restrictions. No attribution required.
 
-**You MAY:**
-- Use within your development team
-- Customize and tune for your project
-- Use with Claude Code, Cursor, or any AI coding tool
+See [LICENSE](LICENSE) for the full license text.
 
-**You MAY NOT:**
-- Redistribute, share, or publish publicly
-- Sell, sublicense, or transfer to third parties
-- Remove or modify copyright notices
-- Commit skill files to any public or shared repository
-
-Contact: **support@heaptrace.com**
+Created by **[Heaptrace Technology Private Limited](https://heaptrace.com)** | Contact: **support@heaptrace.com**
