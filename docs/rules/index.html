@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rules &amp; Templates — Heaptrace Skills</title>
+  <meta name="description" content="Copy-paste CLAUDE.md and .cursorrules templates for your project type. Ready-to-use project rules for React, Next.js, Node.js, Python, React Native, and Monorepo setups.">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Shared Styles -->
+  <link rel="stylesheet" href="../css/styles.css">
+
+  <!-- Page-specific styles -->
+  <style>
+    /* Explainer cards */
+    .explainer-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+      margin: 40px 0;
+    }
+    .explainer-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px;
+      transition: var(--transition);
+    }
+    .explainer-card:hover {
+      border-color: var(--border-hover);
+      box-shadow: var(--shadow-sm);
+    }
+    .explainer-card-header {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 20px;
+    }
+    .explainer-card-icon {
+      width: 48px; height: 48px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; flex-shrink: 0;
+    }
+    .explainer-card-title {
+      font-size: 1.15rem; font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .explainer-card-list {
+      list-style: none; padding: 0; margin: 0;
+    }
+    .explainer-card-list li {
+      font-size: 0.88rem; color: var(--text-secondary); line-height: 1.8;
+      padding-left: 20px; position: relative;
+    }
+    .explainer-card-list li::before {
+      content: '';
+      position: absolute; left: 0; top: 10px;
+      width: 6px; height: 6px; border-radius: 50%;
+    }
+    .explainer-card.cyan-card .explainer-card-list li::before {
+      background: var(--cyan);
+    }
+    .explainer-card.purple-card .explainer-card-list li::before {
+      background: var(--purple);
+    }
+
+    /* Callout */
+    .callout {
+      padding: 20px 24px;
+      border-radius: var(--radius-sm);
+      margin: 32px 0;
+      font-size: 0.92rem;
+      line-height: 1.8;
+      color: var(--text-secondary);
+      background: rgba(6, 182, 212, 0.06);
+      border-left: 3px solid var(--cyan);
+    }
+    .callout strong {
+      color: var(--text-primary);
+    }
+
+    /* Template cards grid */
+    .templates-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin: 40px 0;
+    }
+    .template-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      transition: var(--transition);
+      cursor: pointer;
+      position: relative;
+    }
+    .template-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0;
+      height: 3px; opacity: 0; transition: var(--transition);
+    }
+    .template-card:hover {
+      border-color: var(--border-hover);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-4px);
+    }
+    .template-card:hover::before { opacity: 1; }
+    .template-card.expanded {
+      grid-column: 1 / -1;
+    }
+    .template-card.expanded:hover {
+      transform: none;
+    }
+
+    /* Color variants */
+    .template-card.react::before { background: linear-gradient(90deg, var(--cyan), var(--blue)); }
+    .template-card.nextjs::before { background: linear-gradient(90deg, var(--purple), var(--indigo)); }
+    .template-card.node::before { background: linear-gradient(90deg, var(--green), var(--teal)); }
+    .template-card.python::before { background: linear-gradient(90deg, var(--amber), var(--orange)); }
+    .template-card.mobile::before { background: linear-gradient(90deg, var(--blue), var(--violet)); }
+    .template-card.monorepo::before { background: linear-gradient(90deg, var(--rose), var(--pink)); }
+
+    .template-card.expanded::before { opacity: 1; }
+
+    .template-card-header {
+      padding: 28px 24px;
+      display: flex; align-items: center; gap: 16px;
+    }
+    .template-card-icon {
+      width: 52px; height: 52px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; flex-shrink: 0;
+    }
+    .template-card.react .template-card-icon { background: rgba(6, 182, 212, 0.12); }
+    .template-card.nextjs .template-card-icon { background: rgba(168, 85, 247, 0.12); }
+    .template-card.node .template-card-icon { background: rgba(16, 185, 129, 0.12); }
+    .template-card.python .template-card-icon { background: rgba(245, 158, 11, 0.12); }
+    .template-card.mobile .template-card-icon { background: rgba(59, 130, 246, 0.12); }
+    .template-card.monorepo .template-card-icon { background: rgba(244, 63, 94, 0.12); }
+
+    .template-card-info { flex: 1; min-width: 0; }
+    .template-card-name {
+      font-size: 1.05rem; font-weight: 700; margin-bottom: 4px;
+    }
+    .template-card-desc {
+      font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;
+    }
+    .template-card-toggle {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+      transition: var(--transition); flex-shrink: 0;
+      color: var(--text-muted);
+    }
+    .template-card:hover .template-card-toggle {
+      border-color: var(--border-hover);
+      color: var(--text-secondary);
+    }
+    .template-card.expanded .template-card-toggle {
+      transform: rotate(180deg);
+      background: rgba(6, 182, 212, 0.1);
+      border-color: rgba(6, 182, 212, 0.25);
+      color: var(--cyan);
+    }
+
+    /* Template content (expandable) */
+    .template-card-content {
+      display: none;
+      border-top: 1px solid var(--border);
+    }
+    .template-card.expanded .template-card-content {
+      display: block;
+    }
+    .template-code-wrapper {
+      position: relative;
+    }
+    .template-code-wrapper pre {
+      background: var(--bg-code);
+      margin: 0;
+      padding: 24px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.8;
+      color: var(--text-secondary);
+      overflow-x: auto;
+      white-space: pre;
+      max-height: 600px;
+      overflow-y: auto;
+    }
+    .copy-btn {
+      position: absolute; top: 12px; right: 12px;
+      background: var(--bg-card); border: 1px solid var(--border);
+      color: var(--text-secondary); padding: 6px 14px;
+      border-radius: var(--radius-sm); font-size: 0.75rem;
+      font-weight: 600; cursor: pointer; transition: var(--transition);
+      font-family: 'Inter', sans-serif;
+      z-index: 2;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .copy-btn:hover {
+      border-color: var(--cyan);
+      color: var(--cyan);
+      background: rgba(6, 182, 212, 0.08);
+    }
+    .copy-btn.copied {
+      border-color: var(--green);
+      color: var(--green);
+      background: rgba(16, 185, 129, 0.08);
+    }
+    .template-card-tabs {
+      display: flex; gap: 0; border-bottom: 1px solid var(--border);
+      background: var(--bg-secondary);
+    }
+    .template-card-tab {
+      padding: 10px 20px; font-size: 0.78rem; font-weight: 600;
+      color: var(--text-muted); cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: var(--transition-fast);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .template-card-tab:hover { color: var(--text-secondary); }
+    .template-card-tab.active {
+      color: var(--cyan); border-bottom-color: var(--cyan);
+      background: rgba(6, 182, 212, 0.04);
+    }
+
+    /* Synergy section */
+    .synergy-grid {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr;
+      gap: 0; align-items: center;
+      margin: 40px 0;
+    }
+    .synergy-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      text-align: center;
+      transition: var(--transition);
+    }
+    .synergy-card:hover {
+      border-color: var(--border-hover);
+      box-shadow: var(--shadow-sm);
+    }
+    .synergy-card-icon {
+      width: 48px; height: 48px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; margin: 0 auto 16px;
+    }
+    .synergy-card-title {
+      font-size: 1rem; font-weight: 700; margin-bottom: 6px;
+    }
+    .synergy-card-desc {
+      font-size: 0.82rem; color: var(--text-secondary); line-height: 1.6;
+    }
+    .synergy-arrow {
+      color: var(--text-muted); font-size: 24px;
+      padding: 0 16px;
+    }
+
+    /* Tips grid */
+    .tips-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin: 40px 0;
+    }
+    .tip-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      transition: var(--transition);
+    }
+    .tip-card:hover {
+      border-color: var(--border-hover);
+      box-shadow: var(--shadow-sm);
+    }
+    .tip-num {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem; font-weight: 800; margin-bottom: 16px;
+      background: linear-gradient(135deg, var(--cyan), var(--blue));
+      color: white;
+    }
+    .tip-title {
+      font-size: 0.95rem; font-weight: 700; margin-bottom: 8px;
+    }
+    .tip-desc {
+      font-size: 0.85rem; color: var(--text-secondary); line-height: 1.7;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .templates-grid { grid-template-columns: repeat(2, 1fr); }
+      .synergy-grid { grid-template-columns: 1fr; gap: 16px; }
+      .synergy-arrow { transform: rotate(90deg); padding: 8px 0; margin: 0 auto; }
+    }
+    @media (max-width: 768px) {
+      .explainer-grid { grid-template-columns: 1fr; }
+      .templates-grid { grid-template-columns: 1fr; }
+      .tips-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     NAVIGATION
+     ══════════════════════════════════════════ -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+      <a href="../customize/index.html" class="nav-link">Customize</a>
+      <a href="index.html" class="nav-link active">Rules</a>
+      <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-link">GitHub</a>
+    </div>
+
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+
+    <button class="nav-toggle" id="navToggle" onclick="toggleNav()" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M4 6h16M4 12h16M4 18h16"/>
+      </svg>
+    </button>
+  </div>
+</nav>
+
+
+<!-- ══════════════════════════════════════════
+     HERO
+     ══════════════════════════════════════════ -->
+<section class="hero">
+  <div class="container hero-content">
+
+    <div class="hero-badge">
+      <span class="hero-badge-dot"></span>
+      Rules &amp; Templates
+    </div>
+
+    <h1>Ready-to-Use Project Rules</h1>
+
+    <p class="hero-subtitle">
+      Copy-paste <strong>CLAUDE.md</strong> and <strong>.cursorrules</strong> templates for your project type. Customize and ship.
+    </p>
+
+    <div class="hero-ctas">
+      <a href="#templates" class="btn-primary">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+        Browse Templates
+      </a>
+      <a href="#tips" class="btn-secondary">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+        Writing Tips
+      </a>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     WHAT ARE PROJECT RULES?
+     ══════════════════════════════════════════ -->
+<section class="section" id="explainer">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-eyebrow">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        What Are Project Rules?
+      </div>
+      <h2 class="section-title">Tell Your AI How Your Project Works</h2>
+      <p class="section-desc">Project rules are config files that your AI coding assistant reads automatically. They contain your conventions, patterns, and guardrails.</p>
+    </div>
+
+    <div class="explainer-grid">
+      <div class="explainer-card cyan-card">
+        <div class="explainer-card-header">
+          <div class="explainer-card-icon" style="background: rgba(6, 182, 212, 0.12);">
+            <svg width="24" height="24" fill="none" stroke="var(--cyan)" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          </div>
+          <div class="explainer-card-title" style="color: var(--cyan);">CLAUDE.md</div>
+        </div>
+        <ul class="explainer-card-list">
+          <li>Used by <strong style="color:var(--text-primary)">Claude Code</strong></li>
+          <li>Location: <code class="mono" style="color:var(--cyan-light);font-size:0.82rem">.claude/CLAUDE.md</code> (project) or <code class="mono" style="color:var(--cyan-light);font-size:0.82rem">~/.claude/CLAUDE.md</code> (global)</li>
+          <li>Auto-loaded at the start of every conversation</li>
+          <li>Contains: project conventions, tech stack, patterns to follow, things to avoid</li>
+          <li>Markdown format</li>
+        </ul>
+      </div>
+
+      <div class="explainer-card purple-card">
+        <div class="explainer-card-header">
+          <div class="explainer-card-icon" style="background: rgba(168, 85, 247, 0.12);">
+            <svg width="24" height="24" fill="none" stroke="var(--purple)" stroke-width="2" viewBox="0 0 24 24"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+          </div>
+          <div class="explainer-card-title" style="color: var(--purple);">.cursorrules</div>
+        </div>
+        <ul class="explainer-card-list">
+          <li>Used by <strong style="color:var(--text-primary)">Cursor</strong></li>
+          <li>Location: <code class="mono" style="color:var(--purple-light);font-size:0.82rem">.cursorrules</code> in project root</li>
+          <li>Auto-loaded into every Cursor AI chat</li>
+          <li>Same purpose: conventions, patterns, rules</li>
+          <li>Plain text / markdown format</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout">
+      <strong>Both files serve the same purpose</strong> &mdash; they tell your AI assistant how YOUR project works, so it writes code that fits your codebase instead of generic tutorials. The content is nearly identical; only the filename and location differ.
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+
+<!-- ══════════════════════════════════════════
+     TEMPLATE CARDS
+     ══════════════════════════════════════════ -->
+<section class="section" id="templates">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-eyebrow">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm0 8a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zm10 0a1 1 0 011-1h4a1 1 0 011 1v6a1 1 0 01-1 1h-4a1 1 0 01-1-1v-6z"/></svg>
+        6 Templates
+      </div>
+      <h2 class="section-title">Pick Your Stack, Copy the Rules</h2>
+      <p class="section-desc">Click a template to expand it. Copy the content into your CLAUDE.md or .cursorrules file and customize for your project.</p>
+    </div>
+
+    <div class="templates-grid" id="templatesGrid">
+
+      <!-- Template 1: React SPA -->
+      <div class="template-card react" onclick="toggleTemplate(this)" data-template="react">
+        <div class="template-card-header">
+          <div class="template-card-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="var(--cyan)"><path d="M14.23 12.004a2.236 2.236 0 01-2.235 2.236 2.236 2.236 0 01-2.236-2.236 2.236 2.236 0 012.235-2.236 2.236 2.236 0 012.236 2.236zm2.648-10.69c-1.346 0-3.107.96-4.888 2.622-1.78-1.653-3.542-2.602-4.887-2.602-.31 0-.6.045-.87.134-1.26.414-2.04 1.624-2.13 3.396-.09 1.664.58 3.708 1.84 5.76-1.26 2.05-1.93 4.1-1.84 5.76.09 1.77.87 2.98 2.13 3.4.27.09.56.13.87.13 1.345 0 3.107-.95 4.888-2.6 1.78 1.65 3.542 2.6 4.887 2.6.31 0 .6-.04.87-.13 1.26-.42 2.04-1.63 2.13-3.4.09-1.66-.58-3.71-1.84-5.76 1.26-2.052 1.93-4.096 1.84-5.76-.09-1.772-.87-2.982-2.13-3.396a2.18 2.18 0 00-.87-.134z"/></svg>
+          </div>
+          <div class="template-card-info">
+            <div class="template-card-name">React SPA</div>
+            <div class="template-card-desc">Vite + TypeScript + Tailwind + React Query + Zustand</div>
+          </div>
+          <div class="template-card-toggle">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+          </div>
+        </div>
+        <div class="template-card-content">
+          <div class="template-code-wrapper">
+            <button class="copy-btn" onclick="event.stopPropagation(); copyTemplate(this);">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              Copy
+            </button>
+            <pre><code># Project Rules — React SPA
+
+## Tech Stack
+- React 18 + TypeScript + Vite
+- React Router v6 for routing
+- Zustand for state management
+- Tailwind CSS for styling
+- React Query for server state
+- Vitest + React Testing Library for tests
+
+## Project Structure
+src/
+├── components/    → Reusable UI components
+├── pages/         → Route-level page components
+├── hooks/         → Custom React hooks
+├── stores/        → Zustand stores
+├── api/           → API client and endpoints
+├── types/         → TypeScript interfaces
+├── utils/         → Helper functions
+└── assets/        → Static files
+
+## Conventions
+- Functional components only — no class components
+- Custom hooks for any logic used in 2+ components
+- Co-locate component, styles, and tests in the same folder
+- Named exports only — no default exports
+- Use TypeScript strict mode — no `any` types
+- Component files: PascalCase (Button.tsx)
+- Utility files: camelCase (formatDate.ts)
+
+## State Management
+- Server state → React Query (useQuery, useMutation)
+- Client state → Zustand stores (minimal, atomic)
+- Form state → React Hook Form
+- URL state → React Router search params
+- Never duplicate server data in client stores
+
+## Styling
+- Tailwind utility classes — no custom CSS unless absolutely necessary
+- No inline styles
+- Component variants via className props
+- Design tokens in tailwind.config.ts
+
+## API Calls
+- All API calls go through src/api/ — never call fetch/axios directly in components
+- Use React Query hooks for data fetching
+- Handle loading, error, and empty states on every page
+- Type all API responses with TypeScript interfaces
+
+## Testing
+- Test behavior, not implementation
+- One test file per component/hook
+- Use screen queries from Testing Library — no querySelector
+- Mock API calls with MSW (Mock Service Worker)
+
+## Do NOT
+- Use `any` type — use `unknown` if truly dynamic
+- Install new packages without asking first
+- Create wrapper components for single-use cases
+- Put business logic in components — extract to hooks/utils
+- Skip error boundaries on route-level pages</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Template 2: Next.js Full-Stack -->
+      <div class="template-card nextjs" onclick="toggleTemplate(this)" data-template="nextjs">
+        <div class="template-card-header">
+          <div class="template-card-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="var(--purple)"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm-1.5 14.5V7.5l8 4.5-8 4.5z"/></svg>
+          </div>
+          <div class="template-card-info">
+            <div class="template-card-name">Next.js Full-Stack</div>
+            <div class="template-card-desc">App Router + Prisma + NextAuth + Tailwind + Radix UI</div>
+          </div>
+          <div class="template-card-toggle">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+          </div>
+        </div>
+        <div class="template-card-content">
+          <div class="template-code-wrapper">
+            <button class="copy-btn" onclick="event.stopPropagation(); copyTemplate(this);">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              Copy
+            </button>
+            <pre><code># Project Rules — Next.js Full-Stack
+
+## Tech Stack
+- Next.js 14 + App Router + TypeScript
+- Tailwind CSS + Radix UI primitives
+- Prisma ORM + PostgreSQL
+- NextAuth.js for authentication
+- React Query for client-side data fetching
+- Zod for validation
+
+## Project Structure
+src/
+├── app/              → App Router pages and layouts
+│   ├── (auth)/       → Auth-protected route group
+│   ├── api/          → API route handlers
+│   └── layout.tsx    → Root layout
+├── components/
+│   ├── ui/           → Primitive components (Button, Input, Dialog)
+│   └── features/     → Feature-specific components
+├── lib/              → Utilities, auth config, db client
+├── prisma/           → Schema and migrations
+└── types/            → Shared TypeScript types
+
+## Server vs Client
+- Default to Server Components — add "use client" only when needed
+- Use Server Actions for mutations (form submissions, data writes)
+- Use API routes only for webhooks, external integrations, or cron
+- Fetch data in Server Components, pass to Client Components as props
+
+## Database
+- All schema changes go through Prisma migrations
+- Run `npx prisma migrate dev --name &lt;name&gt;` for every change
+- Always add reverse relations on both sides
+- Use transactions for multi-table operations
+- Never write raw SQL unless Prisma can't express the query
+
+## API Routes
+- Validate all input with Zod schemas
+- Return consistent response shape: { data, error, message }
+- Handle errors with try/catch — never let errors bubble unhandled
+- Use middleware for auth checks on protected routes
+
+## Authentication
+- Use NextAuth.js session — never roll custom auth
+- Check session in Server Components with getServerSession()
+- Protect API routes with auth middleware
+- Never expose user IDs in URLs — use server-side lookup
+
+## Styling
+- Tailwind utility classes — no custom CSS files
+- Radix UI for accessible primitives (Dialog, Dropdown, Tabs)
+- Consistent spacing: p-4, p-6, gap-4
+- Mobile-first responsive: default mobile, then sm:, md:, lg:
+
+## Do NOT
+- Use `getServerSideProps` or `getStaticProps` — we use App Router
+- Put database calls in Client Components
+- Skip loading.tsx and error.tsx files for routes
+- Use cookies/localStorage for auth — use NextAuth sessions
+- Add packages without confirming first</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Template 3: Node.js Backend -->
+      <div class="template-card node" onclick="toggleTemplate(this)" data-template="node">
+        <div class="template-card-header">
+          <div class="template-card-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="var(--green)"><path d="M12 1.85c-.27 0-.55.07-.78.2l-7.44 4.3c-.48.28-.78.8-.78 1.36v8.58c0 .56.3 1.08.78 1.36l1.95 1.12c.95.46 1.27.46 1.7.46 1.38 0 2.17-.84 2.17-2.3V8.55c0-.12-.1-.22-.22-.22h-.93c-.12 0-.22.1-.22.22v8.38c0 .65-.67 1.3-1.77.75l-2.03-1.17a.27.27 0 01-.13-.23V7.71c0-.1.05-.18.13-.23l7.44-4.3a.27.27 0 01.26 0l7.44 4.3c.08.05.13.14.13.23v8.58c0 .1-.05.18-.13.23l-7.44 4.3a.26.26 0 01-.26 0l-1.9-1.13c-.08-.04-.17-.05-.25-.02-.7.3-1.9.53-2.32.53-.93 0-.22-.27.78-.62l1.99-1.18a.27.27 0 00.13-.23V7.71z"/></svg>
+          </div>
+          <div class="template-card-info">
+            <div class="template-card-name">Node.js Backend</div>
+            <div class="template-card-desc">Express + TypeScript + Prisma + Redis + JWT + Zod</div>
+          </div>
+          <div class="template-card-toggle">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+          </div>
+        </div>
+        <div class="template-card-content">
+          <div class="template-code-wrapper">
+            <button class="copy-btn" onclick="event.stopPropagation(); copyTemplate(this);">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              Copy
+            </button>
+            <pre><code># Project Rules — Node.js Backend
+
+## Tech Stack
+- Node.js 20 + Express + TypeScript
+- Prisma ORM + PostgreSQL
+- Redis for caching and sessions
+- JWT for authentication
+- Zod for request validation
+- Winston for logging
+- Vitest for tests
+
+## Project Structure
+src/
+├── routes/         → Express route handlers
+├── services/       → Business logic (one per domain)
+├── middleware/      → Auth, validation, error handling
+├── prisma/         → Schema and migrations
+├── utils/          → Helpers, constants, types
+├── jobs/           → Background jobs and cron tasks
+└── index.ts        → App entry point
+
+## API Design
+- RESTful: GET (read), POST (create), PUT (replace), PATCH (update), DELETE (remove)
+- URL pattern: /api/v1/{resource} — plural nouns, no verbs
+- Consistent response: { success, data, error, message }
+- Pagination: ?page=1&amp;limit=20 — always paginate list endpoints
+- Filter/sort via query params: ?status=active&amp;sort=-createdAt
+
+## Validation
+- Validate ALL input at the route level using Zod
+- Parse body, params, and query separately
+- Return 400 with clear error messages for invalid input
+- Never trust client data — validate even if frontend validated
+
+## Error Handling
+- Central error handler middleware — don't catch errors in routes
+- Use custom ApiError class with status code and message
+- Log all 500 errors with Winston — include stack trace
+- Never return stack traces to the client
+- Always return JSON — never HTML error pages
+
+## Authentication
+- JWT access tokens (short-lived, 15min)
+- Refresh tokens (long-lived, 7 days, stored in DB)
+- Auth middleware on every protected route
+- Rate limit auth routes (login, register, forgot-password)
+
+## Database
+- Prisma for all queries — no raw SQL
+- Run migrations: `npx prisma migrate dev --name &lt;name&gt;`
+- Use transactions for multi-table writes
+- Add indexes on frequently queried columns
+- Soft delete (deletedAt) over hard delete
+
+## Do NOT
+- Use `any` type — TypeScript strict mode
+- Console.log in production — use Winston logger
+- Store secrets in code — use environment variables
+- Skip input validation on any endpoint
+- Add dependencies without asking first</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Template 4: Python Backend -->
+      <div class="template-card python" onclick="toggleTemplate(this)" data-template="python">
+        <div class="template-card-header">
+          <div class="template-card-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="var(--amber)"><path d="M14.31.18l.9.2.73.26.59.3.45.32.34.34.25.34.16.33.1.3.04.26.02.2-.01.13V8.5l-.05.63-.13.55-.21.46-.26.38-.3.31-.33.25-.35.19-.35.14-.33.1-.3.07-.26.04-.21.02H8.83l-.67.04-.59.14-.5.22-.41.27-.33.32-.27.35-.2.36-.15.37-.1.35-.07.32-.04.27-.02.21v3.68H3.23l-.21-.03-.28-.07-.34-.12-.37-.18-.38-.24-.36-.3-.32-.35-.26-.4-.18-.45-.12-.5-.06-.56V7.15l.04-.43.13-.39.21-.34.28-.3.33-.25.37-.2.4-.16.42-.12.43-.08.43-.04h6.31V6.3H8.83l-.09-.01-.02-.04V3.37l.13-.44.27-.38.4-.3.53-.22.65-.14.75-.06.85.02.93.1.73.14z"/></svg>
+          </div>
+          <div class="template-card-info">
+            <div class="template-card-name">Python Backend</div>
+            <div class="template-card-desc">FastAPI + SQLAlchemy + Pydantic + Alembic + Poetry</div>
+          </div>
+          <div class="template-card-toggle">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+          </div>
+        </div>
+        <div class="template-card-content">
+          <div class="template-code-wrapper">
+            <button class="copy-btn" onclick="event.stopPropagation(); copyTemplate(this);">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              Copy
+            </button>
+            <pre><code># Project Rules — Python Backend
+
+## Tech Stack
+- Python 3.12 + FastAPI + Uvicorn
+- SQLAlchemy 2.0 + Alembic migrations
+- PostgreSQL database
+- Pydantic v2 for validation
+- Poetry for dependency management
+- Pytest for testing
+
+## Project Structure
+app/
+├── api/
+│   ├── v1/          → API route modules
+│   └── deps.py      → Dependency injection
+├── models/          → SQLAlchemy models
+├── schemas/         → Pydantic request/response schemas
+├── services/        → Business logic
+├── core/            → Config, security, database setup
+├── tests/           → Test modules
+└── main.py          → FastAPI app entry point
+
+## Conventions
+- Type hints on every function — no untyped code
+- Pydantic models for ALL request/response schemas
+- Dependency injection for DB sessions, auth, etc.
+- Async endpoints for I/O-bound operations
+- snake_case for everything — files, functions, variables
+
+## API Design
+- RESTful endpoints under /api/v1/
+- Pydantic schemas: Create, Update, Response variants
+- Status codes: 200 (success), 201 (created), 400 (validation), 401 (unauth), 404 (not found)
+- Pagination: offset/limit pattern
+- Use FastAPI's built-in OpenAPI docs
+
+## Database
+- SQLAlchemy 2.0 style (mapped_column, DeclarativeBase)
+- Alembic for all migrations — never alter DB manually
+- Session per request via dependency injection
+- Use async sessions with asyncpg for PostgreSQL
+
+## Testing
+- Pytest with async support (pytest-asyncio)
+- Test database with automatic rollback per test
+- httpx.AsyncClient for API tests
+- Fixtures for common test data
+
+## Do NOT
+- Use global database sessions — use dependency injection
+- Write raw SQL — use SQLAlchemy ORM
+- Skip type hints — Pydantic and mypy enforce them
+- Catch broad exceptions (except Exception) — be specific
+- Add packages without confirming first</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Template 5: React Native / Expo -->
+      <div class="template-card mobile" onclick="toggleTemplate(this)" data-template="mobile">
+        <div class="template-card-header">
+          <div class="template-card-icon">
+            <svg width="28" height="28" fill="none" stroke="var(--blue)" stroke-width="2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+          </div>
+          <div class="template-card-info">
+            <div class="template-card-name">React Native / Expo</div>
+            <div class="template-card-desc">Expo SDK 51 + Expo Router + NativeWind + React Query</div>
+          </div>
+          <div class="template-card-toggle">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+          </div>
+        </div>
+        <div class="template-card-content">
+          <div class="template-code-wrapper">
+            <button class="copy-btn" onclick="event.stopPropagation(); copyTemplate(this);">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              Copy
+            </button>
+            <pre><code># Project Rules — React Native (Expo)
+
+## Tech Stack
+- Expo SDK 51 + React Native + TypeScript
+- Expo Router for file-based navigation
+- React Query for data fetching
+- Zustand for client state
+- NativeWind (Tailwind for RN) for styling
+- Expo SecureStore for sensitive data
+
+## Project Structure
+src/
+├── app/             → Expo Router pages (file-based routing)
+├── components/      → Reusable UI components
+├── hooks/           → Custom hooks
+├── stores/          → Zustand stores
+├── api/             → API client and endpoints
+├── constants/       → Colors, sizes, config
+└── utils/           → Helper functions
+
+## Conventions
+- Functional components only
+- Platform-specific code via .ios.tsx / .android.tsx suffixes
+- Expo modules over bare RN libraries when available
+- TypeScript strict mode — no `any`
+
+## Navigation
+- Expo Router file-based routing
+- Stack layout for main navigation
+- Tab layout for bottom tabs
+- Modal routes with presentation: "modal"
+
+## Styling
+- NativeWind (Tailwind) utility classes
+- No inline StyleSheet.create unless NativeWind can't express it
+- Consistent spacing: p-4, gap-3, rounded-xl
+- Use theme colors from constants
+
+## API &amp; Data
+- API base URL: switch between dev (localhost) and prod automatically
+- React Query for server state — no manual fetch in useEffect
+- Handle offline gracefully — show cached data when no network
+- Expo SecureStore for tokens — never AsyncStorage for secrets
+
+## Do NOT
+- Use react-native-cli patterns — we use Expo
+- Import from react-native directly when Expo has a module
+- Hardcode API URLs — use config/constants
+- Test on one platform only — always check iOS + Android
+- Add native dependencies without confirming first</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Template 6: Monorepo -->
+      <div class="template-card monorepo" onclick="toggleTemplate(this)" data-template="monorepo">
+        <div class="template-card-header">
+          <div class="template-card-icon">
+            <svg width="28" height="28" fill="none" stroke="var(--rose)" stroke-width="2" viewBox="0 0 24 24"><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+          </div>
+          <div class="template-card-info">
+            <div class="template-card-name">Monorepo (Turborepo)</div>
+            <div class="template-card-desc">Turborepo + pnpm workspaces + shared packages + TypeScript</div>
+          </div>
+          <div class="template-card-toggle">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+          </div>
+        </div>
+        <div class="template-card-content">
+          <div class="template-code-wrapper">
+            <button class="copy-btn" onclick="event.stopPropagation(); copyTemplate(this);">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              Copy
+            </button>
+            <pre><code># Project Rules — Monorepo (Turborepo)
+
+## Tech Stack
+- Turborepo for build orchestration
+- pnpm workspaces for package management
+- TypeScript (shared tsconfig)
+- Shared packages for common code
+
+## Project Structure
+apps/
+├── web/             → Next.js frontend
+├── api/             → Express/Fastify backend
+└── mobile/          → React Native / Expo
+packages/
+├── ui/              → Shared UI component library
+├── config/          → Shared configs (ESLint, TS, Tailwind)
+├── types/           → Shared TypeScript types
+└── utils/           → Shared utility functions
+
+## Conventions
+- Shared code goes in packages/ — never duplicate between apps
+- Each package has its own package.json and tsconfig.json
+- Import shared packages by name: @repo/ui, @repo/types
+- Changes to packages/ trigger rebuilds for all dependent apps
+- Keep packages focused — one concern per package
+
+## Dependencies
+- Root package.json: only dev tools (turbo, typescript, eslint)
+- App dependencies: in each app's package.json
+- Shared dependencies: in each package's package.json
+- Use pnpm — never npm or yarn
+
+## Build &amp; CI
+- `turbo build` builds all apps in dependency order
+- `turbo dev` runs all dev servers in parallel
+- Turborepo caches builds — configure turbo.json properly
+- CI uses remote caching (Vercel Remote Cache)
+- Lint and test run in parallel per package
+
+## Do NOT
+- Install dependencies in root unless they're dev tools
+- Import between apps directly — extract to a package
+- Duplicate types/utils across apps — move to packages/
+- Skip turbo.json outputs config — breaks caching
+- Add workspace dependencies without confirming first</code></pre>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+
+<!-- ══════════════════════════════════════════
+     SKILLS + RULES SYNERGY
+     ══════════════════════════════════════════ -->
+<section class="section-sm" id="synergy">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-eyebrow">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        Better Together
+      </div>
+      <h2 class="section-title">How Skills + Rules Work Together</h2>
+      <p class="section-desc">Rules define the "what to follow." Skills define the "how to do it." Together, they give your AI both context and process.</p>
+    </div>
+
+    <div class="synergy-grid">
+      <div class="synergy-card">
+        <div class="synergy-card-icon" style="background: rgba(6, 182, 212, 0.12);">
+          <svg width="24" height="24" fill="none" stroke="var(--cyan)" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        </div>
+        <div class="synergy-card-title">Rules</div>
+        <div class="synergy-card-desc">Project-wide conventions that apply to everything. Tech stack, file structure, naming, patterns, "do nots."</div>
+      </div>
+      <div class="synergy-arrow">+</div>
+      <div class="synergy-card">
+        <div class="synergy-card-icon" style="background: rgba(168, 85, 247, 0.12);">
+          <svg width="24" height="24" fill="none" stroke="var(--purple)" stroke-width="2" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <div class="synergy-card-title">Skills</div>
+        <div class="synergy-card-desc">Task-specific processes for individual workflows. Step-by-step instructions, checklists, quality gates.</div>
+      </div>
+      <div class="synergy-arrow">=</div>
+      <div class="synergy-card">
+        <div class="synergy-card-icon" style="background: rgba(16, 185, 129, 0.12);">
+          <svg width="24" height="24" fill="none" stroke="var(--green)" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <div class="synergy-card-title">Consistent Output</div>
+        <div class="synergy-card-desc">AI knows both your standards and your processes. Code fits your codebase on the first try.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+
+<!-- ══════════════════════════════════════════
+     TIPS FOR WRITING RULES
+     ══════════════════════════════════════════ -->
+<section class="section" id="tips">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-eyebrow">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+        Writing Tips
+      </div>
+      <h2 class="section-title">Tips for Writing Your Own Rules</h2>
+      <p class="section-desc">Make your project rules effective from day one. Here are the patterns that work best.</p>
+    </div>
+
+    <div class="tips-grid">
+      <div class="tip-card">
+        <div class="tip-num">1</div>
+        <div class="tip-title">Start from a template</div>
+        <div class="tip-desc">Pick the template above that matches your stack. Delete sections that don't apply, then customize the rest with your actual project details.</div>
+      </div>
+      <div class="tip-card">
+        <div class="tip-num">2</div>
+        <div class="tip-title">Be specific, not generic</div>
+        <div class="tip-desc">Write "use Prisma for all queries" not "use an ORM." Write "Tailwind utility classes" not "CSS-in-JS." The more specific, the better the AI output.</div>
+      </div>
+      <div class="tip-card">
+        <div class="tip-num">3</div>
+        <div class="tip-title">Include real file paths</div>
+        <div class="tip-desc">Reference your actual project structure: <code class="mono" style="color:var(--cyan-light);font-size:0.8rem">src/components/ui/</code> for primitives, <code class="mono" style="color:var(--cyan-light);font-size:0.8rem">src/api/</code> for endpoints. Real paths prevent the AI from guessing.</div>
+      </div>
+      <div class="tip-card">
+        <div class="tip-num">4</div>
+        <div class="tip-title">Add "Do NOT" sections</div>
+        <div class="tip-desc">Explicitly list anti-patterns. "Do NOT use any type." "Do NOT put business logic in components." Negative rules prevent the most common AI mistakes.</div>
+      </div>
+      <div class="tip-card">
+        <div class="tip-num">5</div>
+        <div class="tip-title">Keep it under 500 lines</div>
+        <div class="tip-desc">LLMs have context limits. A focused 200-300 line rules file beats a 2000-line encyclopedia. Prioritize the rules that matter most for your project.</div>
+      </div>
+      <div class="tip-card">
+        <div class="tip-num">6</div>
+        <div class="tip-title">Update quarterly</div>
+        <div class="tip-desc">Your stack evolves. Review your rules every quarter: remove outdated patterns, add new conventions, update file paths after refactors.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     CTA BANNER
+     ══════════════════════════════════════════ -->
+<section class="section-sm">
+  <div class="container">
+    <div class="cta-banner">
+      <h2>Browse 66 Skills</h2>
+      <p>Pair your project rules with structured skills for planning, building, reviewing, testing, and shipping.</p>
+      <a href="../index.html#packs" class="btn-primary">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+        Explore All Packs
+      </a>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     FOOTER
+     ══════════════════════════════════════════ -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-links">
+      <a href="https://github.com/heaptracetechnology/heaptrace-skills" class="footer-link" target="_blank" rel="noopener">GitHub</a>
+      <a href="../index.html#packs" class="footer-link">Packs</a>
+      <a href="../setup/index.html" class="footer-link">Setup Guide</a>
+      <a href="../customize/index.html" class="footer-link">Customize</a>
+      <a href="index.html" class="footer-link">Rules</a>
+      <a href="https://heaptrace.com" class="footer-link" target="_blank" rel="noopener">Heaptrace</a>
+    </div>
+    <div class="footer-copy">
+      MIT License &middot; Built by <a href="https://heaptrace.com" target="_blank" rel="noopener">Heaptrace Technology</a>
+      <br>66 Skills &middot; 8 Packs &middot; Free &amp; Open Source
+    </div>
+  </div>
+</footer>
+
+
+<!-- ══════════════════════════════════════════
+     JAVASCRIPT
+     ══════════════════════════════════════════ -->
+<script>
+/* ═══ Mobile Nav Toggle ═══ */
+function toggleNav() {
+  document.getElementById('navLinks').classList.toggle('open');
+}
+
+/* ═══ Template Expand/Collapse ═══ */
+function toggleTemplate(card) {
+  const wasExpanded = card.classList.contains('expanded');
+
+  // Collapse all templates first
+  document.querySelectorAll('.template-card.expanded').forEach(c => {
+    c.classList.remove('expanded');
+  });
+
+  // Toggle the clicked one (unless it was already expanded)
+  if (!wasExpanded) {
+    card.classList.add('expanded');
+    // Scroll into view smoothly
+    setTimeout(() => {
+      card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 50);
+  }
+}
+
+/* ═══ Copy Template to Clipboard ═══ */
+function copyTemplate(btn) {
+  const pre = btn.closest('.template-code-wrapper').querySelector('pre code');
+  const text = pre.textContent;
+
+  navigator.clipboard.writeText(text).then(() => {
+    const originalHTML = btn.innerHTML;
+    btn.classList.add('copied');
+    btn.innerHTML = '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Copied!';
+
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.innerHTML = originalHTML;
+    }, 2000);
+  }).catch(() => {
+    // Fallback: select text
+    const range = document.createRange();
+    range.selectNodeContents(pre);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  });
+}
+
+/* ═══ Smooth Scroll for Nav Links ═══ */
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) {
+      e.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      document.getElementById('navLinks').classList.remove('open');
+    }
+  });
+});
+</script>
+
+</body>
+</html>

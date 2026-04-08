@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Top MCP Servers for Developers — Heaptrace Skills</title>
+  <meta name="description" content="40+ curated MCP servers across 10 categories. Connect Claude Code, Cursor, and Claude Desktop to databases, APIs, browsers, and cloud services.">
+  <meta name="keywords" content="MCP servers, Model Context Protocol, Claude Code, Cursor, AI tools, developer tools, database MCP, browser automation">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Top MCP Servers for Developers — Heaptrace Skills">
+  <meta property="og:description" content="40+ curated MCP servers across 10 categories. Connect your AI assistant to databases, APIs, browsers, and cloud services.">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Shared Styles -->
+  <link rel="stylesheet" href="../css/styles.css">
+
+  <!-- Page-specific styles -->
+  <style>
+    /* ── Hero ── */
+    .mcp-hero {
+      padding: 140px 0 80px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .mcp-hero::before {
+      content: '';
+      position: absolute;
+      top: -200px; left: 50%; transform: translateX(-50%);
+      width: 800px; height: 800px;
+      background: radial-gradient(circle, rgba(6,182,212,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .mcp-hero h1 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 800;
+      line-height: 1.15;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, var(--text-primary) 0%, var(--cyan-light) 50%, var(--purple-light) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .mcp-hero-subtitle {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      max-width: 680px;
+      margin: 0 auto 40px;
+      line-height: 1.8;
+    }
+    .mcp-hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(6,182,212,0.1);
+      border: 1px solid rgba(6,182,212,0.25);
+      color: var(--cyan-light);
+      padding: 6px 18px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+    .mcp-hero-badge-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 8px var(--cyan);
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+    .mcp-hero-stats {
+      display: flex;
+      justify-content: center;
+      gap: 48px;
+      margin-top: 40px;
+    }
+    .mcp-hero-stat-value {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--cyan-light);
+    }
+    .mcp-hero-stat-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 4px;
+    }
+
+    /* ── Explainer Section ── */
+    .explainer {
+      padding: 80px 0;
+      border-top: 1px solid var(--border);
+    }
+    .explainer h2 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    .explainer-lead {
+      text-align: center;
+      color: var(--text-secondary);
+      max-width: 640px;
+      margin: 0 auto 48px;
+      line-height: 1.8;
+    }
+    .explainer-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-bottom: 48px;
+    }
+    .explainer-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      transition: var(--transition);
+    }
+    .explainer-card:hover {
+      border-color: var(--border-hover);
+    }
+    .explainer-card-icon {
+      font-size: 1.8rem;
+      margin-bottom: 16px;
+    }
+    .explainer-card h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .explainer-card p {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+    .flow-diagram {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px;
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.95rem;
+      color: var(--cyan-light);
+      overflow-x: auto;
+    }
+    .flow-diagram .flow-arrow {
+      color: var(--text-muted);
+      margin: 0 8px;
+    }
+    .flow-diagram .flow-node {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(6,182,212,0.08);
+      border: 1px solid rgba(6,182,212,0.2);
+      padding: 8px 16px;
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 0.85rem;
+    }
+    .flow-diagram .flow-node.highlight {
+      background: rgba(168,85,247,0.12);
+      border-color: rgba(168,85,247,0.3);
+      color: var(--purple-light);
+    }
+    .flow-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    /* ── Configure Section ── */
+    .configure-section {
+      padding: 80px 0;
+      border-top: 1px solid var(--border);
+    }
+    .configure-section h2 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    .configure-lead {
+      text-align: center;
+      color: var(--text-secondary);
+      max-width: 560px;
+      margin: 0 auto 48px;
+    }
+    .configure-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .configure-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      transition: var(--transition);
+    }
+    .configure-card:hover {
+      border-color: var(--border-hover);
+    }
+    .configure-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .configure-card-icon {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 18px;
+      color: white;
+    }
+    .configure-card-icon.cc {
+      background: linear-gradient(135deg, var(--cyan), var(--blue));
+    }
+    .configure-card-icon.cursor {
+      background: linear-gradient(135deg, var(--purple), var(--indigo));
+    }
+    .configure-card-icon.desktop {
+      background: linear-gradient(135deg, var(--orange), var(--amber));
+    }
+    .configure-card h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+    .configure-card-sub {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .config-code {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+      overflow-x: auto;
+      white-space: pre;
+      margin-top: 4px;
+    }
+    .config-code .comment {
+      color: var(--text-muted);
+    }
+    .config-code .string {
+      color: var(--green);
+    }
+    .config-code .key {
+      color: var(--cyan-light);
+    }
+    .config-code .cmd {
+      color: var(--cyan-light);
+    }
+
+    /* ── Category Filters ── */
+    .catalog-section {
+      padding: 80px 0;
+      border-top: 1px solid var(--border);
+    }
+    .catalog-section h2 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    .catalog-lead {
+      text-align: center;
+      color: var(--text-secondary);
+      max-width: 560px;
+      margin: 0 auto 40px;
+    }
+    .category-filters {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 40px;
+    }
+    .cat-btn {
+      padding: 8px 18px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: var(--transition-fast);
+      white-space: nowrap;
+    }
+    .cat-btn:hover {
+      border-color: var(--border-hover);
+      color: var(--text-primary);
+    }
+    .cat-btn.active {
+      color: white;
+    }
+    .cat-btn .cat-count {
+      margin-left: 6px;
+      font-size: 0.72rem;
+      opacity: 0.7;
+    }
+
+    /* ── Server Cards Grid ── */
+    .servers-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+    .server-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .server-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    .server-card-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+    .server-icon {
+      font-size: 1.6rem;
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+    }
+    .server-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .server-name-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 4px;
+      flex-wrap: wrap;
+    }
+    .server-name {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .server-cat-badge {
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 2px 10px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+    .server-desc {
+      font-size: 0.87rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    .server-cmd-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      margin-top: auto;
+    }
+    .server-cmd {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--cyan-light);
+      flex: 1;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+    .copy-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 4px;
+      transition: var(--transition-fast);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+    }
+    .copy-btn:hover {
+      color: var(--cyan-light);
+      background: rgba(6,182,212,0.1);
+    }
+    .copy-btn.copied {
+      color: var(--green);
+    }
+    .server-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .server-stats {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .server-link {
+      font-size: 0.8rem;
+      color: var(--cyan);
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: var(--transition-fast);
+    }
+    .server-link:hover {
+      color: var(--cyan-light);
+    }
+    .no-results {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+      font-size: 1rem;
+    }
+
+    /* ── Starter Pack ── */
+    .starter-section {
+      padding: 80px 0;
+      border-top: 1px solid var(--border);
+    }
+    .starter-section h2 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    .starter-lead {
+      text-align: center;
+      color: var(--text-secondary);
+      max-width: 560px;
+      margin: 0 auto 48px;
+    }
+    .starter-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 16px;
+    }
+    .starter-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 20px;
+      text-align: center;
+      transition: var(--transition);
+      position: relative;
+    }
+    .starter-card:hover {
+      border-color: var(--cyan);
+      transform: translateY(-4px);
+      box-shadow: 0 0 30px rgba(6,182,212,0.1);
+    }
+    .starter-num {
+      position: absolute;
+      top: 12px; left: 12px;
+      width: 24px; height: 24px;
+      border-radius: 6px;
+      background: linear-gradient(135deg, var(--cyan), var(--blue));
+      color: white;
+      font-size: 0.72rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .starter-icon {
+      font-size: 2rem;
+      margin-bottom: 12px;
+    }
+    .starter-name {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .starter-desc {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* ── Security Section ── */
+    .security-section {
+      padding: 80px 0;
+      border-top: 1px solid var(--border);
+    }
+    .security-section h2 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    .security-lead {
+      text-align: center;
+      color: var(--text-secondary);
+      max-width: 560px;
+      margin: 0 auto 48px;
+    }
+    .security-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .security-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      transition: var(--transition);
+    }
+    .security-card:hover {
+      border-color: var(--border-hover);
+    }
+    .security-card-icon {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      margin-bottom: 16px;
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.2);
+    }
+    .security-card h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .security-card p {
+      font-size: 0.87rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    /* ── Resources Section ── */
+    .resources-section {
+      padding: 80px 0;
+      border-top: 1px solid var(--border);
+    }
+    .resources-section h2 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    .resources-lead {
+      text-align: center;
+      color: var(--text-secondary);
+      max-width: 560px;
+      margin: 0 auto 48px;
+    }
+    .resources-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .resource-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      transition: var(--transition);
+      text-decoration: none;
+    }
+    .resource-card:hover {
+      border-color: var(--cyan);
+      transform: translateY(-2px);
+    }
+    .resource-icon {
+      font-size: 1.4rem;
+      flex-shrink: 0;
+    }
+    .resource-name {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+    .resource-url {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .sdk-tags {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 32px;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .sdk-tag {
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .explainer-grid,
+      .configure-grid,
+      .security-grid {
+        grid-template-columns: 1fr;
+      }
+      .servers-grid {
+        grid-template-columns: 1fr;
+      }
+      .starter-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .resources-grid {
+        grid-template-columns: 1fr;
+      }
+      .mcp-hero-stats {
+        gap: 32px;
+      }
+      .flow-row {
+        gap: 8px;
+      }
+    }
+    @media (max-width: 600px) {
+      .starter-grid {
+        grid-template-columns: 1fr;
+      }
+      .mcp-hero-stats {
+        flex-wrap: wrap;
+        gap: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     NAVIGATION
+     ══════════════════════════════════════════ -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+      <a href="../customize/index.html" class="nav-link">Customize</a>
+      <a href="../rules/index.html" class="nav-link">Rules</a>
+      <a href="index.html" class="nav-link active">MCP Servers</a>
+    </div>
+
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+
+    <button class="nav-toggle" id="navToggle" onclick="toggleNav()" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M4 6h16M4 12h16M4 18h16"/>
+      </svg>
+    </button>
+  </div>
+</nav>
+
+
+<!-- ══════════════════════════════════════════
+     HERO
+     ══════════════════════════════════════════ -->
+<section class="mcp-hero">
+  <div class="container">
+    <div class="mcp-hero-badge">
+      <span class="mcp-hero-badge-dot"></span>
+      MCP SERVERS
+    </div>
+
+    <h1>Top MCP Servers<br>for Developers</h1>
+
+    <p class="mcp-hero-subtitle">
+      Model Context Protocol lets your AI assistant connect to databases, APIs, browsers,
+      and cloud services. Here are the best MCP servers to supercharge your workflow.
+    </p>
+
+    <div class="mcp-hero-stats">
+      <div>
+        <div class="mcp-hero-stat-value">40+</div>
+        <div class="mcp-hero-stat-label">Servers</div>
+      </div>
+      <div>
+        <div class="mcp-hero-stat-value">10</div>
+        <div class="mcp-hero-stat-label">Categories</div>
+      </div>
+      <div>
+        <div class="mcp-hero-stat-value">100%</div>
+        <div class="mcp-hero-stat-label">Free &amp; Open Source</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     WHAT IS MCP?
+     ══════════════════════════════════════════ -->
+<section class="explainer" id="what-is-mcp">
+  <div class="container">
+    <h2>What is MCP?</h2>
+    <p class="explainer-lead">
+      MCP (Model Context Protocol) is an open standard that lets AI assistants connect to external tools and data sources. Think of it as "plugins" for your AI.
+    </p>
+
+    <div class="explainer-grid">
+      <div class="explainer-card">
+        <div class="explainer-card-icon">&#x1F50C;</div>
+        <h3>Open Standard</h3>
+        <p>MCP is an open protocol created by Anthropic. Any AI client can connect to any MCP server — no vendor lock-in.</p>
+      </div>
+      <div class="explainer-card">
+        <div class="explainer-card-icon">&#x1F9E9;</div>
+        <h3>Plugins for AI</h3>
+        <p>Each MCP server adds new capabilities — query a database, search the web, manage files, deploy infrastructure, and more.</p>
+      </div>
+      <div class="explainer-card">
+        <div class="explainer-card-icon">&#x1F5A5;&#xFE0F;</div>
+        <h3>Runs Locally</h3>
+        <p>MCP servers run on your machine. Your data stays local, and the AI calls tools through a secure local connection.</p>
+      </div>
+    </div>
+
+    <div class="flow-diagram">
+      <div class="flow-row">
+        <span class="flow-node">&#x1F9D1;&#x200D;&#x1F4BB; You</span>
+        <span class="flow-arrow">&#x2192;</span>
+        <span class="flow-node highlight">&#x1F916; Claude Code / Cursor</span>
+        <span class="flow-arrow">&#x2192;</span>
+        <span class="flow-node">&#x2699;&#xFE0F; MCP Server</span>
+        <span class="flow-arrow">&#x2192;</span>
+        <span class="flow-node">&#x1F4E1; External Service</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     HOW TO CONFIGURE MCP
+     ══════════════════════════════════════════ -->
+<section class="configure-section" id="configure">
+  <div class="container">
+    <h2>How to Configure MCP</h2>
+    <p class="configure-lead">Three ways to connect MCP servers to your AI assistant.</p>
+
+    <div class="configure-grid">
+      <!-- Claude Code -->
+      <div class="configure-card">
+        <div class="configure-card-header">
+          <div class="configure-card-icon cc">CC</div>
+          <div>
+            <h3>Claude Code</h3>
+            <div class="configure-card-sub">CLI commands</div>
+          </div>
+        </div>
+        <div class="config-code"><span class="comment"># Add a server</span>
+<span class="cmd">claude mcp add</span> &lt;name&gt; -- npx -y &lt;package&gt; [args]
+
+<span class="comment"># With environment variables</span>
+<span class="cmd">claude mcp add</span> -e API_KEY=xxx &lt;name&gt; -- npx -y &lt;package&gt;
+
+<span class="comment"># List servers</span>
+<span class="cmd">claude mcp list</span>
+
+<span class="comment"># Remove</span>
+<span class="cmd">claude mcp remove</span> &lt;name&gt;</div>
+      </div>
+
+      <!-- Cursor -->
+      <div class="configure-card">
+        <div class="configure-card-header">
+          <div class="configure-card-icon cursor">Cu</div>
+          <div>
+            <h3>Cursor</h3>
+            <div class="configure-card-sub">.cursor/mcp.json</div>
+          </div>
+        </div>
+        <div class="config-code">{
+  <span class="key">"mcpServers"</span>: {
+    <span class="key">"server-name"</span>: {
+      <span class="key">"command"</span>: <span class="string">"npx"</span>,
+      <span class="key">"args"</span>: [<span class="string">"-y"</span>, <span class="string">"@package/name"</span>],
+      <span class="key">"env"</span>: { <span class="key">"API_KEY"</span>: <span class="string">"your-key"</span> }
+    }
+  }
+}</div>
+      </div>
+
+      <!-- Claude Desktop -->
+      <div class="configure-card">
+        <div class="configure-card-header">
+          <div class="configure-card-icon desktop">CD</div>
+          <div>
+            <h3>Claude Desktop</h3>
+            <div class="configure-card-sub">claude_desktop_config.json</div>
+          </div>
+        </div>
+        <div class="config-code"><span class="comment">// ~/Library/Application Support/Claude/</span>
+{
+  <span class="key">"mcpServers"</span>: {
+    <span class="key">"server-name"</span>: {
+      <span class="key">"command"</span>: <span class="string">"npx"</span>,
+      <span class="key">"args"</span>: [<span class="string">"-y"</span>, <span class="string">"@package/name"</span>]
+    }
+  }
+}</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     MCP SERVER CATALOG
+     ══════════════════════════════════════════ -->
+<section class="catalog-section" id="catalog">
+  <div class="container">
+    <h2>MCP Server Catalog</h2>
+    <p class="catalog-lead">Browse 40+ servers across 10 categories. Click a category to filter.</p>
+
+    <div class="category-filters" id="categoryFilters"></div>
+    <div class="servers-grid" id="serversGrid"></div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     RECOMMENDED STARTER PACK
+     ══════════════════════════════════════════ -->
+<section class="starter-section" id="starter">
+  <div class="container">
+    <h2>Recommended Starter Pack</h2>
+    <p class="starter-lead">New to MCP? Start with these 5 servers to cover the most common workflows.</p>
+
+    <div class="starter-grid">
+      <div class="starter-card">
+        <div class="starter-num">1</div>
+        <div class="starter-icon">&#x1F4C1;</div>
+        <div class="starter-name">Filesystem</div>
+        <div class="starter-desc">Secure file read, write, move, and search operations</div>
+      </div>
+      <div class="starter-card">
+        <div class="starter-num">2</div>
+        <div class="starter-icon">&#x1F4DA;</div>
+        <div class="starter-name">Context7</div>
+        <div class="starter-desc">Up-to-date, version-specific library documentation</div>
+      </div>
+      <div class="starter-card">
+        <div class="starter-num">3</div>
+        <div class="starter-icon">&#x1F3AD;</div>
+        <div class="starter-name">Playwright</div>
+        <div class="starter-desc">Full browser automation, testing, and scraping</div>
+      </div>
+      <div class="starter-card">
+        <div class="starter-num">4</div>
+        <div class="starter-icon">&#x1F419;</div>
+        <div class="starter-name">GitHub</div>
+        <div class="starter-desc">Repo management, PRs, issues, and code search</div>
+      </div>
+      <div class="starter-card">
+        <div class="starter-num">5</div>
+        <div class="starter-icon">&#x1F517;</div>
+        <div class="starter-name">Sequential Thinking</div>
+        <div class="starter-desc">Break down complex problems step by step</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     SECURITY BEST PRACTICES
+     ══════════════════════════════════════════ -->
+<section class="security-section" id="security">
+  <div class="container">
+    <h2>Security Best Practices</h2>
+    <p class="security-lead">MCP servers run with your user permissions. Follow these practices to stay safe.</p>
+
+    <div class="security-grid">
+      <div class="security-card">
+        <div class="security-card-icon">&#x1F512;</div>
+        <h3>Least Privilege</h3>
+        <p>Only grant access to the specific directories and resources the server needs. Avoid giving root or home directory access.</p>
+      </div>
+      <div class="security-card">
+        <div class="security-card-icon">&#x1F511;</div>
+        <h3>Environment Variables</h3>
+        <p>Never hardcode API keys in config files. Use environment variables or secret managers for credentials.</p>
+      </div>
+      <div class="security-card">
+        <div class="security-card-icon">&#x1F4D6;</div>
+        <h3>Read-Only Databases</h3>
+        <p>Use read-only database connections where possible. Avoid giving MCP servers write access to production data.</p>
+      </div>
+      <div class="security-card">
+        <div class="security-card-icon">&#x1F50D;</div>
+        <h3>Audit Server Code</h3>
+        <p>MCP servers are open source. Review the code before running, especially community servers from unknown authors.</p>
+      </div>
+      <div class="security-card">
+        <div class="security-card-icon">&#x1F4C2;</div>
+        <h3>Project-Scoped Config</h3>
+        <p>Use <code class="mono">.mcp.json</code> for project-specific servers instead of global config. Keep server scope narrow.</p>
+      </div>
+      <div class="security-card">
+        <div class="security-card-icon">&#x1F4CC;</div>
+        <h3>Pin Versions</h3>
+        <p>Use specific package versions rather than <code class="mono">latest</code> in production. Prevents unexpected breaking changes.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     RESOURCES
+     ══════════════════════════════════════════ -->
+<section class="resources-section" id="resources">
+  <div class="container">
+    <h2>Resources</h2>
+    <p class="resources-lead">Official documentation, registries, and community projects.</p>
+
+    <div class="resources-grid">
+      <a href="https://registry.modelcontextprotocol.io" target="_blank" rel="noopener" class="resource-card">
+        <div class="resource-icon">&#x1F4E6;</div>
+        <div>
+          <div class="resource-name">Official MCP Registry</div>
+          <div class="resource-url">registry.modelcontextprotocol.io</div>
+        </div>
+      </a>
+      <a href="https://modelcontextprotocol.io" target="_blank" rel="noopener" class="resource-card">
+        <div class="resource-icon">&#x1F4D6;</div>
+        <div>
+          <div class="resource-name">MCP Documentation</div>
+          <div class="resource-url">modelcontextprotocol.io</div>
+        </div>
+      </a>
+      <a href="https://github.com/modelcontextprotocol/servers" target="_blank" rel="noopener" class="resource-card">
+        <div class="resource-icon">&#x2B50;</div>
+        <div>
+          <div class="resource-name">Reference Servers Repo</div>
+          <div class="resource-url">github.com/modelcontextprotocol/servers &middot; 83K stars</div>
+        </div>
+      </a>
+      <a href="https://github.com/punkpeye/awesome-mcp-servers" target="_blank" rel="noopener" class="resource-card">
+        <div class="resource-icon">&#x1F31F;</div>
+        <div>
+          <div class="resource-name">Awesome MCP Servers</div>
+          <div class="resource-url">github.com/punkpeye/awesome-mcp-servers &middot; 84K stars</div>
+        </div>
+      </a>
+    </div>
+
+    <div class="sdk-tags">
+      <span class="sdk-tag">TypeScript SDK</span>
+      <span class="sdk-tag">Python SDK</span>
+      <span class="sdk-tag">Go SDK</span>
+      <span class="sdk-tag">Rust SDK</span>
+      <span class="sdk-tag">Java SDK</span>
+      <span class="sdk-tag">Kotlin SDK</span>
+      <span class="sdk-tag">C# SDK</span>
+      <span class="sdk-tag">Ruby SDK</span>
+      <span class="sdk-tag">Swift SDK</span>
+      <span class="sdk-tag">PHP SDK</span>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     FOOTER
+     ══════════════════════════════════════════ -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-links">
+      <a href="https://github.com/heaptracetechnology/heaptrace-skills" class="footer-link" target="_blank" rel="noopener">GitHub</a>
+      <a href="../index.html#packs" class="footer-link">Packs</a>
+      <a href="../setup/index.html" class="footer-link">Setup Guide</a>
+      <a href="../customize/index.html" class="footer-link">Customize</a>
+      <a href="index.html" class="footer-link">MCP Servers</a>
+      <a href="https://heaptrace.com" class="footer-link" target="_blank" rel="noopener">Heaptrace</a>
+    </div>
+    <div class="footer-copy">
+      MIT License &middot; Built by <a href="https://heaptrace.com" target="_blank" rel="noopener">Heaptrace Technology</a>
+      <br>66 Skills &middot; 8 Packs &middot; Free &amp; Open Source
+    </div>
+  </div>
+</footer>
+
+
+<!-- ══════════════════════════════════════════
+     JAVASCRIPT
+     ══════════════════════════════════════════ -->
+<script>
+/* ═══ Server Data ═══ */
+const servers = [
+  // Official Reference Servers
+  { name: 'Filesystem', pkg: '@modelcontextprotocol/server-filesystem', cat: 'official', desc: 'Secure file operations with configurable access controls. Read, write, move, search files.', cmd: 'npx -y @modelcontextprotocol/server-filesystem /path/to/dir', stats: '591K/week', url: 'https://github.com/modelcontextprotocol/servers', icon: '\u{1F4C1}' },
+  { name: 'Memory', pkg: '@modelcontextprotocol/server-memory', cat: 'official', desc: 'Knowledge graph-based persistent memory. Store and retrieve structured information across sessions.', cmd: 'npx -y @modelcontextprotocol/server-memory', stats: '99K/week', url: 'https://github.com/modelcontextprotocol/servers', icon: '\u{1F9E0}' },
+  { name: 'Sequential Thinking', pkg: '@modelcontextprotocol/server-sequential-thinking', cat: 'official', desc: 'Dynamic problem-solving through thought sequences. Helps break down complex problems step by step.', cmd: 'npx -y @modelcontextprotocol/server-sequential-thinking', stats: '100K/week', url: 'https://github.com/modelcontextprotocol/servers', icon: '\u{1F517}' },
+  { name: 'Fetch', pkg: '@modelcontextprotocol/server-fetch', cat: 'official', desc: 'Web content fetching and conversion to markdown for efficient LLM usage.', cmd: 'npx -y @modelcontextprotocol/server-fetch', stats: 'Reference', url: 'https://github.com/modelcontextprotocol/servers', icon: '\u{1F310}' },
+  { name: 'Git', pkg: '@modelcontextprotocol/server-git', cat: 'git', desc: 'Read, search, and manipulate Git repositories. Log, diff, blame, branch operations.', cmd: 'npx -y @modelcontextprotocol/server-git', stats: 'Reference', url: 'https://github.com/modelcontextprotocol/servers', icon: '\u{1F4E6}' },
+  { name: 'Time', pkg: '@modelcontextprotocol/server-time', cat: 'official', desc: 'Time and timezone conversion capabilities.', cmd: 'npx -y @modelcontextprotocol/server-time', stats: 'Reference', url: 'https://github.com/modelcontextprotocol/servers', icon: '\u{1F550}' },
+
+  // Database
+  { name: 'PostgreSQL', pkg: '@modelcontextprotocol/server-postgres', cat: 'database', desc: 'Read-only database access with schema inspection for PostgreSQL databases.', cmd: 'npx -y @modelcontextprotocol/server-postgres postgresql://user:pass@host/db', stats: '69K/week', url: 'https://github.com/modelcontextprotocol/servers', icon: '\u{1F418}' },
+  { name: 'SQLite', pkg: '@modelcontextprotocol/server-sqlite', cat: 'database', desc: 'Database interaction and business intelligence for SQLite files.', cmd: 'npx -y @modelcontextprotocol/server-sqlite /path/to/db.sqlite', stats: 'Reference', url: 'https://github.com/modelcontextprotocol/servers', icon: '\u{1F4BE}' },
+  { name: 'Redis', pkg: '@modelcontextprotocol/server-redis', cat: 'database', desc: 'Interact with Redis key-value stores. Get, set, search keys.', cmd: 'npx -y @modelcontextprotocol/server-redis redis://localhost:6379', stats: 'Reference', url: 'https://github.com/modelcontextprotocol/servers', icon: '\u26A1' },
+  { name: 'Supabase', pkg: '@supabase/mcp-server-supabase', cat: 'database', desc: 'Manage Supabase projects \u2014 database, auth, storage, edge functions.', cmd: 'npx -y @supabase/mcp-server-supabase', stats: '39K/week', url: 'https://github.com/supabase/mcp-server-supabase', icon: '\u{1F7E2}' },
+  { name: 'Neon', pkg: '@neondatabase/mcp-server-neon', cat: 'database', desc: 'Manage Neon serverless PostgreSQL \u2014 create databases, branches, run SQL.', cmd: 'npx -y @neondatabase/mcp-server-neon', stats: '573 stars', url: 'https://github.com/neondatabase/mcp-server-neon', icon: '\u{1F30A}' },
+
+  // Git & Code
+  { name: 'GitHub (Official)', pkg: 'github-mcp-server', cat: 'git', desc: 'Official GitHub MCP \u2014 repo management, PRs, issues, actions, code search.', cmd: 'npx -y github-mcp-server', stats: '28.6K stars', url: 'https://github.com/github/github-mcp-server', icon: '\u{1F419}' },
+  { name: 'Linear', pkg: '@linear/mcp-server', cat: 'git', desc: 'Manage Linear issues, projects, cycles, and teams.', cmd: 'npx -y @anthropic-ai/linear-mcp-server', stats: 'Official', url: 'https://github.com/linear/linear-mcp-server', icon: '\u{1F4D0}' },
+
+  // Browser & Web
+  { name: 'Playwright', pkg: '@playwright/mcp', cat: 'browser', desc: 'Official Microsoft Playwright \u2014 browser automation, testing, scraping with full browser control.', cmd: 'npx -y @playwright/mcp', stats: '3.1M/week', url: 'https://github.com/microsoft/playwright', icon: '\u{1F3AD}' },
+  { name: 'Puppeteer', pkg: '@modelcontextprotocol/server-puppeteer', cat: 'browser', desc: 'Browser automation and web scraping via headless Chrome.', cmd: 'npx -y @modelcontextprotocol/server-puppeteer', stats: '27K/week', url: 'https://github.com/modelcontextprotocol/servers', icon: '\u{1F916}' },
+  { name: 'Firecrawl', pkg: 'firecrawl-mcp', cat: 'browser', desc: 'Web scraping as a service \u2014 turns any website into clean markdown/structured data.', cmd: 'npx -y firecrawl-mcp', stats: '29K/week', url: 'https://github.com/mendableai/firecrawl', icon: '\u{1F525}' },
+  { name: 'Browserbase', pkg: '@browserbasehq/mcp-server-browserbase', cat: 'browser', desc: 'Cloud browser automation \u2014 run headless browsers in the cloud.', cmd: 'npx -y @browserbasehq/mcp-server-browserbase', stats: '3.2K stars', url: 'https://github.com/browserbase/mcp-server-browserbase', icon: '\u2601\uFE0F' },
+  { name: 'Brave Search', pkg: 'brave-search-mcp-server', cat: 'browser', desc: 'Official Brave Search \u2014 web search, local search, news.', cmd: 'npx -y brave-search-mcp-server', stats: '880 stars', url: 'https://github.com/brave/brave-search-mcp-server', icon: '\u{1F981}' },
+
+  // Cloud & Infra
+  { name: 'Cloudflare', pkg: '@cloudflare/mcp-server-cloudflare', cat: 'cloud', desc: 'Manage Cloudflare Workers, KV, R2, D1, and other Cloudflare services.', cmd: 'npx -y @cloudflare/mcp-server-cloudflare', stats: '3.5K stars', url: 'https://github.com/cloudflare/mcp-server-cloudflare', icon: '\u{1F329}\uFE0F' },
+  { name: 'AWS', pkg: '@aws/mcp', cat: 'cloud', desc: 'Suite of AWS MCP servers \u2014 CDK, CloudFormation, Lambda, S3, DynamoDB, and more.', cmd: 'Various @aws/ packages', stats: '8.7K stars', url: 'https://github.com/awslabs/mcp', icon: '\u2601\uFE0F' },
+  { name: 'Docker', pkg: '@docker/mcp-server', cat: 'cloud', desc: 'Manage Docker containers, images, networks, and volumes.', cmd: 'Docker Desktop MCP integration', stats: 'Official', url: 'https://docs.docker.com/desktop/features/mcp/', icon: '\u{1F433}' },
+  { name: 'Stripe', pkg: '@stripe/agent-toolkit', cat: 'cloud', desc: 'Interact with Stripe API \u2014 payments, customers, subscriptions, invoices.', cmd: 'npx -y @stripe/agent-toolkit --mcp', stats: '22K/week', url: 'https://github.com/stripe/agent-toolkit', icon: '\u{1F4B3}' },
+
+  // Communication
+  { name: 'Slack', pkg: '@modelcontextprotocol/server-slack', cat: 'communication', desc: 'Channel management and messaging for Slack workspaces.', cmd: 'npx -y @modelcontextprotocol/server-slack', stats: '48K/week', url: 'https://github.com/modelcontextprotocol/servers', icon: '\u{1F4AC}' },
+  { name: 'Google Drive', pkg: '@modelcontextprotocol/server-gdrive', cat: 'communication', desc: 'File access and search capabilities for Google Drive.', cmd: 'npx -y @modelcontextprotocol/server-gdrive', stats: 'Reference', url: 'https://github.com/modelcontextprotocol/servers', icon: '\u{1F4C2}' },
+  { name: 'Notion', pkg: '@notionhq/notion-mcp-server', cat: 'communication', desc: 'Official Notion \u2014 read, search, create, and update pages and databases.', cmd: 'npx -y @notionhq/notion-mcp-server', stats: 'Official', url: 'https://github.com/notionhq/notion-mcp-server', icon: '\u{1F4DD}' },
+  { name: 'Atlassian (Jira + Confluence)', pkg: 'Remote MCP', cat: 'communication', desc: 'Interact with Jira issues and Confluence pages. Official remote MCP.', cmd: 'claude mcp add --transport http atlassian https://mcp.atlassian.com/v1/sse', stats: 'Official', url: 'https://atlassian.com/platform/remote-mcp-server', icon: '\u{1F537}' },
+  { name: 'Google Maps', pkg: '@modelcontextprotocol/server-google-maps', cat: 'communication', desc: 'Location services, directions, and place details via Google Maps API.', cmd: 'npx -y @modelcontextprotocol/server-google-maps', stats: '12K/week', url: 'https://github.com/modelcontextprotocol/servers', icon: '\u{1F5FA}\uFE0F' },
+
+  // AI & Search
+  { name: 'Context7', pkg: '@upstash/context7-mcp', cat: 'ai', desc: 'Fetches up-to-date, version-specific documentation for any library/framework.', cmd: 'npx -y @upstash/context7-mcp', stats: '52K stars, 800K/week', url: 'https://github.com/upstash/context7', icon: '\u{1F4DA}' },
+  { name: 'Apify', pkg: '@apify/mcp-server', cat: 'ai', desc: 'Access 6,000+ pre-built cloud tools to extract data from websites, social media, maps.', cmd: 'npx -y @apify/actors-mcp-server', stats: '1K stars', url: 'https://github.com/apify/apify-mcp-server', icon: '\u{1F577}\uFE0F' },
+  { name: 'Anyquery', pkg: 'anyquery', cat: 'ai', desc: 'Query 40+ apps (Notion, Airtable, GitHub, Google Sheets) with SQL.', cmd: 'brew install julien040/anyquery/anyquery', stats: 'Community', url: 'https://github.com/julien040/anyquery', icon: '\u{1F50D}' },
+  { name: '21st.dev Magic', pkg: '@21st-dev/magic-mcp', cat: 'ai', desc: 'Generate crafted UI components inspired by the best design engineers.', cmd: 'npx -y @21st-dev/magic-mcp', stats: '4.6K stars', url: 'https://github.com/21st-dev/magic-mcp', icon: '\u2728' },
+
+  // Monitoring
+  { name: 'Sentry', pkg: 'Remote MCP', cat: 'monitoring', desc: 'Query Sentry issues, events, and error data. Official remote MCP server.', cmd: 'claude mcp add --transport http sentry https://mcp.sentry.dev/mcp', stats: 'Official', url: 'https://sentry.io/integrations/mcp/', icon: '\u{1F41B}' },
+  { name: 'Grafana', pkg: 'mcp-grafana', cat: 'monitoring', desc: 'Query Grafana dashboards, Prometheus metrics, Loki logs, and alerting data.', cmd: 'pip install mcp-grafana', stats: '2.7K stars', url: 'https://github.com/grafana/mcp-grafana', icon: '\u{1F4CA}' },
+  { name: 'Axiom', pkg: '@axiomhq/mcp-server-axiom', cat: 'monitoring', desc: 'Query and analyze Axiom logs, traces, and event data in natural language.', cmd: 'npx -y @axiomhq/mcp-server-axiom', stats: 'Official', url: 'https://github.com/axiomhq/mcp-server-axiom', icon: '\u{1F4C8}' },
+
+  // Documentation
+  { name: 'Auth0', pkg: '@auth0/auth0-mcp-server', cat: 'docs', desc: 'Manage Auth0 tenants \u2014 actions, applications, forms, logs.', cmd: 'npx -y @auth0/auth0-mcp-server', stats: 'Official', url: 'https://github.com/auth0/auth0-mcp-server', icon: '\u{1F510}' },
+  { name: 'PipedreamHQ', pkg: 'Remote MCP', cat: 'docs', desc: 'Connect with 2,500+ APIs and 8,000+ prebuilt tools via Pipedream.', cmd: 'Via Pipedream platform', stats: 'Enterprise', url: 'https://github.com/PipedreamHQ/pipedream', icon: '\u{1F50C}' },
+];
+
+/* ═══ Category Definitions ═══ */
+const categories = [
+  { id: 'all',           label: 'All',              color: '#06b6d4' },
+  { id: 'official',      label: 'Official',          color: '#3b82f6' },
+  { id: 'database',      label: 'Database',          color: '#10b981' },
+  { id: 'git',           label: 'Git & Code',        color: '#8b5cf6' },
+  { id: 'browser',       label: 'Browser & Web',     color: '#f97316' },
+  { id: 'cloud',         label: 'Cloud & Infra',     color: '#f59e0b' },
+  { id: 'communication', label: 'Communication',     color: '#ec4899' },
+  { id: 'ai',            label: 'AI & Search',       color: '#06b6d4' },
+  { id: 'monitoring',    label: 'Monitoring',         color: '#ef4444' },
+  { id: 'docs',          label: 'Documentation',      color: '#14b8a6' },
+];
+
+const catColorMap = {};
+categories.forEach(c => { catColorMap[c.id] = c.color; });
+
+let activeCategory = 'all';
+
+/* ═══ Render Category Filters ═══ */
+function renderFilters() {
+  const container = document.getElementById('categoryFilters');
+  container.innerHTML = categories.map(c => {
+    const count = c.id === 'all' ? servers.length : servers.filter(s => s.cat === c.id).length;
+    const isActive = activeCategory === c.id;
+    const bg = isActive ? c.color : '';
+    const border = isActive ? c.color : '';
+    return `<button class="cat-btn${isActive ? ' active' : ''}"
+      data-cat="${c.id}"
+      style="${isActive ? `background:${c.color};border-color:${c.color};color:#fff;` : ''}"
+      onclick="filterCategory('${c.id}')">
+      ${c.label}<span class="cat-count">${count}</span>
+    </button>`;
+  }).join('');
+}
+
+/* ═══ Render Server Cards ═══ */
+function renderServers() {
+  const grid = document.getElementById('serversGrid');
+  const filtered = activeCategory === 'all' ? servers : servers.filter(s => s.cat === activeCategory);
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '<div class="no-results">No servers found in this category.</div>';
+    return;
+  }
+
+  grid.innerHTML = filtered.map((s, i) => {
+    const color = catColorMap[s.cat] || '#06b6d4';
+    const catLabel = categories.find(c => c.id === s.cat)?.label || s.cat;
+    return `<div class="server-card" style="--card-color:${color}">
+      <div class="server-card-top">
+        <div class="server-icon">${s.icon}</div>
+        <div class="server-info">
+          <div class="server-name-row">
+            <span class="server-name">${s.name}</span>
+            <span class="server-cat-badge" style="background:${color}18;color:${color};border:1px solid ${color}33">${catLabel}</span>
+          </div>
+          <div class="server-desc">${s.desc}</div>
+        </div>
+      </div>
+      <div class="server-cmd-row">
+        <code class="server-cmd">${escapeHtml(s.cmd)}</code>
+        <button class="copy-btn" onclick="copyCmd(this, '${escapeAttr(s.cmd)}')" title="Copy command">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+            <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+          </svg>
+        </button>
+      </div>
+      <div class="server-footer">
+        <span class="server-stats">${s.stats}</span>
+        <a href="${s.url}" target="_blank" rel="noopener" class="server-link">
+          View
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M7 17L17 7M17 7H7M17 7v10"/>
+          </svg>
+        </a>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ═══ Filter ═══ */
+function filterCategory(cat) {
+  activeCategory = cat;
+  renderFilters();
+  renderServers();
+}
+
+/* ═══ Copy to Clipboard ═══ */
+function copyCmd(btn, text) {
+  navigator.clipboard.writeText(text).then(() => {
+    btn.classList.add('copied');
+    btn.innerHTML = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>';
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.innerHTML = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>';
+    }, 2000);
+  });
+}
+
+/* ═══ Helpers ═══ */
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function escapeAttr(str) {
+  return str.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"');
+}
+
+/* ═══ Mobile Nav Toggle ═══ */
+function toggleNav() {
+  document.getElementById('navLinks').classList.toggle('open');
+}
+
+/* ═══ Init ═══ */
+renderFilters();
+renderServers();
+</script>
+
+</body>
+</html>
