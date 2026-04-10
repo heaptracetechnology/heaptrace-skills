@@ -24,6 +24,7 @@ const PACK_MAP = {
   'cloud-engineer':{ label: 'Cloud Engineer Pack', color: '#f97316', icon: '&#9729;' },
   designer:       { label: 'Designer Pack',         color: '#ec4899', icon: '&#9830;' },
   business:       { label: 'Business Pack',         color: '#14b8a6', icon: '&#9733;' },
+  mobile:         { label: 'Mobile Pack',           color: '#f43f5e', icon: '&#128241;' },
 };
 
 // Root-level skills belong to the developer pack
@@ -760,7 +761,7 @@ function generateSkillPage(skill, prevSkill, nextSkill) {
 <footer class="skill-footer">
   <p>
     <a href="../index.html">Heaptrace Skills</a> &mdash;
-    66 production-grade skills for development teams.
+    80 production-grade skills for development teams.
     <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
   </p>
 </footer>

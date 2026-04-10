@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mobile State Management — Predictable Data, Responsive UI — Heaptrace Skills</title>
+  <meta name="description" content="Design and implement state management for mobile apps — server caching, client stores, optimistic updates, persistence, and performance. Use when architecting state for React Native, Flutter, or SwiftUI apps that need predictable data flow and responsive UI.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #f43f5e12, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #f43f5e15;
+      border: 1px solid #f43f5e30;
+      color: #f43f5e;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #f43f5e;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #f43f5e;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #f43f5e;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #f43f5e08;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #f43f5e50;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #f43f5e10;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #f43f5e;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+      <a href="../customize/index.html" class="nav-link">Customize</a>
+      <a href="../rules/index.html" class="nav-link">Rules</a>
+      <a href="../mcp/index.html" class="nav-link">MCP Servers</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Mobile Pack</a>
+      <span class="sep">/</span>
+      <span>Mobile State Management — Predictable Data, Responsive UI</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#128241;</span>
+      Mobile Pack
+    </div>
+
+    <h1>Mobile State Management — Predictable Data, Responsive UI</h1>
+    <p class="description">Takes a mobile app's data requirements and produces a complete state architecture — server state caching, client state stores, mutation strategies with optimistic updates, persistence layers, and re-render optimization. Covers React Native, Flutter, and SwiftUI.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Principal Frontend Architect</strong> with 17+ years designing state architectures for mobile applications handling real-time data, complex forms, and offline-first workflows. You've built state systems for fintech apps processing 10K+ transactions/minute, social apps with real-time feeds, and healthcare apps with strict data consistency requirements. You are an expert in:</p>
+
+<ul class="skill-list"><li>React Native state — Zustand, Jotai, Redux Toolkit, React Query/TanStack Query, MMKV persistence</li>
+<li>Flutter state — Riverpod 2.0, Bloc/Cubit, Provider, freezed immutable models, Isar/Hive local state</li>
+<li>SwiftUI state — @Observable, @State, @Environment, SwiftData, Combine publishers</li>
+<li>Server state vs client state — knowing what belongs where and never mixing them</li>
+<li>Optimistic updates — instant UI feedback with server reconciliation and rollback</li>
+<li>State persistence — surviving app kills, background termination, and low-memory eviction</li>
+
+</ul>You treat state as infrastructure. A state architecture that leaks across boundaries, caches too aggressively, or re-renders too broadly is a state architecture that ships bugs. You design state systems that are boring, predictable, and fast.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>State Library</h4>
+      <p class="config-example">Zustand + React Query, Riverpod + freezed, @Observable + SwiftData</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Server State Caching</h4>
+      <p class="config-example">React Query with 5min staleTime, Riverpod AsyncValue, URLSession cache</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Persistence Layer</h4>
+      <p class="config-example">MMKV for key-value, WatermelonDB for relational, SwiftData for models</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Real-time Updates</h4>
+      <p class="config-example">WebSocket via Socket.io, Firebase Realtime DB, Server-Sent Events</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Form State</h4>
+      <p class="config-example">React Hook Form, flutter_form_builder, SwiftUI @FocusState</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│          MANDATORY RULES FOR EVERY STATE TASK                │
+│                                                              │
+│  1. SERVER STATE IS NOT CLIENT STATE                         │
+│     → API data belongs in a cache layer (React Query,        │
+│       AsyncValue) with TTL, refetch, and invalidation        │
+│     → Local UI state (form inputs, toggles, modals) stays    │
+│       ephemeral in component/widget state                    │
+│     → Mixing them creates bugs that take days to find        │
+│     → If you store API data in Zustand/Bloc, you are         │
+│       building a broken cache by hand                        │
+│                                                              │
+│  2. DERIVE, NEVER DUPLICATE                                  │
+│     → If you can compute a value from existing state,        │
+│       compute it. Duplicated state goes stale                │
+│     → Selectors, computed properties, and getters are free   │
+│     → Two pieces of state that must stay in sync means       │
+│       one of them should not exist                           │
+│                                                              │
+│  3. STATE SCOPE MATCHES UI SCOPE                             │
+│     → Screen-local state stays in the screen                 │
+│     → Cross-screen state goes in a shared store              │
+│     → App-wide state (auth, theme, locale) goes at root      │
+│     → Wrong scope = unnecessary re-renders or lost state     │
+│     → When in doubt, start local. Lift only when forced      │
+│                                                              │
+│  4. EVERY MUTATION HAS THREE STATES                          │
+│     → Loading, success, error. No exceptions                 │
+│     → Users must always know what is happening               │
+│     → Optimistic updates need rollback paths                 │
+│     → Silent failures are unacceptable — show the error      │
+│                                                              │
+│  5. PERSIST ONLY WHAT MATTERS                                │
+│     → Persist: auth tokens, user prefs, draft forms,         │
+│       onboarding flags, offline queue                        │
+│     → Do NOT persist: derived data, server cache,            │
+│       UI state (modal open, scroll position), temp errors    │
+│     → Persisted state needs migration strategy               │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in code, comments, or documentation     │
+│     → All output reads as if written by a staff engineer     │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #f43f5e18; color: #f43f5e;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+
+<ul class="skill-list"><li>Architecting state management for a new mobile app from scratch</li>
+<li>Refactoring a tangled state layer that mixes server and client data</li>
+<li>Adding optimistic updates and offline support to an existing app</li>
+<li>Debugging re-render storms, stale data, or cache inconsistencies</li>
+<li>Choosing between state libraries for a new project or migration</li>
+<li>Designing form state for complex multi-step flows with validation</li>
+<li>Adding persistence that survives app kills and OS-level termination</li>
+</ul><hr class="section-divider">
+<h2>How It Works</h2>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────────┐
+│                  STATE ARCHITECTURE FLOW                         │
+│                                                                 │
+│  ┌────────────┐    ┌────────────┐    ┌──────────────────────┐   │
+│  │ PHASE 1    │    │ PHASE 2    │    │ PHASE 3              │   │
+│  │ Classify   │───▶│ Server     │───▶│ Client State         │   │
+│  │ All State  │    │ State Cache│    │ Design               │   │
+│  └────────────┘    └────────────┘    └──────────┬───────────┘   │
+│                                                  │               │
+│  ┌────────────┐    ┌────────────┐    ┌──────────▼───────────┐   │
+│  │ PHASE 7    │    │ PHASE 6    │    │ PHASE 4              │   │
+│  │ Performance│◀───│ Persistence│◀───│ Mutations &amp;          │   │
+│  │ Audit      │    │ Layer      │    │ Optimistic Updates   │   │
+│  └────────────┘    └────────────┘    └──────────┬───────────┘   │
+│                                                  │               │
+│                                      ┌──────────▼───────────┐   │
+│                                      │ PHASE 5              │   │
+│                                      │ Form State &amp;         │   │
+│                                      │ Validation           │   │
+│                                      └──────────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 1: State Architecture Design — What Goes Where</h2>
+
+Before writing any state code, classify every piece of data in your app.
+
+<h3>The State Classification Decision Tree</h3>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────┐
+│  &quot;Where does this data come from?&quot;          │
+└──────────────────┬──────────────────────────┘
+                   │
+         ┌─────────▼─────────┐
+         │  From an API/      │
+         │  server endpoint?  │
+         └─────┬─────────┬───┘
+           YES │         │ NO
+               │         │
+    ┌──────────▼──┐  ┌───▼──────────────┐
+    │ SERVER      │  │ &quot;Does it need to │
+    │ STATE       │  │  survive screen  │
+    │ (cache it)  │  │  navigation?&quot;    │
+    └─────────────┘  └───┬─────────┬───┘
+                     YES │         │ NO
+                         │         │
+              ┌──────────▼──┐  ┌───▼──────────┐
+              │ SHARED      │  │ LOCAL        │
+              │ CLIENT      │  │ UI STATE     │
+              │ STATE       │  │ (ephemeral)  │
+              └──────┬──────┘  └──────────────┘
+                     │
+         ┌───────────▼───────────┐
+         │ &quot;Does it need to      │
+         │  survive app restart?&quot;│
+         └───────┬──────────┬────┘
+             YES │          │ NO
+                 │          │
+      ┌──────────▼──┐  ┌───▼──────────┐
+      │ PERSISTED   │  │ IN-MEMORY    │
+      │ STATE       │  │ STORE        │
+      └─────────────┘  └──────────────┘</code></pre>
+
+<h3>State Categories Table</h3>
+<div class="table-wrap"><table><thead><tr><th>Category</th><th>Lifetime</th><th>Examples</th><th>Wrong Place</th><th>Right Place</th><th></th></tr></thead><tbody><tr><td>Server state</td><td>Matches server TTL</td><td>User profile, feed items, notifications</td><td>Zustand store, Bloc state, @State</td><td>React Query, Riverpod AsyncValue, SwiftData</td><td></td></tr><tr><td>Shared client state</td><td>Across screens</td><td>Auth token, selected theme, cart items</td><td>useState, local Cubit, @State</td><td>Zustand store, Riverpod provider, @Observable singleton</td><td></td></tr><tr><td>Local UI state</td><td>Single screen</td><td>Modal open, text input, accordion toggle</td><td>Global store, shared provider</td><td>useState, StatefulWidget, @State</td><td></td></tr><tr><td>Derived state</td><td>Computed on read</td><td>Filtered list, total price, unread count</td><td>Separate state variable</td><td>Selector, computed getter, derived property</td><td></td></tr><tr><td>Persisted state</td><td>Across app restarts</td><td>Auth token, onboarding flag, draft form</td><td>AsyncStorage raw calls</td><td>MMKV middleware, Hive box, SwiftData @Model</td><td></td></tr></tbody></table></div>
+<h3>Anti-Patterns — What NOT to Do</h3>
+<div class="table-wrap"><table><thead><tr><th>Anti-Pattern</th><th>Why It Breaks</th><th>Fix</th><th></th></tr></thead><tbody><tr><td>Storing API data in a global store</td><td>You are building a cache without TTL, refetch, or invalidation. Data goes stale silently</td><td>Use a server state cache (React Query, Riverpod, SwiftData)</td><td></td></tr><tr><td>Prop drilling 4+ levels</td><td>Makes refactoring impossible, creates coupling</td><td>Lift to a shared store or use context/provider</td><td></td></tr><tr><td>Two state variables that must stay in sync</td><td>One will inevitably lag behind the other</td><td>Derive one from the other. Single source of truth</td><td></td></tr><tr><td>Persisting the entire store to disk</td><td>Bloats storage, slows app startup, stale data on restore</td><td>Persist only auth, prefs, and drafts</td><td></td></tr><tr><td>Using global state for form inputs</td><td>Every keystroke re-renders the entire subscriber tree</td><td>Use local state or a form library</td><td></td></tr><tr><td>Initializing state from another state</td><td>Creates temporal coupling — order matters, bugs happen</td><td>Derive or compute at read time</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Phase 2: Server State Management</h2>
+
+Server state is data owned by a backend. Your mobile app is a cache of that data, not the source of truth.
+
+<h3>Platform Comparison — Server State Libraries</h3>
+<div class="table-wrap"><table><thead><tr><th>Capability</th><th>React Native</th><th>Flutter</th><th>SwiftUI</th><th></th></tr></thead><tbody><tr><td>Primary library</td><td>TanStack Query (React Query)</td><td>Riverpod 2.0 AsyncValue</td><td>SwiftData + async/await</td><td></td></tr><tr><td>Cache key</td><td><code class="inline-code">['users', userId]</code></td><td><code class="inline-code">userProvider(userId)</code></td><td><code class="inline-code">@Query</code> descriptor</td><td></td></tr><tr><td>Stale time</td><td><code class="inline-code">staleTime: 5 <em> 60 </em> 1000</code></td><td><code class="inline-code">ref.keepAlive()</code> + timer</td><td><code class="inline-code">modelContext.autosaveEnabled</code></td><td></td></tr><tr><td>Background refetch</td><td><code class="inline-code">refetchOnWindowFocus</code></td><td><code class="inline-code">ref.invalidate()</code> on resume</td><td><code class="inline-code">.refreshable</code> modifier</td><td></td></tr><tr><td>Pagination</td><td><code class="inline-code">useInfiniteQuery</code></td><td><code class="inline-code">AsyncNotifierProvider</code> + offset</td><td><code class="inline-code">@Query</code> with <code class="inline-code">fetchLimit</code></td><td></td></tr><tr><td>Error retry</td><td><code class="inline-code">retry: 3, retryDelay: exponential</code></td><td>Custom <code class="inline-code">AsyncNotifier</code> retry</td><td><code class="inline-code">Task { try await }</code> with retry</td><td></td></tr><tr><td>Invalidation</td><td><code class="inline-code">queryClient.invalidateQueries</code></td><td><code class="inline-code">ref.invalidate(provider)</code></td><td><code class="inline-code">modelContext.delete()</code> + re-fetch</td><td></td></tr></tbody></table></div>
+<h3>Cache Invalidation Strategy</h3>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────┐
+│              CACHE INVALIDATION DECISION TREE                │
+│                                                              │
+│  User triggers mutation (create/update/delete)               │
+│       │                                                      │
+│       ▼                                                      │
+│  ┌─────────────────────────────┐                             │
+│  │ Does the mutation response  │                             │
+│  │ return the updated entity?  │                             │
+│  └──────┬──────────────┬───────┘                             │
+│     YES │              │ NO                                  │
+│         │              │                                     │
+│  ┌──────▼──────┐  ┌───▼────────────┐                        │
+│  │ Update the  │  │ Invalidate the │                        │
+│  │ cache entry │  │ cache key to   │                        │
+│  │ directly    │  │ trigger refetch│                        │
+│  └─────────────┘  └────────────────┘                        │
+│                                                              │
+│  Also invalidate related queries:                            │
+│  • List queries that include this entity                     │
+│  • Aggregate queries (counts, totals) affected               │
+│  • Parent entity queries if relationship changed             │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>React Native — TanStack Query Setup</h3>
+
+<pre class="code-block"><code>Query key convention:
+  ['entity']           → list all
+  ['entity', id]       → single item
+  ['entity', { filters }] → filtered list
+
+staleTime strategy:
+  User profile      → 5 min (rarely changes)
+  Feed / timeline   → 30 sec (changes frequently)
+  Static config     → 30 min (almost never changes)
+  Notifications     → 0 (always refetch)
+
+gcTime (garbage collection):
+  Default           → 5 min after last subscriber unmounts
+  Critical data     → 30 min (keep warm for back navigation)</code></pre>
+
+<h3>Flutter — Riverpod AsyncValue Pattern</h3>
+
+<pre class="code-block"><code>Provider types for server state:
+  FutureProvider      → one-shot fetch, auto-disposed
+  StreamProvider      → real-time / WebSocket data
+  AsyncNotifierProvider → fetch + mutation logic together
+
+Lifecycle:
+  autoDispose         → kills cache when no listeners (default)
+  ref.keepAlive()     → manual cache retention with timer
+  ref.invalidate()    → force refetch on next read</code></pre>
+
+<h3>SwiftUI — SwiftData + Async Pattern</h3>
+
+<pre class="code-block"><code>Data flow:
+  @Query              → automatic fetch + observation from SwiftData
+  .task { }           → async fetch on view appear
+  .refreshable { }    → pull-to-refresh trigger
+
+Model lifecycle:
+  modelContext.insert() → local-first, then sync
+  modelContext.delete() → remove locally, then confirm server
+  modelContext.save()   → persist to disk</code></pre>
+<hr class="section-divider">
+<h2>Phase 3: Client State Patterns</h2>
+
+Client state is data your app owns. It does not come from a server. It represents UI decisions, user preferences, and ephemeral interaction data.
+
+<h3>Platform Comparison — Client State</h3>
+<div class="table-wrap"><table><thead><tr><th>Scope</th><th>React Native</th><th>Flutter</th><th>SwiftUI</th><th></th></tr></thead><tbody><tr><td>Screen-local</td><td><code class="inline-code">useState</code>, <code class="inline-code">useReducer</code></td><td><code class="inline-code">StatefulWidget</code>, <code class="inline-code">ValueNotifier</code></td><td><code class="inline-code">@State</code>, <code class="inline-code">@Binding</code></td><td></td></tr><tr><td>Cross-screen shared</td><td>Zustand store</td><td>Riverpod <code class="inline-code">NotifierProvider</code></td><td><code class="inline-code">@Observable</code> class</td><td></td></tr><tr><td>App-wide singleton</td><td>Zustand with <code class="inline-code">persist</code></td><td><code class="inline-code">ProviderScope</code> override</td><td><code class="inline-code">@Environment</code> + <code class="inline-code">@Observable</code></td><td></td></tr><tr><td>Derived/computed</td><td>Zustand <code class="inline-code">selector</code></td><td><code class="inline-code">Provider</code> depending on another</td><td><code class="inline-code">computed</code> property</td><td></td></tr></tbody></table></div>
+<h3>Zustand Store Design (React Native)</h3>
+
+<pre class="code-block"><code>Store boundaries — one store per domain, not one mega-store:
+
+  useAuthStore     → token, user, login/logout actions
+  useCartStore     → items, quantities, add/remove actions
+  useThemeStore    → mode (light/dark), accent color
+  useOnboardStore  → completed steps, current step
+
+Each store:
+  • Has 3–8 state fields max
+  • Owns its actions (mutations live next to state)
+  • Uses selectors for derived values
+  • Persists only what survives restart</code></pre>
+
+<h3>Riverpod Provider Design (Flutter)</h3>
+
+<pre class="code-block"><code>Provider organization:
+
+  authProvider           → StateNotifierProvider (token + user)
+  themeProvider          → NotifierProvider (mode + accent)
+  cartProvider           → NotifierProvider (items + quantities)
+  cartTotalProvider      → Provider (derived from cartProvider)
+
+Rules:
+  • Notifiers hold mutable state and expose methods
+  • Plain Providers derive/compute from other providers
+  • autoDispose by default — override only when needed
+  • Never read a provider inside another provider's constructor</code></pre>
+
+<h3>@Observable Pattern (SwiftUI)</h3>
+
+<pre class="code-block"><code>Observable class organization:
+
+  @Observable class AuthState    → token, user, login(), logout()
+  @Observable class CartState    → items, add(), remove(), total (computed)
+  @Observable class ThemeState   → colorScheme, accentColor, toggle()
+
+Injection:
+  • Root: .environment(authState) on the app entry
+  • Screen: @Environment(AuthState.self) var auth
+  • Local: @State for screen-only values — never @Observable</code></pre>
+<hr class="section-divider">
+<h2>Phase 4: Optimistic Updates & Mutations</h2>
+
+Users expect instant feedback. Network latency is invisible when you update the UI before the server confirms.
+
+<h3>Optimistic Update Flow</h3>
+
+<pre class="code-block"><code>┌─────────┐     ┌──────────────┐     ┌──────────────┐
+│ User     │     │ UI Updates   │     │ API Request  │
+│ Taps     │────▶│ Immediately  │────▶│ Fires Async  │
+│ &quot;Like&quot;   │     │ (heart fills)│     │ POST /like   │
+└─────────┘     └──────────────┘     └──────┬───────┘
+                                            │
+                                  ┌─────────▼─────────┐
+                                  │   Server responds  │
+                                  └─────┬─────────┬───┘
+                                    200 │         │ 4xx/5xx
+                                        │         │
+                              ┌─────────▼──┐  ┌───▼──────────┐
+                              │ Confirm —  │  │ Rollback —   │
+                              │ cache now  │  │ revert UI,   │
+                              │ matches    │  │ show error   │
+                              │ server     │  │ toast        │
+                              └────────────┘  └──────────────┘</code></pre>
+
+<h3>Platform Implementation Patterns</h3>
+<div class="table-wrap"><table><thead><tr><th>Step</th><th>React Native (TanStack)</th><th>Flutter (Riverpod)</th><th>SwiftUI</th><th></th></tr></thead><tbody><tr><td>1. Snapshot</td><td><code class="inline-code">queryClient.getQueryData(key)</code></td><td><code class="inline-code">ref.read(provider)</code></td><td>Copy current <code class="inline-code">@Observable</code> value</td><td></td></tr><tr><td>2. Optimistic set</td><td><code class="inline-code">queryClient.setQueryData(key, newData)</code></td><td><code class="inline-code">state = AsyncValue.data(newData)</code></td><td>Mutate <code class="inline-code">@Observable</code> property directly</td><td></td></tr><tr><td>3. Fire mutation</td><td><code class="inline-code">mutationFn: () => api.post(...)</code></td><td><code class="inline-code">await repository.post(...)</code></td><td><code class="inline-code">try await api.post(...)</code></td><td></td></tr><tr><td>4. On error rollback</td><td><code class="inline-code">onError: () => queryClient.setQueryData(key, snapshot)</code></td><td><code class="inline-code">state = AsyncValue.data(snapshot)</code></td><td>Restore from snapshot</td><td></td></tr><tr><td>5. On success settle</td><td><code class="inline-code">onSettled: () => queryClient.invalidateQueries(key)</code></td><td><code class="inline-code">ref.invalidate(provider)</code></td><td>Confirm or re-fetch</td><td></td></tr></tbody></table></div>
+<h3>Mutation State Machine</h3>
+
+Every mutation in your app follows this state machine. No exceptions.
+
+<pre class="code-block"><code>┌─────────┐   trigger   ┌───────────┐   success   ┌───────────┐
+│  IDLE   │────────────▶│  LOADING  │────────────▶│  SUCCESS  │
+└─────────┘             └─────┬─────┘             └─────┬─────┘
+     ▲                        │                         │
+     │                   error│                    reset│
+     │                        ▼                         │
+     │                  ┌───────────┐                   │
+     └──────────────────│   ERROR   │◀──────────────────┘
+          retry/reset   └───────────┘</code></pre>
+
+The UI must reflect every state:
+<ul class="skill-list"><li><strong>IDLE</strong> — button enabled, no spinner</li>
+<li><strong>LOADING</strong> — button disabled, spinner or skeleton shown</li>
+<li><strong>SUCCESS</strong> — confirmation feedback (toast, checkmark, navigation)</li>
+<li><strong>ERROR</strong> — error message visible, retry option available</li>
+</ul><hr class="section-divider">
+<h2>Phase 5: Form State & Validation</h2>
+
+Complex forms (multi-step, real-time validation, draft saving) need dedicated state management separate from both server cache and global stores.
+
+<h3>Form State Principles</h3>
+<div class="table-wrap"><table><thead><tr><th>Principle</th><th>Explanation</th><th></th></tr></thead><tbody><tr><td>Form state is local</td><td>Form data lives in the form, not in a global store. It dies when the form unmounts</td><td></td></tr><tr><td>Validate on blur, not on change</td><td>Validating every keystroke is noisy. Validate when the user leaves a field</td><td></td></tr><tr><td>Dirty tracking is essential</td><td>Know which fields changed so you send partial updates, not full replacements</td><td></td></tr><tr><td>Draft persistence is opt-in</td><td>Only persist drafts for long forms where losing progress hurts (multi-step wizards, posts)</td><td></td></tr><tr><td>Error state is per-field</td><td>Global error banners are useless. Show the error next to the field that caused it</td><td></td></tr></tbody></table></div>
+<h3>Platform Comparison — Form State</h3>
+<div class="table-wrap"><table><thead><tr><th>Capability</th><th>React Native</th><th>Flutter</th><th>SwiftUI</th><th></th></tr></thead><tbody><tr><td>Library</td><td>React Hook Form</td><td>flutter_form_builder / Riverpod</td><td>@State + @FocusState</td><td></td></tr><tr><td>Registration</td><td><code class="inline-code">register('email')</code></td><td><code class="inline-code">FormBuilderTextField(name: 'email')</code></td><td><code class="inline-code">TextField("", text: $email)</code></td><td></td></tr><tr><td>Validation</td><td>Zod schema <code class="inline-code">.parse()</code></td><td><code class="inline-code">FormBuilderValidators.compose()</code></td><td>Custom <code class="inline-code">validate()</code> method</td><td></td></tr><tr><td>Dirty check</td><td><code class="inline-code">formState.dirtyFields</code></td><td><code class="inline-code">formKey.currentState?.didChange</code></td><td>Manual <code class="inline-code">hasChanges</code> computed</td><td></td></tr><tr><td>Submission</td><td><code class="inline-code">handleSubmit(onValid)</code></td><td><code class="inline-code">formKey.currentState?.saveAndValidate()</code></td><td><code class="inline-code">onSubmit { validate() }</code></td><td></td></tr><tr><td>Field errors</td><td><code class="inline-code">errors.email?.message</code></td><td><code class="inline-code">FormBuilderTextField(validator: ...)</code></td><td>Inline error <code class="inline-code">Text</code> below field</td><td></td></tr></tbody></table></div>
+<h3>Multi-Step Form Architecture</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────┐
+│                  MULTI-STEP FORM FLOW                    │
+│                                                          │
+│  ┌──────────┐   ┌──────────┐   ┌──────────┐             │
+│  │ Step 1   │──▶│ Step 2   │──▶│ Step 3   │──▶ Submit   │
+│  │ Personal │   │ Address  │   │ Payment  │             │
+│  └────┬─────┘   └────┬─────┘   └────┬─────┘             │
+│       │              │              │                    │
+│       ▼              ▼              ▼                    │
+│  ┌─────────────────────────────────────────┐             │
+│  │  Shared Form Context / Provider         │             │
+│  │  • Aggregates all step data             │             │
+│  │  • Tracks current step index            │             │
+│  │  • Validates per-step before advancing  │             │
+│  │  • Persists draft to disk on step change│             │
+│  └─────────────────────────────────────────┘             │
+└──────────────────────────────────────────────────────────┘
+
+Rules:
+  • Each step validates independently before allowing &quot;Next&quot;
+  • Back navigation preserves entered data (no re-initialization)
+  • Draft auto-saves on step transitions and app background
+  • Final submit sends all steps as one API call
+  • On submit failure, navigate to the step with the error</code></pre>
+<hr class="section-divider">
+<h2>Phase 6: State Persistence</h2>
+
+Mobile apps get killed. The OS reclaims memory. Users close and reopen hours later. Persistence must handle all of these gracefully.
+
+<h3>What to Persist — Decision Matrix</h3>
+<div class="table-wrap"><table><thead><tr><th>Data</th><th>Persist?</th><th>Storage</th><th>Reason</th><th></th></tr></thead><tbody><tr><td>Auth token / refresh token</td><td>Yes</td><td>Secure storage (Keychain/Keystore)</td><td>Must survive restart, must be encrypted</td><td></td></tr><tr><td>User preferences (theme, locale)</td><td>Yes</td><td>Key-value (MMKV, SharedPrefs, UserDefaults)</td><td>Small, rarely changes, needed before API call</td><td></td></tr><tr><td>Onboarding completion flags</td><td>Yes</td><td>Key-value</td><td>Prevents re-showing completed flows</td><td></td></tr><tr><td>Draft form data</td><td>Yes (opt-in)</td><td>Key-value or local DB</td><td>Prevents data loss on accidental close</td><td></td></tr><tr><td>Offline mutation queue</td><td>Yes</td><td>Local DB or key-value</td><td>Mutations must retry after connectivity returns</td><td></td></tr><tr><td>Server-fetched data (cache)</td><td>No</td><td>In-memory cache only</td><td>Server cache has its own TTL and refetch logic</td><td></td></tr><tr><td>UI state (modal open, scroll)</td><td>No</td><td>Memory only</td><td>Ephemeral by nature</td><td></td></tr><tr><td>Derived/computed values</td><td>No</td><td>Compute on read</td><td>Persisting derived data creates stale copies</td><td></td></tr></tbody></table></div>
+<h3>Platform Comparison — Persistence</h3>
+<div class="table-wrap"><table><thead><tr><th>Capability</th><th>React Native</th><th>Flutter</th><th>SwiftUI</th><th></th></tr></thead><tbody><tr><td>Key-value (fast)</td><td>MMKV</td><td>Hive / SharedPreferences</td><td>UserDefaults</td><td></td></tr><tr><td>Secure storage</td><td>react-native-keychain</td><td>flutter_secure_storage</td><td>Keychain Services</td><td></td></tr><tr><td>Relational local DB</td><td>WatermelonDB / SQLite</td><td>Isar / Drift (SQLite)</td><td>SwiftData / Core Data</td><td></td></tr><tr><td>Store middleware</td><td>Zustand <code class="inline-code">persist</code> middleware</td><td>Riverpod + Hive adapter</td><td>Manual <code class="inline-code">@Observable</code> + UserDefaults</td><td></td></tr></tbody></table></div>
+<h3>Persistence Lifecycle</h3>
+
+<pre class="code-block"><code>┌─────────────┐    App Launch    ┌──────────────────────┐
+│ Cold Start  │────────────────▶ │ Read persisted state │
+└─────────────┘                  │ • Auth token         │
+                                 │ • User preferences   │
+                                 │ • Draft forms        │
+                                 │ • Offline queue      │
+                                 └──────────┬───────────┘
+                                            │
+                                            ▼
+                                 ┌──────────────────────┐
+                                 │ Hydrate stores with  │
+                                 │ persisted data       │
+                                 │ (before first render) │
+                                 └──────────┬───────────┘
+                                            │
+                                            ▼
+                                 ┌──────────────────────┐
+                                 │ Fetch server state   │
+                                 │ (fills cache layer)  │
+                                 └──────────────────────┘
+
+                    ┌─────────────────────────────┐
+    App Background  │ Persist dirty state to disk │
+    ───────────────▶│ • Flush draft forms         │
+                    │ • Enqueue pending mutations  │
+                    │ • Save preference changes    │
+                    └─────────────────────────────┘
+
+                    ┌─────────────────────────────┐
+    App Terminated  │ Offline queue persists       │
+    ───────────────▶│ Retries on next launch       │
+                    └─────────────────────────────┘</code></pre>
+
+<h3>State Migration Strategy</h3>
+
+Persisted state schemas change across app versions. Without migration, the app crashes on update.
+
+<pre class="code-block"><code>Migration rules:
+  1. Version your persisted state schema (integer, starts at 1)
+  2. On app launch, compare stored version vs current version
+  3. If mismatch, run migration functions sequentially:
+     v1 → v2: rename field 'name' to 'displayName'
+     v2 → v3: add field 'locale' with default 'en'
+  4. If migration fails, wipe persisted state and start fresh
+     (never crash — losing prefs is better than a crash loop)
+  5. Log migration events for debugging</code></pre>
+<hr class="section-divider">
+<h2>Phase 7: Performance — Preventing Unnecessary Re-renders</h2>
+
+State management is the primary cause of performance problems in mobile apps. Every state change triggers a rebuild cycle. Minimize the blast radius.
+
+<h3>The Re-render Problem</h3>
+
+<pre class="code-block"><code>BAD — entire screen rebuilds on one field change:
+
+  ┌─────────────────────────────────┐
+  │  Screen subscribes to entire    │
+  │  store (20 fields)              │
+  │  ┌───────────────────────────┐  │
+  │  │  Header (re-renders) ✗   │  │
+  │  │  List (re-renders) ✗     │  │
+  │  │  Footer (re-renders) ✗   │  │
+  │  └───────────────────────────┘  │
+  │  One field changed → all rebuild│
+  └─────────────────────────────────┘
+
+GOOD — only affected widget rebuilds:
+
+  ┌─────────────────────────────────┐
+  │  Screen                         │
+  │  ┌───────────────────────────┐  │
+  │  │  Header (skipped) ✓      │  │
+  │  │  List (skipped) ✓        │  │
+  │  │  Counter (re-renders) ←  │  │ ← only this subscribes
+  │  └───────────────────────────┘  │    to the changed field
+  └─────────────────────────────────┘</code></pre>
+
+<h3>Platform-Specific Optimization</h3>
+<div class="table-wrap"><table><thead><tr><th>Technique</th><th>React Native</th><th>Flutter</th><th>SwiftUI</th><th></th></tr></thead><tbody><tr><td>Granular subscription</td><td><code class="inline-code">useStore(s => s.count)</code> selector</td><td><code class="inline-code">ref.watch(provider.select((s) => s.count))</code></td><td><code class="inline-code">@Observable</code> tracks property access automatically</td><td></td></tr><tr><td>Memoize components</td><td><code class="inline-code">React.memo(Component)</code></td><td><code class="inline-code">const</code> widget constructor</td><td>SwiftUI diffs <code class="inline-code">Equatable</code> body automatically</td><td></td></tr><tr><td>Memoize expensive computations</td><td><code class="inline-code">useMemo(() => compute(), [deps])</code></td><td><code class="inline-code">Provider</code> (auto-cached)</td><td><code class="inline-code">computed</code> property on <code class="inline-code">@Observable</code></td><td></td></tr><tr><td>Avoid inline closures</td><td>Extract callbacks with <code class="inline-code">useCallback</code></td><td>Extract handler methods</td><td>Extract methods on <code class="inline-code">@Observable</code> class</td><td></td></tr><tr><td>List optimization</td><td><code class="inline-code">FlashList</code> with <code class="inline-code">keyExtractor</code></td><td><code class="inline-code">ListView.builder</code> with keys</td><td><code class="inline-code">LazyVStack</code> with <code class="inline-code">id:</code></td><td></td></tr><tr><td>Image caching</td><td><code class="inline-code">FastImage</code></td><td><code class="inline-code">cached_network_image</code></td><td><code class="inline-code">AsyncImage</code> + URLCache</td><td></td></tr></tbody></table></div>
+<h3>Re-render Audit Checklist</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  RE-RENDER AUDIT — RUN BEFORE SHIPPING                       │
+│                                                              │
+│  □ No screen subscribes to an entire store — use selectors   │
+│  □ Lists use builder/lazy patterns — never materialize all   │
+│  □ Expensive computations are memoized or derived            │
+│  □ Forms use local state — not global stores                 │
+│  □ Animations use platform primitives — not state changes    │
+│  □ Images are cached — not re-fetched on rebuild             │
+│  □ Mutation loading states are scoped to the trigger widget  │
+│  □ No prop drilling beyond 2 levels — use provider/context   │
+│  □ Dev tools show no unexpected rebuilds on interaction      │
+│  □ Profile with: React DevTools Profiler / Flutter DevTools  │
+│    Performance Overlay / Instruments Time Profiler           │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Debugging Tools by Platform</h3>
+<div class="table-wrap"><table><thead><tr><th>Platform</th><th>Tool</th><th>What It Shows</th><th></th></tr></thead><tbody><tr><td>React Native</td><td>React DevTools Profiler</td><td>Which components re-rendered and why</td><td></td></tr><tr><td>React Native</td><td>Flipper + React Query plugin</td><td>Cache state, query status, refetch triggers</td><td></td></tr><tr><td>Flutter</td><td>Flutter DevTools > Performance</td><td>Widget rebuild counts, frame timing</td><td></td></tr><tr><td>Flutter</td><td><code class="inline-code">debugPrintRebuildDirtyWidgets</code></td><td>Logs every widget rebuild in console</td><td></td></tr><tr><td>SwiftUI</td><td>Instruments > SwiftUI template</td><td>Body evaluation counts per view</td><td></td></tr><tr><td>SwiftUI</td><td><code class="inline-code">_printChanges()</code> (debug)</td><td>Logs which <code class="inline-code">@Observable</code> property triggered redraw</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Tips for Best Results</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  STATE ARCHITECTURE REVIEW CHECKLIST                         │
+│                                                              │
+│  □ Every piece of state is classified (server/client/local)  │
+│  □ Server data lives in a cache layer with TTL               │
+│  □ No duplicated state — derived values are computed          │
+│  □ Store boundaries match domain boundaries                  │
+│  □ Every mutation handles loading, success, and error         │
+│  □ Optimistic updates have rollback on failure               │
+│  □ Forms use local or form-scoped state, not global stores   │
+│  □ Persistence covers only auth, prefs, drafts, and queue    │
+│  □ Persisted state has versioning and migration strategy      │
+│  □ No screen subscribes to more state than it renders        │
+│  □ Lists use virtualized/lazy rendering patterns             │
+│  □ Re-render profiling shows no unnecessary rebuilds         │
+│  □ Cache invalidation strategy covers all mutation types     │
+│  □ Offline queue retries pending mutations on reconnect      │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="mobile-perf.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">Mobile Performance — 60 FPS or It's a Bug</span></span></a>
+    <a href="mobile-test.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Mobile Testing — Confidence Across Every Device</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    80 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

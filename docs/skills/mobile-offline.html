@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mobile Offline-First — Works Without Signal, Syncs When Connected — Heaptrace Skills</title>
+  <meta name="description" content="Design and implement offline-first mobile architectures — local databases, sync engines, conflict resolution, mutation queues, and background sync. Use when building mobile apps that must work without signal and reconcile data when connectivity returns.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #f43f5e12, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #f43f5e15;
+      border: 1px solid #f43f5e30;
+      color: #f43f5e;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #f43f5e;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #f43f5e;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #f43f5e;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #f43f5e08;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #f43f5e50;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #f43f5e10;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #f43f5e;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+      <a href="../customize/index.html" class="nav-link">Customize</a>
+      <a href="../rules/index.html" class="nav-link">Rules</a>
+      <a href="../mcp/index.html" class="nav-link">MCP Servers</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Mobile Pack</a>
+      <span class="sep">/</span>
+      <span>Mobile Offline-First — Works Without Signal, Syncs When Connected</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#128241;</span>
+      Mobile Pack
+    </div>
+
+    <h1>Mobile Offline-First — Works Without Signal, Syncs When Connected</h1>
+    <p class="description">Takes a mobile app's data requirements and produces a complete offline-first architecture — local database schema, sync engine with delta tracking, mutation queue with retry logic, conflict resolution strategy, and background sync scheduling. Works across React Native, Flutter, and Swift/SwiftUI.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Principal Data Architect</strong> with 18+ years designing offline-first systems for mobile applications operating in connectivity-challenged environments — field service apps in rural areas with zero signal, military logistics apps on aircraft, and healthcare apps in hospital basements. You've built sync engines that reconcile 100K+ records across multiple devices, designed conflict resolution strategies for collaborative editing, and architected local databases that survive app updates without data loss. You are an expert in:</p>
+
+<ul class="skill-list"><li>Local databases — SQLite (via WatermelonDB, Drift, GRDB), Realm, Core Data/SwiftData, Isar/Hive</li>
+<li>Sync strategies — last-write-wins, operational transforms, CRDTs, version vectors, delta sync</li>
+<li>Conflict resolution — field-level merge, user-prompted resolution, domain-specific rules</li>
+<li>Queue management — offline mutation queues, retry with backoff, idempotency keys</li>
+<li>React Native offline — WatermelonDB, MMKV, NetInfo, background sync with react-native-background-fetch</li>
+<li>Flutter offline — Drift (SQLite), Isar, Hive, connectivity_plus, workmanager for background sync</li>
+<li>iOS offline — Core Data + CloudKit, SwiftData, GRDB, BGTaskScheduler, NSPersistentContainer</li>
+
+</ul>You design systems where the network is a luxury, not a requirement. Your apps collect data in tunnels, sync in parking lots, and never lose a byte.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Local Database</h4>
+      <p class="config-example">WatermelonDB, Drift/Isar, SwiftData/Core Data</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Sync Strategy</h4>
+      <p class="config-example">Pull-push with timestamp, delta sync, CRDT-based</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Conflict Resolution</h4>
+      <p class="config-example">Last-write-wins by field, server-wins, user-prompted</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Queue Storage</h4>
+      <p class="config-example">MMKV queue, Hive box, Core Data pending changes</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Connectivity Detection</h4>
+      <p class="config-example">NetInfo, connectivity_plus, NWPathMonitor</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Background Sync</h4>
+      <p class="config-example">background-fetch, workmanager, BGTaskScheduler</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│         MANDATORY RULES FOR EVERY OFFLINE TASK               │
+│                                                              │
+│  1. OFFLINE IS THE DEFAULT STATE                             │
+│     → Design as if the network does not exist. Every         │
+│       feature works locally first, syncs second              │
+│     → If your app shows a blank screen without internet,     │
+│       it is broken. Full stop                                │
+│     → Users open your app in elevators, subways, planes,     │
+│       and basements — connectivity is the exception          │
+│     → Every screen must answer: &quot;What renders with zero      │
+│       network?&quot; If the answer is nothing, redesign it        │
+│                                                              │
+│  2. IDEMPOTENCY KEYS ON EVERY MUTATION                       │
+│     → Network can drop mid-request. The user taps &quot;submit&quot;   │
+│       again. Without idempotency keys, you create duplicates │
+│     → Every create/update mutation needs a client-generated   │
+│       UUID sent as an idempotency key                        │
+│     → The server must deduplicate by this key — returning    │
+│       the existing result if seen before                     │
+│     → This is not optional. It is the foundation of          │
+│       reliable offline writes                                │
+│                                                              │
+│  3. CONFLICT RESOLUTION IS A PRODUCT DECISION                │
+│     → Last-write-wins, server-wins, or ask-the-user?         │
+│       This is not a technical choice — it depends on domain  │
+│     → A note-taking app merges fields. A banking app uses    │
+│       server authority. An inventory app prompts the user    │
+│     → Decide with product, not engineering alone             │
+│     → Document the strategy per entity type before coding    │
+│                                                              │
+│  4. SYNC IS INCREMENTAL, NOT FULL                            │
+│     → Never download the entire dataset on every sync        │
+│     → Use updated_at timestamps, version numbers, or         │
+│       change feeds to pull only deltas                       │
+│     → Full sync does not scale past 1,000 records            │
+│     → Track a sync cursor (timestamp or version) per         │
+│       entity type and persist it locally                     │
+│                                                              │
+│  5. LOCAL SCHEMA MIGRATIONS ARE HARDER THAN SERVER           │
+│     → You cannot force users to update the app. The local    │
+│       DB schema from v1.0 must be migrateable to v5.0       │
+│     → Plan forward-compatible schemas from day one           │
+│     → Never rename columns — add new ones, backfill, drop    │
+│       old ones in a later version                            │
+│     → Test migration paths: v1→v2, v1→v5, v3→v5             │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No &quot;Generated by...&quot; in code comments                  │
+│     → No AI tool mentions in commits or documentation        │
+│     → All code must read as if written by a staff engineer   │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #f43f5e18; color: #f43f5e;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+
+<ul class="skill-list"><li>Designing an offline-first architecture for a new mobile app</li>
+<li>Adding offline support to an existing app that currently requires connectivity</li>
+<li>Building a sync engine to reconcile local and server data</li>
+<li>Choosing a local database for a mobile project (SQLite vs Realm vs Core Data)</li>
+<li>Implementing a mutation queue with retry, ordering, and idempotency</li>
+<li>Designing conflict resolution for multi-device or multi-user editing</li>
+<li>Adding background sync that respects battery and data limits</li>
+<li>Planning local database migrations across app versions</li>
+<li>Debugging sync failures, duplicate records, or data loss after reconnection</li>
+</ul><hr class="section-divider">
+<h2>How It Works</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────────┐
+│                  OFFLINE-FIRST ARCHITECTURE FLOW                 │
+│                                                                  │
+│  ┌────────────┐    ┌────────────┐    ┌──────────────────────┐   │
+│  │ PHASE 1    │    │ PHASE 2    │    │ PHASE 3              │   │
+│  │ Local DB   │───▶│ Data Model │───▶│ Sync Engine          │   │
+│  │ Selection  │    │ Design     │    │ Design               │   │
+│  └────────────┘    └────────────┘    └──────────┬───────────┘   │
+│                                                  │               │
+│  ┌────────────┐    ┌────────────┐    ┌──────────▼───────────┐   │
+│  │ PHASE 6    │    │ PHASE 5    │    │ PHASE 4              │   │
+│  │ Background │◀───│ Conflict   │◀───│ Mutation Queue       │   │
+│  │ Sync       │    │ Resolution │    │ &amp; Retry              │   │
+│  └─────┬──────┘    └────────────┘    └──────────────────────┘   │
+│        │                                                         │
+│  ┌─────▼──────┐    ┌────────────┐                               │
+│  │ PHASE 7    │    │ PHASE 8    │                               │
+│  │ Schema     │───▶│ Testing &amp;  │                               │
+│  │ Migration  │    │ Performance│                               │
+│  └────────────┘    └────────────┘                               │
+└──────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 1: Local Database Selection</h2>
+
+Choose the right local database before writing a single model. This decision is nearly impossible to reverse once data is in production.
+
+<h3>Local Database Comparison</h3>
+<div class="table-wrap"><table><thead><tr><th>Database</th><th>Platform</th><th>Query Language</th><th>Relations</th><th>Migration</th><th>Sync Built-in</th><th>Best For</th><th></th></tr></thead><tbody><tr><td><strong>WatermelonDB</strong></td><td>React Native</td><td>JS query builder</td><td>Yes (lazy)</td><td>Automatic</td><td>Yes (pull/push)</td><td>Large datasets, offline-heavy RN apps</td><td></td></tr><tr><td><strong>SQLite (raw)</strong></td><td>All</td><td>SQL</td><td>Manual joins</td><td>Manual</td><td>No</td><td>Full control, complex queries</td><td></td></tr><tr><td><strong>Drift</strong></td><td>Flutter</td><td>Dart type-safe</td><td>Yes (joins)</td><td>Versioned</td><td>No</td><td>Flutter apps needing SQL power</td><td></td></tr><tr><td><strong>Isar</strong></td><td>Flutter</td><td>Dart builder</td><td>Links</td><td>Automatic</td><td>No</td><td>Fast reads, simple schemas</td><td></td></tr><tr><td><strong>Hive</strong></td><td>Flutter</td><td>Key-value</td><td>No</td><td>Manual</td><td>No</td><td>Preferences, small caches</td><td></td></tr><tr><td><strong>Realm</strong></td><td>RN / Swift</td><td>Object query</td><td>Yes (live)</td><td>Automatic</td><td>Yes (Atlas)</td><td>Real-time sync, live objects</td><td></td></tr><tr><td><strong>Core Data</strong></td><td>iOS/macOS</td><td>NSPredicate</td><td>Yes (graph)</td><td>Lightweight</td><td>CloudKit</td><td>Apple-only apps with iCloud</td><td></td></tr><tr><td><strong>SwiftData</strong></td><td>iOS 17+</td><td>Swift macros</td><td>Yes</td><td>Automatic</td><td>CloudKit</td><td>New Apple-only projects</td><td></td></tr><tr><td><strong>GRDB</strong></td><td>iOS/macOS</td><td>SQL + Swift</td><td>Manual</td><td>Versioned</td><td>No</td><td>SQL-first Swift developers</td><td></td></tr><tr><td><strong>MMKV</strong></td><td>RN / iOS</td><td>Key-value</td><td>No</td><td>N/A</td><td>No</td><td>Auth tokens, flags, tiny data</td><td></td></tr></tbody></table></div>
+<h3>Decision Tree — Which Database?</h3>
+
+<pre class="code-block"><code>┌────────────────────────────────────────────┐
+│  &quot;How many records per entity type?&quot;       │
+└──────────────────┬─────────────────────────┘
+                   │
+         ┌─────────▼───────────┐
+         │  &lt; 500 records?     │
+         └───┬─────────────┬───┘
+          YES│             │ NO
+             │             │
+  ┌──────────▼──┐  ┌──────▼──────────────────┐
+  │ Key-value   │  │ &quot;Do you need relational │
+  │ MMKV / Hive │  │  queries (joins, WHERE  │
+  │             │  │  clauses, indexes)?&quot;     │
+  └─────────────┘  └───┬────────────────┬────┘
+                    YES│                │ NO
+                       │                │
+           ┌───────────▼───┐   ┌────────▼────────┐
+           │ SQLite-based  │   │ Document/Object  │
+           │ WatermelonDB  │   │ Realm, Isar      │
+           │ Drift, GRDB   │   │                  │
+           └───────────────┘   └─────────────────┘</code></pre>
+
+<h3>Platform Recommendations</h3>
+<div class="table-wrap"><table><thead><tr><th>Platform</th><th>Primary Choice</th><th>Alternative</th><th>For Small Data</th><th></th></tr></thead><tbody><tr><td>React Native</td><td>WatermelonDB</td><td>Realm</td><td>MMKV</td><td></td></tr><tr><td>Flutter</td><td>Drift</td><td>Isar</td><td>Hive</td><td></td></tr><tr><td>iOS Native</td><td>GRDB or SwiftData</td><td>Core Data</td><td>MMKV / UserDefaults</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Phase 2: Data Modeling for Offline</h2>
+
+Every local model needs fields the server models do not. These fields make sync, conflict detection, and soft deletion possible.
+
+<h3>Required Fields on Every Syncable Model</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  OFFLINE MODEL SCHEMA — Minimum Required Fields              │
+│                                                              │
+│  id           : UUID (client-generated, primary key)         │
+│  server_id    : UUID | null (null = never synced)            │
+│  created_at   : ISO timestamp (client clock)                 │
+│  updated_at   : ISO timestamp (client clock)                 │
+│  synced_at    : ISO timestamp | null (last successful sync)  │
+│  is_deleted   : boolean (soft delete, syncs as tombstone)    │
+│  version      : integer (incremented on every local write)   │
+│  sync_status  : enum (synced | pending | conflict | error)   │
+│  ...domain fields...                                         │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Field Semantics</h3>
+<div class="table-wrap"><table><thead><tr><th>Field</th><th>Purpose</th><th>Set By</th><th>When</th><th></th></tr></thead><tbody><tr><td><code class="inline-code">id</code></td><td>Local primary key, client-generated UUID</td><td>Client</td><td>On create</td><td></td></tr><tr><td><code class="inline-code">server_id</code></td><td>Server's canonical ID for this record</td><td>Server</td><td>On first successful sync</td><td></td></tr><tr><td><code class="inline-code">updated_at</code></td><td>Last local modification time</td><td>Client</td><td>On every write</td><td></td></tr><tr><td><code class="inline-code">synced_at</code></td><td>Last time server confirmed this record</td><td>Client</td><td>After successful push</td><td></td></tr><tr><td><code class="inline-code">is_deleted</code></td><td>Soft delete flag — never hard delete locally</td><td>Client</td><td>On user delete action</td><td></td></tr><tr><td><code class="inline-code">version</code></td><td>Monotonic version counter for conflict detection</td><td>Client + Server</td><td>On every write</td><td></td></tr><tr><td><code class="inline-code">sync_status</code></td><td>Current sync state of this record</td><td>Sync engine</td><td>On state transitions</td><td></td></tr></tbody></table></div>
+<h3>Sync Status State Machine</h3>
+
+<pre class="code-block"><code>                      ┌──────────┐
+            create/   │          │   push succeeds
+            update    │ pending  │─────────────────┐
+          ┌──────────▶│          │                  │
+          │           └────┬─────┘                  │
+          │                │                        ▼
+     ┌────┴─────┐          │ push fails     ┌──────────┐
+     │          │          │                │          │
+     │  synced  │◀─────────┼────────────────│  synced  │
+     │          │  pull     │    resolved    │          │
+     └──────────┘  update   │               └──────────┘
+          ▲                 ▼
+          │           ┌──────────┐
+          │           │          │
+          └───────────│ conflict │
+            resolved  │          │
+                      └──────────┘</code></pre>
+
+<h3>Soft Deletes Are Mandatory</h3>
+
+Never hard-delete records from the local database. Why:
+
+<ul class="skill-list"><li class="ordered"><strong>The delete must sync to the server</strong> — if you hard-delete locally, you lose the record ID needed to tell the server to delete it</li>
+<li class="ordered"><strong>Other devices need the tombstone</strong> — they pull the <code class="inline-code">is_deleted: true</code> record and remove it from their UI</li>
+<li class="ordered"><strong>Undo support</strong> — users accidentally delete things. Soft delete makes undo trivial</li>
+<li class="ordered"><strong>Purge policy</strong> — periodically clean tombstones older than 30 days after they have synced</li>
+</ul><hr class="section-divider">
+<h2>Phase 3: Sync Engine Design</h2>
+
+The sync engine is the core of offline-first. It coordinates pulling changes from the server and pushing local mutations up.
+
+<h3>Pull-Push Sync Flow</h3>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────────┐
+│                    SYNC ENGINE — PULL THEN PUSH                  │
+│                                                                  │
+│  ┌──────────┐                                    ┌──────────┐   │
+│  │  CLIENT   │                                   │  SERVER   │   │
+│  └──────┬───┘                                    └──────┬───┘   │
+│         │                                               │       │
+│         │  1. PULL: &quot;Give me changes since cursor X&quot;     │       │
+│         │──────────────────────────────────────────────▶│       │
+│         │                                               │       │
+│         │  2. Response: [{records}, new_cursor: Y]       │       │
+│         │◀──────────────────────────────────────────────│       │
+│         │                                               │       │
+│         │  3. Apply remote changes to local DB           │       │
+│         │  (detect conflicts if local version differs)   │       │
+│         │                                               │       │
+│         │  4. PUSH: &quot;Here are my local mutations&quot;        │       │
+│         │──────────────────────────────────────────────▶│       │
+│         │  [records with idempotency_key per mutation]   │       │
+│         │                                               │       │
+│         │  5. Response: [{accepted, rejected, conflicts}]│       │
+│         │◀──────────────────────────────────────────────│       │
+│         │                                               │       │
+│         │  6. Mark accepted as synced                     │       │
+│         │  7. Handle conflicts (merge or prompt user)     │       │
+│         │  8. Persist new cursor Y locally                │       │
+│         │                                               │       │
+└─────────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Pull Strategy — Delta Sync with Cursor</h3>
+
+Never pull all records. Use a cursor (timestamp or version number) to fetch only changes since last sync.
+
+<strong>Server endpoint contract:</strong>
+<pre class="code-block"><code>GET /api/sync/pull?entity=tasks&amp;since=2026-04-09T10:00:00Z&amp;limit=500
+
+Response:
+{
+  &quot;records&quot;: [ ...changed records since cursor... ],
+  &quot;deletions&quot;: [ ...IDs of deleted records... ],
+  &quot;cursor&quot;: &quot;2026-04-09T12:30:00Z&quot;,
+  &quot;has_more&quot;: false
+}</code></pre>
+
+<strong>Key rules for delta sync:</strong>
+<ul class="skill-list"><li>Server must index <code class="inline-code">updated_at</code> on every syncable table</li>
+<li>Soft-deleted records appear in the response with <code class="inline-code">is_deleted: true</code></li>
+<li><code class="inline-code">cursor</code> is the <code class="inline-code">updated_at</code> of the last record in the batch</li>
+<li>Client persists cursor per entity type — never globally</li>
+<li>If <code class="inline-code">has_more</code> is true, pull again with the new cursor immediately</li>
+
+</ul><h3>Push Strategy — Batch with Idempotency</h3>
+
+Push pending local mutations in order, with idempotency keys.
+
+<strong>Push request contract:</strong>
+<pre class="code-block"><code>POST /api/sync/push
+
+{
+  &quot;mutations&quot;: [
+    {
+      &quot;idempotency_key&quot;: &quot;550e8400-e29b-41d4-a716-446655440000&quot;,
+      &quot;entity&quot;: &quot;tasks&quot;,
+      &quot;action&quot;: &quot;create&quot;,
+      &quot;data&quot;: { ...record fields... },
+      &quot;client_version&quot;: 3,
+      &quot;client_updated_at&quot;: &quot;2026-04-09T11:00:00Z&quot;
+    }
+  ]
+}
+
+Response:
+{
+  &quot;results&quot;: [
+    { &quot;idempotency_key&quot;: &quot;550e...&quot;, &quot;status&quot;: &quot;accepted&quot;, &quot;server_id&quot;: &quot;...&quot; },
+    { &quot;idempotency_key&quot;: &quot;661f...&quot;, &quot;status&quot;: &quot;conflict&quot;, &quot;server_version&quot;: { ... } }
+  ]
+}</code></pre>
+
+<h3>Sync Ordering Rules</h3>
+<div class="table-wrap"><table><thead><tr><th>Rule</th><th>Why</th><th></th></tr></thead><tbody><tr><td>Always pull before push</td><td>Pulling first gives you the latest server state, reducing false conflicts</td><td></td></tr><tr><td>Push creates before updates</td><td>An update referencing a record that hasn't been created yet will fail</td><td></td></tr><tr><td>Push parents before children</td><td>Foreign key constraints require the parent record to exist first</td><td></td></tr><tr><td>Batch by entity type</td><td>Keeps transactions small and debuggable</td><td></td></tr><tr><td>Retry failed pushes with exponential backoff</td><td>Network is unreliable — 1s, 2s, 4s, 8s, max 60s</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Phase 4: Mutation Queue & Retry</h2>
+
+Every write operation goes into a queue first. The queue ensures ordering, deduplication, and retry.
+
+<h3>Queue Architecture</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│                     MUTATION QUEUE FLOW                       │
+│                                                              │
+│  User Action                                                 │
+│      │                                                       │
+│      ▼                                                       │
+│  ┌────────────────┐   immediate    ┌───────────────────┐     │
+│  │ Write to       │──────────────▶│ Update local DB   │     │
+│  │ local DB       │               │ (optimistic)      │     │
+│  └────────┬───────┘               └───────────────────┘     │
+│           │                                                  │
+│           ▼                                                  │
+│  ┌────────────────┐                                          │
+│  │ Enqueue        │   Queue stored in local DB or MMKV       │
+│  │ mutation       │   Each entry: idempotency_key, entity,   │
+│  │                │   action, data, retry_count, created_at  │
+│  └────────┬───────┘                                          │
+│           │                                                  │
+│           ▼                                                  │
+│  ┌────────────────┐   online?   ┌───────────────────┐       │
+│  │ Queue          │────YES─────▶│ Push to server    │       │
+│  │ processor      │             │ (batch, in order) │       │
+│  │ (debounced)    │             └─────────┬─────────┘       │
+│  └────────┬───────┘                       │                  │
+│           │ NO                            │                  │
+│           ▼                               ▼                  │
+│  ┌────────────────┐             ┌───────────────────┐       │
+│  │ Wait for       │             │ accepted?         │       │
+│  │ connectivity   │             │ YES → mark synced │       │
+│  │                │             │ NO  → retry/error │       │
+│  └────────────────┘             └───────────────────┘       │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Queue Entry Schema</h3>
+<div class="table-wrap"><table><thead><tr><th>Field</th><th>Type</th><th>Purpose</th><th></th></tr></thead><tbody><tr><td><code class="inline-code">id</code></td><td>UUID</td><td>Queue entry identifier</td><td></td></tr><tr><td><code class="inline-code">idempotency_key</code></td><td>UUID</td><td>Sent to server to prevent duplicates</td><td></td></tr><tr><td><code class="inline-code">entity_type</code></td><td>string</td><td>"tasks", "notes", "inspections"</td><td></td></tr><tr><td><code class="inline-code">action</code></td><td>enum</td><td>create, update, delete</td><td></td></tr><tr><td><code class="inline-code">entity_id</code></td><td>UUID</td><td>Local ID of the affected record</td><td></td></tr><tr><td><code class="inline-code">payload</code></td><td>JSON</td><td>The mutation data</td><td></td></tr><tr><td><code class="inline-code">retry_count</code></td><td>int</td><td>Number of failed attempts</td><td></td></tr><tr><td><code class="inline-code">max_retries</code></td><td>int</td><td>Stop after this many failures (default: 10)</td><td></td></tr><tr><td><code class="inline-code">created_at</code></td><td>timestamp</td><td>When the mutation was queued</td><td></td></tr><tr><td><code class="inline-code">status</code></td><td>enum</td><td>pending, in_flight, failed, completed</td><td></td></tr><tr><td><code class="inline-code">error</code></td><td>string</td><td>null</td><td>Last error message</td><td></td></tr></tbody></table></div>
+<h3>Retry Strategy</h3>
+
+<pre class="code-block"><code>Attempt 1: immediate (if online)
+Attempt 2: 1 second delay
+Attempt 3: 2 seconds
+Attempt 4: 4 seconds
+Attempt 5: 8 seconds
+...
+Attempt N: min(2^(N-1), 60) seconds
+After max_retries: mark as failed, surface to user</code></pre>
+
+<h3>Platform-Specific Queue Storage</h3>
+<div class="table-wrap"><table><thead><tr><th>Platform</th><th>Primary Storage</th><th>Why</th><th></th></tr></thead><tbody><tr><td>React Native</td><td>WatermelonDB table or MMKV JSON array</td><td>WatermelonDB for queryable queue, MMKV for lightweight apps</td><td></td></tr><tr><td>Flutter</td><td>Drift table or Hive box</td><td>Drift for SQL queries on queue, Hive for simple FIFO</td><td></td></tr><tr><td>iOS Native</td><td>Core Data entity or GRDB table</td><td>Survives app termination, queryable, transactional</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Phase 5: Conflict Resolution Strategies</h2>
+
+Conflicts occur when the same record is modified locally and on the server between syncs. Every offline app must have a conflict strategy.
+
+<h3>Conflict Detection</h3>
+
+A conflict exists when:
+<ul class="skill-list"><li>Local record has <code class="inline-code">sync_status = pending</code> (modified locally since last sync)</li>
+<li>Pull returns a server version of the same record with a different <code class="inline-code">version</code> or <code class="inline-code">updated_at</code></li>
+
+</ul><h3>Conflict Resolution Decision Tree</h3>
+
+<pre class="code-block"><code>┌───────────────────────────────────────────────────────────┐
+│  CONFLICT DETECTED — Same record modified locally &amp; server │
+└──────────────────────────┬────────────────────────────────┘
+                           │
+              ┌────────────▼────────────┐
+              │ What type of entity?    │
+              └────┬──────────────┬─────┘
+                   │              │
+        ┌──────────▼──┐    ┌─────▼──────────────┐
+        │ Collaborative│    │ Authoritative      │
+        │ (notes, docs,│    │ (orders, payments, │
+        │  comments)   │    │  inventory counts) │
+        └──────┬──────┘    └─────┬──────────────┘
+               │                 │
+    ┌──────────▼──────┐   ┌─────▼──────────────┐
+    │ Field-level      │   │ Server always wins │
+    │ merge possible?  │   │ Discard local,     │
+    └──┬──────────┬───┘   │ apply server       │
+    YES│          │NO     └────────────────────┘
+       │          │
+┌──────▼──┐  ┌───▼───────────┐
+│ Merge   │  │ Prompt user   │
+│ fields  │  │ &quot;Keep yours   │
+│ by      │  │  or use       │
+│ timestamp│  │  server       │
+│ per field│  │  version?&quot;   │
+└─────────┘  └───────────────┘</code></pre>
+
+<h3>Strategy Comparison</h3>
+<div class="table-wrap"><table><thead><tr><th>Strategy</th><th>How It Works</th><th>Best For</th><th>Risk</th><th></th></tr></thead><tbody><tr><td><strong>Last-write-wins (LWW)</strong></td><td>Higher <code class="inline-code">updated_at</code> wins. Simple, no user prompt</td><td>Logs, activity feeds, non-critical data</td><td>Silent data loss if older write had important changes</td><td></td></tr><tr><td><strong>Server-wins</strong></td><td>Server version always takes precedence</td><td>Financial data, inventory, anything with authority</td><td>Local changes discarded without user awareness</td><td></td></tr><tr><td><strong>Client-wins</strong></td><td>Local version always takes precedence</td><td>Personal drafts, local-only preferences</td><td>Server state can be overwritten by stale clients</td><td></td></tr><tr><td><strong>Field-level merge</strong></td><td>Compare each field individually, take latest per field</td><td>Notes, profiles, forms with independent fields</td><td>Complex to implement, edge cases with related fields</td><td></td></tr><tr><td><strong>User-prompted</strong></td><td>Show both versions, let user choose</td><td>Documents, critical business data</td><td>Blocks sync until user resolves — bad for background sync</td><td></td></tr><tr><td><strong>CRDT-based</strong></td><td>Mathematically guaranteed convergence without coordination</td><td>Collaborative editing, counters, sets</td><td>Complex to implement, limited data types supported</td><td></td></tr></tbody></table></div>
+<h3>Field-Level Merge Example</h3>
+
+<pre class="code-block"><code>Server version:                  Local version:
+{                                {
+  title: &quot;Weekly Report&quot;           title: &quot;Weekly Report&quot;    ← same
+  status: &quot;in_review&quot;             status: &quot;draft&quot;           ← conflict
+  assignee: &quot;alice&quot;                assignee: &quot;bob&quot;           ← conflict
+  due_date: &quot;2026-04-15&quot;          due_date: &quot;2026-04-15&quot;    ← same
+  updated_at: &quot;...T10:00&quot;         updated_at: &quot;...T10:05&quot;
+}                                }
+
+Field-level merge result:
+{
+  title: &quot;Weekly Report&quot;         ← no conflict, keep either
+  status: &quot;draft&quot;                ← local is newer (10:05 &gt; 10:00)
+  assignee: &quot;bob&quot;                ← local is newer
+  due_date: &quot;2026-04-15&quot;        ← no conflict
+}</code></pre>
+
+To implement field-level merge, you need per-field timestamps — either a <code class="inline-code">field_timestamps</code> JSON column or a separate change-tracking table. This adds storage cost but gives the most accurate merges.
+<hr class="section-divider">
+<h2>Phase 6: Background Sync</h2>
+
+Sync should happen without the user actively using the app. Each platform has different background execution APIs with strict limitations.
+
+<h3>Platform Background Sync APIs</h3>
+<div class="table-wrap"><table><thead><tr><th>Platform</th><th>API</th><th>Min Interval</th><th>Execution Time</th><th>Requires</th><th></th></tr></thead><tbody><tr><td>React Native</td><td><code class="inline-code">react-native-background-fetch</code></td><td>~15 minutes (iOS), configurable (Android)</td><td>~30 seconds (iOS), ~10 min (Android)</td><td>App registered for background fetch</td><td></td></tr><tr><td>Flutter</td><td><code class="inline-code">workmanager</code></td><td>~15 minutes</td><td>~30 seconds (iOS), ~10 min (Android)</td><td>Background mode capability</td><td></td></tr><tr><td>iOS Native</td><td><code class="inline-code">BGAppRefreshTaskRequest</code></td><td>~15 minutes (OS decides)</td><td>~30 seconds</td><td>Background Modes → Background Fetch</td><td></td></tr><tr><td>iOS Native</td><td><code class="inline-code">BGProcessingTaskRequest</code></td><td>Overnight (OS decides)</td><td>Minutes</td><td>Background Modes → Background Processing</td><td></td></tr><tr><td>Android</td><td><code class="inline-code">WorkManager</code></td><td>~15 minutes</td><td>~10 minutes</td><td>No special permissions</td><td></td></tr></tbody></table></div>
+<h3>Background Sync Flow</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│                  BACKGROUND SYNC FLOW                        │
+│                                                              │
+│  OS triggers background execution                            │
+│      │                                                       │
+│      ▼                                                       │
+│  ┌──────────────────┐                                        │
+│  │ Check pending    │   0 pending mutations?                 │
+│  │ mutation count   │───────────────────────▶ Skip push      │
+│  └────────┬─────────┘                                        │
+│           │ &gt; 0                                              │
+│           ▼                                                  │
+│  ┌──────────────────┐                                        │
+│  │ Check network    │   Offline?                             │
+│  │ connectivity     │───────────────────────▶ Abort, retry   │
+│  └────────┬─────────┘                         next window    │
+│           │ Online                                           │
+│           ▼                                                  │
+│  ┌──────────────────┐                                        │
+│  │ Pull changes     │   Fetch deltas since last cursor       │
+│  │ (max 30s budget) │                                        │
+│  └────────┬─────────┘                                        │
+│           │                                                  │
+│           ▼                                                  │
+│  ┌──────────────────┐                                        │
+│  │ Push pending     │   Batch mutations, respect ordering    │
+│  │ mutations        │                                        │
+│  └────────┬─────────┘                                        │
+│           │                                                  │
+│           ▼                                                  │
+│  ┌──────────────────┐                                        │
+│  │ Schedule next    │   Tell OS &quot;I need more time&quot; or        │
+│  │ background task  │   &quot;I am done for now&quot;                  │
+│  └──────────────────┘                                        │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Battery and Data Budget Rules</h3>
+<div class="table-wrap"><table><thead><tr><th>Rule</th><th>Implementation</th><th></th></tr></thead><tbody><tr><td>Batch mutations into a single request</td><td>Reduces network round trips and radio wake-ups</td><td></td></tr><tr><td>Compress payloads over 10KB</td><td>gzip request body — saves data and time</td><td></td></tr><tr><td>Skip sync if battery < 15%</td><td>Check battery level before starting background work</td><td></td></tr><tr><td>Respect metered connections</td><td>On cellular, sync only critical mutations, defer media uploads</td><td></td></tr><tr><td>Track sync data usage</td><td>Log bytes sent/received per sync for analytics and optimization</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Phase 7: Schema Migration for Local Databases</h2>
+
+You control server migrations. You do not control when users update the app. Local DB migrations must handle version jumps.
+
+<h3>Migration Strategy by Platform</h3>
+<div class="table-wrap"><table><thead><tr><th>Platform</th><th>Library</th><th>Migration Approach</th><th></th></tr></thead><tbody><tr><td>React Native</td><td>WatermelonDB</td><td>Numbered migration steps in <code class="inline-code">schema/migrations.js</code>. Each step is additive — add columns, add tables. WatermelonDB runs steps sequentially from current to latest</td><td></td></tr><tr><td>Flutter</td><td>Drift</td><td>Versioned <code class="inline-code">schemaVersion</code> with <code class="inline-code">MigrationStrategy</code>. Override <code class="inline-code">onUpgrade</code> with <code class="inline-code">stepByStep</code> for sequential migrations</td><td></td></tr><tr><td>iOS</td><td>Core Data</td><td>Lightweight migration (automatic for simple changes) or heavyweight migration with mapping models. Enable <code class="inline-code">NSMigratePersistentStoresAutomaticallyOption</code></td><td></td></tr><tr><td>iOS</td><td>GRDB</td><td><code class="inline-code">DatabaseMigrator</code> with named migrations. Each migration runs once, in registration order</td><td></td></tr><tr><td>iOS</td><td>SwiftData</td><td>Versioned schemas with <code class="inline-code">VersionedSchema</code> and <code class="inline-code">SchemaMigrationPlan</code></td><td></td></tr></tbody></table></div>
+<h3>Migration Rules</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  LOCAL DB MIGRATION RULES                                    │
+│                                                              │
+│  1. Migrations are ALWAYS additive                           │
+│     → Add columns, add tables, add indexes                   │
+│     → Never rename columns in the same version               │
+│     → To &quot;rename&quot;: add new column → backfill → drop old      │
+│       column in next app version                             │
+│                                                              │
+│  2. Every migration is IDEMPOTENT                            │
+│     → Running the same migration twice must not crash         │
+│     → Use IF NOT EXISTS for new tables/columns               │
+│                                                              │
+│  3. New columns MUST have defaults                           │
+│     → Existing rows need valid values. NULL or a sensible    │
+│       default. Never add a NOT NULL column without default   │
+│                                                              │
+│  4. Test the SKIP path                                       │
+│     → User on v1.0 updates to v5.0 (skipping v2, v3, v4)    │
+│     → All intermediate migrations must run in sequence        │
+│     → Write a test: create v1 DB, run all migrations, assert │
+│                                                              │
+│  5. Ship data backfill as a migration step                   │
+│     → If a new column derives from existing data, compute    │
+│       it in the migration, not lazily at read time           │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 8: Testing & Performance</h2>
+
+<h3>Testing Offline Scenarios</h3>
+<div class="table-wrap"><table><thead><tr><th>Scenario</th><th>How to Simulate</th><th>What to Assert</th><th></th></tr></thead><tbody><tr><td>Cold start offline</td><td>Enable airplane mode, force-kill app, reopen</td><td>App renders cached data, no crashes, no blank screens</td><td></td></tr><tr><td>Write while offline</td><td>Airplane mode, create/edit records, check queue</td><td>Mutations queued with correct idempotency keys</td><td></td></tr><tr><td>Reconnect and sync</td><td>Create data offline, disable airplane mode</td><td>Queue drains, server has correct data, local records updated with server IDs</td><td></td></tr><tr><td>Conflict on sync</td><td>Modify same record on two devices offline, sync both</td><td>Conflict resolution runs, no data loss, result matches strategy</td><td></td></tr><tr><td>Slow network</td><td>Use network conditioner (300ms latency, 50kbps)</td><td>UI remains responsive, sync completes eventually, retry logic triggers</td><td></td></tr><tr><td>Mid-request failure</td><td>Kill network during active push</td><td>Partial batch handled, queue retries remaining items</td><td></td></tr><tr><td>App killed mid-sync</td><td>Force-kill app during pull/push</td><td>Next launch resumes sync correctly, no partial state</td><td></td></tr><tr><td>Schema migration</td><td>Install v1, add data, upgrade to v5</td><td>All data preserved, new columns populated, app starts normally</td><td></td></tr></tbody></table></div>
+<h3>Performance Targets</h3>
+<div class="table-wrap"><table><thead><tr><th>Metric</th><th>Target</th><th>How to Measure</th><th></th></tr></thead><tbody><tr><td>Local query time (100 records)</td><td>< 10ms</td><td>Instrument DB query wrapper</td><td></td></tr><tr><td>Local query time (10K records)</td><td>< 50ms</td><td>Profile with indexes</td><td></td></tr><tr><td>Sync pull (500 records)</td><td>< 2 seconds on 4G</td><td>Network profiler</td><td></td></tr><tr><td>Sync push (50 mutations)</td><td>< 1 second on 4G</td><td>Network profiler</td><td></td></tr><tr><td>Local DB size per 1K records</td><td>< 500KB</td><td>Check SQLite file size</td><td></td></tr><tr><td>Background sync execution</td><td>< 25 seconds total</td><td>OS budget is ~30s on iOS</td><td></td></tr><tr><td>App cold start with local DB</td><td>< 500ms to first paint</td><td>Measure from launch to rendered content</td><td></td></tr></tbody></table></div>
+<h3>Local Database Indexing Checklist</h3>
+
+<ul class="skill-list"><li class="checkbox"><input type="checkbox" disabled> Index all foreign key columns used in WHERE clauses</li>
+<li class="checkbox"><input type="checkbox" disabled> Index <code class="inline-code">sync_status</code> for queue processing queries</li>
+<li class="checkbox"><input type="checkbox" disabled> Index <code class="inline-code">updated_at</code> for delta sync cursor queries</li>
+<li class="checkbox"><input type="checkbox" disabled> Index <code class="inline-code">is_deleted</code> to filter tombstones from UI queries</li>
+<li class="checkbox"><input type="checkbox" disabled> Composite index on <code class="inline-code">(entity_type, sync_status)</code> for batch sync</li>
+<li class="checkbox"><input type="checkbox" disabled> Never index columns you only use in INSERT — indexes slow writes</li>
+</ul><hr class="section-divider">
+<h2>Tips for Best Results</h2>
+
+<ul class="skill-list"><li class="ordered"><strong>Start with one entity type</strong> — get sync working end-to-end for a single entity (e.g., tasks) before adding more. A sync engine that works for one entity type extends naturally to others</li>
+<li class="ordered"><strong>Log every sync event</strong> — timestamp, direction (pull/push), record count, conflicts found, resolution applied. When sync breaks in production (it will), these logs are the only way to diagnose</li>
+<li class="ordered"><strong>Build a sync status indicator</strong> — show users whether they are online, offline, syncing, or have pending changes. A simple colored dot in the header prevents support tickets</li>
+<li class="ordered"><strong>Test on real networks, not simulators</strong> — subway tunnels, elevators, and rural areas produce network conditions no simulator can replicate. Test there</li>
+<li class="ordered"><strong>Set a data retention policy</strong> — synced tombstones older than 30 days can be purged. Without a purge policy, the local DB grows indefinitely</li>
+<li class="ordered"><strong>Version your sync protocol</strong> — include a <code class="inline-code">sync_version</code> header so the server can handle old clients gracefully when the sync format evolves</li>
+<li class="ordered"><strong>Monitor queue depth in production</strong> — if a user's queue grows past 100 items, something is wrong. Alert on it</li>
+<li class="ordered"><strong>Plan for clock skew</strong> — client clocks are wrong. Use server timestamps for conflict resolution, client timestamps only for ordering local mutations</li>
+
+</ul><pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  OFFLINE-FIRST READINESS CHECKLIST                           │
+│                                                              │
+│  □ Every screen renders meaningful content without network   │
+│  □ Local DB schema includes sync fields on all models        │
+│  □ Mutation queue persists across app restarts               │
+│  □ Every mutation carries an idempotency key                 │
+│  □ Sync is incremental (cursor-based, not full download)     │
+│  □ Conflict resolution strategy documented per entity        │
+│  □ Background sync scheduled on all target platforms         │
+│  □ Schema migrations tested for version-skip upgrades        │
+│  □ Sync status visible to the user (online/offline/pending)  │
+│  □ Retry with exponential backoff on all network failures    │
+│  □ Soft deletes only — no hard deletes in local DB           │
+│  □ Local DB indexed on sync_status, updated_at, foreign keys │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="mobile-navigation.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">Mobile Navigation — Architecture That Scales</span></span></a>
+    <a href="mobile-perf.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Mobile Performance — 60 FPS or It's a Bug</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    80 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

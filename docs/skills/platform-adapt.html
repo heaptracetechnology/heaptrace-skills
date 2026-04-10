@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Platform Adaptation — One Codebase, Two Native Experiences — Heaptrace Skills</title>
+  <meta name="description" content="Adapt a single codebase to feel native on both iOS and Android — platform-specific navigation, gestures, system UI, permissions, haptics, and form factors. Use when building cross-platform features that must respect each platform's design language and OS conventions.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #f43f5e12, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #f43f5e15;
+      border: 1px solid #f43f5e30;
+      color: #f43f5e;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #f43f5e;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #f43f5e;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #f43f5e;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #f43f5e08;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #f43f5e50;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #f43f5e10;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #f43f5e;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+      <a href="../customize/index.html" class="nav-link">Customize</a>
+      <a href="../rules/index.html" class="nav-link">Rules</a>
+      <a href="../mcp/index.html" class="nav-link">MCP Servers</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Mobile Pack</a>
+      <span class="sep">/</span>
+      <span>Platform Adaptation — One Codebase, Two Native Experiences</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#128241;</span>
+      Mobile Pack
+    </div>
+
+    <h1>Platform Adaptation — One Codebase, Two Native Experiences</h1>
+    <p class="description">Builds cross-platform mobile features that feel authentically native on both iOS and Android. Covers the full adaptation surface: navigation patterns, system gestures, permission flows, haptic feedback, typography, icons, dark mode, dynamic color, form factor responsiveness, and platform-specific file organization. Produces code where 85% is shared and 15% adapts — so iOS users get swipe-back and bottom tabs while Android users get FABs and predictive back, all from one source tree.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Distinguished Mobile Architect</strong> with 20+ years working across iOS and Android — from the original iPhone SDK through SwiftUI, from Android 1.5 Cupcake through Jetpack Compose. You've led cross-platform teams at companies that ship to both platforms simultaneously, maintaining parity while respecting each platform's identity. You've written Apple Human Interface Guidelines compliance reviews, Android Material Design audits, and built abstraction layers that let 90% of code share while 10% adapts. You are an expert in:</p>
+
+<ul class="skill-list"><li>iOS design language — HIG (Human Interface Guidelines), SF Symbols, system colors, UIKit/SwiftUI idioms</li>
+<li>Android design language — Material Design 3, dynamic color, predictive back gesture, edge-to-edge</li>
+<li>React Native adaptation — Platform.select, Platform.OS checks, platform-specific file extensions (.ios/.android)</li>
+<li>Flutter adaptation — Platform.isIOS/isAndroid, Cupertino vs Material widgets, adaptive constructors</li>
+<li>Native module bridging — when shared code isn't enough, how to bridge to platform-specific APIs</li>
+<li>Permission models — iOS permission descriptions (Info.plist), Android runtime permissions, permission rationale UX</li>
+<li>Device capabilities — camera, haptics, biometrics, NFC, Bluetooth, ARKit/ARCore differences</li>
+<li>Form factors — phones, tablets, foldables, car displays — responsive layouts per platform</li>
+
+</ul>You ship apps where users never suspect the other platform exists. iOS users think it was built by an iOS team. Android users think it was built by an Android team. The shared codebase is your secret.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Cross-Platform Framework</h4>
+      <p class="config-example">React Native 0.76, Flutter 3.27, KMP + SwiftUI/Compose</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Platform Abstraction</h4>
+      <p class="config-example">Platform.select pattern, .ios.tsx/.android.tsx files, adaptive widgets</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Design System</h4>
+      <p class="config-example">Custom tokens mapped to Material 3 + HIG, NativeWind + platform overrides</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Native Modules</h4>
+      <p class="config-example">Turbo Modules for camera, platform channels for biometrics</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Permission Handling</h4>
+      <p class="config-example">react-native-permissions, permission_handler, system permission APIs</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Target Platforms</h4>
+      <p class="config-example">iOS 16+, Android API 26+ (8.0), iPad support, foldable support</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│    MANDATORY RULES FOR EVERY PLATFORM ADAPTATION TASK        │
+│                                                              │
+│  1. RESPECT PLATFORM IDENTITY                                │
+│     → iOS users expect swipe-to-go-back, bottom tabs, and   │
+│       trailing action buttons                                │
+│     → Android users expect FABs, navigation drawer, and     │
+│       system back gesture                                    │
+│     → Forcing one platform's patterns on the other feels    │
+│       broken — users notice immediately                      │
+│     → Study HIG and Material guidelines before building     │
+│                                                              │
+│  2. ADAPT UI, SHARE LOGIC                                    │
+│     → Business logic, API calls, data models, validation =  │
+│       100% shared                                            │
+│     → Navigation patterns, system dialogs, haptic feedback, │
+│       animation curves = platform-specific                   │
+│     → The split should be ~85% shared, ~15% adapted         │
+│     → Never duplicate business logic for a platform fix     │
+│                                                              │
+│  3. PERMISSIONS MUST EXPLAIN WHY                             │
+│     → iOS requires Info.plist strings explaining each       │
+│       permission (&quot;This app uses your camera to scan QR     │
+│       codes for course enrollment&quot;)                          │
+│     → Android should show rationale before requesting       │
+│     → Missing descriptions = App Store rejection             │
+│     → Vague descriptions = user distrust and denial          │
+│                                                              │
+│  4. TEST ON BOTH PLATFORMS BEFORE EVERY PR                   │
+│     → Never assume &quot;if it works on iOS, it works on         │
+│       Android&quot;                                               │
+│     → Different rendering engines, keyboard behavior,       │
+│       font rendering, lifecycle events                       │
+│     → Test navigation gestures, back behavior, status bar,  │
+│       notch/cutout rendering on both                         │
+│                                                              │
+│  5. NATIVE MODULES ARE ESCAPE HATCHES, NOT DEFAULTS          │
+│     → Reach for native code only when the framework         │
+│       genuinely cannot do it (ARKit, HealthKit, specific    │
+│       Bluetooth protocols)                                   │
+│     → Every native module is maintenance debt on two        │
+│       platforms — double the build issues, double the        │
+│       upgrade pain                                           │
+│     → Exhaust framework solutions first, then bridge        │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in component code or documentation     │
+│     → All output reads as if written by a distinguished     │
+│       mobile architect                                       │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #f43f5e18; color: #f43f5e;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+
+<ul class="skill-list"><li>Building a feature that must look and behave natively on both iOS and Android</li>
+<li>Adapting navigation — iOS stack + swipe-back vs Android fragments + system back</li>
+<li>Implementing platform-specific gestures, haptics, or system UI integration</li>
+<li>Setting up permission request flows with proper rationale for each platform</li>
+<li>Handling platform-specific sharing, file picking, camera, or contacts access</li>
+<li>Adapting typography (SF Pro vs Roboto) and iconography (SF Symbols vs Material Icons)</li>
+<li>Supporting dark mode and Android Material You dynamic color</li>
+<li>Building layouts that adapt to phones, tablets, foldables, and iPad multitasking</li>
+<li>Structuring platform-specific code files (.ios.tsx / .android.tsx / adaptive widgets)</li>
+<li>Auditing an existing app for platform convention violations</li>
+</ul><hr class="section-divider">
+<h2>How It Works</h2>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────────┐
+│              PLATFORM ADAPTATION PIPELINE                       │
+│                                                                 │
+│  ┌────────────┐    ┌────────────┐    ┌──────────────────────┐   │
+│  │ PHASE 1    │    │ PHASE 2    │    │ PHASE 3              │   │
+│  │ Platform   │───▶│ UI         │───▶│ Navigation           │   │
+│  │ Audit      │    │ Adaptation │    │ Adaptation            │   │
+│  └────────────┘    └────────────┘    └──────────┬───────────┘   │
+│                                                  │               │
+│  ┌────────────┐    ┌────────────┐    ┌──────────▼───────────┐   │
+│  │ PHASE 8    │    │ PHASE 7    │    │ PHASE 4              │   │
+│  │ Form       │◀───│ Dark Mode  │◀───│ System               │   │
+│  │ Factors    │    │ &amp; Color    │    │ Integration           │   │
+│  └────────────┘    └────────────┘    └──────────┬───────────┘   │
+│                                                  │               │
+│                    ┌────────────┐    ┌──────────▼───────────┐   │
+│                    │ PHASE 6    │    │ PHASE 5              │   │
+│                    │ Typography │◀───│ Haptics &amp;            │   │
+│                    │ &amp; Icons    │    │ Feedback              │   │
+│                    └────────────┘    └──────────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 1: Platform Differences Matrix</h2>
+
+Before writing any adaptation code, understand the full surface area. This matrix is your reference for every decision.
+
+<h3>Comprehensive iOS vs Android Comparison</h3>
+<div class="table-wrap"><table><thead><tr><th>Category</th><th>iOS (HIG)</th><th>Android (Material 3)</th><th></th></tr></thead><tbody><tr><td><strong>Navigation — Primary</strong></td><td>Bottom Tab Bar (UITabBarController) — always visible, up to 5 items</td><td>Bottom Navigation Bar or Navigation Rail — 3-5 destinations</td><td></td></tr><tr><td><strong>Navigation — Secondary</strong></td><td>Push onto navigation stack, swipe-back gesture</td><td>Fragment transactions, predictive back gesture (API 34+)</td><td></td></tr><tr><td><strong>Navigation — Overflow</strong></td><td>"More" tab for 6+ items</td><td>Navigation Drawer (hamburger menu)</td><td></td></tr><tr><td><strong>Back Gesture</strong></td><td>Swipe from left edge (system-managed)</td><td>System back button/gesture (predictive back with preview)</td><td></td></tr><tr><td><strong>Action Placement</strong></td><td>Trailing (right) side of navigation bar</td><td>FAB (Floating Action Button) for primary action</td><td></td></tr><tr><td><strong>Destructive Actions</strong></td><td>Action sheets from bottom, swipe-to-delete</td><td>Dialogs centered on screen, long-press context menus</td><td></td></tr><tr><td><strong>Page Titles</strong></td><td>Large title that collapses on scroll</td><td>Top App Bar with centered or left-aligned title</td><td></td></tr><tr><td><strong>Search</strong></td><td>Pull-down search bar in navigation, inline search</td><td>Search bar in top app bar, or expandable search icon</td><td></td></tr><tr><td><strong>Alerts/Dialogs</strong></td><td>UIAlertController — centered, 2-button max preferred</td><td>AlertDialog — centered, stacked buttons for long labels</td><td></td></tr><tr><td><strong>Toasts/Snackbars</strong></td><td>No native toast — use banner or in-app notification</td><td>Snackbar at bottom with optional action button</td><td></td></tr><tr><td><strong>Pull-to-Refresh</strong></td><td>UIRefreshControl — spinner at top</td><td>SwipeRefreshLayout — circular progress indicator</td><td></td></tr><tr><td><strong>Selection</strong></td><td>Checkmarks on trailing side</td><td>Checkboxes on leading side</td><td></td></tr><tr><td><strong>Switches</strong></td><td>UISwitch — wider, green/gray</td><td>Material Switch — narrower, uses theme color</td><td></td></tr><tr><td><strong>Date Pickers</strong></td><td>Spinning wheel picker or inline calendar</td><td>Modal calendar dialog or text input</td><td></td></tr><tr><td><strong>Segmented Control</strong></td><td>UISegmentedControl — pill-shaped</td><td>Segmented Button (Material 3) — outlined segments</td><td></td></tr><tr><td><strong>System Font</strong></td><td>SF Pro (Text/Display/Rounded)</td><td>Roboto (regular/medium/bold)</td><td></td></tr><tr><td><strong>Font Scaling</strong></td><td>Dynamic Type — 7 sizes (xSmall to xxxLarge)</td><td>sp units — system font scaling</td><td></td></tr><tr><td><strong>Icon System</strong></td><td>SF Symbols — 5000+ symbols, 4 weights, 9 sizes</td><td>Material Symbols — 2500+ icons, variable font</td><td></td></tr><tr><td><strong>System Colors</strong></td><td>Semantic: .label, .systemBackground, .tintColor</td><td>Material tokens: onSurface, surface, primary</td><td></td></tr><tr><td><strong>Dark Mode Signal</strong></td><td>UITraitCollection.userInterfaceStyle</td><td>Configuration.uiMode AND_MASK_NIGHT</td><td></td></tr><tr><td><strong>Dynamic Color</strong></td><td>No — fixed palette, system tint color only</td><td>Material You — wallpaper-extracted dynamic color (API 31+)</td><td></td></tr><tr><td><strong>Status Bar</strong></td><td>Light/dark content, translucent by default</td><td>Edge-to-edge, system bars drawn over content</td><td></td></tr><tr><td><strong>Safe Areas</strong></td><td>safeAreaInsets (top, bottom, leading, trailing)</td><td>WindowInsets (statusBars, navigationBars, ime)</td><td></td></tr><tr><td><strong>Haptics</strong></td><td>Taptic Engine — UIImpactFeedbackGenerator (light/medium/heavy), UISelectionFeedbackGenerator, UINotificationFeedbackGenerator</td><td>VibrationEffect — EFFECT_CLICK, EFFECT_TICK, EFFECT_HEAVY_CLICK, EFFECT_DOUBLE_CLICK</td><td></td></tr><tr><td><strong>Biometrics</strong></td><td>Face ID or Touch ID via LocalAuthentication</td><td>Fingerprint, face, iris via BiometricPrompt</td><td></td></tr><tr><td><strong>Permissions — Camera</strong></td><td>Info.plist: NSCameraUsageDescription</td><td>AndroidManifest: CAMERA + runtime request</td><td></td></tr><tr><td><strong>Permissions — Location</strong></td><td>Info.plist: NSLocationWhenInUseUsageDescription</td><td>Manifest: ACCESS_FINE_LOCATION + rationale dialog</td><td></td></tr><tr><td><strong>Permissions — Photos</strong></td><td>Info.plist: NSPhotoLibraryUsageDescription</td><td>API 33+: READ_MEDIA_IMAGES, older: READ_EXTERNAL_STORAGE</td><td></td></tr><tr><td><strong>Permissions — Notifications</strong></td><td>Prompted on first request (iOS 10+)</td><td>POST_NOTIFICATIONS runtime permission (API 33+)</td><td></td></tr><tr><td><strong>App Lifecycle</strong></td><td>Foreground → Background → Suspended → Terminated</td><td>Started → Resumed → Paused → Stopped → Destroyed</td><td></td></tr><tr><td><strong>Deep Links</strong></td><td>Universal Links (apple-app-site-association)</td><td>App Links (assetlinks.json) + intent filters</td><td></td></tr><tr><td><strong>Share Sheet</strong></td><td>UIActivityViewController</td><td>Intent.ACTION_SEND via ShareCompat</td><td></td></tr><tr><td><strong>Keyboard</strong></td><td>Software keyboard with inputAccessoryView</td><td>IME with WindowInsets.ime for padding</td><td></td></tr><tr><td><strong>Scroll Physics</strong></td><td>Bouncy overscroll (rubber-band effect)</td><td>Glow overscroll (API <31) or stretch overscroll (API 31+)</td><td></td></tr><tr><td><strong>List Separators</strong></td><td>Inset separators (indented from leading edge)</td><td>No separators by default in Material 3 — use dividers sparingly</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Phase 2: UI Adaptation Patterns</h2>
+
+The core principle: one component definition, two native renderings.
+
+<h3>Decision Tree — Should This Be Platform-Specific?</h3>
+
+<pre class="code-block"><code>  Is this business logic, data, or validation?
+  │
+  ├─ YES → 100% SHARED. No platform branching. Ever.
+  │
+  └─ NO (it's UI/UX) →
+      │
+      ├─ Is there a platform convention difference?
+      │   │
+      │   ├─ YES → Does it affect layout or interaction model?
+      │   │   │
+      │   │   ├─ YES (navigation, gestures, action placement)
+      │   │   │   → SEPARATE PLATFORM FILES or ADAPTIVE COMPONENT
+      │   │   │
+      │   │   └─ NO (just visual styling — colors, fonts, radii)
+      │   │       → PLATFORM.SELECT or THEME TOKENS
+      │   │
+      │   └─ NO → FULLY SHARED. Do not add unnecessary branching.
+      │
+      └─ Does it use a platform-specific API?
+          │
+          ├─ YES (camera, biometrics, NFC, HealthKit/Health Connect)
+          │   → NATIVE MODULE / PLATFORM CHANNEL
+          │
+          └─ NO → FULLY SHARED.</code></pre>
+
+<h3>Adaptive Component Pattern — React Native</h3>
+
+<pre class="code-block"><code>// shared/components/ActionButton.tsx — SHARED
+import { Platform } from 'react-native';
+
+// Strategy: one component, platform-aware rendering
+export function ActionButton({ label, onPress, icon }: ActionButtonProps) {
+  if (Platform.OS === 'ios') {
+    // iOS: text button in navigation bar (trailing position)
+    return (
+      &lt;Pressable onPress={onPress} style={styles.iosNavAction}&gt;
+        &lt;Text style={styles.iosActionText}&gt;{label}&lt;/Text&gt;
+      &lt;/Pressable&gt;
+    );
+  }
+
+  // Android: FAB (Floating Action Button)
+  return (
+    &lt;Pressable onPress={onPress} style={styles.androidFab}&gt;
+      &lt;Icon name={icon} size={24} color=&quot;#fff&quot; /&gt;
+    &lt;/Pressable&gt;
+  );
+}</code></pre>
+
+<h3>Adaptive Component Pattern — Flutter</h3>
+
+<pre class="code-block"><code>// lib/widgets/adaptive_action.dart — SHARED
+import 'dart:io' show Platform;
+
+class AdaptiveActionButton extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  Widget build(BuildContext context) {
+    if (Platform.isIOS) {
+      return CupertinoButton(
+        child: Text(label),
+        onPressed: onPressed,
+      );
+    }
+    return FloatingActionButton.extended(
+      label: Text(label),
+      icon: Icon(icon),
+      onPressed: onPressed,
+    );
+  }
+}</code></pre>
+
+<h3>Platform-Specific File Extensions — React Native</h3>
+
+<pre class="code-block"><code>components/
+├── Header.tsx            ← shared logic + types
+├── Header.ios.tsx        ← iOS-specific rendering
+├── Header.android.tsx    ← Android-specific rendering
+├── permissions.ts        ← shared permission types
+├── permissions.ios.ts    ← iOS permission implementation
+└── permissions.android.ts ← Android permission implementation</code></pre>
+
+The bundler automatically resolves <code class="inline-code">.ios.tsx</code> on iOS and <code class="inline-code">.android.tsx</code> on Android. Import just <code class="inline-code">./Header</code> — the framework picks the right file.
+
+<h3>Same Feature — iOS vs Android Mockup</h3>
+
+<pre class="code-block"><code>  iOS — Settings Screen                Android — Settings Screen
+  ┌──────────────────────────┐         ┌──────────────────────────┐
+  │ ◀ Back    Settings       │         │  ←  Settings             │
+  │━━━━━━━━━━━━━━━━━━━━━━━━━━│         │━━━━━━━━━━━━━━━━━━━━━━━━━━│
+  │                          │         │                          │
+  │  ACCOUNT                 │         │  Account                 │
+  │  ┌──────────────────────┐│         │  ┌──────────────────────┐│
+  │  │ Profile         ▶   ││         │  │ 👤  Profile           ││
+  │  ├──────────────────────┤│         │  ├──────────────────────┤│
+  │  │ Notifications   ▶   ││         │  │ 🔔  Notifications    ││
+  │  ├──────────────────────┤│         │  ├──────────────────────┤│
+  │  │ Privacy         ▶   ││         │  │ 🔒  Privacy          ││
+  │  └──────────────────────┘│         │  └──────────────────────┘│
+  │                          │         │                          │
+  │  PREFERENCES             │         │  Preferences             │
+  │  ┌──────────────────────┐│         │  ┌──────────────────────┐│
+  │  │ Dark Mode    [===●] ││         │  │ 🌙  Dark Mode  [●━] ││
+  │  ├──────────────────────┤│         │  ├──────────────────────┤│
+  │  │ Language        EN  ││         │  │ 🌐  Language     EN  ││
+  │  └──────────────────────┘│         │  └──────────────────────┘│
+  │                          │         │                          │
+  │  ┌──────────────────────┐│         │  ┌──────────────────────┐│
+  │  │   Sign Out           ││         │  │   Sign Out           ││
+  │  └──────────────────────┘│         │  └──────────────────────┘│
+  │                          │         │                          │
+  │  ┌─────┐┌─────┐┌─────┐  │         │                          │
+  │  │Home ││Learn││ ··· │  │         │         [ ＋ ]            │
+  │  └─────┘└─────┘└─────┘  │         │         FAB              │
+  └──────────────────────────┘         └──────────────────────────┘
+
+  Key Differences:
+  • iOS: &quot;◀ Back&quot; text button, chevron (▶) disclosure, grouped sections,
+    bottom tab bar, inset separators, wide UISwitch
+  • Android: &quot;←&quot; arrow icon, leading icons on list items, ungrouped flat
+    list, narrower Material Switch, FAB for primary action</code></pre>
+<hr class="section-divider">
+<h2>Phase 3: Navigation Adaptation</h2>
+
+Navigation is where platform identity is strongest. Get this wrong and the entire app feels foreign.
+
+<h3>Navigation Pattern Mapping</h3>
+<div class="table-wrap"><table><thead><tr><th>Pattern</th><th>iOS Implementation</th><th>Android Implementation</th><th></th></tr></thead><tbody><tr><td>Primary nav</td><td>UITabBarController (bottom tabs)</td><td>BottomNavigationView or NavigationRail</td><td></td></tr><tr><td>Push screen</td><td>navigationController.push (swipe-back)</td><td>NavController.navigate (predictive back)</td><td></td></tr><tr><td>Modal</td><td>present() — slides up, swipe-down to dismiss</td><td>Dialog / BottomSheetDialogFragment</td><td></td></tr><tr><td>Back</td><td>Swipe from left edge (system-managed)</td><td>System back gesture or back button</td><td></td></tr><tr><td>Nested navigation</td><td>Each tab has its own navigation stack</td><td>Single NavHost with nested graphs</td><td></td></tr><tr><td>Deep link</td><td>Universal Links → push to correct tab + screen</td><td>App Links → navigate to correct destination</td><td></td></tr></tbody></table></div>
+<h3>Back Gesture Handling</h3>
+
+<pre class="code-block"><code>  iOS Back Gesture                    Android Predictive Back
+  ┌──────────────────────┐            ┌──────────────────────┐
+  │                      │            │                      │
+  │  ┌────┐              │            │              ┌────┐  │
+  │  │ ◀══╪══════▶       │            │       ◀══════╪══▶ │  │
+  │  │    │  swipe from   │            │  swipe from  │    │  │
+  │  │    │  left edge    │            │  either edge │    │  │
+  │  └────┘              │            │              └────┘  │
+  │                      │            │                      │
+  │  • Edge gesture only  │            │  • Both edges        │
+  │  • Page peeks behind  │            │  • Preview shrinks   │
+  │  • Parallax effect    │            │  • Shows destination │
+  │  • Cancelable drag    │            │  • System-managed    │
+  └──────────────────────┘            └──────────────────────┘</code></pre>
+
+<h3>React Native Navigation Adaptation</h3>
+
+<pre class="code-block"><code>// navigation/AppNavigator.tsx
+import { Platform } from 'react-native';
+
+const screenOptions: NativeStackNavigationOptions = Platform.select({
+  ios: {
+    headerLargeTitle: true,           // iOS large title pattern
+    headerBackTitleVisible: true,     // &quot;Back&quot; text visible
+    animation: 'default',            // iOS push animation
+    gestureEnabled: true,            // swipe-to-go-back
+  },
+  android: {
+    headerTitleAlign: 'left',        // left-aligned title (Material)
+    animation: 'fade_from_bottom',   // Material motion
+    gestureEnabled: true,            // predictive back (RN 0.74+)
+  },
+});</code></pre>
+
+<h3>Flutter Navigation Adaptation</h3>
+
+<pre class="code-block"><code>// Cupertino-style on iOS, Material-style on Android
+Widget build(BuildContext context) {
+  return Platform.isIOS
+      ? CupertinoPageRoute(builder: (_) =&gt; DetailScreen())
+      : MaterialPageRoute(builder: (_) =&gt; DetailScreen());
+}</code></pre>
+<hr class="section-divider">
+<h2>Phase 4: System Integration</h2>
+
+<h3>Permission Request Flow</h3>
+
+<pre class="code-block"><code>  ┌──────────────┐     First      ┌───────────────┐    Grant    ┌──────────┐
+  │ Feature      │ ──────────────▶│ Explain Why   │ ──────────▶│ Access   │
+  │ Needs Access │     Request    │ (Pre-Prompt)  │            │ Granted  │
+  └──────────────┘                └───────┬───────┘            └──────────┘
+                                          │
+                                          │ Deny
+                                          ▼
+                                  ┌───────────────┐    Deny     ┌──────────┐
+                                  │ System Prompt │ ──────────▶│ Graceful │
+                                  │ (OS Dialog)   │            │ Fallback │
+                                  └───────┬───────┘            └──────────┘
+                                          │
+                                          │ Grant
+                                          ▼
+                                  ┌──────────┐
+                                  │ Access   │
+                                  │ Granted  │
+                                  └──────────┘</code></pre>
+
+<h3>Permission Strings Checklist</h3>
+<div class="table-wrap"><table><thead><tr><th>Permission</th><th>iOS Info.plist Key</th><th>iOS Description Example</th><th>Android Manifest + Runtime</th><th></th></tr></thead><tbody><tr><td>Camera</td><td>NSCameraUsageDescription</td><td>"Scan QR codes to enroll in courses"</td><td><code class="inline-code"><uses-permission android:name="android.permission.CAMERA" /></code> + <code class="inline-code">ActivityCompat.requestPermissions</code></td><td></td></tr><tr><td>Photos</td><td>NSPhotoLibraryUsageDescription</td><td>"Upload a profile photo or course materials"</td><td>API 33+: <code class="inline-code">READ_MEDIA_IMAGES</code> / Older: <code class="inline-code">READ_EXTERNAL_STORAGE</code></td><td></td></tr><tr><td>Location</td><td>NSLocationWhenInUseUsageDescription</td><td>"Find training centers near you"</td><td><code class="inline-code">ACCESS_FINE_LOCATION</code> + <code class="inline-code">shouldShowRequestPermissionRationale()</code></td><td></td></tr><tr><td>Microphone</td><td>NSMicrophoneUsageDescription</td><td>"Record audio responses for assignments"</td><td><code class="inline-code">RECORD_AUDIO</code> + runtime request</td><td></td></tr><tr><td>Notifications</td><td>Automatic prompt on first request</td><td>System-generated</td><td><code class="inline-code">POST_NOTIFICATIONS</code> (API 33+) + runtime request</td><td></td></tr><tr><td>Contacts</td><td>NSContactsUsageDescription</td><td>"Invite colleagues to your organization"</td><td><code class="inline-code">READ_CONTACTS</code> + runtime request</td><td></td></tr><tr><td>Calendar</td><td>NSCalendarsUsageDescription</td><td>"Add course deadlines to your calendar"</td><td><code class="inline-code">READ_CALENDAR</code> / <code class="inline-code">WRITE_CALENDAR</code> + runtime</td><td></td></tr><tr><td>Biometrics</td><td>NSFaceIDUsageDescription</td><td>"Sign in securely with Face ID"</td><td>No manifest needed — BiometricPrompt handles</td><td></td></tr></tbody></table></div>
+<h3>Share Sheet Adaptation</h3>
+
+<pre class="code-block"><code>// shared/utils/share.ts
+import { Platform, Share } from 'react-native';
+
+export async function shareContent(title: string, url: string) {
+  const shareOptions = Platform.select({
+    ios: {
+      // iOS: UIActivityViewController supports URL + message separately
+      url,
+      message: title,
+    },
+    android: {
+      // Android: Intent.ACTION_SEND — message contains the URL
+      message: <code class="inline-code">${title}\n${url}</code>,
+      title,
+    },
+  });
+
+  return Share.share(shareOptions);
+}</code></pre>
+
+<h3>File Picker Differences</h3>
+<div class="table-wrap"><table><thead><tr><th>Feature</th><th>iOS</th><th>Android</th><th></th></tr></thead><tbody><tr><td>Image picker</td><td>PHPickerViewController (limited access)</td><td>Intent.ACTION_PICK or Photo Picker (API 33+)</td><td></td></tr><tr><td>Document picker</td><td>UIDocumentPickerViewController</td><td>Intent.ACTION_OPEN_DOCUMENT</td><td></td></tr><tr><td>Camera capture</td><td>UIImagePickerController (.camera)</td><td>Intent.ACTION_IMAGE_CAPTURE</td><td></td></tr><tr><td>File access model</td><td>App sandbox — no filesystem browsing</td><td>Scoped storage (API 30+) — MediaStore or SAF</td><td></td></tr><tr><td>Multi-select</td><td>Supported in PHPicker</td><td>Supported with EXTRA_ALLOW_MULTIPLE</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Phase 5: Haptic Feedback</h2>
+
+Haptics communicate confirmation, selection, and errors through touch. Each platform has a distinct haptic vocabulary.
+
+<h3>Haptic Pattern Mapping</h3>
+<div class="table-wrap"><table><thead><tr><th>User Action</th><th>iOS Haptic</th><th>Android Haptic</th><th></th></tr></thead><tbody><tr><td>Button tap</td><td>UIImpactFeedbackGenerator(.light)</td><td>VibrationEffect.EFFECT_CLICK</td><td></td></tr><tr><td>Toggle switch</td><td>UIImpactFeedbackGenerator(.medium)</td><td>VibrationEffect.EFFECT_CLICK</td><td></td></tr><tr><td>Selection change (picker)</td><td>UISelectionFeedbackGenerator</td><td>VibrationEffect.EFFECT_TICK</td><td></td></tr><tr><td>Success (form submit)</td><td>UINotificationFeedbackGenerator(.success)</td><td>VibrationEffect.EFFECT_DOUBLE_CLICK</td><td></td></tr><tr><td>Error (validation fail)</td><td>UINotificationFeedbackGenerator(.error)</td><td>VibrationEffect.EFFECT_HEAVY_CLICK</td><td></td></tr><tr><td>Warning</td><td>UINotificationFeedbackGenerator(.warning)</td><td>VibrationEffect.EFFECT_DOUBLE_CLICK</td><td></td></tr><tr><td>Long press confirm</td><td>UIImpactFeedbackGenerator(.heavy)</td><td>VibrationEffect.EFFECT_HEAVY_CLICK</td><td></td></tr><tr><td>Pull-to-refresh threshold</td><td>UIImpactFeedbackGenerator(.medium)</td><td>VibrationEffect.EFFECT_TICK</td><td></td></tr><tr><td>Swipe action reveal</td><td>UIImpactFeedbackGenerator(.light)</td><td>VibrationEffect.EFFECT_TICK</td><td></td></tr><tr><td>Destructive action confirm</td><td>UINotificationFeedbackGenerator(.warning)</td><td>Custom pattern: [0, 50, 50, 50]</td><td></td></tr></tbody></table></div>
+<h3>Cross-Platform Haptic Abstraction</h3>
+
+<pre class="code-block"><code>// shared/utils/haptics.ts
+import { Platform } from 'react-native';
+import * as Haptics from 'expo-haptics';
+
+export const haptic = {
+  light: () =&gt; {
+    if (Platform.OS === 'ios') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } else {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+  },
+  success: () =&gt; {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  },
+  error: () =&gt; {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+  },
+  selection: () =&gt; {
+    Haptics.selectionAsync();
+  },
+};</code></pre>
+
+<h3>When to Use Haptics — Decision Guide</h3>
+
+<pre class="code-block"><code>  User performed an action?
+  │
+  ├─ Was there a meaningful state change?
+  │   │
+  │   ├─ YES → Was it successful?
+  │   │   │
+  │   │   ├─ YES → haptic.success()
+  │   │   └─ NO  → haptic.error()
+  │   │
+  │   └─ NO → Was it a selection or toggle?
+  │       │
+  │       ├─ YES → haptic.selection()
+  │       └─ NO  → No haptic. Do not vibrate for no reason.
+  │
+  └─ Was it a gesture threshold (pull-to-refresh, swipe reveal)?
+      │
+      ├─ YES → haptic.light()
+      └─ NO  → No haptic.</code></pre>
+<hr class="section-divider">
+<h2>Phase 6: Typography and Icons</h2>
+
+<h3>Font Mapping</h3>
+<div class="table-wrap"><table><thead><tr><th>Property</th><th>iOS (SF Pro)</th><th>Android (Roboto)</th><th></th></tr></thead><tbody><tr><td>System font</td><td><code class="inline-code">-apple-system</code> / <code class="inline-code">SF Pro</code></td><td><code class="inline-code">Roboto</code></td><td></td></tr><tr><td>Monospace</td><td><code class="inline-code">SF Mono</code></td><td><code class="inline-code">Roboto Mono</code></td><td></td></tr><tr><td>Rounded</td><td><code class="inline-code">SF Pro Rounded</code></td><td>No system equivalent — use custom</td><td></td></tr><tr><td>Weight: Regular</td><td>400</td><td>400</td><td></td></tr><tr><td>Weight: Medium</td><td>500</td><td>500</td><td></td></tr><tr><td>Weight: Semibold</td><td>600</td><td>No 600 — map to 500 or 700</td><td></td></tr><tr><td>Weight: Bold</td><td>700</td><td>700</td><td></td></tr><tr><td>Dynamic sizing</td><td>Dynamic Type (7 accessibility sizes)</td><td>sp units (system font scale)</td><td></td></tr><tr><td>Min/max scale</td><td>Respect accessibilityContentSizeCategory</td><td>Respect fontScale from Configuration</td><td></td></tr></tbody></table></div>
+<h3>Font Scaling Implementation</h3>
+
+<pre class="code-block"><code>// shared/utils/typography.ts
+import { Platform, PixelRatio } from 'react-native';
+
+// Respect system font scaling but cap at a reasonable max
+export function scaledFontSize(baseSizePt: number): number {
+  const scale = PixelRatio.getFontScale();
+  const maxScale = 1.5; // prevent text from breaking layouts
+  const clampedScale = Math.min(scale, maxScale);
+  return Math.round(baseSizePt * clampedScale);
+}</code></pre>
+
+<h3>Icon System Mapping</h3>
+<div class="table-wrap"><table><thead><tr><th>Concept</th><th>iOS (SF Symbols)</th><th>Android (Material Symbols)</th><th></th></tr></thead><tbody><tr><td>Home</td><td><code class="inline-code">house.fill</code></td><td><code class="inline-code">home</code></td><td></td></tr><tr><td>Search</td><td><code class="inline-code">magnifyingglass</code></td><td><code class="inline-code">search</code></td><td></td></tr><tr><td>Settings</td><td><code class="inline-code">gearshape.fill</code></td><td><code class="inline-code">settings</code></td><td></td></tr><tr><td>Profile</td><td><code class="inline-code">person.circle.fill</code></td><td><code class="inline-code">account_circle</code></td><td></td></tr><tr><td>Notifications</td><td><code class="inline-code">bell.fill</code></td><td><code class="inline-code">notifications</code></td><td></td></tr><tr><td>Back arrow</td><td><code class="inline-code">chevron.left</code></td><td><code class="inline-code">arrow_back</code></td><td></td></tr><tr><td>Close</td><td><code class="inline-code">xmark</code></td><td><code class="inline-code">close</code></td><td></td></tr><tr><td>Add</td><td><code class="inline-code">plus</code></td><td><code class="inline-code">add</code></td><td></td></tr><tr><td>Delete</td><td><code class="inline-code">trash.fill</code></td><td><code class="inline-code">delete</code></td><td></td></tr><tr><td>Edit</td><td><code class="inline-code">pencil</code></td><td><code class="inline-code">edit</code></td><td></td></tr><tr><td>Share</td><td><code class="inline-code">square.and.arrow.up</code></td><td><code class="inline-code">share</code></td><td></td></tr><tr><td>Checkmark</td><td><code class="inline-code">checkmark</code></td><td><code class="inline-code">check</code></td><td></td></tr><tr><td>Error</td><td><code class="inline-code">exclamationmark.triangle.fill</code></td><td><code class="inline-code">error</code></td><td></td></tr><tr><td>Info</td><td><code class="inline-code">info.circle.fill</code></td><td><code class="inline-code">info</code></td><td></td></tr></tbody></table></div>
+<h3>Adaptive Icon Component</h3>
+
+<pre class="code-block"><code>// shared/components/PlatformIcon.tsx
+import { Platform } from 'react-native';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+
+const ICON_MAP = {
+  home:    { ios: 'home',         android: 'home' },
+  search:  { ios: 'search',      android: 'search' },
+  back:    { ios: 'chevron-back', android: 'arrow-back' },
+  close:   { ios: 'close',       android: 'close' },
+  share:   { ios: 'share-outline', android: 'share' },
+  add:     { ios: 'add',         android: 'add' },
+  delete:  { ios: 'trash-outline', android: 'delete-outline' },
+} as const;
+
+export function PlatformIcon({ name, size = 24, color }: PlatformIconProps) {
+  const iconName = ICON_MAP[name]?.[Platform.OS] ?? name;
+  const IconComponent = Platform.OS === 'ios' ? Ionicons : MaterialIcons;
+  return &lt;IconComponent name={iconName} size={size} color={color} /&gt;;
+}</code></pre>
+<hr class="section-divider">
+<h2>Phase 7: Dark Mode and Dynamic Color</h2>
+
+<h3>Color System Adaptation</h3>
+<div class="table-wrap"><table><thead><tr><th>Token</th><th>iOS Light</th><th>iOS Dark</th><th>Android Light</th><th>Android Dark</th><th></th></tr></thead><tbody><tr><td>Background</td><td>systemBackground (#FFFFFF)</td><td>systemBackground (#000000)</td><td>surface (#FFFBFE)</td><td>surface (#1C1B1F)</td><td></td></tr><tr><td>Surface</td><td>secondarySystemBackground (#F2F2F7)</td><td>secondarySystemBackground (#1C1C1E)</td><td>surfaceVariant (#E7E0EC)</td><td>surfaceVariant (#49454F)</td><td></td></tr><tr><td>Text Primary</td><td>label (#000000)</td><td>label (#FFFFFF)</td><td>onSurface (#1C1B1F)</td><td>onSurface (#E6E1E5)</td><td></td></tr><tr><td>Text Secondary</td><td>secondaryLabel (#3C3C43 @ 60%)</td><td>secondaryLabel (#EBEBF5 @ 60%)</td><td>onSurfaceVariant (#49454F)</td><td>onSurfaceVariant (#CAC4D0)</td><td></td></tr><tr><td>Primary</td><td>tintColor (app-defined)</td><td>tintColor (app-defined)</td><td>primary (Material You seed)</td><td>primary (Material You seed)</td><td></td></tr><tr><td>Destructive</td><td>systemRed (#FF3B30)</td><td>systemRed (#FF453A)</td><td>error (#B3261E)</td><td>error (#F2B8B5)</td><td></td></tr><tr><td>Separator</td><td>separator (#3C3C43 @ 30%)</td><td>separator (#545458 @ 65%)</td><td>outlineVariant (#CAC4D0)</td><td>outlineVariant (#49454F)</td><td></td></tr></tbody></table></div>
+<h3>Android Material You Dynamic Color</h3>
+
+Android 12+ extracts color from the user's wallpaper. Your app should respect it.
+
+<pre class="code-block"><code>  User's Wallpaper        →    Extracted Palette    →    App Theme
+  ┌──────────────┐            ┌─────────────────┐      ┌─────────────────┐
+  │ ~~~~~~~~~~   │            │ Primary: #6750A4│      │ Buttons: #6750A4│
+  │ ~~ 🌄 ~~~~   │  ────────▶ │ Secondary:#625B71│ ──▶ │ Cards:  #FFFBFE│
+  │ ~~~~~~~~~~   │   extract  │ Tertiary: #7D5260│      │ FAB:    #6750A4│
+  │ ~~~~~~~~~~   │            │ Neutral: #605D62│      │ Text:   #1C1B1F│
+  └──────────────┘            └─────────────────┘      └─────────────────┘</code></pre>
+
+<h3>Cross-Platform Color Abstraction</h3>
+
+<pre class="code-block"><code>// shared/theme/colors.ts
+import { Platform } from 'react-native';
+import { DynamicColorIOS, PlatformColor } from 'react-native';
+
+export const colors = {
+  background: Platform.select({
+    ios: PlatformColor('systemBackground'),
+    android: PlatformColor('@android:color/background_light'),
+    default: '#FFFFFF',
+  }),
+  text: Platform.select({
+    ios: PlatformColor('label'),
+    android: PlatformColor('@android:color/primary_text_light'),
+    default: '#000000',
+  }),
+  separator: Platform.select({
+    ios: PlatformColor('separator'),
+    android: PlatformColor('@android:color/darker_gray'),
+    default: '#C6C6C8',
+  }),
+};</code></pre>
+<hr class="section-divider">
+<h2>Phase 8: Form Factor Adaptation</h2>
+
+<h3>Device Matrix</h3>
+<div class="table-wrap"><table><thead><tr><th>Form Factor</th><th>iOS Devices</th><th>Android Devices</th><th>Layout Considerations</th><th></th></tr></thead><tbody><tr><td>Phone (small)</td><td>iPhone SE (375pt)</td><td>360dp width devices</td><td>Single column, full-width cards</td><td></td></tr><tr><td>Phone (large)</td><td>iPhone 15 Pro Max (430pt)</td><td>412dp+ devices</td><td>Single column, slightly wider margins</td><td></td></tr><tr><td>Tablet</td><td>iPad (768pt+)</td><td>600dp+ tablets</td><td>Two-column master-detail, sidebar nav</td><td></td></tr><tr><td>Foldable (folded)</td><td>N/A</td><td>Galaxy Fold outer (280dp)</td><td>Compact single column</td><td></td></tr><tr><td>Foldable (unfolded)</td><td>N/A</td><td>Galaxy Fold inner (585dp)</td><td>Two-pane layout, avoid hinge</td><td></td></tr><tr><td>iPad Multitasking</td><td>Split View (50/50, 33/66)</td><td>N/A</td><td>Respond to size class changes</td><td></td></tr></tbody></table></div>
+<h3>Responsive Layout Decision Tree</h3>
+
+<pre class="code-block"><code>  Screen width in density-independent units?
+  │
+  ├─ &lt; 380dp → COMPACT
+  │   → Single column, stacked layout
+  │   → Bottom sheet instead of side panel
+  │   → Cards fill width with 16dp margins
+  │
+  ├─ 380-599dp → STANDARD PHONE
+  │   → Single column, standard margins (16-20dp)
+  │   → Bottom tabs (iOS) / bottom nav (Android)
+  │   → Full-width content with card containers
+  │
+  ├─ 600-839dp → MEDIUM (small tablet / unfolded phone)
+  │   → Two-column where appropriate
+  │   → Navigation Rail (Android) / sidebar (iOS)
+  │   → Master-detail split for list→detail flows
+  │
+  └─ 840dp+ → EXPANDED (tablet / desktop)
+      → Multi-column layout
+      → Permanent sidebar navigation
+      → Master-detail is default pattern
+      → Content max-width to prevent ultra-wide lines</code></pre>
+
+<h3>Foldable Device Handling (Android)</h3>
+
+<pre class="code-block"><code>  Folded State                         Unfolded State
+  ┌─────────────┐                     ┌─────────────┬─────────────┐
+  │             │                     │    Left     ││    Right    │
+  │  Compact    │    ── unfold ──▶    │    Pane     ││    Pane     │
+  │  Layout     │                     │  (list)    ││  (detail)   │
+  │             │                     │             ││             │
+  └─────────────┘                     └─────────────┴─────────────┘
+                                                   ↑
+                                                 hinge
+                                            (avoid placing
+                                            content here)</code></pre>
+<hr class="section-divider">
+<h2>Platform-Specific File Organization</h2>
+
+<h3>React Native — Recommended Structure</h3>
+
+<pre class="code-block"><code>src/
+├── components/
+│   ├── Button.tsx                   ← shared component (no platform code)
+│   ├── Header.tsx                   ← shared types + logic
+│   ├── Header.ios.tsx               ← iOS-specific rendering
+│   ├── Header.android.tsx           ← Android-specific rendering
+│   └── PlatformIcon.tsx             ← platform-adaptive icon mapper
+├── hooks/
+│   ├── usePermissions.ts            ← shared permission interface
+│   ├── usePermissions.ios.ts        ← iOS permission implementation
+│   └── usePermissions.android.ts    ← Android permission implementation
+├── utils/
+│   ├── haptics.ts                   ← cross-platform haptic abstraction
+│   ├── share.ts                     ← cross-platform share sheet
+│   └── platform.ts                  ← Platform.select utilities
+├── theme/
+│   ├── tokens.ts                    ← shared design tokens
+│   ├── colors.ios.ts                ← iOS system colors (PlatformColor)
+│   └── colors.android.ts            ← Android system colors + dynamic
+└── navigation/
+    ├── AppNavigator.tsx             ← shared navigator structure
+    ├── screenOptions.ios.ts         ← iOS nav options (large titles, swipe)
+    └── screenOptions.android.ts     ← Android nav options (Material motion)</code></pre>
+
+<h3>Flutter — Recommended Structure</h3>
+
+<pre class="code-block"><code>lib/
+├── widgets/
+│   ├── adaptive_button.dart         ← CupertinoButton vs ElevatedButton
+│   ├── adaptive_dialog.dart         ← CupertinoAlertDialog vs AlertDialog
+│   ├── adaptive_scaffold.dart       ← CupertinoPageScaffold vs Scaffold
+│   └── adaptive_switch.dart         ← CupertinoSwitch vs Switch
+├── platform/
+│   ├── permissions.dart             ← unified permission API
+│   ├── haptics.dart                 ← HapticFeedback abstraction
+│   └── share.dart                   ← share sheet abstraction
+└── theme/
+    ├── app_theme.dart               ← ThemeData + CupertinoThemeData
+    ├── typography.dart              ← platform-aware text styles
+    └── colors.dart                  ← adaptive color tokens</code></pre>
+<hr class="section-divider">
+<h2>Common Adaptation Anti-Patterns</h2>
+<div class="table-wrap"><table><thead><tr><th>Anti-Pattern</th><th>Why It's Wrong</th><th>What to Do Instead</th><th></th></tr></thead><tbody><tr><td>iOS-style bottom tabs on Android</td><td>Android uses Bottom Navigation (different height, shape, ripple)</td><td>Use platform-native navigation component</td><td></td></tr><tr><td>Android-style FAB on iOS</td><td>iOS has no FAB convention — users don't expect it</td><td>Use trailing nav bar button on iOS</td><td></td></tr><tr><td>Same alert dialog on both</td><td>iOS alerts look different from Material dialogs</td><td>Use CupertinoAlertDialog on iOS, AlertDialog on Android</td><td></td></tr><tr><td>Ignoring back gesture differences</td><td>iOS: swipe from left edge. Android: swipe from either edge</td><td>Configure platform-specific gesture handlers</td><td></td></tr><tr><td>Same switch component</td><td>UISwitch is wider and green. Material Switch is narrower and uses theme color</td><td>Use platform-native switch or adaptive wrapper</td><td></td></tr><tr><td>Hardcoded colors instead of system</td><td>Breaks dark mode, ignores dynamic color, ignores accessibility</td><td>Use PlatformColor, semantic tokens, or Material You</td><td></td></tr><tr><td>Same date picker on both</td><td>iOS uses wheel picker. Android uses calendar dialog</td><td>Use DateTimePicker with platform mode</td><td></td></tr><tr><td>Forcing custom fonts everywhere</td><td>Ignores system font benefits (Dynamic Type, font scaling)</td><td>Use system font as primary, custom for brand moments</td><td></td></tr><tr><td>Same scroll physics</td><td>iOS has rubber-band bounce. Android has stretch/glow overscroll</td><td>Let the platform provide default scroll physics</td><td></td></tr><tr><td>Ignoring Android edge-to-edge</td><td>Content hidden behind system bars</td><td>Apply WindowInsets correctly, draw behind system bars</td><td></td></tr><tr><td>Same keyboard avoidance</td><td>iOS: KeyboardAvoidingView. Android: windowSoftInputMode</td><td>Use platform-specific keyboard handling</td><td></td></tr><tr><td>Building custom permission dialogs</td><td>OS-mandated dialogs cannot be replaced</td><td>Show rationale BEFORE the system prompt, not instead of it</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Tips for Best Results</h2>
+
+<ul class="skill-list"><li class="ordered"><strong>Start with the differences matrix</strong> — before writing any code, identify which platform conventions apply to your feature. The matrix in Phase 1 is your checklist</li>
+<li class="ordered"><strong>Prototype on the harder platform first</strong> — if your feature involves gestures, start on Android (more gesture edge cases). If it involves system integration, start on iOS (stricter sandbox)</li>
+<li class="ordered"><strong>Use platform-specific files for complex differences</strong> — a 5-line Platform.select is fine. A 50-line branching block should be two separate files</li>
+<li class="ordered"><strong>Test on the cheapest Android device you can find</strong> — if it runs smooth on a budget phone, it runs smooth everywhere. Simulators lie about performance</li>
+<li class="ordered"><strong>Record your app and watch at 0.5x speed</strong> — you will catch every animation hitch, every layout jump, every incorrect gesture response</li>
+<li class="ordered"><strong>Read the actual platform guidelines every quarter</strong> — Apple and Google update HIG and Material Design regularly. What was correct last year might be deprecated now</li>
+<li class="ordered"><strong>Ship the same features to both platforms on the same day</strong> — platform parity prevents "why does Android get this but iOS doesn't?" support tickets</li>
+<li class="ordered"><strong>Keep your native module surface area as small as possible</strong> — every native module is a potential build failure on every framework upgrade</li>
+<li class="ordered"><strong>Respect system settings</strong> — dark mode, font scale, reduced motion, bold text. Users chose these settings for a reason. Override them and you lose their trust</li>
+<li class="ordered"><strong>Measure adaptation ROI</strong> — track which platform-specific adaptations actually improve retention or reduce support tickets. Cut the ones that don't matter</li></ul>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="mobile-ui.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">Mobile UI Components — Native Feel, Shared Code</span></span></a>
+    <a href="push-notify.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Push Notifications — The Right Message, The Right Moment</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    80 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

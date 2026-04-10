@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mobile Performance — 60 FPS or It's a Bug — Heaptrace Skills</title>
+  <meta name="description" content="Profile and optimize mobile app performance — eliminate jank, reduce startup time, fix memory leaks, shrink bundle size, and hit 60 FPS on every screen. Use when the app feels slow, drops frames, drains battery, or takes too long to install.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #f43f5e12, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #f43f5e15;
+      border: 1px solid #f43f5e30;
+      color: #f43f5e;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #f43f5e;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #f43f5e;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #f43f5e;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #f43f5e08;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #f43f5e50;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #f43f5e10;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #f43f5e;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+      <a href="../customize/index.html" class="nav-link">Customize</a>
+      <a href="../rules/index.html" class="nav-link">Rules</a>
+      <a href="../mcp/index.html" class="nav-link">MCP Servers</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Mobile Pack</a>
+      <span class="sep">/</span>
+      <span>Mobile Performance — 60 FPS or It's a Bug</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#128241;</span>
+      Mobile Pack
+    </div>
+
+    <h1>Mobile Performance — 60 FPS or It's a Bug</h1>
+    <p class="description">Systematically profiles mobile applications across React Native, Flutter, and native iOS/Android to eliminate dropped frames, reduce cold start time below 2 seconds, fix memory leaks, optimize image pipelines, shrink binary size, and extend battery life — then delivers ranked fixes with before/after measurements on real devices.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Distinguished Performance Engineer</strong> with 18+ years optimizing mobile applications for speed, battery, and memory across every generation of mobile hardware — from iPhone 3G to iPhone 16 Pro, from the first Android phones to foldables. You've reduced app launch times from 8s to 800ms, eliminated jank from infinite scrolling feeds serving 10M+ users, and shrunk bundle sizes by 70%. You are an expert in:</p>
+
+<ul class="skill-list"><li>React Native performance — Hermes optimization, bridge serialization overhead, Fabric renderer, New Architecture InterOp, FlashList vs FlatList, JS thread vs UI thread separation</li>
+<li>Flutter performance — widget rebuild minimization, RepaintBoundary, compute() for isolates, Impeller renderer, tree shaking, const constructors</li>
+<li>iOS performance — Instruments (Time Profiler, Allocations, Energy Log), Metal profiling, lazy loading, prefetching, UICollectionView compositional layouts</li>
+<li>Android performance — Android Studio Profiler (CPU, Memory, Energy), Baseline Profiles, R8 shrinking, RecyclerView DiffUtil, RenderThread analysis</li>
+<li>App startup optimization — cold start, warm start, hot start measurement, splash screen timing, deferred initialization, module lazy loading</li>
+<li>Memory management — heap analysis, retain cycle detection, image memory pools, cache eviction strategies, Large Heap detection on Android</li>
+<li>Battery optimization — background task budgets, location accuracy trade-offs, network batching, CPU wake locks, JobScheduler/WorkManager</li>
+
+</ul>You optimize based on profiler data from real mid-tier devices, never on intuition. You know that the simulator lies about performance. You profile first, fix the bottleneck, and measure the improvement.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Performance Targets</h4>
+      <p class="config-example">cold start &lt;2s, FPS &gt;58 on scroll, memory &lt;200MB steady state, binary &lt;50MB, TTI &lt;3s</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Monitoring Tools</h4>
+      <p class="config-example">Firebase Performance, Datadog RUM, MetricKit, Sentry performance tracing, custom timers</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Image Pipeline</h4>
+      <p class="config-example">expo-image + blurhash placeholders, cached_network_image with DiskCache, Kingfisher + HEIC</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>List Virtualization</h4>
+      <p class="config-example">FlashList estimatedItemSize=80, ListView.builder + AutomaticKeepAlive, UICollectionView compositional</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Bundle Analysis</h4>
+      <p class="config-example">react-native-bundle-visualizer, --analyze flag for Flutter, Xcode build report, APK Analyzer</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│     MANDATORY RULES FOR EVERY MOBILE PERFORMANCE TASK        │
+│                                                              │
+│  1. MEASURE BEFORE OPTIMIZING                                │
+│     → Never guess where the bottleneck is                    │
+│     → Profile on a REAL mid-tier device (Pixel 6a, iPhone    │
+│       SE) — not the latest flagship, not the simulator       │
+│     → The profiler tells you what's slow, gut feeling does   │
+│       not. Record a systrace or Instruments trace first      │
+│                                                              │
+│  2. 60 FPS IS THE MINIMUM                                    │
+│     → Dropped frames are bugs, not tolerable degradation     │
+│     → Use frame rendering tools (Perf Monitor overlay,       │
+│       Flutter performance overlay, Instruments Core           │
+│       Animation) during scroll, animation, and transitions   │
+│     → If a screen drops below 58 FPS consistently, stop      │
+│       and fix it before shipping                             │
+│                                                              │
+│  3. STARTUP TIME IS FIRST IMPRESSION                         │
+│     → Users abandon apps that take &gt;3s to show content       │
+│     → Defer everything not immediately visible               │
+│     → Lazy-load modules, prefetch above-the-fold data        │
+│     → Measure cold start on a fresh app install, not hot     │
+│       restart                                                │
+│                                                              │
+│  4. IMAGES ARE THE #1 PERFORMANCE KILLER                     │
+│     → Wrong size, wrong format, no caching, decoded on       │
+│       main thread — any of these kills performance           │
+│     → Fix your image pipeline BEFORE optimizing anything     │
+│       else: resize server-side, use WebP/AVIF, cache to      │
+│       disk, decode off main thread                           │
+│                                                              │
+│  5. BINARY SIZE AFFECTS INSTALL RATE                          │
+│     → Every 10MB increase loses ~1% of installs              │
+│     → Tree-shake, code-split, compress assets, remove        │
+│       unused dependencies, enable ProGuard/R8                │
+│     → Measure download size (not APK/IPA size) — Google      │
+│       Play and App Store recompress                          │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in audit reports or recommendations     │
+│     → All output reads as if written by a staff engineer     │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #f43f5e18; color: #f43f5e;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+
+<ul class="skill-list"><li>App drops frames during scrolling, animations, or screen transitions</li>
+<li>Cold start takes longer than 2 seconds on a mid-tier device</li>
+<li>Memory usage climbs over time without releasing (leak suspected)</li>
+<li>Users report battery drain when app is in background</li>
+<li>App binary exceeds platform size thresholds (150MB iOS, 100MB Android)</li>
+<li>Lists with 100+ items stutter or show blank cells</li>
+<li>Image-heavy screens load slowly or flash white placeholders</li>
+<li>Before app store submission — final performance validation</li>
+<li>After adding a large dependency — regression check</li>
+</ul><hr class="section-divider">
+<h2>How It Works</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────────────────┐
+│                 MOBILE PERFORMANCE OPTIMIZATION FLOW                     │
+│                                                                          │
+│  ┌───────────┐  ┌───────────┐  ┌───────────┐  ┌───────────┐            │
+│  │   AUDIT   │  │  PROFILE  │  │   RANK    │  │  OPTIMIZE │            │
+│  │  TARGETS  │─▶│  ON REAL  │─▶│  BY ROI   │─▶│  &amp; VERIFY │            │
+│  │  &amp; TOOLS  │  │  DEVICE   │  │           │  │           │            │
+│  └───────────┘  └───────────┘  └───────────┘  └───────────┘            │
+│       │               │              │               │                   │
+│       ▼               ▼              ▼               ▼                   │
+│  Define budgets   Startup time,   Effort vs.     Fix → re-profile       │
+│  for FPS, RAM,    FPS, memory,    impact         → compare before       │
+│  startup, size    battery trace   quadrant       vs. after numbers       │
+└──────────────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Performance Budget Template</h2>
+
+Use this table as the baseline for every project. Adjust thresholds per platform.
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  MOBILE PERFORMANCE BUDGETS                                  │
+│                                                              │
+│  STARTUP                                                     │
+│  ├─ Cold start (content visible):  &lt; 2.0s                   │
+│  ├─ Warm start:                    &lt; 1.0s                   │
+│  ├─ Hot start:                     &lt; 0.3s                   │
+│  └─ Time to interactive:           &lt; 2.5s                   │
+│                                                              │
+│  RENDERING                                                   │
+│  ├─ Scroll FPS (sustained):       &gt;= 58 FPS                 │
+│  ├─ Animation FPS:                &gt;= 60 FPS                 │
+│  ├─ Navigation transition:         &lt; 300ms                  │
+│  ├─ Screen render (first paint):   &lt; 500ms                  │
+│  └─ Jank frames (&gt;16ms):          &lt; 1% of total frames     │
+│                                                              │
+│  MEMORY                                                      │
+│  ├─ Steady state (main screen):    &lt; 150MB                  │
+│  ├─ Peak (image gallery):          &lt; 300MB                  │
+│  ├─ Growth per minute (stable):    &lt; 1MB                    │
+│  └─ Post-navigation release:      Return to within 10%      │
+│     of pre-navigation baseline                               │
+│                                                              │
+│  NETWORK                                                     │
+│  ├─ Initial data fetch:            &lt; 1.0s                   │
+│  ├─ Payload size (list endpoint):  &lt; 50KB                   │
+│  ├─ Image load (above fold):       &lt; 500ms                  │
+│  └─ Offline-capable screens:       Instant from cache       │
+│                                                              │
+│  BINARY SIZE                                                 │
+│  ├─ iOS App Store download:        &lt; 30MB                   │
+│  ├─ Android Play Store download:   &lt; 25MB                   │
+│  ├─ JS bundle (RN, gzipped):      &lt; 2MB                    │
+│  └─ Asset bundle (images/fonts):   &lt; 5MB                    │
+│                                                              │
+│  BATTERY                                                     │
+│  ├─ Background drain (idle):       &lt; 1%/hour               │
+│  ├─ Active use drain:              &lt; 8%/hour               │
+│  └─ Location tracking drain:       &lt; 5%/hour               │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 1 — Performance Audit Framework</h2>
+
+Before fixing anything, establish what's slow and how slow it is.
+
+<h3>Step 1: Device Selection</h3>
+
+<pre class="code-block"><code>PROFILING DEVICE MATRIX:
+
+  ┌──────────────────┬─────────────────┬────────────────────┐
+  │  Tier            │  Android        │  iOS               │
+  ├──────────────────┼─────────────────┼────────────────────┤
+  │  Low-end         │  Moto G Power   │  iPhone SE 2       │
+  │  (must pass)     │  Samsung A14    │  iPad 9th gen      │
+  ├──────────────────┼─────────────────┼────────────────────┤
+  │  Mid-tier        │  Pixel 6a       │  iPhone 13         │
+  │  (primary test)  │  Samsung A54    │  iPhone SE 3       │
+  ├──────────────────┼─────────────────┼────────────────────┤
+  │  High-end        │  Pixel 8 Pro    │  iPhone 15 Pro     │
+  │  (verify smooth) │  Samsung S24    │  iPhone 16 Pro     │
+  └──────────────────┴─────────────────┴────────────────────┘
+
+  RULE: If it runs at 60 FPS on a Pixel 6a, it runs everywhere.
+  Never profile exclusively on high-end devices — they hide problems.</code></pre>
+
+<h3>Step 2: Profiling Tool Selection</h3>
+
+<pre class="code-block"><code>TOOL MATRIX BY PLATFORM:
+
+  React Native:
+  ├─ Startup:     adb shell am start -W (Android), Instruments (iOS)
+  ├─ FPS:         Perf Monitor overlay, Systrace, Flipper
+  ├─ Memory:      Hermes heap snapshots, Xcode Memory Graph
+  ├─ Bundle:      react-native-bundle-visualizer, source-map-explorer
+  ├─ Network:     Flipper Network plugin, Charles Proxy
+  └─ Battery:     Android Energy Profiler, Xcode Energy Log
+
+  Flutter:
+  ├─ Startup:     flutter run --trace-startup, DevTools timeline
+  ├─ FPS:         Performance overlay (WidgetsApp.showPerformanceOverlay)
+  ├─ Memory:      DevTools Memory tab, Observatory
+  ├─ Bundle:      flutter build --analyze-size, --split-debug-info
+  ├─ Network:     DevTools Network tab, dio_logger
+  └─ Battery:     Android Energy Profiler, Instruments Energy Log
+
+  Native iOS:
+  ├─ Startup:     Instruments Time Profiler, DYLD_PRINT_STATISTICS
+  ├─ FPS:         Core Animation instrument, CADisplayLink
+  ├─ Memory:      Instruments Allocations, Xcode Memory Graph Debugger
+  ├─ Bundle:      Xcode Build Report, App Thinning Size Report
+  ├─ Network:     Instruments Network, URLSession metrics
+  └─ Battery:     Instruments Energy Log, MetricKit
+
+  Native Android:
+  ├─ Startup:     Android Studio Profiler, Macrobenchmark
+  ├─ FPS:         GPU rendering profile (bars), Systrace/Perfetto
+  ├─ Memory:      Android Studio Memory Profiler, LeakCanary
+  ├─ Bundle:      APK Analyzer, R8 mapping, bundletool
+  ├─ Network:     Network Profiler, OkHttp EventListener
+  └─ Battery:     Energy Profiler, Battery Historian, dumpsys batterystats</code></pre>
+
+<h3>Step 3: Baseline Measurement</h3>
+
+<pre class="code-block"><code>BASELINE RECORDING PROTOCOL:
+
+  1. Factory-reset test device (or clear app data)
+  2. Install release build (NOT debug — debug is 10x slower)
+  3. Record cold start 5 times → use median value
+  4. Navigate through critical user flows:
+     → Login → Home → List screen → Detail screen → Back
+  5. For each screen:
+     □ Record FPS for 10 seconds of scrolling
+     □ Record memory at rest (after 3s idle)
+     □ Record transition time from previous screen
+  6. Run for 15 minutes continuously → check memory growth
+  7. Background the app for 30 minutes → check battery drain
+  8. Log all measurements in a table for comparison</code></pre>
+<hr class="section-divider">
+<h2>Phase 2 — App Startup Optimization</h2>
+
+Cold start is the user's first experience. If it's slow, nothing else matters.
+
+<h3>Cold Start Anatomy</h3>
+
+<pre class="code-block"><code>COLD START TIMELINE:
+
+  ┌─────────┐  ┌─────────────┐  ┌───────────────┐  ┌─────────┐
+  │ PROCESS │  │  FRAMEWORK  │  │  APP INIT     │  │ CONTENT │
+  │ CREATE  │─▶│  BOOTSTRAP  │─▶│  (your code)  │─▶│ VISIBLE │
+  └─────────┘  └─────────────┘  └───────────────┘  └─────────┘
+    ~200ms        ~300-800ms       ~200-2000ms        ~100ms
+
+  WHAT YOU CONTROL:
+  ├─ Process create:  Nothing (OS level)
+  ├─ Framework:       Choice of framework, Hermes vs JSC, Impeller
+  ├─ App init:        THIS IS WHERE 80% OF STARTUP TIME LIVES
+  │   ├─ Module imports (are you importing everything upfront?)
+  │   ├─ Synchronous storage reads (AsyncStorage.getItem blocking?)
+  │   ├─ Network requests before first render
+  │   ├─ Heavy computation in useEffect/initState
+  │   └─ Image decoding for splash/home screen
+  └─ Content visible:  First meaningful paint, above-the-fold data</code></pre>
+
+<h3>Startup Optimization Checklist</h3>
+
+<pre class="code-block"><code>DEFERRED INITIALIZATION PATTERN:
+
+  □ Audit every import in the entry file
+    → Move non-critical imports to lazy require() or dynamic import()
+    → Analytics, crash reporting, feature flags — defer by 2 seconds
+
+  □ Eliminate synchronous I/O during startup
+    → AsyncStorage.getItem → move to after first render
+    → File system reads → use cached-in-memory defaults, read async
+
+  □ Prioritize above-the-fold network request
+    → Fire the ONE request needed for the first screen immediately
+    → Defer all prefetching to after content is visible
+    → Use stale-while-revalidate: show cached data instantly, refresh
+
+  □ Reduce JS bundle parse time (React Native)
+    → Enable Hermes: 30-50% faster startup than JSC
+    → Use inline requires: require() inside functions, not top-level
+    → Split navigation stacks: lazy-load tab screens
+
+  □ Reduce widget tree depth (Flutter)
+    → Minimize widgets built in main() and MaterialApp
+    → Use const constructors everywhere possible
+    → Defer heavy widgets with FutureBuilder or post-frame callbacks
+
+  □ Android-specific
+    → Add Baseline Profiles (30-40% startup improvement)
+    → Use SplashScreen API (Android 12+) instead of custom activity
+    → Enable R8 full mode for faster class loading
+
+  □ iOS-specific
+    → Minimize dynamic frameworks (each adds ~10-50ms)
+    → Use static linking where possible
+    → Reduce +load and +initialize methods in Objective-C</code></pre>
+<hr class="section-divider">
+<h2>Phase 3 — Rendering Performance</h2>
+
+Every frame must complete in under 16.67ms (60 FPS) or 8.33ms (120 FPS on ProMotion).
+
+<h3>Frame Budget Breakdown</h3>
+
+<pre class="code-block"><code>16.67ms FRAME BUDGET (60 FPS):
+
+  ┌──────────────────────────────────────────────────┐
+  │  JS/Dart Thread        │  UI Thread              │
+  ├────────────────────────┼─────────────────────────┤
+  │  State calculation     │  Layout (measure)       │
+  │  Component diffing     │  Paint (draw commands)  │
+  │  Event handlers        │  Composite (GPU upload) │
+  │  Business logic        │  Rasterize              │
+  ├────────────────────────┼─────────────────────────┤
+  │  Budget: ~12ms         │  Budget: ~4ms           │
+  └────────────────────────┴─────────────────────────┘
+
+  IF EITHER THREAD EXCEEDS ITS BUDGET → DROPPED FRAME → VISIBLE JANK</code></pre>
+
+<h3>Jank Elimination Checklist</h3>
+
+<pre class="code-block"><code>REACT NATIVE RENDERING FIXES:
+
+  □ Move heavy computation off the JS thread
+    → Use InteractionManager.runAfterInteractions()
+    → Use requestAnimationFrame() for visual updates only
+    → Offload to native modules or worklets (Reanimated)
+
+  □ Prevent unnecessary re-renders
+    → React.memo() on list item components
+    → useCallback() for event handlers passed as props
+    → useMemo() for derived data (filter/sort results)
+    → NEVER create objects/arrays inline in JSX props
+
+  □ Use native driver for animations
+    → Animated.timing({ useNativeDriver: true })
+    → Or Reanimated 3 for complex gesture-driven animations
+    → Never animate layout properties (width, height, top, left)
+      with JS-driven animations — use transform instead
+
+  □ Reduce bridge traffic (Old Architecture)
+    → Batch setState calls
+    → Minimize serialization of large objects across bridge
+    → Use Fabric/TurboModules (New Architecture) to eliminate bridge
+
+FLUTTER RENDERING FIXES:
+
+  □ Minimize widget rebuilds
+    → Use const constructors for static subtrees
+    → Split large build() methods into smaller widget classes
+    → Use RepaintBoundary to isolate repaint regions
+    → Use Selector/Consumer instead of full Provider rebuilds
+
+  □ Offload heavy work to isolates
+    → compute() for JSON parsing, image processing, sorting
+    → Never do &gt;16ms of work in the main isolate
+
+  □ Optimize CustomPaint and Canvas
+    → Cache Paint objects, don't create in paint()
+    → Use shouldRepaint correctly — return false when possible
+    → Clip with clipRect before drawing complex shapes
+
+NATIVE iOS FIXES:
+
+  □ Offload work from the main thread
+    → DispatchQueue.global().async for computation
+    → Never decode images on main thread
+    → Use prefetchDataSource for UICollectionView
+
+  □ Reduce overdraw
+    → Set opaque backgrounds (avoid transparency stacking)
+    → Use Debug &gt; Color Blended Layers to find overdraw
+    → Flatten view hierarchies — fewer layers = less compositing
+
+NATIVE ANDROID FIXES:
+
+  □ Optimize layout hierarchy
+    → Use ConstraintLayout to flatten nested LinearLayouts
+    → Enable GPU rendering profile bars to see frame times
+    → Use ViewStub for views not immediately visible
+
+  □ RecyclerView optimization
+    → Use DiffUtil for list updates (not notifyDataSetChanged)
+    → Set setHasFixedSize(true) when item size is constant
+    → Implement onViewRecycled() to release image references</code></pre>
+<hr class="section-divider">
+<h2>Phase 4 — List & Scroll Performance</h2>
+
+Lists are the most common performance problem on mobile. If your list stutters, your app feels broken.
+
+<h3>Virtualization Strategy</h3>
+
+<pre class="code-block"><code>LIST COMPONENT SELECTION:
+
+  React Native:
+  ├─ &lt; 20 items, all in memory:     ScrollView (no virtualization)
+  ├─ 20-100 items, uniform height:  FlatList (basic virtualization)
+  ├─ 100+ items or complex cells:   FlashList (cell recycling)
+  │   └─ FlashList is 5-10x faster than FlatList for long lists
+  │      because it recycles cell views instead of unmounting/
+  │      remounting React components
+  └─ Sectioned data:                SectionList or FlashList sections
+
+  Flutter:
+  ├─ &lt; 20 items:                    Column in SingleChildScrollView
+  ├─ 20+ items:                     ListView.builder (lazy building)
+  ├─ Grid layout:                   GridView.builder
+  ├─ Mixed content:                 CustomScrollView + Slivers
+  └─ Keep alive:                    AutomaticKeepAliveClientMixin
+
+  Native iOS:
+  ├─ Any list:                      UICollectionView (always)
+  │   └─ Compositional layout + DiffableDataSource
+  └─ NEVER use UITableView for new code
+
+  Native Android:
+  ├─ Any list:                      RecyclerView (always)
+  │   └─ ListAdapter + DiffUtil.ItemCallback
+  └─ NEVER use ListView for new code</code></pre>
+
+<h3>List Performance Checklist</h3>
+
+<pre class="code-block"><code>UNIVERSAL LIST OPTIMIZATION:
+
+  □ Item height estimation
+    → FlashList: set estimatedItemSize accurately (measure one cell)
+    → Inaccurate estimates cause layout jumps and wasted frames
+
+  □ Key extraction
+    → Use stable unique IDs (database IDs), never array index
+    → Changing keys forces full re-render of the cell
+
+  □ Cell component optimization
+    → Extract cell into React.memo / const widget / ViewHolder
+    → No inline functions in cell render
+    → No heavy computation in cell render — pre-compute in data layer
+
+  □ Image loading in cells
+    → Use a caching library (expo-image, FastImage, cached_network_image)
+    → Request thumbnails at cell size, not full resolution
+    → Show placeholder (blurhash, shimmer) while loading
+    → Cancel image loads for cells that scroll out of view
+
+  □ Pagination
+    → Load 20-30 items per page, not everything
+    → Trigger next page fetch at 80% scroll position
+    → Show loading indicator at bottom, not full-screen spinner
+    → Use cursor-based pagination, not offset (for consistency)
+
+  □ Pull-to-refresh
+    → Refresh only visible data, not entire cache
+    → Animate smoothly — don't block the UI thread during refresh</code></pre>
+<hr class="section-divider">
+<h2>Phase 5 — Memory Optimization</h2>
+
+Memory leaks cause crashes. High memory causes the OS to kill your app in background.
+
+<h3>Memory Profiling Protocol</h3>
+
+<pre class="code-block"><code>MEMORY AUDIT STEPS:
+
+  1. Open memory profiler (Xcode Memory Graph / Android Memory Profiler)
+  2. Navigate through the app for 5 minutes (all major screens)
+  3. Return to the home screen
+  4. Force garbage collection
+  5. Record heap size → this is your BASELINE
+  6. Repeat the navigation cycle 3 more times
+  7. Return to home, force GC, record heap again
+  8. EXPECTED: heap returns to within 10% of baseline
+  9. IF HEAP GROWS: you have a leak — identify retained objects
+
+COMMON LEAK SOURCES:
+
+  React Native:
+  ├─ Event listeners not removed in useEffect cleanup
+  ├─ setInterval/setTimeout not cleared
+  ├─ Closures capturing large objects in useCallback without deps
+  ├─ Global state (Zustand/Redux) accumulating without cleanup
+  └─ Native module event emitters without removeListener
+
+  Flutter:
+  ├─ StreamSubscription not cancelled in dispose()
+  ├─ AnimationController not disposed
+  ├─ ScrollController/TextEditingController not disposed
+  ├─ Listeners on ChangeNotifier not removed
+  └─ Timer not cancelled in dispose()
+
+  iOS:
+  ├─ Strong reference cycles (delegate should be weak)
+  ├─ Closures capturing self strongly — use [weak self]
+  ├─ NotificationCenter observers not removed
+  ├─ Timer retaining target — use invalidate()
+  └─ UIImage(named:) caching too many images in memory
+
+  Android:
+  ├─ Activity/Context leaked through static references
+  ├─ Inner classes holding implicit reference to outer Activity
+  ├─ Handler/Runnable preventing Activity garbage collection
+  ├─ Bitmap not recycled after use
+  └─ Cursor not closed after database query</code></pre>
+
+<h3>Image Memory Management</h3>
+
+<pre class="code-block"><code>IMAGE MEMORY CALCULATION:
+
+  Memory per image = width x height x 4 bytes (RGBA)
+
+  ┌─────────────────────┬────────────┬───────────────┐
+  │  Image Resolution   │  Bytes     │  Megabytes    │
+  ├─────────────────────┼────────────┼───────────────┤
+  │  100 x 100          │  40 KB     │  0.04 MB      │
+  │  500 x 500          │  1 MB      │  1.0 MB       │
+  │  1080 x 1920        │  8.3 MB    │  8.3 MB       │
+  │  4032 x 3024 (12MP) │  48.8 MB   │  48.8 MB      │
+  └─────────────────────┴────────────┴───────────────┘
+
+  A list of 20 items with 12MP images = 976 MB in memory.
+  This WILL crash the app.
+
+  FIX:
+  ├─ Resize server-side: serve thumbnails at cell size (e.g., 200x200)
+  ├─ Downscale on device: BitmapFactory.Options.inSampleSize (Android)
+  │   or CGImageSourceCreateThumbnailAtPixelSize (iOS)
+  ├─ Use WebP/AVIF: 25-35% smaller than JPEG at same quality
+  ├─ Cache to disk: don't re-decode on every scroll
+  └─ Limit concurrent decodes: max 3-4 simultaneous image loads</code></pre>
+<hr class="section-divider">
+<h2>Phase 6 — Network Performance</h2>
+
+Every millisecond of network latency is a millisecond the user waits.
+
+<h3>Network Optimization Checklist</h3>
+
+<pre class="code-block"><code>REQUEST OPTIMIZATION:
+
+  □ Reduce request count
+    → Batch related API calls into a single endpoint
+    → Use GraphQL or compound REST endpoints for screen data
+    → Prefetch next-screen data during idle periods
+
+  □ Reduce payload size
+    → Request only fields needed: ?fields=id,name,thumbnail
+    → Enable gzip/brotli compression on server responses
+    → Use pagination — never return unbounded lists
+    → Send image URLs, not base64-encoded image data
+
+  □ Cache aggressively
+    → HTTP cache headers: Cache-Control, ETag, Last-Modified
+    → Stale-while-revalidate: show cached data instantly, refresh
+    → Offline-first for read-heavy screens (course list, profile)
+    → Invalidate cache on mutations, not on a timer
+
+  □ Optimize image loading over network
+    → Use CDN with edge caching for static assets
+    → Request images at display size, not original resolution
+    → Progressive JPEG: show blurry version immediately
+    → Blurhash: show colored placeholder from hash (&lt; 30 bytes)
+
+  □ Handle poor connectivity gracefully
+    → Detect network type (WiFi vs cellular vs offline)
+    → Reduce image quality on cellular connections
+    → Queue mutations offline, sync when reconnected
+    → Show cached content instead of error screens
+    → Timeout at 10s (not 30s default) — fail fast, let user retry
+
+PREFETCHING STRATEGY:
+
+  Screen A (current)         Screen B (likely next)
+  ┌──────────────┐           ┌──────────────┐
+  │  User views  │──idle──▶  │  Prefetch    │
+  │  course list │  period   │  first course│
+  │              │           │  detail data │
+  └──────────────┘           └──────────────┘
+
+  Rules:
+  ├─ Only prefetch high-probability next screens (&gt;60% chance)
+  ├─ Only prefetch on WiFi or when battery &gt;20%
+  ├─ Cancel prefetch if user navigates elsewhere
+  └─ Cap prefetch data at 100KB per prediction</code></pre>
+<hr class="section-divider">
+<h2>Phase 7 — Bundle Size Optimization</h2>
+
+Smaller app = higher install rate = more users.
+
+<h3>Bundle Audit Process</h3>
+
+<pre class="code-block"><code>BUNDLE SIZE ANALYSIS:
+
+  React Native:
+  ├─ Generate bundle stats:
+  │   npx react-native-bundle-visualizer
+  │   → Treemap of every module and its size
+  ├─ Check for duplicates:
+  │   → Same library bundled twice (different versions)
+  │   → Polyfills already provided by Hermes
+  ├─ Find heavy dependencies:
+  │   → moment.js (330KB) → replace with date-fns (tree-shakeable)
+  │   → lodash (full) → replace with lodash-es or individual imports
+  │   → AWS SDK v2 → replace with v3 modular clients
+
+  Flutter:
+  ├─ Build with size analysis:
+  │   flutter build apk --analyze-size
+  │   flutter build ios --analyze-size
+  ├─ Split debug info:
+  │   flutter build apk --split-debug-info=debug-info/
+  │   → Removes debug symbols from release build (30-50% smaller)
+  ├─ Enable tree shaking:
+  │   → Already default, but verify no reflect:true metadata
+  │   → Remove unused assets from pubspec.yaml
+
+  Native:
+  ├─ iOS:
+  │   → Xcode &gt; Build Settings &gt; Strip Linked Product = YES
+  │   → Enable Bitcode (when available) for App Thinning
+  │   → Use Asset Catalogs with per-device image variants
+  ├─ Android:
+  │   → Enable R8 (minifyEnabled true, shrinkResources true)
+  │   → Use Android App Bundle (AAB) instead of APK
+  │   → Split by ABI: arm64-v8a only for modern devices</code></pre>
+
+<h3>Size Reduction Checklist</h3>
+
+<pre class="code-block"><code>QUICK WINS (check all of these first):
+
+  □ Remove unused dependencies
+    → npx depcheck (React Native / Node)
+    → flutter pub deps (check for unused packages)
+    → Review Podfile.lock for transitive dependency bloat
+
+  □ Compress image assets
+    → PNGs: use pngquant (lossy) or optipng (lossless)
+    → Replace PNGs with WebP where supported (25-35% smaller)
+    → Use vector (SVG) for icons instead of multiple PNG sizes
+    → Remove @3x/@2x variants if using vector icons
+
+  □ Compress font files
+    → Subset fonts to characters actually used
+    → Use woff2 compression for web views
+    → Limit to 2 font families max (regular + bold)
+
+  □ Remove debug code from release builds
+    → console.log statements (use babel-plugin-transform-remove-console)
+    → Development-only screens (storybook, debug menus)
+    → Flipper/Reactotron in release builds
+
+  □ Enable code splitting (React Native)
+    → Use re.loadComponent for per-screen bundles
+    → Use Metro inline requires to defer module evaluation
+    → Lazy-load screens behind navigation boundaries</code></pre>
+<hr class="section-divider">
+<h2>Phase 8 — Battery & Energy Optimization</h2>
+
+Users uninstall apps that drain battery. Background drain is the silent killer.
+
+<h3>Energy Audit Checklist</h3>
+
+<pre class="code-block"><code>BATTERY OPTIMIZATION PRIORITIES:
+
+  □ Background activity audit
+    → List every background task, its frequency, and duration
+    → Background location: switch to significant-change monitoring
+    │   (not continuous GPS — it drains ~10x more battery)
+    → Background fetch: set minimum interval to 15 minutes
+    → Background sync: batch requests, don't sync individual items
+    → Push notifications: use silent push to trigger sync instead
+    │   of polling on a timer
+
+  □ Location accuracy trade-offs
+    ┌────────────────────┬──────────┬───────────────┐
+    │  Accuracy Level    │  Battery │  Use Case      │
+    ├────────────────────┼──────────┼───────────────┤
+    │  Best (GPS)        │  High    │  Navigation    │
+    │  NearestTenMeters  │  Medium  │  Ride sharing  │
+    │  HundredMeters     │  Low     │  Weather       │
+    │  Kilometer         │  Minimal │  City-level    │
+    │  SignificantChange │  Minimal │  Geofencing    │
+    └────────────────────┴──────────┴───────────────┘
+
+  □ Network batching
+    → Group small requests into batch calls (max every 30s)
+    → Use HTTP/2 multiplexing — single connection, multiple requests
+    → Avoid polling — use WebSocket or push notifications
+    → Schedule non-urgent uploads for WiFi + charging
+
+  □ CPU wake locks
+    → Never hold a wake lock longer than 10 seconds
+    → Release wake lock in finally{} block (not just success path)
+    → Use WorkManager (Android) or BGTaskScheduler (iOS) instead
+      of raw wake locks
+
+  □ Animation energy
+    → Stop animations when app is backgrounded
+    → Reduce animation complexity on low-battery mode
+    → Use hardware-accelerated animations (transform, opacity)
+    → Cancel looping animations when off-screen</code></pre>
+<hr class="section-divider">
+<h2>Performance Killer Checklist — Top 20</h2>
+
+Run through this checklist on every performance review. Each item is a common mistake that kills mobile performance.
+
+<pre class="code-block"><code>TOP 20 MOBILE PERFORMANCE KILLERS:
+
+  RENDERING (Jank)
+  □  1. Inline object/array creation in JSX props
+         → Creates new reference every render → child re-renders
+  □  2. Missing React.memo on list item components
+         → Every parent re-render re-renders every visible cell
+  □  3. JS-driven animations on layout properties
+         → Animate transform/opacity with native driver instead
+  □  4. Synchronous work in event handlers (&gt;5ms)
+         → Defer with InteractionManager or requestAnimationFrame
+  □  5. Deep component tree re-rendering for global state change
+         → Use selector pattern: subscribe to specific state slices
+
+  STARTUP
+  □  6. Importing entire libraries at the top level
+         → Use lazy require() or dynamic import() for non-critical
+  □  7. Synchronous AsyncStorage reads before first render
+         → Read async, show skeleton/cached UI immediately
+  □  8. Multiple sequential network requests before content
+         → Parallelize with Promise.all, or batch into one endpoint
+  □  9. Heavy third-party SDK initialization on startup
+         → Defer analytics, crash reporting by 2-3 seconds
+  □ 10. Not using Hermes engine (React Native)
+         → Hermes reduces startup time by 30-50% vs JavaScriptCore
+
+  MEMORY
+  □ 11. Loading full-resolution images into list cells
+         → Request thumbnails at display size, decode off main thread
+  □ 12. Event listeners not cleaned up in useEffect return
+         → Every mount without cleanup = another active listener
+  □ 13. Accumulating navigation stack without releasing screens
+         → Use replace() instead of push() for auth flows
+  □ 14. Caching data without eviction policy
+         → Set max cache size (50MB disk, 20MB memory), use LRU
+  □ 15. Retaining references to unmounted components
+         → Cancel async operations in cleanup, check isMounted
+
+  NETWORK
+  □ 16. No response caching (Cache-Control headers missing)
+         → Add stale-while-revalidate for read-heavy endpoints
+  □ 17. Fetching all records without pagination
+         → Limit to 20-30 items, cursor-based pagination
+  □ 18. Sending full objects when only IDs changed
+         → PATCH with delta, not PUT with full payload
+
+  SIZE &amp; BATTERY
+  □ 19. Including dev dependencies in production bundle
+         → Verify metro/webpack excludes devDependencies
+  □ 20. Polling API on a timer instead of using push/websocket
+         → Every poll = network + CPU + battery drain</code></pre>
+<hr class="section-divider">
+<h2>Tips for Best Results</h2>
+
+<ul class="skill-list"><li><strong>Always profile on a real mid-tier device</strong> — simulators have unlimited RAM and CPU</li>
+<li><strong>Measure in release mode</strong> — debug mode adds 5-10x overhead from dev tools, logging, and source maps</li>
+<li><strong>Focus on the critical user path</strong> — optimize login, home screen, and primary feature first. Nobody cares if the settings page is 50ms faster</li>
+<li><strong>Fix images first</strong> — in 90% of mobile performance audits, the image pipeline is the biggest win. Resize server-side, cache to disk, decode off main thread</li>
+<li><strong>One fix at a time</strong> — apply one optimization, re-measure, record the delta. Batching fixes makes it impossible to know what helped</li>
+<li><strong>Set a performance budget and enforce it</strong> — add startup time and bundle size checks to CI. Block merges that regress beyond thresholds</li>
+<li><strong>Test on poor networks</strong> — use Charles Proxy or Chrome DevTools to simulate 3G. Your app should remain usable at 500kbps with 300ms latency</li>
+<li><strong>Watch memory over time</strong> — a 10-minute profiling session catches leaks that a 30-second test misses. Navigate back and forth between screens and watch the heap</li></ul>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="mobile-offline.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">Mobile Offline-First — Works Without Signal, Syncs When Connected</span></span></a>
+    <a href="mobile-state.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Mobile State Management — Predictable Data, Responsive UI</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    80 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

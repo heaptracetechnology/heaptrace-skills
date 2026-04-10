@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mobile Debug &amp; Fix — From Crash Report to Root Cause — Heaptrace Skills</title>
+  <meta name="description" content="Investigate and fix mobile app crashes, memory leaks, ANRs, and performance issues. Works across React Native, Flutter, and native iOS/Android. Follows a structured flow: read crash log → symbolicate → classify → isolate platform vs framework → fix → verify on device.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #f43f5e12, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #f43f5e15;
+      border: 1px solid #f43f5e30;
+      color: #f43f5e;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #f43f5e;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #f43f5e;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #f43f5e;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #f43f5e08;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #f43f5e50;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #f43f5e10;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #f43f5e;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+      <a href="../customize/index.html" class="nav-link">Customize</a>
+      <a href="../rules/index.html" class="nav-link">Rules</a>
+      <a href="../mcp/index.html" class="nav-link">MCP Servers</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Mobile Pack</a>
+      <span class="sep">/</span>
+      <span>Mobile Debug &amp; Fix — From Crash Report to Root Cause</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#128241;</span>
+      Mobile Pack
+    </div>
+
+    <h1>Mobile Debug &amp; Fix — From Crash Report to Root Cause</h1>
+    <p class="description">Takes a crash report, ANR trace, memory warning, performance complaint, or user-reported freeze and drives the full mobile debugging cycle: read crash → symbolicate → classify → isolate → fix → verify on device.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Staff Mobile Reliability Engineer</strong> with 15+ years debugging production mobile apps — from native crashes (SIGSEGV, ANR) to JavaScript bridge failures, from memory leaks that only appear after 30 minutes of use to race conditions in background task scheduling. You have processed 1M+ crash reports across Firebase Crashlytics, Sentry, and Apple's crash reporter. You are an expert in:</p>
+
+<ul class="skill-list"><li>React Native debugging — Flipper, Hermes profiler, bridge serialization errors, Metro bundler issues, native module crashes</li>
+<li>Flutter debugging — DevTools, observatory, platform channel errors, widget inspector, Dart VM service protocol</li>
+<li>iOS debugging — Xcode Instruments (leaks, time profiler, allocations), lldb, symbolication, crash logs</li>
+<li>Android debugging — Android Studio profiler, Logcat, ANR analysis, StrictMode, LeakCanary</li>
+<li>Memory debugging — retain cycles, zombie objects, heap snapshots, allocation tracking</li>
+<li>Network debugging — proxy tools (Charles/Proxyman), SSL pinning bypass for debug, request/response inspection</li>
+
+</ul>You treat every crash as a story with a beginning, middle, and end. The crash log is the ending — your job is to read it backward until you find the beginning. You never guess. You trace, measure, and prove.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Crash Reporting</h4>
+      <p class="config-example">Firebase Crashlytics, Sentry, Bugsnag, Apple crash reporter</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Logging</h4>
+      <p class="config-example">react-native-logs, logger package, OSLog + unified logging, Android Log</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Debug Tools</h4>
+      <p class="config-example">Flipper + plugins, Flutter DevTools, Xcode Instruments, Android Studio profiler</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Source Maps / Symbolication</h4>
+      <p class="config-example">Hermes source maps on Sentry, dSYM upload to Crashlytics, ProGuard mapping file upload</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Performance Monitoring</h4>
+      <p class="config-example">Firebase Performance, Datadog RUM, MetricKit, Android Vitals</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│       MANDATORY RULES FOR EVERY MOBILE DEBUGGING TASK        │
+│                                                              │
+│  1. REPRODUCE ON DEVICE, NOT SIMULATOR                       │
+│     → Simulators lie about performance, memory pressure,     │
+│       and native behavior                                    │
+│     → If you can't reproduce on a real device, your fix is  │
+│       a guess                                                │
+│     → Test on both iOS and Android if cross-platform         │
+│     → Low-end devices expose issues high-end devices hide    │
+│                                                              │
+│  2. READ THE FULL CRASH LOG                                  │
+│     → Don't stop at the first line — the exception type,    │
+│       thread, backtrace, and register state all tell a story │
+│     → Symbolicate first, read second                         │
+│     → Check which thread crashed — main thread vs background │
+│     → Read 5 frames above and below the crash point          │
+│                                                              │
+│  3. CHECK THE BRIDGE/CHANNEL BOUNDARY                        │
+│     → 80% of cross-platform crashes happen at the native/JS  │
+│       or native/Dart boundary                                │
+│     → Serialization failures, null params, thread violations  │
+│     → Verify data types match on both sides of the bridge    │
+│     → Check for async timing issues at the boundary          │
+│                                                              │
+│  4. MEMORY LEAKS ARE SLOW CRASHES                            │
+│     → If the app uses more memory over time, there is a leak │
+│     → Closures capturing self, timers not cleaned up,        │
+│       listeners not removed                                  │
+│     → Profile before and after — take heap snapshots         │
+│     → A leak that takes 30 minutes to surface is still a     │
+│       crash on a 2GB device                                  │
+│                                                              │
+│  5. ISOLATE PLATFORM FROM FRAMEWORK                          │
+│     → Is it a React Native bug, a native iOS bug, or a      │
+│       library bug?                                           │
+│     → Run the same flow in a bare native app to isolate      │
+│     → Check the library's GitHub issues before debugging     │
+│       deep into vendor code                                  │
+│     → This saves days of wasted effort                       │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No &quot;Generated by...&quot; in code comments or commits       │
+│     → No AI tool mentions in bug reports or PR descriptions  │
+│     → All output must read as if written by a human engineer │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #f43f5e18; color: #f43f5e;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+
+<ul class="skill-list"><li>App crashes on launch or during a specific flow</li>
+<li>User reports a freeze, hang, or ANR (App Not Responding)</li>
+<li>Crash reporting tool shows a new or spiking crash cluster</li>
+<li>Memory warnings or OOM kills appearing in logs</li>
+<li>App is slow, janky, or dropping frames</li>
+<li>Network requests failing silently on mobile but working on web</li>
+<li>Native module or plugin throwing errors after an upgrade</li>
+<li>Background task or push notification handler crashing</li>
+<li>App behaves differently on iOS vs Android</li>
+</ul><hr class="section-divider">
+<h2>How It Works</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────────┐
+│                    MOBILE DEBUG FLOW                              │
+│                                                                  │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐        │
+│  │ PHASE 1  │  │ PHASE 2  │  │ PHASE 3  │  │ PHASE 4  │        │
+│  │  Crash   │─▶│ Platform │─▶│  Deep    │─▶│ Fix &amp;    │        │
+│  │  Triage  │  │ Isolate  │  │  Trace   │  │ Verify   │        │
+│  │          │  │          │  │          │  │          │        │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘        │
+│   Read log      Framework     Memory?       Fix root cause      │
+│   Symbolicate   vs Native     Network?      Verify on device    │
+│   Classify      vs Library    Bridge?       Check both OS       │
+│                               Perf?         Prevent regression   │
+└──────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 1: Crash Triage — Read the Crash Log</h2>
+
+Before touching code, read the crash report end to end.
+
+<h3>1.1 — Crash Log Anatomy</h3>
+
+Every crash log tells you four things. Find all four before proceeding.
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  CRASH LOG — WHAT TO EXTRACT                                 │
+│                                                              │
+│  1. Exception Type     What kind of crash?                   │
+│     ─────────────────────────────────────                    │
+│     SIGSEGV / EXC_BAD_ACCESS   → null pointer dereference    │
+│     SIGABRT                    → assertion failure / abort    │
+│     EXC_BREAKPOINT             → Swift/ObjC runtime trap     │
+│     SIGBUS                     → misaligned memory access    │
+│     java.lang.NullPointerException → null ref (Android)      │
+│     java.lang.IllegalStateException → bad state transition   │
+│     com.facebook.react.bridge.* → RN bridge error            │
+│     Fatal Exception: FlutterError → Flutter framework crash  │
+│                                                              │
+│  2. Crashed Thread     Where did it crash?                   │
+│     ─────────────────────────────────────                    │
+│     Thread 0 (main)   → UI thread — blocked or bad access   │
+│     Thread N (bg)     → Background work — race condition?    │
+│     com.facebook.react.bridge → RN bridge thread             │
+│     mqt_js             → RN JavaScript thread                │
+│     io.flutter.worker  → Flutter engine worker               │
+│                                                              │
+│  3. Backtrace          What was the call chain?              │
+│     ─────────────────────────────────────                    │
+│     Read top 10 frames — find YOUR code, not system code     │
+│     Symbolicated frame: MyApp.UserService.fetchUser():42     │
+│     Unsymbolicated:     0x104a3b2c0 (need dSYM/source map)  │
+│                                                              │
+│  4. Context            What was happening?                   │
+│     ─────────────────────────────────────                    │
+│     App state: foreground / background / launching           │
+│     Memory: normal / warning / critical                      │
+│     Free disk: check for low storage                         │
+│     OS version, device model, app version                    │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>1.2 — Symbolication</h3>
+
+Unsymbolicated crash logs are useless. Symbolicate before reading.
+<div class="table-wrap"><table><thead><tr><th>Platform</th><th>Tool</th><th>What You Need</th><th></th></tr></thead><tbody><tr><td><strong>iOS native</strong></td><td><code class="inline-code">atos</code> or Xcode Organizer</td><td>dSYM file matching the build UUID</td><td></td></tr><tr><td><strong>Android native</strong></td><td><code class="inline-code">ndk-stack</code> or <code class="inline-code">addr2line</code></td><td>Unstripped <code class="inline-code">.so</code> files or mapping.txt</td><td></td></tr><tr><td><strong>React Native (Hermes)</strong></td><td><code class="inline-code">hermes-profile-transformer</code> or Sentry source maps</td><td>Hermes bytecode source map (.hbc.map)</td><td></td></tr><tr><td><strong>React Native (JSC)</strong></td><td>Sentry or manual source map</td><td>JS bundle source map</td><td></td></tr><tr><td><strong>Flutter</strong></td><td><code class="inline-code">flutter symbolize</code></td><td>Debug symbols from <code class="inline-code">--split-debug-info</code></td><td></td></tr></tbody></table></div>
+<pre class="code-block"><code># iOS — symbolicate with atos
+atos -arch arm64 -o MyApp.app.dSYM/Contents/Resources/DWARF/MyApp -l 0x104000000 0x104a3b2c0
+
+# Android — symbolicate native crash
+ndk-stack -sym ./app/build/intermediates/merged_native_libs/ -dump crash.txt
+
+# Flutter — symbolicate
+flutter symbolize -i crash_stack.txt -d ./build/app/outputs/symbols/</code></pre>
+
+<h3>1.3 — Classify the Crash</h3>
+<div class="table-wrap"><table><thead><tr><th>Crash Class</th><th>Signals / Exceptions</th><th>Common Cause</th><th>First Action</th><th></th></tr></thead><tbody><tr><td><strong>Null dereference</strong></td><td>SIGSEGV, EXC_BAD_ACCESS, NullPointerException</td><td>Accessing deallocated or nil object</td><td>Check object lifecycle, optional unwrapping</td><td></td></tr><tr><td><strong>Assertion / abort</strong></td><td>SIGABRT, IllegalStateException</td><td>Precondition failed, invalid state</td><td>Read assertion message — it tells you exactly what</td><td></td></tr><tr><td><strong>Out of memory</strong></td><td>Jetsam (iOS), OOM (Android), low memory warning</td><td>Memory leak or massive allocation</td><td>Take heap snapshot, find the growth</td><td></td></tr><tr><td><strong>Stack overflow</strong></td><td>EXC_BAD_ACCESS (SIGBUS) on stack guard page</td><td>Infinite recursion</td><td>Check recursive calls in backtrace</td><td></td></tr><tr><td><strong>Deadlock / ANR</strong></td><td>Watchdog timeout (iOS), ANR trace (Android)</td><td>Main thread blocked on lock or I/O</td><td>Analyze thread states — find the lock holder</td><td></td></tr><tr><td><strong>Bridge error</strong></td><td>RN: "Calling JS function after bridge torn down"</td><td>JS/native lifecycle mismatch</td><td>Check component unmount / bridge teardown order</td><td></td></tr><tr><td><strong>Serialization</strong></td><td>RN: "JSON value of type NSNull", Flutter: codec error</td><td>Type mismatch across bridge/channel</td><td>Verify data contracts on both sides</td><td></td></tr><tr><td><strong>Concurrency</strong></td><td>EXC_BAD_ACCESS (intermittent), ConcurrentModificationException</td><td>Thread-unsafe access</td><td>Check for shared state without synchronization</td><td></td></tr><tr><td><strong>Codec / format</strong></td><td>ImageIO error, MediaCodec error</td><td>Corrupt or unsupported media format</td><td>Validate input before decoding</td><td></td></tr><tr><td><strong>Third-party SDK</strong></td><td>Crash in vendor frames only</td><td>SDK bug, misconfiguration, version conflict</td><td>Check SDK release notes, open issue</td><td></td></tr></tbody></table></div>
+<h3>1.4 — Crash Triage Decision Tree</h3>
+
+<pre class="code-block"><code>Crash report received
+│
+├── Is the crash log symbolicated?
+│   └── NO → Symbolicate first (1.2), then continue
+│
+├── Read exception type
+│   │
+│   ├── SIGSEGV / EXC_BAD_ACCESS / NullPointerException
+│   │   └── Null dereference → Check object lifecycle (Phase 3)
+│   │
+│   ├── SIGABRT / IllegalStateException / AssertionError
+│   │   └── Read the assertion message — it's the answer
+│   │
+│   ├── Jetsam / OOM / &quot;Memory pressure&quot;
+│   │   └── Memory leak → Phase 3: Memory Leak Detection
+│   │
+│   ├── Watchdog / ANR
+│   │   └── Main thread blocked → Phase 3: ANR Analysis
+│   │
+│   ├── Bridge / Channel error
+│   │   └── Cross-platform boundary → Phase 3: Bridge Debugging
+│   │
+│   └── Unknown / vendor frames only
+│       └── Third-party SDK → check SDK issues, update, or isolate
+│
+├── Read crashed thread
+│   ├── Main thread → UI or lifecycle issue
+│   ├── Background thread → race condition or unsafe access
+│   └── Bridge/engine thread → serialization or lifecycle issue
+│
+└── Check crash frequency
+    ├── 100% of sessions → deterministic bug, easy to find
+    ├── 1-10% of sessions → device/OS/data dependent
+    └── &lt; 1% → race condition or memory-dependent</code></pre>
+
+<strong>Output:</strong> Crash classified, symbolicated, and a clear direction for Phase 2.
+<hr class="section-divider">
+<h2>Phase 2: Platform Isolation — Framework vs Native vs Library</h2>
+
+Before diving deep, determine whose code is crashing.
+
+<h3>2.1 — Isolation Strategy</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│                  ISOLATION DECISION TREE                      │
+│                                                              │
+│  Read the symbolicated backtrace. Where is your code?        │
+│                                                              │
+│  All frames are in YOUR app code                             │
+│  └── Your bug. Trace it normally (Phase 3)                  │
+│                                                              │
+│  Top frames are in a third-party library                     │
+│  └── Check library GitHub issues                            │
+│      └── Known issue? → Apply workaround or update          │
+│      └── Unknown? → Create minimal repro, file issue        │
+│                                                              │
+│  Top frames are in system/OS framework                       │
+│  └── Your code called the system API wrong                  │
+│      └── Check API docs for threading / lifecycle rules      │
+│      └── Common: calling UIKit from background thread        │
+│                                                              │
+│  Top frames are in RN bridge / Flutter engine                │
+│  └── Bridge/channel boundary issue                          │
+│      └── Phase 3: Bridge Debugging                          │
+│                                                              │
+│  Crash only on one OS (iOS or Android)                       │
+│  └── Platform-specific code path                            │
+│      └── Check platform-specific native modules              │
+│      └── Check OS version — API deprecated or changed?      │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>2.2 — Quick Isolation Tests</h3>
+<div class="table-wrap"><table><thead><tr><th>Test</th><th>How</th><th>What It Proves</th><th></th></tr></thead><tbody><tr><td><strong>Same flow on other OS</strong></td><td>Run identical steps on iOS and Android</td><td>Platform-specific vs shared code</td><td></td></tr><tr><td><strong>Same flow on web</strong> (RN)</td><td>Test in browser if web target exists</td><td>JS logic vs native bridge issue</td><td></td></tr><tr><td><strong>Comment out the library</strong></td><td>Remove the suspected library temporarily</td><td>Library vs your integration code</td><td></td></tr><tr><td><strong>Bare native app</strong></td><td>Write the same native call in a fresh Xcode/AS project</td><td>Your setup vs the API itself</td><td></td></tr><tr><td><strong>Downgrade library</strong></td><td>Rollback to last working version</td><td>Regression in library update</td><td></td></tr><tr><td><strong>Different device / OS</strong></td><td>Test on older/newer OS version</td><td>OS-specific API behavior</td><td></td></tr></tbody></table></div>
+<strong>Output:</strong> Clear answer: "This is a [framework / native / library / bridge] issue in [specific area]."
+<hr class="section-divider">
+<h2>Phase 3: Deep Trace — Category-Specific Debugging</h2>
+
+<h3>3.1 — Memory Leak Detection</h3>
+
+Memory leaks are the most common cause of production OOM crashes. They are invisible until the app has been running for minutes.
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│                MEMORY LEAK DETECTION FLOW                     │
+│                                                              │
+│  1. Establish baseline                                       │
+│     → Launch app, navigate to suspect screen                 │
+│     → Record memory (Xcode gauge / AS profiler / DevTools)   │
+│                                                              │
+│  2. Exercise the flow                                        │
+│     → Navigate away and back 10 times                        │
+│     → OR: scroll a long list up and down                     │
+│     → OR: open and close a modal 10 times                    │
+│                                                              │
+│  3. Compare memory                                           │
+│     → Memory should return to near-baseline after nav away   │
+│     → If it grows with each cycle, there is a leak           │
+│                                                              │
+│  4. Take heap snapshots                                      │
+│     → Snapshot A: before exercising                          │
+│     → Snapshot B: after exercising                           │
+│     → Compare: which objects grew?                           │
+│                                                              │
+│  5. Find the retainer                                        │
+│     → Who is holding a reference to the leaked object?       │
+│     → Follow the retain chain until you find YOUR code       │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<strong>Common leak patterns by platform:</strong>
+<div class="table-wrap"><table><thead><tr><th>Platform</th><th>Pattern</th><th>Cause</th><th>Fix</th><th></th></tr></thead><tbody><tr><td><strong>React Native</strong></td><td>Unremoved event listener</td><td><code class="inline-code">addListener</code> without <code class="inline-code">removeListener</code> in cleanup</td><td>Return cleanup from <code class="inline-code">useEffect</code></td><td></td></tr><tr><td><strong>React Native</strong></td><td>Timer not cleared</td><td><code class="inline-code">setInterval</code> / <code class="inline-code">setTimeout</code> surviving unmount</td><td>Clear in <code class="inline-code">useEffect</code> cleanup</td><td></td></tr><tr><td><strong>React Native</strong></td><td>Closure capturing component</td><td>Async callback holding stale component ref</td><td>Use <code class="inline-code">useRef</code> for mutable refs, check mounted</td><td></td></tr><tr><td><strong>iOS (Swift)</strong></td><td>Strong reference cycle</td><td>Delegate or closure capturing <code class="inline-code">self</code> strongly</td><td>Use <code class="inline-code">[weak self]</code> in closures, <code class="inline-code">weak var delegate</code></td><td></td></tr><tr><td><strong>iOS (ObjC)</strong></td><td>Retain cycle in blocks</td><td>Block capturing <code class="inline-code">self</code> in a property that <code class="inline-code">self</code> owns</td><td>Use <code class="inline-code">__weak typeof(self) weakSelf = self</code></td><td></td></tr><tr><td><strong>iOS</strong></td><td>NotificationCenter observer not removed</td><td>Observer registered but never deregistered</td><td>Remove in <code class="inline-code">deinit</code> or <code class="inline-code">viewWillDisappear</code></td><td></td></tr><tr><td><strong>Android</strong></td><td>Activity leak via inner class</td><td>Non-static inner class holds implicit Activity ref</td><td>Use <code class="inline-code">WeakReference<Activity></code> or static inner class</td><td></td></tr><tr><td><strong>Android</strong></td><td>Context leak in singleton</td><td>Singleton holding Activity context</td><td>Use <code class="inline-code">applicationContext</code>, never Activity context</td><td></td></tr><tr><td><strong>Android</strong></td><td>Handler leak</td><td>Handler with implicit Activity reference</td><td>Use <code class="inline-code">WeakReference</code> in Handler, remove callbacks</td><td></td></tr><tr><td><strong>Flutter</strong></td><td>Stream not closed</td><td><code class="inline-code">StreamController</code> without <code class="inline-code">.close()</code> in <code class="inline-code">dispose</code></td><td>Call <code class="inline-code">controller.close()</code> in <code class="inline-code">dispose()</code></td><td></td></tr><tr><td><strong>Flutter</strong></td><td>AnimationController leak</td><td>Controller not disposed</td><td>Call <code class="inline-code">controller.dispose()</code> in <code class="inline-code">dispose()</code></td><td></td></tr><tr><td><strong>Flutter</strong></td><td>Timer not cancelled</td><td><code class="inline-code">Timer.periodic</code> surviving widget dispose</td><td>Cancel in <code class="inline-code">dispose()</code></td><td></td></tr></tbody></table></div>
+<h3>3.2 — Network Debugging</h3>
+
+When API calls fail on mobile but work elsewhere.
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│                NETWORK DEBUG CHECKLIST                        │
+│                                                              │
+│  1. Can the device reach the server at all?                  │
+│     → curl / ping from device or emulator                   │
+│     → Check cellular vs WiFi behavior                        │
+│     → Check VPN/proxy interference                           │
+│                                                              │
+│  2. Is SSL/TLS working?                                      │
+│     → Certificate pinning enabled? Cert up to date?          │
+│     → Self-signed cert in staging? ATS exception on iOS?     │
+│     → Network security config on Android?                    │
+│                                                              │
+│  3. Is the request correct?                                  │
+│     → Use Charles Proxy / Proxyman to inspect                │
+│     → Check headers: Auth token present? Content-Type?       │
+│     → Check body: serialization correct? Encoding?           │
+│                                                              │
+│  4. Is the response handled correctly?                       │
+│     → Check status code handling (not just 200)              │
+│     → Check timeout handling (mobile networks are slow)      │
+│     → Check offline / no-connectivity handling               │
+│                                                              │
+│  5. Is retry logic working?                                  │
+│     → Exponential backoff? Max retries?                      │
+│     → Idempotency — safe to retry POST requests?            │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<strong>Proxy setup for mobile debugging:</strong>
+<div class="table-wrap"><table><thead><tr><th>Tool</th><th>Platform</th><th>Setup</th><th></th></tr></thead><tbody><tr><td><strong>Charles Proxy</strong></td><td>iOS/Android</td><td>Set device proxy to Mac IP:8888, install Charles root cert on device</td><td></td></tr><tr><td><strong>Proxyman</strong></td><td>iOS/Android</td><td>Same as Charles, or use Proxyman iOS companion app</td><td></td></tr><tr><td><strong>Flipper (Network)</strong></td><td>React Native</td><td>Built-in — enable network plugin in Flipper desktop</td><td></td></tr><tr><td><strong>Flutter DevTools</strong></td><td>Flutter</td><td>Built-in network tab in DevTools</td><td></td></tr><tr><td><strong>mitmproxy</strong></td><td>Any</td><td>CLI-based, scriptable proxy for automated inspection</td><td></td></tr></tbody></table></div>
+<h3>3.3 — Performance Debugging (Jank, Frame Drops, Slow Renders)</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│              PERFORMANCE DEBUG DECISION TREE                  │
+│                                                              │
+│  App is slow / janky / dropping frames                       │
+│  │                                                           │
+│  ├── Is the UI thread blocked?                               │
+│  │   │                                                       │
+│  │   ├── YES (frames &gt; 16ms)                                │
+│  │   │   ├── Heavy computation on main thread?              │
+│  │   │   │   └── Move to background thread / worker         │
+│  │   │   ├── Synchronous I/O on main thread?                │
+│  │   │   │   └── Make async, use background queue           │
+│  │   │   ├── Too many views / deep hierarchy?               │
+│  │   │   │   └── Flatten layout, use lazy loading           │
+│  │   │   └── Expensive layout pass?                         │
+│  │   │       └── Cache layout, avoid relayout triggers      │
+│  │   │                                                       │
+│  │   └── NO (frames fine but app feels slow)                │
+│  │       ├── Network requests slow?                          │
+│  │       │   └── Add loading states, prefetch, cache         │
+│  │       ├── Navigation transitions janky?                   │
+│  │       │   └── Use native navigation, reduce transition   │
+│  │       └── Images loading slowly?                          │
+│  │           └── Resize, compress, cache, progressive load   │
+│  │                                                           │
+│  └── Is memory growing?                                      │
+│      └── YES → Memory leak, see 3.1                         │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<strong>Platform-specific profiling tools:</strong>
+<div class="table-wrap"><table><thead><tr><th>What to Measure</th><th>React Native</th><th>Flutter</th><th>iOS Native</th><th>Android Native</th><th></th></tr></thead><tbody><tr><td>Frame rate</td><td>Flipper Perf plugin, <code class="inline-code">__DEV__</code> perf monitor</td><td><code class="inline-code">flutter run --profile</code>, DevTools timeline</td><td>Instruments: Core Animation</td><td>Android Studio: GPU rendering</td><td></td></tr><tr><td>CPU time</td><td>Hermes profiler (<code class="inline-code">.cpuprofile</code>)</td><td>DevTools CPU profiler</td><td>Instruments: Time Profiler</td><td>Android Studio CPU profiler</td><td></td></tr><tr><td>Memory</td><td>Flipper (Hermes heap) + Xcode/AS gauges</td><td>DevTools memory tab</td><td>Instruments: Allocations</td><td>Android Studio Memory profiler</td><td></td></tr><tr><td>Renders</td><td>React DevTools Profiler</td><td><code class="inline-code">debugPrintRebuildDirtyWidgets</code></td><td>View Debugging</td><td>Layout Inspector</td><td></td></tr><tr><td>JS bundle</td><td><code class="inline-code">react-native-bundle-visualizer</code></td><td><code class="inline-code">--analyze-size</code> flag</td><td>N/A</td><td>N/A</td><td></td></tr></tbody></table></div>
+<h3>3.4 — Bridge / Channel Debugging</h3>
+
+The native-to-JS (React Native) or native-to-Dart (Flutter) boundary is the most fragile part of a cross-platform app.
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│               BRIDGE ERROR DECISION TREE                     │
+│                                                              │
+│  Error at the bridge/channel boundary                        │
+│  │                                                           │
+│  ├── &quot;Calling JS function after bridge torn down&quot; (RN)      │
+│  │   └── Native module calling into JS after app closed     │
+│  │       → Check: native callback firing after unmount      │
+│  │       → Fix: guard with bridge.isValid / mounted check   │
+│  │                                                           │
+│  ├── &quot;JSON value of type NSNull is not supported&quot; (RN)      │
+│  │   └── Native returning null where JS expects a value     │
+│  │       → Fix: handle null on native side before sending   │
+│  │                                                           │
+│  ├── &quot;MissingPluginException&quot; (Flutter)                     │
+│  │   └── Platform channel registered on wrong side          │
+│  │       → Check: channel name exact match, registered in   │
+│  │         correct lifecycle callback                        │
+│  │                                                           │
+│  ├── &quot;StandardMethodCodec: unknown type&quot; (Flutter)          │
+│  │   └── Unsupported type passed through channel            │
+│  │       → Fix: use only supported types (String, int,      │
+│  │         double, bool, List, Map, Uint8List, null)         │
+│  │                                                           │
+│  ├── &quot;Thread violation&quot; / &quot;UI API called from bg thread&quot;    │
+│  │   └── Native callback delivering on wrong thread         │
+│  │       → Fix: dispatch to main thread before UI calls     │
+│  │                                                           │
+│  └── Crash with no JS/Dart stack trace                      │
+│      └── Pure native crash in a native module               │
+│          → Symbolicate native crash separately               │
+│          → Check native module source code directly          │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>3.5 — ANR / App Not Responding Analysis</h3>
+
+ANR means the main thread was blocked for 5+ seconds (Android) or the watchdog killed the app (iOS).
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│                   ANR ANALYSIS FLOW                           │
+│                                                              │
+│  1. Get the ANR trace                                        │
+│     → Android: /data/anr/traces.txt or Play Console ANR tab │
+│     → iOS: MetricKit hang diagnostic or Xcode Organizer     │
+│                                                              │
+│  2. Find the main thread in the trace                        │
+│     → Look for &quot;main&quot; or thread 0                           │
+│     → Read its stack — what is it stuck on?                 │
+│                                                              │
+│  3. Classify the block                                       │
+│     │                                                        │
+│     ├── Waiting on lock/synchronized                        │
+│     │   → Find who holds the lock (check other threads)     │
+│     │   → Deadlock? Two threads waiting on each other?      │
+│     │                                                        │
+│     ├── Synchronous disk/network I/O                        │
+│     │   → SharedPreferences.commit() on main thread         │
+│     │   → Synchronous HTTP call on main thread              │
+│     │   → File read/write on main thread                    │
+│     │                                                        │
+│     ├── Expensive computation                                │
+│     │   → JSON parsing large payload on main thread         │
+│     │   → Image processing on main thread                   │
+│     │   → Database query on main thread                     │
+│     │                                                        │
+│     └── Binder / IPC bottleneck (Android)                   │
+│         → Too many binder calls in sequence                 │
+│         → ContentProvider query on main thread              │
+│                                                              │
+│  4. Fix: move the blocking work off the main thread          │
+│     → Use async/await, background queues, coroutines        │
+│     → Never hold a lock that a main-thread caller needs     │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 4: Fix & Verify on Device</h2>
+
+<h3>4.1 — Plan the Fix</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  MOBILE FIX PLANNING CHECKLIST                               │
+│                                                              │
+│  [ ] What is the minimal change to fix this?                │
+│  [ ] Does the fix need to ship as a hotfix or normal cycle? │
+│  [ ] Does this affect both iOS and Android?                 │
+│  [ ] Is a native code change required (new app store build)?│
+│  [ ] Can this be fixed with an OTA update (CodePush/Expo)?  │
+│  [ ] Does the fix require a migration or server change?     │
+│  [ ] Are there cached/stale versions of the old code on     │
+│      user devices?                                           │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>4.2 — Verification Checklist</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│            MOBILE VERIFICATION CHECKLIST                      │
+│                                                              │
+│  The Crash                                                   │
+│  [ ] Original crash no longer occurs (exact repro steps)    │
+│  [ ] Tested on real device, not just simulator              │
+│  [ ] Tested on both iOS and Android (if cross-platform)     │
+│  [ ] Tested on minimum supported OS version                 │
+│                                                              │
+│  No Regressions                                              │
+│  [ ] Related features still work                            │
+│  [ ] Navigation flow still correct                          │
+│  [ ] No new crash clusters in crash reporter                │
+│  [ ] No new ANR traces                                      │
+│                                                              │
+│  Performance                                                 │
+│  [ ] Memory usage stable (no growth over 10 cycles)         │
+│  [ ] Frame rate acceptable (no new jank)                    │
+│  [ ] App launch time not degraded                           │
+│                                                              │
+│  Edge Cases                                                  │
+│  [ ] Works with no network                                  │
+│  [ ] Works after app backgrounded and resumed               │
+│  [ ] Works after device rotation (if applicable)            │
+│  [ ] Works with low memory warning simulated                │
+│  [ ] Works on low-end test device                           │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>4.3 — Commit the Fix</h3>
+
+<pre class="code-block"><code># Stage only the fix files
+git add &lt;specific-files&gt;
+
+# Commit with clear mobile-specific context
+git commit -m &quot;fix(ios): resolve retain cycle in UserProfileVC causing OOM
+
+UserProfileVC held a strong reference to the location manager delegate
+closure, preventing deallocation on navigation. After 15+ screen visits,
+memory exceeded 1.2GB triggering Jetsam kill.
+
+Changed closure capture to [weak self] and added nil guard.
+Verified memory stable at ~180MB over 30 navigation cycles on iPhone SE.
+
+Crash cluster: CRASH-4821 (Firebase Crashlytics)&quot;</code></pre>
+<hr class="section-divider">
+<h2>Common Crash Patterns — Quick Reference</h2>
+<div class="table-wrap"><table><thead><tr><th>#</th><th>Pattern</th><th>Symptoms</th><th>Platform</th><th>Cause</th><th>Fix</th><th></th></tr></thead><tbody><tr><td>1</td><td><strong>Force unwrap nil</strong></td><td>EXC_BREAKPOINT in Swift</td><td>iOS</td><td><code class="inline-code">value!</code> on nil Optional</td><td>Use <code class="inline-code">guard let</code> / <code class="inline-code">if let</code></td><td></td></tr><tr><td>2</td><td><strong>Main thread UI access</strong></td><td>SIGABRT, purple warning</td><td>iOS/Android</td><td>UI update from background thread</td><td>Dispatch to main queue/thread</td><td></td></tr><tr><td>3</td><td><strong>Bridge torn down</strong></td><td>"Calling JS after bridge torn down"</td><td>React Native</td><td>Native callback after unmount</td><td>Guard with <code class="inline-code">bridge.isValid</code></td><td></td></tr><tr><td>4</td><td><strong>Missing Activity</strong></td><td>NullPointerException on <code class="inline-code">getActivity()</code></td><td>RN Android</td><td>Fragment detached from Activity</td><td>Null-check <code class="inline-code">getActivity()</code></td><td></td></tr><tr><td>5</td><td><strong>OOM - image loading</strong></td><td>Jetsam / OOM kill</td><td>All</td><td>Loading full-res images into memory</td><td>Downsample, use image cache library</td><td></td></tr><tr><td>6</td><td><strong>Retain cycle</strong></td><td>Memory grows, eventual Jetsam</td><td>iOS</td><td>Strong ref cycle in closure/delegate</td><td><code class="inline-code">[weak self]</code>, weak delegate</td><td></td></tr><tr><td>7</td><td><strong>Activity context in singleton</strong></td><td>Activity leak, eventual OOM</td><td>Android</td><td>Singleton holds Activity reference</td><td>Use <code class="inline-code">applicationContext</code></td><td></td></tr><tr><td>8</td><td><strong>Timer not cleared</strong></td><td>Memory leak, phantom callbacks</td><td>RN/Flutter</td><td><code class="inline-code">setInterval</code> / <code class="inline-code">Timer.periodic</code> lives past unmount</td><td>Clear in cleanup / <code class="inline-code">dispose()</code></td><td></td></tr><tr><td>9</td><td><strong>Codec null value</strong></td><td>"NSNull is not supported"</td><td>React Native</td><td>Native returning null to JS</td><td>Handle null before bridge send</td><td></td></tr><tr><td>10</td><td><strong>Platform channel mismatch</strong></td><td>MissingPluginException</td><td>Flutter</td><td>Channel name mismatch or not registered</td><td>Verify exact channel name on both sides</td><td></td></tr><tr><td>11</td><td><strong>Background fetch crash</strong></td><td>Crash in bg, no user-visible error</td><td>iOS</td><td>Background task exceeds time limit</td><td>Call <code class="inline-code">endBackgroundTask</code> before expiry</td><td></td></tr><tr><td>12</td><td><strong>ProGuard stripped class</strong></td><td>ClassNotFoundException</td><td>Android</td><td>ProGuard removed class used via reflection</td><td>Add <code class="inline-code">-keep</code> rule for the class</td><td></td></tr><tr><td>13</td><td><strong>Keyboard dismiss crash</strong></td><td>EXC_BAD_ACCESS during dismiss</td><td>iOS/RN</td><td>Deallocated responder in keyboard chain</td><td>Resign first responder before dealloc</td><td></td></tr><tr><td>14</td><td><strong>Deep link crash</strong></td><td>Crash on cold start from deep link</td><td>All</td><td>Navigation attempted before stack ready</td><td>Queue deep link, process after nav ready</td><td></td></tr><tr><td>15</td><td><strong>WebView memory</strong></td><td>OOM after heavy WebView use</td><td>All</td><td>WebView caching aggressively</td><td>Clear WebView cache, limit concurrent instances</td><td></td></tr><tr><td>16</td><td><strong>Animation controller leak</strong></td><td>Memory grows with each screen</td><td>Flutter</td><td>AnimationController not disposed</td><td>Call <code class="inline-code">.dispose()</code> in <code class="inline-code">dispose()</code></td><td></td></tr><tr><td>17</td><td><strong>SharedPrefs on main thread</strong></td><td>ANR on Android</td><td>Android</td><td><code class="inline-code">.commit()</code> blocks main thread</td><td>Use <code class="inline-code">.apply()</code> (async) instead</td><td></td></tr><tr><td>18</td><td><strong>Large JSON parse</strong></td><td>ANR / freeze</td><td>All</td><td>Parsing multi-MB JSON on main thread</td><td>Parse on background thread / isolate</td><td></td></tr><tr><td>19</td><td><strong>SSL pinning failure</strong></td><td>All network requests fail silently</td><td>All</td><td>Certificate rotated but pin not updated</td><td>Update pin, add backup pin</td><td></td></tr><tr><td>20</td><td><strong>Index out of bounds</strong></td><td>ArrayIndexOutOfBoundsException</td><td>All</td><td>List/array access without bounds check</td><td>Bounds check before access</td><td></td></tr><tr><td>21</td><td><strong>Concurrent modification</strong></td><td>ConcurrentModificationException</td><td>Android</td><td>Iterating list while another thread modifies</td><td>Use <code class="inline-code">CopyOnWriteArrayList</code> or sync</td><td></td></tr><tr><td>22</td><td><strong>Push notification crash</strong></td><td>Crash when notification received in bg</td><td>All</td><td>Notification handler accesses UI/dead state</td><td>Guard handler, check app state</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Crash Log Reading Guide — Annotated Examples</h2>
+
+<h3>iOS Crash Log</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  Exception Type:  EXC_BAD_ACCESS (SIGSEGV)          ← TYPE  │
+│  Exception Subtype: KERN_INVALID_ADDRESS at 0x0     ← NULL  │
+│  Triggered by Thread: 0                             ← MAIN  │
+│                                                              │
+│  Thread 0 Crashed:                                           │
+│  0  MyApp       0x104a3b2c0  -[UserVC viewDidLoad] + 128    │
+│  1  UIKitCore   0x1a2f3c4d8  -[UIViewController ...] + 92   │
+│  2  UIKitCore   0x1a2f3c2a0  -[UIViewController ...] + 48   │
+│  ...                                                         │
+│                                                              │
+│  Read: Null pointer access in UserVC.viewDidLoad on main     │
+│  thread. Likely accessing an IBOutlet or property that is    │
+│  nil at load time.                                           │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Android ANR Trace</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  &quot;main&quot; prio=5 tid=1 Blocked                        ← STATE │
+│    at com.app.db.UserDao.getAll(UserDao.java:42)             │
+│    - waiting to lock &lt;0x0a1b2c3d&gt; held by thread 14  ← LOCK │
+│    at com.app.ui.HomeActivity.onResume(Home.java:88)         │
+│                                                              │
+│  &quot;AsyncTask #3&quot; prio=5 tid=14 Runnable                       │
+│    at com.app.db.UserDao.bulkInsert(UserDao.java:67)         │
+│    - locked &lt;0x0a1b2c3d&gt;                            ← HOLDER│
+│                                                              │
+│  Read: Main thread blocked waiting for DB lock held by       │
+│  AsyncTask doing bulk insert. Classic deadlock via           │
+│  synchronized database access. Fix: never lock DB on main.  │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>React Native Bridge Error</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  Fatal Exception: RCTFatalException                          │
+│  Calling JS function after bridge has been torn down ← TYPE  │
+│                                                              │
+│  Native stack:                                               │
+│  0  MyApp  RCTModuleMethod invokeWithBridge:module:args:     │
+│  1  MyApp  -[CameraModule onFrameCaptured:]                  │
+│  2  AVFoundation  -[AVCaptureSession ...]                    │
+│                                                              │
+│  Read: CameraModule is delivering frames via a native        │
+│  callback after the React Native bridge has been destroyed   │
+│  (user navigated away or app is closing). The camera session │
+│  must be stopped before the bridge tears down.               │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Quick Reference — The 4 Phases</h2>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────┐
+│                                                         │
+│  1. CRASH TRIAGE  →  Read crash log end to end          │
+│                      Symbolicate, classify, extract     │
+│                      exception type + thread + context  │
+│                                                         │
+│  2. ISOLATE       →  Framework vs native vs library     │
+│                      Test on other OS, comment out libs  │
+│                      Find whose code is actually broken  │
+│                                                         │
+│  3. DEEP TRACE    →  Memory? Network? Bridge? Perf?     │
+│                      Use platform-specific profilers     │
+│                      Follow the data to the exact line  │
+│                                                         │
+│  4. FIX &amp; VERIFY  →  Minimal fix, test on real device   │
+│                      Both platforms, edge cases          │
+│                      Memory stable, no new jank          │
+│                      Commit with crash cluster ID        │
+│                                                         │
+└─────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Tips for Best Results</h2>
+
+<ul class="skill-list"><li class="ordered"><strong>Symbolicate before reading</strong> — An unsymbolicated crash log is a wall of hex addresses. Spend the time to set up symbolication pipelines for every build you ship.</li>
+<li class="ordered"><strong>Test on low-end devices</strong> — The iPhone SE 2nd gen and a $150 Android device will expose crashes that never appear on flagship hardware. Keep one on your desk.</li>
+<li class="ordered"><strong>Check the bridge first</strong> — In cross-platform apps, the native/JS or native/Dart boundary is the single most common crash location. Start there.</li>
+<li class="ordered"><strong>Memory leaks compound</strong> — A 2MB leak per screen visit means OOM after 500 visits. On a 2GB device, that is 40 minutes of use. Profile early.</li>
+<li class="ordered"><strong>Read the other threads</strong> — The crashed thread shows where the app died, but the cause is often in another thread holding a lock or corrupting shared state.</li>
+<li class="ordered"><strong>Crash frequency matters</strong> — A 100% crash is easy to find. A 0.1% crash is a race condition, memory-dependent, or device-specific. Adjust your strategy accordingly.</li>
+<li class="ordered"><strong>Keep a crash pattern library</strong> — Every crash you solve goes into a team knowledge base. The same patterns repeat across projects and years.</li></ul>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="mobile-ci.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">Mobile CI/CD — From Push to Production in Minutes</span></span></a>
+    <a href="mobile-feature.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Mobile Feature Build — End-to-End on Any Platform</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    80 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

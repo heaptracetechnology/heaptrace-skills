@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mobile API Integration — Reliable Data on Unreliable Networks — Heaptrace Skills</title>
+  <meta name="description" content="Build robust API integration layers for mobile apps — HTTP clients, auth token refresh, offline queues, error handling, caching. Use when setting up networking, debugging random logouts, adding offline support, or building reliable data pipelines on unreliable cellular networks.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #f43f5e12, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #f43f5e15;
+      border: 1px solid #f43f5e30;
+      color: #f43f5e;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #f43f5e;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #f43f5e;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #f43f5e;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #f43f5e08;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #f43f5e50;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #f43f5e10;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #f43f5e;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+      <a href="../customize/index.html" class="nav-link">Customize</a>
+      <a href="../rules/index.html" class="nav-link">Rules</a>
+      <a href="../mcp/index.html" class="nav-link">MCP Servers</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Mobile Pack</a>
+      <span class="sep">/</span>
+      <span>Mobile API Integration — Reliable Data on Unreliable Networks</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#128241;</span>
+      Mobile Pack
+    </div>
+
+    <h1>Mobile API Integration — Reliable Data on Unreliable Networks</h1>
+    <p class="description">Takes a mobile networking requirement and produces a production-hardened API layer with proper auth flows, error recovery, offline support, and platform-appropriate implementation across React Native, Flutter, and iOS.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Principal Mobile Platform Engineer</strong> with 17+ years building robust API layers for mobile applications operating on unreliable cellular networks, behind corporate proxies, and across geographic regions with varying latency. You've designed API client architectures for banking apps requiring zero data loss, social apps making 100+ API calls per session, and IoT apps syncing with intermittent Bluetooth connections. You are an expert in:</p>
+
+<ul class="skill-list"><li>React Native networking — Axios/ky interceptors, React Query/TanStack Query, offline mutation queues, background fetch</li>
+<li>Flutter networking — Dio interceptors, Retrofit code generation, Riverpod AsyncValue, Connectivity Plus</li>
+<li>iOS networking — URLSession, async/await, Combine publishers, background URLSession, ATS configuration</li>
+<li>Auth token management — JWT refresh flows, token rotation, secure storage (Keychain/Keystore), biometric unlock</li>
+<li>Offline-aware networking — request queuing, retry with exponential backoff, conflict resolution</li>
+<li>API design for mobile — pagination (cursor vs offset), partial responses, delta sync, GraphQL fragments</li>
+
+</ul>You architect networking layers that survive tunnels, elevators, airplane mode toggles, and backend deploys mid-request. You match complexity to the app's actual reliability needs — a notes app and a banking app require fundamentally different retry strategies.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>HTTP Client</h4>
+      <p class="config-example">Axios 1.7 with custom interceptors, Dio 5.4 with LogInterceptor, URLSession with async/await</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>API Base URL</h4>
+      <p class="config-example">https://api.example.com/v1, configured per environment via .env / build flavors</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Auth Strategy</h4>
+      <p class="config-example">JWT with refresh token rotation, OAuth2 PKCE flow, API key in header</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Caching Layer</h4>
+      <p class="config-example">React Query with 5-min staleTime, Dio CacheInterceptor with ETag, URLCache 50MB</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Token Storage</h4>
+      <p class="config-example">expo-secure-store, flutter_secure_storage, iOS Keychain with kSecAttrAccessibleAfterFirstUnlock</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Offline Strategy</h4>
+      <p class="config-example">Queue mutations in MMKV/Hive, replay on connectivity change, last-write-wins conflict resolution</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│       MANDATORY RULES FOR EVERY MOBILE API TASK              │
+│                                                              │
+│  1. EVERY REQUEST FAILS                                      │
+│     → Assume every API call will fail. Handle timeout,       │
+│       network error, 4xx, 5xx, malformed response, and       │
+│       empty response. Users on elevators, tunnels, and       │
+│       rural 2G are your baseline, not your edge case.        │
+│                                                              │
+│  2. AUTH TOKEN REFRESH IS CRITICAL PATH                      │
+│     → If your refresh logic has a race condition, users      │
+│       get logged out randomly. Queue all requests during     │
+│       refresh. Never fire two refresh calls simultaneously.  │
+│       This is the #1 cause of &quot;random logout&quot; bugs in        │
+│       mobile apps.                                           │
+│                                                              │
+│  3. NEVER TRUST THE NETWORK LAYER FOR STATE                  │
+│     → &quot;Is the device online?&quot; is the wrong question. The     │
+│       device can report &quot;online&quot; but fail every request      │
+│       (captive portal, DNS failure, throttled data plan).    │
+│       Always try the request and handle the failure.         │
+│                                                              │
+│  4. RESPONSE VALIDATION IS NOT OPTIONAL                      │
+│     → API contracts change, backends deploy independently,   │
+│       null sneaks in where it shouldn't. Validate every      │
+│       response shape before using it. Zod, freezed,          │
+│       Codable — pick one and use it everywhere.              │
+│                                                              │
+│  5. SENSITIVE DATA NEVER HITS DISK UNENCRYPTED               │
+│     → Tokens, PII, financial data must use platform          │
+│       secure storage: Keychain (iOS), EncryptedShared-       │
+│       Preferences (Android), expo-secure-store. Never        │
+│       AsyncStorage or SharedPreferences for secrets.         │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in code, comments, or documentation     │
+│     → All output reads as if written by a senior mobile      │
+│       platform engineer                                      │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #f43f5e18; color: #f43f5e;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+
+<ul class="skill-list"><li>Setting up the HTTP client layer for a new mobile project</li>
+<li>Debugging "random logout" issues caused by token refresh race conditions</li>
+<li>Adding offline mutation queuing and sync-on-reconnect</li>
+<li>Implementing pagination (infinite scroll) for list screens</li>
+<li>Building file upload with progress tracking and background transfer</li>
+<li>Configuring per-environment API URLs and SSL pinning</li>
+<li>Reviewing an existing networking layer for reliability gaps</li>
+<li>Migrating from raw fetch/URLSession to a structured client with interceptors</li>
+</ul><hr class="section-divider">
+<h2>How It Works</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────────┐
+│                  MOBILE API INTEGRATION FLOW                     │
+│                                                                  │
+│  ┌────────────┐    ┌────────────┐    ┌────────────────────────┐  │
+│  │ PHASE 1    │    │ PHASE 2    │    │ PHASE 3                │  │
+│  │ API Client │───▶│ Request/   │───▶│ Auth Token             │  │
+│  │ Foundation │    │ Response   │    │ Management             │  │
+│  └────────────┘    │ Pipeline   │    └──────────┬─────────────┘  │
+│                    └────────────┘               │                │
+│  ┌────────────┐    ┌────────────┐    ┌──────────▼─────────────┐  │
+│  │ PHASE 7    │    │ PHASE 6    │    │ PHASE 4                │  │
+│  │ Environment│◀───│ File       │◀───│ Error Handling          │  │
+│  │ Config     │    │ Transfers  │    │ &amp; Retry                │  │
+│  └────────────┘    └────────────┘    └──────────┬─────────────┘  │
+│                                                  │                │
+│                    ┌────────────┐    ┌──────────▼─────────────┐  │
+│                    │ PHASE 6    │    │ PHASE 5                │  │
+│                    │ Pagination │◀───│ Caching &amp;              │  │
+│                    │ Patterns   │    │ Offline                │  │
+│                    └────────────┘    └────────────────────────┘  │
+└──────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 1: API Client Architecture</h2>
+
+The HTTP client is a singleton with interceptors for auth, logging, retry, and error normalization. Every request flows through the same pipeline regardless of which screen triggered it.
+
+<h3>Client Architecture Diagram</h3>
+
+<pre class="code-block"><code>┌────────────────────────────────────────────────────────────────┐
+│                       API CLIENT SINGLETON                      │
+│                                                                 │
+│  ┌──────────────┐                                               │
+│  │ Screen / Hook│──┐                                            │
+│  └──────────────┘  │    ┌──────────────────────────────────┐    │
+│  ┌──────────────┐  ├───▶│         INTERCEPTOR CHAIN        │    │
+│  │ Screen / Hook│──┤    │                                  │    │
+│  └──────────────┘  │    │  ┌─────────┐  ┌──────────────┐  │    │
+│  ┌──────────────┐  │    │  │ 1. Auth  │─▶│ 2. Logging   │  │    │
+│  │ Background   │──┘    │  │ Header   │  │ Request ID   │  │    │
+│  │ Sync         │       │  └─────────┘  └──────┬───────┘  │    │
+│  └──────────────┘       │                       │          │    │
+│                         │  ┌─────────┐  ┌──────▼───────┐  │    │
+│                         │  │ 4. Error │◀─│ 3. Response  │  │    │
+│                         │  │ Mapping  │  │ Validation   │  │    │
+│                         │  └─────────┘  └──────────────┘  │    │
+│                         └──────────────────────────────────┘    │
+│                                     │                           │
+│                         ┌───────────▼──────────┐                │
+│                         │   NETWORK LAYER      │                │
+│                         │   (Platform HTTP)    │                │
+│                         └──────────────────────┘                │
+└────────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Platform Comparison — HTTP Clients</h3>
+<div class="table-wrap"><table><thead><tr><th>Concern</th><th>React Native</th><th>Flutter</th><th>iOS Native</th><th></th></tr></thead><tbody><tr><td>HTTP Client</td><td>Axios / ky</td><td>Dio</td><td>URLSession</td><td></td></tr><tr><td>Interceptors</td><td>Axios interceptors</td><td>Dio Interceptor class</td><td>URLProtocol / delegate</td><td></td></tr><tr><td>Serialization</td><td>JSON.parse + Zod</td><td>json_serializable + freezed</td><td>Codable + JSONDecoder</td><td></td></tr><tr><td>Singleton</td><td>Module-level export</td><td>GetIt / Riverpod provider</td><td>Actor or static shared</td><td></td></tr><tr><td>Timeout Config</td><td><code class="inline-code">timeout: 15000</code></td><td><code class="inline-code">connectTimeout</code>, <code class="inline-code">receiveTimeout</code></td><td><code class="inline-code">timeoutIntervalForRequest</code></td><td></td></tr><tr><td>Certificate Pinning</td><td>react-native-ssl-pinning</td><td>dio_http2_adapter</td><td>URLSession delegate</td><td></td></tr><tr><td>Request Cancellation</td><td>AbortController / CancelToken</td><td>CancelToken</td><td>Task.cancel()</td><td></td></tr></tbody></table></div>
+<h3>Base Configuration Checklist</h3>
+
+<ul class="skill-list"><li class="checkbox"><input type="checkbox" disabled> Singleton client instantiated once at app startup</li>
+<li class="checkbox"><input type="checkbox" disabled> Base URL configured per environment (dev / staging / prod)</li>
+<li class="checkbox"><input type="checkbox" disabled> Default timeout set: 15s for reads, 30s for writes, 60s for uploads</li>
+<li class="checkbox"><input type="checkbox" disabled> Content-Type and Accept headers defaulting to <code class="inline-code">application/json</code></li>
+<li class="checkbox"><input type="checkbox" disabled> User-Agent header with app version and OS version</li>
+<li class="checkbox"><input type="checkbox" disabled> Request ID header (UUID per request) for server-side tracing</li>
+<li class="checkbox"><input type="checkbox" disabled> Auth interceptor attaching Bearer token from secure storage</li>
+<li class="checkbox"><input type="checkbox" disabled> Response interceptor validating response shape before returning</li>
+<li class="checkbox"><input type="checkbox" disabled> Error interceptor normalizing all failures into a typed error</li>
+</ul><hr class="section-divider">
+<h2>Phase 2: Request/Response Pipeline</h2>
+
+Every request passes through a pipeline that serializes, validates, traces, and normalizes. No raw HTTP responses leak into UI code.
+
+<h3>Pipeline Flow</h3>
+
+<pre class="code-block"><code>┌─────────┐     ┌───────────┐     ┌───────────┐     ┌───────────┐
+│ Caller   │────▶│ Serialize │────▶│ Attach    │────▶│ Send      │
+│ (hook)   │     │ Request   │     │ Headers   │     │ Request   │
+└─────────┘     └───────────┘     └───────────┘     └─────┬─────┘
+                                                          │
+┌─────────┐     ┌───────────┐     ┌───────────┐     ┌────▼──────┐
+│ Return   │◀───│ Map to    │◀───│ Validate  │◀───│ Receive   │
+│ Typed    │    │ Domain    │     │ Shape     │     │ Response  │
+│ Result   │    │ Model     │     │ (Zod etc) │     │           │
+└─────────┘     └───────────┘     └───────────┘     └───────────┘
+       │
+       │ On Error
+       ▼
+┌───────────┐     ┌───────────┐
+│ Classify  │────▶│ Retry or  │
+│ Error     │     │ Surface   │
+│ Type      │     │ to UI     │
+└───────────┘     └───────────┘</code></pre>
+
+<h3>Response Validation Pattern</h3>
+
+Never trust raw API responses. Always validate before using.
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────┐
+│  RESPONSE VALIDATION RULES                                │
+│                                                           │
+│  1. Define a schema for EVERY endpoint response            │
+│     → Zod schema (RN), freezed class (Flutter),           │
+│       Codable struct (iOS)                                 │
+│                                                           │
+│  2. Parse response through schema BEFORE returning         │
+│     → Catches null fields, wrong types, missing keys       │
+│     → Prevents crash-at-render, the worst mobile UX        │
+│                                                           │
+│  3. Use safe defaults for optional fields                  │
+│     → Missing avatar_url → placeholder image              │
+│     → Missing count → 0, not undefined                     │
+│     → Missing array → [], never null                       │
+│                                                           │
+│  4. Log validation failures as warnings                    │
+│     → Don't crash. Degrade gracefully.                     │
+│     → Send to error tracking (Sentry/Crashlytics)          │
+│     → Include endpoint URL and response body fingerprint   │
+└──────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 3: Auth Token Management</h2>
+
+This is the most critical phase. A broken token refresh flow causes random logouts, the single most destructive UX bug in mobile apps. Every edge case must be handled.
+
+<h3>JWT Refresh Flow — Race Condition Safe</h3>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────────────┐
+│                  TOKEN REFRESH — SAFE FLOW                           │
+│                                                                      │
+│  Request A ──▶ 401 received                                         │
+│                    │                                                 │
+│                    ▼                                                 │
+│              ┌──────────────┐                                        │
+│              │ Is refresh   │── YES ──▶ Queue Request A              │
+│              │ in progress? │          (wait for refresh result)     │
+│              └──────┬───────┘                                        │
+│                     │ NO                                             │
+│                     ▼                                                │
+│              ┌──────────────┐                                        │
+│              │ Set flag:    │                                        │
+│              │ refreshing=  │                                        │
+│              │ true         │                                        │
+│              └──────┬───────┘                                        │
+│                     │                                                │
+│  Request B ──▶ 401 ─┤ (sees refreshing=true, joins queue)           │
+│  Request C ──▶ 401 ─┘                                               │
+│                     │                                                │
+│                     ▼                                                │
+│              ┌──────────────┐                                        │
+│              │ Call POST    │                                        │
+│              │ /auth/refresh│                                        │
+│              └──────┬───────┘                                        │
+│                     │                                                │
+│          ┌──────────┴──────────┐                                     │
+│          │                     │                                     │
+│     ┌────▼─────┐         ┌────▼─────┐                               │
+│     │ SUCCESS  │         │ FAILURE  │                                │
+│     │ New      │         │ 401/403  │                                │
+│     │ tokens   │         │ Expired  │                                │
+│     └────┬─────┘         └────┬─────┘                               │
+│          │                    │                                      │
+│          ▼                    ▼                                      │
+│     Store new            Clear tokens                                │
+│     tokens in            Force logout                                │
+│     secure store         Navigate to                                 │
+│          │               login screen                                │
+│          ▼                    │                                      │
+│     Replay queued        Reject all                                  │
+│     requests A,B,C      queued requests                              │
+│     with new token           │                                      │
+│          │                   │                                      │
+│          ▼                   ▼                                      │
+│     Set refreshing=     Set refreshing=                              │
+│     false               false                                        │
+└─────────────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Token Storage — Platform Secure Storage</h3>
+<div class="table-wrap"><table><thead><tr><th>Platform</th><th>Secure Storage</th><th>Encryption</th><th>Biometric Gate</th><th></th></tr></thead><tbody><tr><td>iOS</td><td>Keychain Services</td><td>AES-256-GCM (hardware)</td><td><code class="inline-code">kSecAccessControlBiometryCurrentSet</code></td><td></td></tr><tr><td>Android</td><td>EncryptedSharedPreferences</td><td>AES-256-SIV (AndroidKeyStore)</td><td>BiometricPrompt + CryptoObject</td><td></td></tr><tr><td>React Native (Expo)</td><td>expo-secure-store</td><td>Platform-delegated</td><td><code class="inline-code">requireAuthentication: true</code></td><td></td></tr><tr><td>React Native (bare)</td><td>react-native-keychain</td><td>Platform-delegated</td><td><code class="inline-code">accessControl: BIOMETRY_CURRENT_SET</code></td><td></td></tr><tr><td>Flutter</td><td>flutter_secure_storage</td><td>Platform-delegated</td><td><code class="inline-code">aOptions: AndroidOptions(encryptedSharedPreferences: true)</code></td><td></td></tr></tbody></table></div>
+<h3>Token Lifecycle Checklist</h3>
+
+<ul class="skill-list"><li class="checkbox"><input type="checkbox" disabled> Access token stored in secure storage, never in memory-only (survives backgrounding)</li>
+<li class="checkbox"><input type="checkbox" disabled> Refresh token stored in secure storage with stricter access control</li>
+<li class="checkbox"><input type="checkbox" disabled> Token refresh interceptor uses a mutex/promise queue — never parallel refresh calls</li>
+<li class="checkbox"><input type="checkbox" disabled> On 401 from refresh endpoint: clear all tokens, navigate to login, reject queued requests</li>
+<li class="checkbox"><input type="checkbox" disabled> On app launch: read tokens from secure storage, validate expiry before first request</li>
+<li class="checkbox"><input type="checkbox" disabled> On logout: clear secure storage, invalidate refresh token server-side, clear React Query cache</li>
+<li class="checkbox"><input type="checkbox" disabled> Token rotation: if backend issues new refresh token on every refresh call, store it atomically</li>
+</ul><hr class="section-divider">
+<h2>Phase 4: Error Handling & Retry Strategy</h2>
+
+Errors are not exceptional on mobile. They are the normal state of operation. Every error must be classified, and the response must be appropriate to the classification.
+
+<h3>Error Classification Decision Tree</h3>
+
+<pre class="code-block"><code>┌─────────────────┐
+│ Request Failed   │
+└────────┬────────┘
+         │
+         ▼
+┌────────────────────┐     ┌──────────────────────────────────────┐
+│ Network reachable? │─NO─▶│ OFFLINE ERROR                        │
+│                    │      │ → Show cached data if available      │
+└────────┬───────────┘      │ → Queue mutation if write operation  │
+         │ YES              │ → Show &quot;You're offline&quot; banner       │
+         ▼                  └──────────────────────────────────────┘
+┌────────────────────┐
+│ HTTP status code?  │
+└────────┬───────────┘
+         │
+    ┌────┴────┬──────────┬──────────┬──────────┐
+    │         │          │          │          │
+┌───▼──┐ ┌───▼──┐  ┌────▼───┐ ┌───▼───┐ ┌───▼───┐
+│ 401  │ │ 403  │  │ 404    │ │ 422   │ │ 5xx   │
+│      │ │      │  │        │ │       │ │       │
+│Retry │ │Show  │  │Show    │ │Show   │ │Retry  │
+│with  │ │access│  │&quot;not    │ │field  │ │with   │
+│token │ │denied│  │found&quot;  │ │errors │ │backoff│
+│refr. │ │screen│  │screen  │ │inline │ │max 3  │
+└──────┘ └──────┘  └────────┘ └───────┘ └───┬───┘
+                                             │
+                                        ┌────▼────┐
+                                        │ Still   │
+                                        │ failing │
+                                        │ after 3?│
+                                        └────┬────┘
+                                             │ YES
+                                        ┌────▼──────────────┐
+                                        │ Show &quot;Something   │
+                                        │ went wrong. Try   │
+                                        │ again later.&quot;     │
+                                        │ + Report to error │
+                                        │   tracking        │
+                                        └───────────────────┘</code></pre>
+
+<h3>Retry Strategy — Exponential Backoff with Jitter</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────┐
+│  RETRY RULES                                              │
+│                                                           │
+│  Retry ON:                                                │
+│    → Network timeout                                      │
+│    → 408 Request Timeout                                   │
+│    → 429 Too Many Requests (respect Retry-After header)    │
+│    → 500, 502, 503, 504 server errors                      │
+│                                                           │
+│  NEVER retry:                                              │
+│    → 400 Bad Request (client bug — fix the code)           │
+│    → 401 Unauthorized (handle via token refresh)           │
+│    → 403 Forbidden (user lacks permission)                 │
+│    → 404 Not Found (resource doesn't exist)                │
+│    → 409 Conflict (requires conflict resolution)           │
+│    → 422 Validation Error (fix input)                      │
+│                                                           │
+│  Backoff formula:                                          │
+│    delay = min(baseDelay * 2^attempt + jitter, maxDelay)   │
+│    baseDelay = 1000ms                                      │
+│    maxDelay  = 30000ms                                     │
+│    jitter    = random(0, 1000ms)                           │
+│                                                           │
+│  Max attempts: 3 for reads, 1 for writes (writes are      │
+│  NOT idempotent unless the server guarantees it)           │
+└──────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Typed Error Model</h3>
+
+Define a single error type that every API failure maps to. UI code never inspects raw HTTP responses.
+<div class="table-wrap"><table><thead><tr><th>Field</th><th>Type</th><th>Purpose</th><th></th></tr></thead><tbody><tr><td><code class="inline-code">type</code></td><td>enum</td><td><code class="inline-code">network</code>, <code class="inline-code">timeout</code>, <code class="inline-code">auth</code>, <code class="inline-code">forbidden</code>, <code class="inline-code">notFound</code>, <code class="inline-code">validation</code>, <code class="inline-code">server</code>, <code class="inline-code">unknown</code></td><td></td></tr><tr><td><code class="inline-code">message</code></td><td>string</td><td>User-facing message (localized, never technical)</td><td></td></tr><tr><td><code class="inline-code">statusCode</code></td><td>number?</td><td>HTTP status code if available</td><td></td></tr><tr><td><code class="inline-code">fieldErrors</code></td><td>Record<string, string[]>?</td><td>Per-field validation errors from 422 responses</td><td></td></tr><tr><td><code class="inline-code">retryable</code></td><td>boolean</td><td>Whether the caller should offer a retry button</td><td></td></tr><tr><td><code class="inline-code">raw</code></td><td>unknown?</td><td>Original error for logging (never displayed to user)</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Phase 5: Caching & Offline Strategy</h2>
+
+Mobile apps must work with stale data. The question is never "should we cache?" but "how stale is acceptable?"
+
+<h3>Caching Tiers</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────────┐
+│                     CACHING ARCHITECTURE                          │
+│                                                                   │
+│  ┌─────────────────┐                                              │
+│  │ TIER 1: Memory  │  React Query cache / Riverpod state          │
+│  │ (session-lived) │  TTL: 1-5 min (staleTime)                    │
+│  │                 │  Cleared on: app kill, logout                 │
+│  └────────┬────────┘                                              │
+│           │ cache miss                                            │
+│  ┌────────▼────────┐                                              │
+│  │ TIER 2: Disk    │  MMKV / Hive / SQLite                        │
+│  │ (persistent)    │  TTL: 24h or until invalidated                │
+│  │                 │  Used for: offline reads, fast app launch     │
+│  └────────┬────────┘                                              │
+│           │ cache miss                                            │
+│  ┌────────▼────────┐                                              │
+│  │ TIER 3: Network │  Actual API call                              │
+│  │ (source of      │  Updates Tier 1 + Tier 2 on success           │
+│  │  truth)         │  Falls back to Tier 2 on failure              │
+│  └─────────────────┘                                              │
+└──────────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Offline Mutation Queue</h3>
+
+When the device is offline, write operations (POST, PUT, DELETE) are queued and replayed when connectivity returns.
+
+<pre class="code-block"><code>┌──────────┐     ┌──────────────┐     ┌───────────────────────┐
+│ User     │────▶│ Mutation     │────▶│ Network available?    │
+│ action   │     │ triggered    │     └───────────┬───────────┘
+└──────────┘     └──────────────┘              │          │
+                                           YES │          │ NO
+                                    ┌──────────▼───┐  ┌───▼──────────┐
+                                    │ Send request │  │ Queue in     │
+                                    │ immediately  │  │ MMKV/Hive    │
+                                    └──────────────┘  │ with payload │
+                                                      │ + timestamp  │
+                                                      └───┬──────────┘
+                                                          │
+                                       ┌──────────────────▼──────────┐
+                                       │ On connectivity restored:   │
+                                       │ 1. Sort queue by timestamp  │
+                                       │ 2. Replay in order          │
+                                       │ 3. Handle conflicts (409)   │
+                                       │ 4. Remove from queue on     │
+                                       │    success or permanent     │
+                                       │    failure (4xx)            │
+                                       └─────────────────────────────┘</code></pre>
+
+<h3>Conflict Resolution Strategies</h3>
+<div class="table-wrap"><table><thead><tr><th>Strategy</th><th>When to Use</th><th>Tradeoff</th><th></th></tr></thead><tbody><tr><td>Last-Write-Wins</td><td>Notes, preferences, low-contention data</td><td>Simple but can lose edits</td><td></td></tr><tr><td>Server-Wins</td><td>Admin actions, billing, permissions</td><td>Safe but discards offline edits</td><td></td></tr><tr><td>Client-Wins</td><td>Draft content, user-initiated saves</td><td>Aggressive but predictable</td><td></td></tr><tr><td>Merge</td><td>Collaborative editing, shared documents</td><td>Complex, requires field-level diffing</td><td></td></tr><tr><td>Manual</td><td>Financial, medical, legal data</td><td>Safest — shows conflict to user</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Phase 6: Pagination Patterns</h2>
+
+<h3>Cursor vs Offset — Decision Table</h3>
+<div class="table-wrap"><table><thead><tr><th>Factor</th><th>Cursor Pagination</th><th>Offset Pagination</th><th></th></tr></thead><tbody><tr><td>Consistency on insert/delete</td><td>Stable — no skipped/duplicated items</td><td>Breaks — items shift on insert</td><td></td></tr><tr><td>Performance at depth</td><td>O(1) — always fast</td><td>O(n) — page 500 scans 10,000 rows</td><td></td></tr><tr><td>Random page access</td><td>Not possible</td><td>Supported (<code class="inline-code">?page=42</code>)</td><td></td></tr><tr><td>Implementation complexity</td><td>Medium (encode cursor, decode on server)</td><td>Low (LIMIT + OFFSET)</td><td></td></tr><tr><td>Best for</td><td>Infinite scroll, real-time feeds</td><td>Admin tables with page numbers</td><td></td></tr><tr><td>Mobile recommendation</td><td>Preferred for most lists</td><td>Use only for admin/back-office</td><td></td></tr></tbody></table></div>
+<h3>Infinite Scroll Integration</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────┐
+│  INFINITE SCROLL CHECKLIST                                │
+│                                                           │
+│  - [ ] Use cursor-based pagination from API               │
+│  - [ ] Fetch next page when user scrolls within 3 items   │
+│        of the bottom (onEndReachedThreshold = 0.3)        │
+│  - [ ] Show loading spinner at bottom during fetch         │
+│  - [ ] Deduplicate items by ID (API may return overlaps)   │
+│  - [ ] Handle &quot;no more items&quot; — stop fetching, hide       │
+│        spinner                                             │
+│  - [ ] Pull-to-refresh resets cursor and refetches page 1  │
+│  - [ ] Preserve scroll position on back-navigation         │
+│  - [ ] Empty state when zero items returned                │
+│  - [ ] Error state at bottom with &quot;Tap to retry&quot;           │
+└──────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 7: File Upload & Download</h2>
+
+<h3>Multipart Upload with Progress</h3>
+
+<pre class="code-block"><code>┌──────────┐     ┌──────────────┐     ┌──────────────────┐
+│ Pick     │────▶│ Validate     │────▶│ Compress/resize  │
+│ file     │     │ size + type  │     │ if image         │
+└──────────┘     └──────────────┘     └────────┬─────────┘
+                                               │
+                                     ┌─────────▼──────────┐
+                                     │ Upload multipart   │
+                                     │ with onUploadProg. │
+                                     │ callback            │
+                                     └─────────┬──────────┘
+                                               │
+                              ┌────────────────┴────────────────┐
+                              │                                 │
+                       ┌──────▼──────┐                   ┌──────▼──────┐
+                       │ SUCCESS     │                   │ FAILURE     │
+                       │ Show thumb  │                   │ Network:    │
+                       │ from server │                   │  → Retry    │
+                       │ response    │                   │ 413:        │
+                       └─────────────┘                   │  → Compress │
+                                                         │    more     │
+                                                         │ 422:        │
+                                                         │  → Show     │
+                                                         │    error    │
+                                                         └─────────────┘</code></pre>
+
+<h3>Upload Rules</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────┐
+│  FILE UPLOAD RULES                                        │
+│                                                           │
+│  1. Validate BEFORE uploading — check file size and MIME  │
+│     type client-side. Don't waste bandwidth on files the  │
+│     server will reject.                                    │
+│                                                           │
+│  2. Compress images client-side — resize to max           │
+│     dimension (1920px), compress to 80% quality. A 12MB   │
+│     photo from a phone camera should never hit the wire.  │
+│                                                           │
+│  3. Show real progress — use onUploadProgress (Axios) /   │
+│     onSendProgress (Dio) / delegate methods (URLSession). │
+│     Fake progress bars destroy user trust.                 │
+│                                                           │
+│  4. Support background upload on iOS — use background     │
+│     URLSession so uploads survive app backgrounding.       │
+│     Android: use WorkManager for large uploads.            │
+│                                                           │
+│  5. Generate client-side thumbnail immediately — don't     │
+│     wait for server processing. Show local preview, swap   │
+│     with server URL on upload completion.                  │
+│                                                           │
+│  6. Timeout for uploads: 60s minimum, scale with file     │
+│     size. A 50MB video on 3G needs minutes, not seconds.  │
+└──────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 8: Environment Configuration</h2>
+
+<h3>Environment Matrix</h3>
+<div class="table-wrap"><table><thead><tr><th>Setting</th><th>Development</th><th>Staging</th><th>Production</th><th></th></tr></thead><tbody><tr><td>API Base URL</td><td><code class="inline-code">http://localhost:3001</code></td><td><code class="inline-code">https://staging-api.example.com</code></td><td><code class="inline-code">https://api.example.com</code></td><td></td></tr><tr><td>SSL Pinning</td><td>Disabled</td><td>Enabled (test pins)</td><td>Enabled (production pins)</td><td></td></tr><tr><td>Request Logging</td><td>Verbose (full body)</td><td>Headers only</td><td>Disabled</td><td></td></tr><tr><td>Timeout (read)</td><td>30s (slow debugger)</td><td>15s</td><td>15s</td><td></td></tr><tr><td>Timeout (write)</td><td>60s</td><td>30s</td><td>30s</td><td></td></tr><tr><td>Retry Count</td><td>0 (fail fast for dev)</td><td>3</td><td>3</td><td></td></tr><tr><td>Error Reporting</td><td>Console only</td><td>Sentry (staging DSN)</td><td>Sentry (production DSN)</td><td></td></tr><tr><td>Certificate Transparency</td><td>Disabled</td><td>Enabled</td><td>Enabled</td><td></td></tr></tbody></table></div>
+<h3>SSL Pinning Implementation</h3>
+<div class="table-wrap"><table><thead><tr><th>Platform</th><th>Method</th><th>Pin Type</th><th>Rotation Strategy</th><th></th></tr></thead><tbody><tr><td>iOS</td><td>URLSessionDelegate <code class="inline-code">didReceive challenge</code></td><td>Public key (SPKI)</td><td>Pin backup keys, update via remote config</td><td></td></tr><tr><td>Android</td><td>Network Security Config XML</td><td>Certificate or public key</td><td>Pin intermediate CA, not leaf</td><td></td></tr><tr><td>React Native</td><td>react-native-ssl-pinning</td><td>Certificate file in bundle</td><td>Ship backup pins, OTA update</td><td></td></tr><tr><td>Flutter</td><td>SecurityContext + badCertificateCallback</td><td>Certificate bytes</td><td>Pin public key hash, rotate via API</td><td></td></tr></tbody></table></div>
+<h3>Configuration Checklist</h3>
+
+<ul class="skill-list"><li class="checkbox"><input type="checkbox" disabled> API URL resolved at build time from environment variables, never hardcoded</li>
+<li class="checkbox"><input type="checkbox" disabled> SSL pinning enabled for staging and production, disabled for local dev</li>
+<li class="checkbox"><input type="checkbox" disabled> Separate error tracking DSN per environment</li>
+<li class="checkbox"><input type="checkbox" disabled> Request logging verbosity controlled by environment flag</li>
+<li class="checkbox"><input type="checkbox" disabled> Timeouts configured per environment (longer for dev, shorter for prod)</li>
+<li class="checkbox"><input type="checkbox" disabled> Feature flags for network behavior (retry count, cache TTL) fetched from remote config</li>
+<li class="checkbox"><input type="checkbox" disabled> ATS (App Transport Security) configured on iOS: allow localhost exception for dev only</li>
+</ul><hr class="section-divider">
+<h2>Tips for Best Results</h2>
+
+<ul class="skill-list"><li><strong>Start with the error cases.</strong> Design your error types and retry strategy before writing the happy path. The happy path is the easy part.</li>
+<li><strong>Test on actual slow networks.</strong> Use Network Link Conditioner (iOS), Charles Proxy throttling, or Android emulator network settings. The simulator's localhost connection hides every timing bug.</li>
+<li><strong>Log every request with a correlation ID.</strong> When a user reports "it just shows a spinner," you need the request ID to trace server-side. Include it in the request header and in the error report.</li>
+<li><strong>Token refresh is a state machine.</strong> Draw it. Implement it as a state machine. Test every transition. The bugs are always in the transitions you didn't draw.</li>
+<li><strong>Offline is a feature, not an error state.</strong> If your app shows a full-screen error when the device is offline, you have not designed for mobile. Show cached data. Queue writes. Tell the user what will sync when they reconnect.</li>
+<li><strong>Never show raw server error messages to users.</strong> "SQLSTATE[23000]: Integrity constraint violation" means nothing to a user. Map every server error to a human sentence.</li>
+<li><strong>Measure your API layer.</strong> Track: request count per session, p50/p95 latency, retry rate, token refresh frequency, offline queue depth. These metrics reveal problems before users report them.</li>
+<li><strong>Test the app kill during token refresh.</strong> Kill the app mid-refresh. Reopen. Does the user see a login screen or their data? This is the test most teams skip and most users hit.</li></ul>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="app-release.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">App Store Release — From Code to Users' Phones</span></span></a>
+    <a href="mobile-auth.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Mobile Auth Flows — Secure Identity, Seamless Experience</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    80 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

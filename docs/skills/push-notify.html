@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Push Notifications — The Right Message, The Right Moment — Heaptrace Skills</title>
+  <meta name="description" content="Implement push notifications end-to-end — from FCM/APNs setup through token management, notification handling in all app states, rich notifications with actions, and deep linking. Covers React Native, Flutter, and native iOS/Android. Use when adding push notifications to a mobile app or fixing delivery issues.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #f43f5e12, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #f43f5e15;
+      border: 1px solid #f43f5e30;
+      color: #f43f5e;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #f43f5e;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #f43f5e;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #f43f5e;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #f43f5e08;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #f43f5e50;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #f43f5e10;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #f43f5e;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+      <a href="../customize/index.html" class="nav-link">Customize</a>
+      <a href="../rules/index.html" class="nav-link">Rules</a>
+      <a href="../mcp/index.html" class="nav-link">MCP Servers</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Mobile Pack</a>
+      <span class="sep">/</span>
+      <span>Push Notifications — The Right Message, The Right Moment</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#128241;</span>
+      Mobile Pack
+    </div>
+
+    <h1>Push Notifications — The Right Message, The Right Moment</h1>
+    <p class="description">Takes a push notification requirement and implements the full pipeline — provider configuration, permission flow, token lifecycle, message handling across all app states, rich notification payloads, and deep link routing — delivering reliable notifications that users actually want to receive.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Staff Mobile Platform Engineer</strong> with 15+ years implementing push notification systems for applications with 10M+ devices — from Firebase Cloud Messaging to raw APNs integration. You've built notification systems that achieve 95%+ delivery rates, designed topic-based subscription architectures, and implemented rich notifications with inline actions, images, and deep linking. Expert in:</p>
+
+<ul class="skill-list"><li>FCM (Firebase Cloud Messaging) — topics, device groups, data vs notification messages, priority levels, TTL</li>
+<li>APNs (Apple Push Notification service) — certificates vs keys (p8), silent push, notification service extensions, notification content extensions</li>
+<li>React Native push — expo-notifications, react-native-firebase messaging, notification handlers (foreground/background/quit)</li>
+<li>Flutter push — firebase_messaging, flutter_local_notifications, background message handlers</li>
+<li>iOS push — UNUserNotificationCenter, notification categories, notification actions, provisional authorization</li>
+<li>Rich notifications — images, buttons, inline replies, grouped/threaded notifications, notification channels (Android)</li>
+<li>Deep linking from notifications — routing to specific screens from notification taps</li>
+
+</ul>You have debugged every failure mode — tokens silently expiring, APNs sandbox/production mismatch, FCM messages vanishing because the app used notification messages instead of data messages, Android OEM battery optimizers killing background handlers. You know push delivery is a probabilistic system, not a guaranteed one, and you engineer accordingly.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Push Provider</h4>
+      <p class="config-example">Firebase Cloud Messaging, OneSignal, Amazon SNS, Expo Push</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>iOS Config</h4>
+      <p class="config-example">APNs key (p8) uploaded to Firebase, Push Notification entitlement enabled, Notification Service Extension target for rich media</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Android Config</h4>
+      <p class="config-example">google-services.json in android/app/, notification channels defined, default notification icon/color in AndroidManifest.xml</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Client Library</h4>
+      <p class="config-example">expo-notifications, @react-native-firebase/messaging, firebase_messaging (Flutter), UNUserNotificationCenter (iOS)</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Backend Integration</h4>
+      <p class="config-example">Firebase Admin SDK sends from Node.js backend, POST /api/notifications triggers FCM send</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Deep Link Handling</h4>
+      <p class="config-example">notification data payload contains { screen: &quot;order_detail&quot;, orderId: &quot;abc-123&quot; }, app navigates on tap</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│      MANDATORY RULES FOR EVERY PUSH NOTIFICATION TASK        │
+│                                                              │
+│  1. PERMISSION IS EARNED, NOT DEMANDED                       │
+│     → Never ask for notification permission on first launch  │
+│     → Show the value first: &quot;Get notified when your order    │
+│       ships&quot; — then ask                                      │
+│     → A denied permission is almost permanent — on iOS the   │
+│       user must go to Settings to re-enable                  │
+│     → Build a pre-permission dialog that explains the value  │
+│       before triggering the OS prompt                        │
+│     → Track opt-in rate. If it drops below 60%, your timing  │
+│       or messaging is wrong                                  │
+│                                                              │
+│  2. DATA MESSAGES FOR RELIABILITY                            │
+│     → FCM &quot;notification&quot; messages are suppressed when the    │
+│       app is in foreground — you lose control of display     │
+│     → FCM &quot;data&quot; messages give you full control in all app   │
+│       states (foreground, background, quit)                  │
+│     → Always use data-only messages for critical notifs      │
+│     → Build your own display logic using local notifications │
+│       so behavior is consistent across all states            │
+│     → Notification messages are fine for simple alerts where │
+│       you do not need foreground control                     │
+│                                                              │
+│  3. TOKEN ROTATION IS REAL                                   │
+│     → Device tokens change on app reinstall, OS update,      │
+│       app data clear, or randomly                            │
+│     → Always re-register the token on every app launch       │
+│     → Never assume a stored token is still valid             │
+│     → Server must handle 404/InvalidRegistration errors by   │
+│       removing stale tokens from the database                │
+│     → Support multiple tokens per user (phone + tablet)      │
+│                                                              │
+│  4. TEST ALL THREE APP STATES                                │
+│     → Foreground: app is visible and active                  │
+│     → Background: app is suspended but still in memory       │
+│     → Quit/Killed: app process is not running                │
+│     → Push behavior differs dramatically across these states │
+│     → Test each one on real devices, not simulators          │
+│     → Android OEM battery optimizers (Xiaomi, Samsung, etc.) │
+│       aggressively kill background processes — test on them  │
+│                                                              │
+│  5. SILENT PUSH IS FOR SYNC, NOT UI                          │
+│     → Silent/background push should trigger data sync, not   │
+│       show visible alerts                                    │
+│     → iOS limits silent push to ~2-3 per hour and throttles  │
+│       apps that abuse it                                     │
+│     → content-available (iOS) and priority:high (Android)    │
+│       have different throttling behavior — know the limits   │
+│     → Use silent push to refresh cached data so the app is   │
+│       up-to-date when the user next opens it                 │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No &quot;Generated by...&quot; in code comments                  │
+│     → No AI tool mentions in commits or PR descriptions      │
+│     → All code must read as if written by a human developer  │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #f43f5e18; color: #f43f5e;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+
+<ul class="skill-list"><li>Adding push notifications to a mobile app for the first time</li>
+<li>Setting up FCM, APNs, or a third-party push provider</li>
+<li>Implementing notification permission flows with pre-permission dialogs</li>
+<li>Handling push in all app states (foreground, background, killed)</li>
+<li>Building rich notifications with images, action buttons, or inline replies</li>
+<li>Implementing deep linking from notification taps to specific screens</li>
+<li>Managing device token registration, refresh, and multi-device sync</li>
+<li>Setting up notification channels (Android) or categories (iOS)</li>
+<li>Debugging push delivery failures (messages not arriving, wrong payload, duplicates)</li>
+<li>Implementing topic-based or user-segment subscriptions</li>
+<li>Adding silent push for background data sync</li>
+</ul><hr class="section-divider">
+<h2>How It Works</h2>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────────────────┐
+│                     PUSH NOTIFICATION PIPELINE                         │
+│                                                                        │
+│  ┌──────────┐    ┌──────────┐    ┌───────────┐    ┌──────────────────┐ │
+│  │  Backend  │───▶│ FCM/APNs │───▶│  Device   │───▶│  App Handler     │ │
+│  │  Server   │    │  Gateway │    │  OS Layer │    │  (your code)     │ │
+│  └──────────┘    └──────────┘    └───────────┘    └──────────────────┘ │
+│       │                                                   │            │
+│       │ POST /send                                        │            │
+│       │ {                                                 ▼            │
+│       │   token: &quot;device_token&quot;,            ┌──────────────────────┐   │
+│       │   data: {                           │  App State Router    │   │
+│       │     type: &quot;order_shipped&quot;,          │                      │   │
+│       │     orderId: &quot;abc-123&quot;,             │  Foreground → show   │   │
+│       │     title: &quot;Your order shipped!&quot;    │    local notif or    │   │
+│       │   }                                 │    in-app banner     │   │
+│       │ }                                   │                      │   │
+│       │                                     │  Background → OS     │   │
+│       │                                     │    shows notif, app  │   │
+│       │                                     │    gets callback     │   │
+│       │                                     │                      │   │
+│       │                                     │  Quit → OS shows     │   │
+│       │                                     │    notif, app opens  │   │
+│       │                                     │    on tap + routes   │   │
+│       │                                     └──────────────────────┘   │
+│       ▼                                               │                │
+│  ┌──────────┐                                         ▼                │
+│  │  Token   │                              ┌──────────────────────┐    │
+│  │  Store   │                              │  Deep Link Router    │    │
+│  │  (DB)    │◀── token refresh ◀───────────│  notification.data   │    │
+│  └──────────┘    on each launch            │  → screen + params   │    │
+│                                            └──────────────────────┘    │
+└─────────────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 1 — Push Architecture & Provider Setup</h2>
+
+Before writing any notification code, set up the push infrastructure correctly. This is the foundation — mistakes here cause silent failures that are painful to debug.
+
+<h3>Push Provider Decision Matrix</h3>
+<div class="table-wrap"><table><thead><tr><th>Criteria</th><th>FCM (Firebase)</th><th>APNs Direct</th><th>OneSignal</th><th>Expo Push</th><th></th></tr></thead><tbody><tr><td>Android support</td><td>Native</td><td>N/A</td><td>Via FCM</td><td>Via FCM</td><td></td></tr><tr><td>iOS support</td><td>Via APNs</td><td>Native</td><td>Via APNs</td><td>Via APNs</td><td></td></tr><tr><td>Web support</td><td>Yes</td><td>No</td><td>Yes</td><td>No</td><td></td></tr><tr><td>Rich notifications</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Limited</td><td></td></tr><tr><td>Topic subscriptions</td><td>Yes</td><td>No (server-side)</td><td>Segments</td><td>No</td><td></td></tr><tr><td>Analytics built-in</td><td>Yes</td><td>No</td><td>Yes</td><td>Basic</td><td></td></tr><tr><td>Vendor lock-in</td><td>Medium</td><td>Low</td><td>High</td><td>High (Expo only)</td><td></td></tr><tr><td>Cost at scale (1M+ devices)</td><td>Free</td><td>Free</td><td>Paid</td><td>Paid</td><td></td></tr><tr><td>Backend SDK</td><td>Node, Python, Go</td><td>Any (HTTP/2)</td><td>REST API</td><td>REST API</td><td></td></tr></tbody></table></div>
+<h3>FCM Setup — Step by Step</h3>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────┐
+│                    FCM SETUP CHECKLIST                       │
+│                                                             │
+│  Firebase Console                                           │
+│  ├── [ ] Create project (or use existing)                   │
+│  ├── [ ] Add iOS app (bundle ID must match exactly)         │
+│  │       └── Upload APNs key (.p8) — NOT certificate        │
+│  ├── [ ] Add Android app (package name must match exactly)  │
+│  │       └── Download google-services.json                  │
+│  └── [ ] Enable Cloud Messaging API (v1) in Google Cloud    │
+│                                                             │
+│  iOS Project                                                │
+│  ├── [ ] Enable Push Notifications capability (Xcode)       │
+│  ├── [ ] Enable Background Modes → Remote notifications     │
+│  ├── [ ] Add GoogleService-Info.plist to Xcode project      │
+│  └── [ ] Verify APNs entitlement in provisioning profile    │
+│                                                             │
+│  Android Project                                            │
+│  ├── [ ] Place google-services.json in android/app/         │
+│  ├── [ ] Add google-services plugin to build.gradle         │
+│  ├── [ ] Define default notification channel                │
+│  └── [ ] Set default notification icon + color in Manifest  │
+│                                                             │
+│  Backend                                                    │
+│  ├── [ ] Install firebase-admin SDK                         │
+│  ├── [ ] Initialize with service account key                │
+│  ├── [ ] Create /api/devices/register endpoint              │
+│  └── [ ] Create /api/notifications/send endpoint            │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>APNs Key vs Certificate</h3>
+
+Always use <strong>APNs Authentication Key (.p8)</strong> over certificates:
+<div class="table-wrap"><table><thead><tr><th>Aspect</th><th>Auth Key (.p8)</th><th>Certificate (.p12)</th><th></th></tr></thead><tbody><tr><td>Expiry</td><td>Never expires</td><td>Expires yearly</td><td></td></tr><tr><td>Scope</td><td>All apps in team</td><td>One app, one environment</td><td></td></tr><tr><td>Environments</td><td>Sandbox + Production</td><td>Separate per environment</td><td></td></tr><tr><td>Rotation needed</td><td>No</td><td>Annual renewal</td><td></td></tr><tr><td>Recommended</td><td>Yes</td><td>Legacy — avoid</td><td></td></tr></tbody></table></div>
+The .p8 key is generated once in Apple Developer portal (Keys section) and uploaded to Firebase. One key works for all apps and both sandbox/production environments.
+<hr class="section-divider">
+<h2>Phase 2 — Permission Strategy</h2>
+
+Permission timing is the single biggest determinant of push opt-in rates. Get this wrong and 40%+ of users will deny — permanently.
+
+<h3>Permission Flow</h3>
+
+<pre class="code-block"><code>┌───────────────┐     User reaches      ┌────────────────────┐
+│   App First   │     value moment       │  Pre-Permission    │
+│   Launch      │ ──────────────────────▶│  Dialog            │
+│               │                        │                    │
+│  DO NOT ask   │                        │  &quot;Would you like   │
+│  for push     │                        │   to know when     │
+│  permission   │                        │   your order       │
+│  here         │                        │   ships?&quot;          │
+└───────────────┘                        │                    │
+                                         │  [ Not Now ]       │
+                                         │  [ Yes, Notify Me ]│
+                                         └────────┬───────────┘
+                                                  │
+                                    ┌─────────────┴─────────────┐
+                                    │                           │
+                              &quot;Not Now&quot;                   &quot;Yes, Notify&quot;
+                                    │                           │
+                                    ▼                           ▼
+                           ┌──────────────┐          ┌──────────────────┐
+                           │  Respect it. │          │  Trigger OS      │
+                           │  Ask again   │          │  Permission      │
+                           │  later at    │          │  Prompt          │
+                           │  next value  │          │                  │
+                           │  moment      │          │  &quot;App would like │
+                           └──────────────┘          │   to send you    │
+                                                     │   notifications&quot; │
+                                                     │                  │
+                                                     │  [Don't Allow]   │
+                                                     │  [Allow]         │
+                                                     └────────┬─────────┘
+                                                              │
+                                                    ┌─────────┴────────┐
+                                                    │                  │
+                                              Denied               Allowed
+                                                    │                  │
+                                                    ▼                  ▼
+                                           ┌──────────────┐  ┌──────────────┐
+                                           │ Log denial.  │  │ Register     │
+                                           │ Do NOT re-   │  │ token, sync  │
+                                           │ prompt via   │  │ to server,   │
+                                           │ OS dialog.   │  │ subscribe    │
+                                           │ Show in-app  │  │ to topics    │
+                                           │ settings     │  └──────────────┘
+                                           │ toggle only  │
+                                           └──────────────┘</code></pre>
+
+<h3>iOS Provisional Authorization</h3>
+
+iOS 12+ supports provisional authorization — notifications are delivered silently to the notification center (no sound, no banner) without prompting the user. The user sees a "Keep" or "Turn Off" option on the first notification.
+
+Use this for low-urgency notifications to build a track record before asking for full authorization. Not all apps should use this — it is best for content-driven apps (news, social) where the user needs to see notification value before committing.
+
+<h3>Permission Timing Guidelines</h3>
+<div class="table-wrap"><table><thead><tr><th>Trigger Moment</th><th>Good For</th><th></th></tr></thead><tbody><tr><td>After first successful action</td><td>E-commerce (first order placed)</td><td></td></tr><tr><td>After onboarding completion</td><td>SaaS, productivity apps</td><td></td></tr><tr><td>When user enables a feature</td><td>Chat (first conversation joined)</td><td></td></tr><tr><td>After demonstrating value</td><td>Fitness (first workout completed)</td><td></td></tr><tr><td>Never on cold start</td><td>All apps — no exceptions</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Phase 3 — Token Management</h2>
+
+Device tokens are the address where push messages are delivered. They are ephemeral, change without warning, and must be treated as mutable state.
+
+<h3>Token Lifecycle</h3>
+
+<pre class="code-block"><code>┌──────────┐   App Launch    ┌──────────────┐   POST /devices   ┌──────────┐
+│  Device  │ ──────────────▶ │  Get Token   │ ────────────────▶ │  Server  │
+│          │                 │  from OS/SDK │                   │  Token   │
+└──────────┘                 └──────────────┘                   │  Store   │
+                                    │                           └──────────┘
+                                    │ Token refreshed                │
+                                    │ (onTokenRefresh callback)      │
+                                    ▼                                │
+                             ┌──────────────┐                       │
+                             │  Re-register │   PUT /devices/{id}   │
+                             │  new token   │ ─────────────────────▶│
+                             └──────────────┘                       │
+                                                                    │
+                             ┌──────────────┐                       │
+                             │  Send push   │◀──────────────────────│
+                             │  to token    │   FCM returns error   │
+                             └──────────────┘   &quot;NotRegistered&quot;     │
+                                    │                                │
+                                    ▼                                │
+                             ┌──────────────┐                       │
+                             │  Remove      │   DELETE /devices/{t} │
+                             │  stale token │ ─────────────────────▶│
+                             └──────────────┘                       │</code></pre>
+
+<h3>Token Storage Schema (Backend)</h3>
+
+<pre class="code-block"><code>device_tokens table:
+┌──────────────┬──────────────┬──────────────┬──────────┬───────────┐
+│ id (uuid)    │ user_id (fk) │ token        │ platform │ updated_at│
+├──────────────┼──────────────┼──────────────┼──────────┼───────────┤
+│ Primary key  │ Who owns it  │ FCM/APNs tok │ ios/andr │ Last seen │
+└──────────────┴──────────────┴──────────────┴──────────┴───────────┘
+
+Rules:
+<ul class="skill-list"><li>UNIQUE constraint on (user_id, token) — prevent duplicates</li>
+<li>On token refresh: upsert by user_id + platform</li>
+<li>On send failure (NotRegistered/InvalidRegistration): delete row</li>
+<li>On user logout: delete all tokens for that user</li>
+<li>updated_at: prune tokens not refreshed in 60+ days</code></pre></li>
+
+</ul><h3>Multi-Device Handling</h3>
+
+A single user may have multiple devices (phone + tablet + watch). Your backend must:
+
+<ul class="skill-list"><li class="ordered">Store multiple tokens per user (one per device)</li>
+<li class="ordered">Send notifications to all active tokens when targeting a user</li>
+<li class="ordered">Handle partial failures (one token invalid, others succeed)</li>
+<li class="ordered">Remove only the specific failed token, not all tokens for the user</li>
+</ul><hr class="section-divider">
+<h2>Phase 4 — Notification Handling Across App States</h2>
+
+This is where most push implementations break. The three app states — foreground, background, and quit — each have different behavior on iOS and Android.
+
+<h3>App State Behavior Matrix</h3>
+
+<pre class="code-block"><code>┌────────────────┬───────────────────────┬───────────────────────┬───────────────────────┐
+│ App State      │ Notification Message  │ Data Message (FCM)    │ Silent Push (APNs)    │
+│                │ (FCM notification key)│ (FCM data key only)   │ (content-available)   │
+├────────────────┼───────────────────────┼───────────────────────┼───────────────────────┤
+│ FOREGROUND     │ iOS: delivered to     │ Delivered to app      │ Delivered to app      │
+│ (app visible)  │   app handler, no     │ handler. YOU decide   │ handler. No visible   │
+│                │   system UI           │ whether to show       │ notification.         │
+│                │ Android: system tray  │ local notification.   │                       │
+│                │   by default          │                       │                       │
+├────────────────┼───────────────────────┼───────────────────────┼───────────────────────┤
+│ BACKGROUND     │ System shows notif.   │ iOS: NOT delivered    │ App wakes briefly.    │
+│ (app suspended)│ Tap opens app →       │   (data-only msgs     │ ~30s to sync data.    │
+│                │ handler fires.        │   need notification   │ No visible UI.        │
+│                │                       │   key on iOS!)        │ Throttled to ~2-3/hr. │
+│                │                       │ Android: delivered to │                       │
+│                │                       │   background handler  │                       │
+├────────────────┼───────────────────────┼───────────────────────┼───────────────────────┤
+│ QUIT / KILLED  │ System shows notif.   │ iOS: NOT delivered    │ Same as background.   │
+│ (no process)   │ Tap launches app →    │ Android: delivered to │ May not wake app if   │
+│                │ getInitialNotif()     │   background handler  │ battery optimization  │
+│                │ returns the payload   │   (if headless task   │ is aggressive.        │
+│                │                       │   registered)         │                       │
+├────────────────┼───────────────────────┼───────────────────────┼───────────────────────┤
+│ RECOMMENDATION │ Simple alerts where   │ Android-only or when  │ Background data sync  │
+│                │ you don't need full   │ paired with notif key │ only. Never for       │
+│                │ control               │ for cross-platform    │ visible alerts.       │
+└────────────────┴───────────────────────┴───────────────────────┴───────────────────────┘</code></pre>
+
+<h3>The Cross-Platform Data Message Pattern</h3>
+
+For reliable cross-platform push, send <strong>both</strong> <code class="inline-code">notification</code> and <code class="inline-code">data</code> keys. This ensures iOS shows the notification in background/quit (where data-only is ignored) while giving you full control in foreground:
+
+<pre class="code-block"><code>Backend sends to FCM:
+{
+  &quot;message&quot;: {
+    &quot;token&quot;: &quot;device_token_here&quot;,
+    &quot;notification&quot;: {                    ← OS displays this in background/quit
+      &quot;title&quot;: &quot;Order Shipped&quot;,
+      &quot;body&quot;: &quot;Your order #1234 is on the way&quot;
+    },
+    &quot;data&quot;: {                            ← App reads this for routing/logic
+      &quot;type&quot;: &quot;order_shipped&quot;,
+      &quot;orderId&quot;: &quot;1234&quot;,
+      &quot;trackingUrl&quot;: &quot;https://...&quot;
+    },
+    &quot;android&quot;: {
+      &quot;priority&quot;: &quot;high&quot;,               ← Wake device from Doze
+      &quot;notification&quot;: {
+        &quot;channel_id&quot;: &quot;orders&quot;,          ← Required Android 8+
+        &quot;click_action&quot;: &quot;OPEN_ORDER&quot;
+      }
+    },
+    &quot;apns&quot;: {
+      &quot;headers&quot;: {
+        &quot;apns-priority&quot;: &quot;10&quot;            ← Immediate delivery
+      },
+      &quot;payload&quot;: {
+        &quot;aps&quot;: {
+          &quot;sound&quot;: &quot;default&quot;,
+          &quot;badge&quot;: 1
+        }
+      }
+    }
+  }
+}</code></pre>
+
+<h3>Foreground Handler Pattern</h3>
+
+When the app is in the foreground, you must decide how to display the notification. Options:
+<div class="table-wrap"><table><thead><tr><th>Approach</th><th>UX Feel</th><th>Use When</th><th></th></tr></thead><tbody><tr><td>In-app banner/toast</td><td>Non-intrusive, stays in context</td><td>Chat messages, status updates</td><td></td></tr><tr><td>Local notification</td><td>Appears in system tray like a real push</td><td>Time-sensitive alerts</td><td></td></tr><tr><td>Badge/dot update</td><td>Silent, user notices on next glance</td><td>Background activity, counts</td><td></td></tr><tr><td>Nothing</td><td>No interruption</td><td>Low-priority data sync</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Phase 5 — Rich Notifications</h2>
+
+Modern push notifications support images, action buttons, inline replies, and grouped threads. These dramatically increase engagement when used correctly.
+
+<h3>Rich Notification Capabilities by Platform</h3>
+
+<pre class="code-block"><code>┌──────────────────────┬───────────────────┬───────────────────┐
+│ Feature              │ iOS               │ Android           │
+├──────────────────────┼───────────────────┼───────────────────┤
+│ Large image          │ Notification      │ BigPictureStyle   │
+│                      │ Service Extension │ (built-in)        │
+├──────────────────────┼───────────────────┼───────────────────┤
+│ Action buttons       │ UNNotification    │ addAction() on    │
+│                      │ Category + Action │ NotificationCompat│
+├──────────────────────┼───────────────────┼───────────────────┤
+│ Inline reply         │ UNTextInput       │ RemoteInput       │
+│                      │ NotificationAction│                   │
+├──────────────────────┼───────────────────┼───────────────────┤
+│ Grouped/threaded     │ threadIdentifier  │ setGroup() +      │
+│                      │ (auto-groups)     │ GroupSummary       │
+├──────────────────────┼───────────────────┼───────────────────┤
+│ Progress bar         │ No (custom UI     │ setProgress()     │
+│                      │ via content ext)  │                   │
+├──────────────────────┼───────────────────┼───────────────────┤
+│ Custom layout        │ Notification      │ Custom RemoteViews│
+│                      │ Content Extension │ (setCustomContent)│
+├──────────────────────┼───────────────────┼───────────────────┤
+│ Sound customization  │ Custom .caf file  │ setSound() with   │
+│                      │ in app bundle     │ raw resource      │
+└──────────────────────┴───────────────────┴───────────────────┘</code></pre>
+
+<h3>Notification Channels (Android 8+)</h3>
+
+Android requires notification channels. Create them at app startup — they cannot be modified programmatically after creation (only the user can change channel settings).
+
+<pre class="code-block"><code>Channel design checklist:
+┌──────────────────────────────────────────────────────────┐
+│  Channel ID       │ Name           │ Importance │ Sound  │
+├───────────────────┼────────────────┼────────────┼────────┤
+│  orders           │ Order Updates  │ HIGH       │ Yes    │
+│  messages         │ Messages       │ HIGH       │ Yes    │
+│  promotions       │ Promotions     │ LOW        │ No     │
+│  account          │ Account        │ DEFAULT    │ Yes    │
+│  system           │ System Updates │ MIN        │ No     │
+└───────────────────┴────────────────┴────────────┴────────┘
+
+Rules:
+<ul class="skill-list"><li>Create ALL channels on first app launch</li>
+<li>channel_id is immutable — typo in ID means creating a new channel</li>
+<li>Users can disable individual channels in system settings</li>
+<li>Check channel.importance before sending — user may have muted it</li>
+<li>Delete unused channels with deleteNotificationChannel()</code></pre></li>
+
+</ul><h3>Notification Categories (iOS)</h3>
+
+iOS uses categories to define action buttons and behaviors. Register categories at app startup.
+
+<pre class="code-block"><code>Category registration:
+┌───────────────────────────────────────────────────────────────┐
+│  Category ID    │ Actions                    │ Options        │
+├─────────────────┼────────────────────────────┼────────────────┤
+│  ORDER_UPDATE   │ [Track] [Details]          │ None           │
+│  MESSAGE        │ [Reply (text input)] [Mute]│ .allowAnnounce │
+│  FRIEND_REQUEST │ [Accept] [Decline]         │ None           │
+│  REMINDER       │ [Done] [Snooze]            │ .customDismiss │
+└─────────────────┴────────────────────────────┴────────────────┘
+
+Rules:
+<ul class="skill-list"><li>Register categories in application:didFinishLaunching</li>
+<li>Each action needs an identifier, title, and options (foreground/destructive/authRequired)</li>
+<li>Text input actions use UNTextInputNotificationAction</li>
+<li>Match category identifier in push payload: aps.category = &quot;MESSAGE&quot;</code></pre></li>
+</ul><hr class="section-divider">
+<h2>Phase 6 — Deep Linking from Notifications</h2>
+
+When a user taps a notification, the app must navigate to the relevant screen. This requires a consistent data schema and a reliable routing layer.
+
+<h3>Notification Data Schema</h3>
+
+Define a standard payload structure that all notifications follow:
+
+<pre class="code-block"><code>{
+  &quot;data&quot;: {
+    &quot;type&quot;: &quot;order_shipped&quot;,           ← Notification type (for routing)
+    &quot;screen&quot;: &quot;/orders/detail&quot;,        ← Target screen path
+    &quot;params&quot;: {                        ← Screen parameters
+      &quot;orderId&quot;: &quot;abc-123&quot;
+    },
+    &quot;action&quot;: &quot;view&quot;                   ← What happened (for analytics)
+  }
+}</code></pre>
+
+<h3>Deep Link Router</h3>
+
+<pre class="code-block"><code>Notification Tap
+       │
+       ▼
+┌──────────────┐     Parse data.screen     ┌──────────────────┐
+│  App Opens   │ ─────────────────────────▶│  Route Resolver   │
+│  or Resumes  │                           │                   │
+└──────────────┘                           │  Match screen to  │
+                                           │  navigation route │
+                                           └────────┬──────────┘
+                                                    │
+                                    ┌───────────────┴──────────────┐
+                                    │                              │
+                              App was running              App was quit
+                                    │                              │
+                                    ▼                              ▼
+                           ┌──────────────┐              ┌──────────────────┐
+                           │  navigation  │              │  Wait for nav    │
+                           │  .navigate(  │              │  to be ready,    │
+                           │    screen,   │              │  then navigate.  │
+                           │    params    │              │  Use a pending   │
+                           │  )           │              │  notification    │
+                           └──────────────┘              │  queue.          │
+                                                         └──────────────────┘</code></pre>
+
+<h3>Cold Start Deep Link Problem</h3>
+
+When the app is quit and the user taps a notification, the app launches fresh. Navigation is not ready yet. You must:
+
+<ul class="skill-list"><li class="ordered">Store the notification data in a pending queue (module-level variable, not state)</li>
+<li class="ordered">Wait for navigation to mount and become ready</li>
+<li class="ordered">Process the pending notification and navigate</li>
+<li class="ordered">Clear the queue</li>
+
+</ul>This race condition is the most common deep link bug. If you navigate before the navigator is mounted, the navigation silently fails.
+<hr class="section-divider">
+<h2>Phase 7 — Silent Push & Background Sync</h2>
+
+Silent push wakes the app briefly to sync data without showing any visible notification.
+
+<h3>Platform Constraints</h3>
+<div class="table-wrap"><table><thead><tr><th>Constraint</th><th>iOS</th><th>Android</th><th></th></tr></thead><tbody><tr><td>Rate limit</td><td>~2-3 per hour (Apple decides)</td><td>No hard limit (but Doze)</td><td></td></tr><tr><td>Execution time</td><td>~30 seconds</td><td>~10 minutes (WorkManager)</td><td></td></tr><tr><td>Requires</td><td>content-available: 1</td><td>priority: high</td><td></td></tr><tr><td>Background fetch enabled</td><td>Yes (entitlement)</td><td>N/A</td><td></td></tr><tr><td>Killed by OS if over budget</td><td>Yes</td><td>OEM-dependent</td><td></td></tr><tr><td>Works with app force-quit by user</td><td>No (iOS blocks it)</td><td>Yes (usually)</td><td></td></tr></tbody></table></div>
+<h3>Silent Push Payload (FCM via APNs)</h3>
+
+<pre class="code-block"><code>{
+  &quot;message&quot;: {
+    &quot;token&quot;: &quot;...&quot;,
+    &quot;data&quot;: {
+      &quot;type&quot;: &quot;sync&quot;,
+      &quot;resource&quot;: &quot;conversations&quot;,
+      &quot;updatedSince&quot;: &quot;2026-04-01T00:00:00Z&quot;
+    },
+    &quot;apns&quot;: {
+      &quot;headers&quot;: {
+        &quot;apns-push-type&quot;: &quot;background&quot;,
+        &quot;apns-priority&quot;: &quot;5&quot;                ← Must be 5 for silent push
+      },
+      &quot;payload&quot;: {
+        &quot;aps&quot;: {
+          &quot;content-available&quot;: 1             ← Triggers background handler
+        }
+      }
+    },
+    &quot;android&quot;: {
+      &quot;priority&quot;: &quot;normal&quot;                   ← Use normal for non-urgent sync
+    }
+  }
+}</code></pre>
+
+<h3>Important: iOS will NOT deliver silent push if the user force-quits the app (swipes up in app switcher). This is by design and cannot be worked around. Only a visible notification can relaunch a force-quit app.</h3>
+<hr class="section-divider">
+<h2>Phase 8 — Testing Push Notifications</h2>
+
+Push is notoriously difficult to test because it requires real devices, real certificates, and real network paths.
+
+<h3>Testing Checklist</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│               PUSH NOTIFICATION TEST MATRIX                  │
+│                                                              │
+│  For each notification type, test:                           │
+│                                                              │
+│  [ ] iOS Foreground — app open, screen visible               │
+│  [ ] iOS Background — app in app switcher                    │
+│  [ ] iOS Killed — app not in memory                          │
+│  [ ] iOS Locked — device locked, screen off                  │
+│  [ ] Android Foreground — app open, screen visible           │
+│  [ ] Android Background — app in recents                     │
+│  [ ] Android Killed — app force-stopped                      │
+│  [ ] Android Doze — device idle for 30+ minutes              │
+│  [ ] Notification tap → correct screen opens                 │
+│  [ ] Action button tap → correct handler fires               │
+│  [ ] Multiple notifications → proper grouping/threading      │
+│  [ ] Permission denied → graceful fallback (no crash)        │
+│  [ ] Token refresh → server receives new token               │
+│  [ ] Stale token → server removes on error response          │
+│  [ ] App update → token still valid or re-registered         │
+│  [ ] Multi-device → all devices receive notification         │
+│  [ ] Silent push → data sync completes without visible UI    │
+│  [ ] Rich notification → image loads, actions work           │
+│  [ ] Deep link → correct screen with correct params          │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Testing Tools</h3>
+<div class="table-wrap"><table><thead><tr><th>Tool</th><th>What It Does</th><th></th></tr></thead><tbody><tr><td>FCM Console (Firebase)</td><td>Send test messages to specific tokens</td><td></td></tr><tr><td><code class="inline-code">xcrun simctl push</code> (iOS Sim)</td><td>Push APNs payload to iOS Simulator (Xcode 11.4+)</td><td></td></tr><tr><td><code class="inline-code">adb shell am broadcast</code> (Android)</td><td>Trigger push handler locally</td><td></td></tr><tr><td>Pusher (macOS app)</td><td>Send raw APNs payloads to sandbox/production</td><td></td></tr><tr><td>NWPusher (open source)</td><td>Test APNs with .p12 certificates</td><td></td></tr><tr><td>FCM REST API</td><td>Curl-based testing against FCM HTTP v1 API</td><td></td></tr><tr><td>Charles/Proxyman</td><td>Inspect token registration HTTP calls</td><td></td></tr></tbody></table></div>
+<h3>Debugging — Common Failures</h3>
+
+<pre class="code-block"><code>Symptom: Not receiving push at all
+┌──────────────────────────────────────────────────────────┐
+│  Check → Is the token registered on the server?          │
+│  Check → Is the token from the correct environment?      │
+│          (sandbox token to production APNs = silent fail) │
+│  Check → Is the APNs key uploaded to Firebase?           │
+│  Check → Is the bundle ID correct in Firebase project?   │
+│  Check → Did the user deny notification permission?      │
+│  Check → Is the device connected to the internet?        │
+│  Check → Android: is the app battery-optimized (killed)? │
+└──────────────────────────────────────────────────────────┘
+
+Symptom: Push received but notification not shown
+┌──────────────────────────────────────────────────────────┐
+│  Check → Are you sending data-only message on iOS?       │
+│          (iOS does not display data-only in background)   │
+│  Check → Is the notification channel disabled (Android)?  │
+│  Check → Is Do Not Disturb active on the device?         │
+│  Check → Is foreground handler showing the notification? │
+│  Check → Is the payload well-formed JSON?                │
+└──────────────────────────────────────────────────────────┘
+
+Symptom: Duplicate notifications
+┌──────────────────────────────────────────────────────────┐
+│  Check → Are you sending both notification + data msg    │
+│          AND also showing a local notification in the     │
+│          foreground handler? (double display)             │
+│  Check → Are multiple tokens registered for same device? │
+│  Check → Is the backend retrying sends without idempotency│
+│          checks?                                          │
+└──────────────────────────────────────────────────────────┘
+
+Symptom: Deep link opens wrong screen or does nothing
+┌──────────────────────────────────────────────────────────┐
+│  Check → Is navigation ready when processing the tap?    │
+│  Check → Is getInitialNotification() called only once?   │
+│          (it should be — not on every re-render)          │
+│  Check → Is the notification data structure consistent?  │
+│  Check → Are you handling the cold-start race condition? │
+└──────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 9 — Production Checklist</h2>
+
+Before shipping push notifications to production, verify every item:
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│              PRODUCTION READINESS CHECKLIST                   │
+│                                                              │
+│  Infrastructure                                              │
+│  [ ] APNs key (.p8) uploaded to FCM — NOT certificate        │
+│  [ ] google-services.json matches production Firebase project│
+│  [ ] FCM HTTP v1 API enabled in Google Cloud Console         │
+│  [ ] Backend uses service account with messaging.send scope  │
+│  [ ] Token storage table has proper indexes                  │
+│                                                              │
+│  Client                                                      │
+│  [ ] Permission requested at value moment, not cold start    │
+│  [ ] Pre-permission dialog implemented                       │
+│  [ ] Token registered on every app launch                    │
+│  [ ] Token refresh listener active                           │
+│  [ ] All three app states handled (foreground/bg/quit)       │
+│  [ ] Deep linking works from all three states                │
+│  [ ] Cold-start deep link race condition handled             │
+│  [ ] Notification channels created (Android 8+)              │
+│  [ ] Notification categories registered (iOS)                │
+│  [ ] Badge count managed (incremented/cleared)               │
+│                                                              │
+│  Backend                                                     │
+│  [ ] Stale token cleanup on FCM error response               │
+│  [ ] Multi-device send (all tokens per user)                 │
+│  [ ] Partial failure handling (one token bad, others fine)    │
+│  [ ] Rate limiting on notification sends                     │
+│  [ ] Notification preferences respected (user opt-out)       │
+│  [ ] Payload size under 4KB (FCM limit)                      │
+│  [ ] Idempotency on sends (prevent duplicates on retry)      │
+│                                                              │
+│  Monitoring                                                  │
+│  [ ] Track delivery rate (sent vs received)                  │
+│  [ ] Track open rate (tap vs delivered)                       │
+│  [ ] Alert on delivery rate drop below threshold             │
+│  [ ] Log FCM error responses for debugging                   │
+│  [ ] Monitor token registration volume for anomalies         │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Tips for Best Results</h2>
+
+<ul class="skill-list"><li class="ordered"><strong>Start with data messages + local notifications</strong> for full control across all app states, rather than relying on FCM notification messages that behave differently per state</li>
+<li class="ordered"><strong>Always build the pre-permission dialog first</strong> — it is easier to ask for permission later than to recover from a denial</li>
+<li class="ordered"><strong>Test on real devices from day one</strong> — simulators do not support push on iOS (use <code class="inline-code">xcrun simctl push</code> for basic testing, but real APNs requires hardware)</li>
+<li class="ordered"><strong>Log every token registration and refresh on the server</strong> — when debugging delivery failures, the token trail is your best forensic tool</li>
+<li class="ordered"><strong>Build a notification preferences screen</strong> early — let users control which types of notifications they receive, mapped to notification channels (Android) and topic subscriptions (FCM)</li>
+<li class="ordered"><strong>Handle the Android OEM problem</strong> — Xiaomi, Huawei, Samsung, and Oppo all have aggressive battery optimization that kills background processes. Direct users to dontkillmyapp.com instructions for their device</li>
+<li class="ordered"><strong>Keep payloads small</strong> — FCM limit is 4KB. Put the minimum data needed for routing and display in the payload. Fetch full details from the API when the user taps</li>
+<li class="ordered"><strong>Batch server-side sends</strong> — use FCM <code class="inline-code">sendEach()</code> or <code class="inline-code">sendMulticast()</code> instead of individual sends when targeting multiple tokens. Reduces HTTP overhead and respects rate limits</li>
+<li class="ordered"><strong>Version your notification payload schema</strong> — add a <code class="inline-code">version</code> field so old app versions can ignore payload formats they do not understand</li>
+<li class="ordered"><strong>Never send push notifications from the client</strong> — all sends go through your backend, which validates permissions, preferences, and rate limits before calling FCM</li></ul>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="platform-adapt.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">Platform Adaptation — One Codebase, Two Native Experiences</span></span></a>
+    <div></div>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    80 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

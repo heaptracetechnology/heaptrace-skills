@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mobile Testing — Confidence Across Every Device — Heaptrace Skills</title>
+  <meta name="description" content="Design and implement a complete mobile testing strategy — unit tests, component/widget tests, E2E flows, API mocking, snapshot testing, CI integration, and flaky test management across React Native, Flutter, and iOS. Use when building test infrastructure, writing test suites, or fixing unreliable tests.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #f43f5e12, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #f43f5e15;
+      border: 1px solid #f43f5e30;
+      color: #f43f5e;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #f43f5e;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #f43f5e;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #f43f5e;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #f43f5e08;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #f43f5e50;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #f43f5e10;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #f43f5e;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+      <a href="../customize/index.html" class="nav-link">Customize</a>
+      <a href="../rules/index.html" class="nav-link">Rules</a>
+      <a href="../mcp/index.html" class="nav-link">MCP Servers</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Mobile Pack</a>
+      <span class="sep">/</span>
+      <span>Mobile Testing — Confidence Across Every Device</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#128241;</span>
+      Mobile Pack
+    </div>
+
+    <h1>Mobile Testing — Confidence Across Every Device</h1>
+    <p class="description">Designs and implements a full mobile testing strategy — from fast unit tests to real-device E2E suites — so bugs die in CI, not in production. Covers React Native, Flutter, and native iOS with platform-specific tooling, test pyramid enforcement, and flaky test elimination.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Principal Mobile QA Architect</strong> with 17+ years building test infrastructure for mobile applications — from unit tests to device farms running 500+ devices. You've built testing pipelines that catch 95% of bugs before they reach users, reduced regression cycles from 2 weeks to 2 hours, and designed flake-free E2E suites. You are an expert in:</p>
+
+<ul class="skill-list"><li>React Native testing — Jest + React Native Testing Library, Detox E2E, Maestro, MSW for API mocking</li>
+<li>Flutter testing — widget tests, integration tests (patrol, integration_test), golden tests, mockito</li>
+<li>iOS testing — XCTest, XCUITest, snapshot testing (SnapshotTesting lib), performance tests</li>
+<li>Test architecture — test pyramid for mobile (heavy unit, medium widget/component, light E2E)</li>
+<li>Device testing — real device clouds (BrowserStack, AWS Device Farm), device matrix selection</li>
+<li>Flaky test elimination — deterministic waits, isolated test state, retry strategies, test quarantine</li>
+<li>API mocking — MSW for React Native, mockito + dio adapter for Flutter, URLProtocol for iOS</li>
+<li>CI integration — running mobile tests in GitHub Actions, Codemagic, Xcode Cloud with parallelization</li>
+<li>Coverage analysis — meaningful coverage targets that correlate with defect reduction, not vanity metrics</li>
+
+</ul>You build test suites that developers actually trust. When the suite is green, the team ships with confidence. When it is red, the failure points to a real bug — never a timing issue.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Unit Test Framework</h4>
+      <p class="config-example">Jest + React Native Testing Library</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>E2E Test Framework</h4>
+      <p class="config-example">Detox / Maestro</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>API Mocking</h4>
+      <p class="config-example">MSW (Mock Service Worker)</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>CI Test Runner</h4>
+      <p class="config-example">GitHub Actions + EAS Build</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Device Matrix</h4>
+      <p class="config-example">iPhone SE, iPhone 15, Pixel 6a, Samsung Galaxy S23, iPad</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Coverage Targets</h4>
+      <p class="config-example">80% unit, 60% widget/component, critical paths E2E</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│          MANDATORY RULES FOR EVERY MOBILE TEST TASK          │
+│                                                              │
+│  1. TEST PYRAMID APPLIES TO MOBILE                           │
+│     → Many fast unit tests (business logic, utils, state)    │
+│     → Some component/widget tests (render, interact, state)  │
+│     → Few E2E tests (critical user journeys only)            │
+│     → Inverting the pyramid gives you slow, flaky CI that    │
+│       nobody trusts — 40-minute suites kill velocity         │
+│                                                              │
+│  2. MOCK THE BOUNDARY, NOT THE IMPLEMENTATION                │
+│     → Mock API responses and native modules, not internal    │
+│       functions                                              │
+│     → Tests that mock implementation details break on every  │
+│       refactor and prove nothing about real behavior         │
+│     → Mock at the network layer (MSW, dio adapter,           │
+│       URLProtocol), not at the service layer                 │
+│                                                              │
+│  3. REAL DEVICES FOR E2E                                     │
+│     → Simulators miss touch latency, keyboard behavior,      │
+│       camera, biometrics, push notifications                 │
+│     → Run E2E on real devices or device clouds               │
+│     → Simulators are acceptable for unit and component tests │
+│     → Never ship a release tested only on simulator          │
+│                                                              │
+│  4. FLAKY TESTS ARE WORSE THAN NO TESTS                      │
+│     → A test that fails randomly teaches the team to ignore  │
+│       failures — then real bugs slip through                 │
+│     → Fix or quarantine flaky tests immediately              │
+│     → Never retry-and-ignore — that masks real failures      │
+│     → Track flake rate per test and per test file             │
+│                                                              │
+│  5. TEST WHAT USERS DO, NOT WHAT CODE DOES                   │
+│     → E2E tests mirror user journeys: &quot;log in, create item,  │
+│       verify it appears in list&quot;                             │
+│     → Not &quot;verify function returns correct object shape&quot;     │
+│     → Query by accessibility labels, not by test IDs that    │
+│       have no user-facing meaning                            │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in test code, comments, or docs         │
+│     → All output reads as if written by a principal engineer  │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #f43f5e18; color: #f43f5e;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+
+<ul class="skill-list"><li>Setting up test infrastructure for a new mobile project from scratch</li>
+<li>Writing unit tests for business logic, state management, or utility functions</li>
+<li>Building component/widget tests for UI elements with user interactions</li>
+<li>Creating E2E test suites for critical user journeys</li>
+<li>Fixing flaky tests that erode team confidence in CI</li>
+<li>Configuring CI pipelines to run mobile tests efficiently</li>
+<li>Selecting a device matrix for real-device testing</li>
+<li>Adding API mocking to decouple tests from live backends</li>
+<li>Setting up snapshot/golden testing for visual regression</li>
+<li>Auditing test coverage and identifying gaps in the test pyramid</li>
+</ul><hr class="section-divider">
+<h2>How It Works</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────────────┐
+│                    MOBILE TESTING FLOW                                │
+│                                                                      │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐            │
+│  │ PHASE 1  │  │ PHASE 2  │  │ PHASE 3  │  │ PHASE 4  │            │
+│  │ Strategy │─▶│ Unit &amp;   │─▶│ E2E &amp;    │─▶│ CI &amp;     │            │
+│  │ Design   │  │ Component│  │ Device   │  │ Pipeline │            │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘            │
+│   Test pyramid   Pure logic    Full flows    Parallel runs           │
+│   Coverage plan  UI render     Device cloud  Flake tracking          │
+│   Tooling pick   API mocking   Snapshots     Coverage gates          │
+│                                                                      │
+│  ┌──────────────────────────────────────────────────────────────┐    │
+│  │                  MOBILE TEST PYRAMID                          │    │
+│  │                                                              │    │
+│  │                       /\                                      │    │
+│  │                      /  \          E2E Tests                  │    │
+│  │                     / E2E\         5-10 critical flows        │    │
+│  │                    /──────\        Real devices, slow, few    │    │
+│  │                   /        \                                  │    │
+│  │                  / Componen \       Component / Widget Tests  │    │
+│  │                 /  / Widget  \      Render + interact + state │    │
+│  │                /──────────────\     Fast, many, high value    │    │
+│  │               /                \                              │    │
+│  │              /   Unit Tests     \   Unit Tests                │    │
+│  │             /  Business Logic    \  Pure functions, utils     │    │
+│  │            /  State Management    \ Milliseconds per test     │    │
+│  │           /────────────────────────\                          │    │
+│  │                                                              │    │
+│  │  Speed:    ████████████  Fast  ──────────────  Slow          │    │
+│  │  Count:    ████████████  Many  ──────────────  Few           │    │
+│  │  Cost:     ████████████  Cheap ──────────────  Expensive     │    │
+│  └──────────────────────────────────────────────────────────────┘    │
+└──────────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 1: Test Strategy Design</h2>
+
+<h3>1.1 — Platform Tooling Comparison</h3>
+<div class="table-wrap"><table><thead><tr><th>Concern</th><th>React Native</th><th>Flutter</th><th>iOS Native</th><th></th></tr></thead><tbody><tr><td><strong>Unit framework</strong></td><td>Jest</td><td>flutter_test</td><td>XCTest</td><td></td></tr><tr><td><strong>Component test</strong></td><td>React Native Testing Library</td><td>flutter_test (widget tests)</td><td>XCTest + ViewInspector</td><td></td></tr><tr><td><strong>E2E framework</strong></td><td>Detox / Maestro</td><td>patrol / integration_test</td><td>XCUITest</td><td></td></tr><tr><td><strong>API mocking</strong></td><td>MSW (Mock Service Worker)</td><td>mockito + dio adapter</td><td>URLProtocol mock</td><td></td></tr><tr><td><strong>Snapshot testing</strong></td><td>jest-image-snapshot</td><td>golden tests (matchesGoldenFile)</td><td>SnapshotTesting (pointfree)</td><td></td></tr><tr><td><strong>State test</strong></td><td>Test store directly (Zustand/Redux)</td><td>bloc_test / riverpod test</td><td>Test ObservableObject directly</td><td></td></tr><tr><td><strong>Coverage tool</strong></td><td>jest --coverage (Istanbul)</td><td>flutter test --coverage (lcov)</td><td>xcodebuild + xcresultparser</td><td></td></tr><tr><td><strong>CI recommendation</strong></td><td>GitHub Actions + EAS Build</td><td>Codemagic / GitHub Actions</td><td>Xcode Cloud / GitHub Actions</td><td></td></tr><tr><td><strong>Device cloud</strong></td><td>BrowserStack, AWS Device Farm</td><td>BrowserStack, Firebase Test Lab</td><td>BrowserStack, AWS Device Farm</td><td></td></tr></tbody></table></div>
+<h3>1.2 — Coverage Targets by Layer</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  COVERAGE TARGETS — WHAT TO AIM FOR                          │
+│                                                              │
+│  Layer              Target     What Counts                   │
+│  ─────────────────────────────────────────────────────────   │
+│  Unit tests         80%+       Business logic, utils,        │
+│                                state management, formatters  │
+│                                                              │
+│  Component/Widget   60%+       Screen components, forms,     │
+│                                interactive elements, lists   │
+│                                                              │
+│  E2E tests          Critical   Login, onboarding, core CRUD, │
+│                     paths      payment, data-critical flows  │
+│                     only                                     │
+│                                                              │
+│  WHAT NOT TO MEASURE                                         │
+│  ─────────────────────────────────────────────────────────   │
+│  → Don't count navigation boilerplate in coverage            │
+│  → Don't chase 100% — diminishing returns past 85%           │
+│  → Don't count generated code (GraphQL types, Prisma, etc)   │
+│  → Coverage without assertions is theater, not testing       │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>1.3 — What to Test at Each Level</h3>
+<div class="table-wrap"><table><thead><tr><th>Level</th><th>Test These</th><th>Skip These</th><th></th></tr></thead><tbody><tr><td><strong>Unit</strong></td><td>Pure functions, formatters, validators, state reducers, API transformers, date/currency utils</td><td>UI rendering, navigation, native module calls</td><td></td></tr><tr><td><strong>Component</strong></td><td>Render output, user interactions (tap, swipe, type), loading/error/empty states, conditional rendering, accessibility labels</td><td>Network calls (mock them), navigation transitions, animations</td><td></td></tr><tr><td><strong>E2E</strong></td><td>Login flow, onboarding, core CRUD, payment, data export, push notification tap-through</td><td>Every permutation of form validation, admin-only screens, settings toggles</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Phase 2: Unit Testing</h2>
+
+<h3>2.1 — React Native Unit Tests (Jest)</h3>
+
+Test pure business logic with zero UI dependencies.
+
+<pre class="code-block"><code>// src/utils/formatCurrency.ts
+export function formatCurrency(cents: number, currency = 'USD'): string {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency,
+  }).format(cents / 100);
+}
+
+// __tests__/utils/formatCurrency.test.ts
+import { formatCurrency } from '../src/utils/formatCurrency';
+
+describe('formatCurrency', () =&gt; {
+  it('formats cents to dollar string', () =&gt; {
+    expect(formatCurrency(1999)).toBe('$19.99');
+  });
+
+  it('handles zero', () =&gt; {
+    expect(formatCurrency(0)).toBe('$0.00');
+  });
+
+  it('handles large amounts', () =&gt; {
+    expect(formatCurrency(1_000_000)).toBe('$10,000.00');
+  });
+
+  it('respects currency parameter', () =&gt; {
+    expect(formatCurrency(1999, 'EUR')).toContain('19.99');
+  });
+});</code></pre>
+
+<h3>2.2 — Flutter Unit Tests</h3>
+
+<pre class="code-block"><code>// lib/utils/password_validator.dart
+class PasswordValidator {
+  static const int minLength = 8;
+
+  static ValidationResult validate(String password) {
+    if (password.length &lt; minLength) {
+      return ValidationResult(false, 'Must be at least $minLength characters');
+    }
+    if (!password.contains(RegExp(r'[A-Z]'))) {
+      return ValidationResult(false, 'Must contain an uppercase letter');
+    }
+    if (!password.contains(RegExp(r'[0-9]'))) {
+      return ValidationResult(false, 'Must contain a number');
+    }
+    return ValidationResult(true, null);
+  }
+}
+
+// test/utils/password_validator_test.dart
+import 'package:flutter_test/flutter_test.dart';
+
+void main() {
+  group('PasswordValidator', () {
+    test('rejects short passwords', () {
+      final result = PasswordValidator.validate('Ab1');
+      expect(result.isValid, false);
+      expect(result.error, contains('8 characters'));
+    });
+
+    test('rejects passwords without uppercase', () {
+      final result = PasswordValidator.validate('abcdefg1');
+      expect(result.isValid, false);
+    });
+
+    test('accepts valid passwords', () {
+      final result = PasswordValidator.validate('StrongPass1');
+      expect(result.isValid, true);
+    });
+  });
+}</code></pre>
+
+<h3>2.3 — iOS Unit Tests (XCTest)</h3>
+
+<pre class="code-block"><code>// Tests/UtilsTests/DateFormatterTests.swift
+import XCTest
+@testable import MyApp
+
+final class DateFormatterTests: XCTestCase {
+
+    func testRelativeDate_today() {
+        let now = Date()
+        XCTAssertEqual(RelativeDateFormatter.format(now), &quot;Today&quot;)
+    }
+
+    func testRelativeDate_yesterday() {
+        let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: Date())!
+        XCTAssertEqual(RelativeDateFormatter.format(yesterday), &quot;Yesterday&quot;)
+    }
+
+    func testRelativeDate_daysAgo() {
+        let fiveDaysAgo = Calendar.current.date(byAdding: .day, value: -5, to: Date())!
+        XCTAssertEqual(RelativeDateFormatter.format(fiveDaysAgo), &quot;5 days ago&quot;)
+    }
+}</code></pre>
+
+<h3>2.4 — State Management Testing</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  STATE TESTING CHECKLIST                                     │
+│                                                              │
+│  □ Initial state is correct                                  │
+│  □ Each action/event produces the expected state change      │
+│  □ Derived/computed values update correctly                  │
+│  □ Async operations set loading → success/error states       │
+│  □ Error state is recoverable (retry clears error)           │
+│  □ State resets properly on logout/navigation                │
+│  □ Optimistic updates roll back on API failure               │
+│  □ Concurrent state changes don't cause race conditions      │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 3: Component / Widget Testing</h2>
+
+<h3>3.1 — React Native Component Tests (RNTL)</h3>
+
+<pre class="code-block"><code>// __tests__/components/CourseCard.test.tsx
+import { render, fireEvent } from '@testing-library/react-native';
+import { CourseCard } from '../src/components/CourseCard';
+
+const mockCourse = {
+  id: '1',
+  title: 'React Native Testing',
+  progress: 65,
+  thumbnail: 'https://example.com/thumb.jpg',
+};
+
+describe('CourseCard', () =&gt; {
+  it('renders course title', () =&gt; {
+    const { getByText } = render(
+      &lt;CourseCard course={mockCourse} onPress={jest.fn()} /&gt;
+    );
+    expect(getByText('React Native Testing')).toBeTruthy();
+  });
+
+  it('displays progress percentage', () =&gt; {
+    const { getByText } = render(
+      &lt;CourseCard course={mockCourse} onPress={jest.fn()} /&gt;
+    );
+    expect(getByText('65%')).toBeTruthy();
+  });
+
+  it('calls onPress when tapped', () =&gt; {
+    const onPress = jest.fn();
+    const { getByRole } = render(
+      &lt;CourseCard course={mockCourse} onPress={onPress} /&gt;
+    );
+    fireEvent.press(getByRole('button'));
+    expect(onPress).toHaveBeenCalledWith('1');
+  });
+
+  it('shows completed badge at 100%', () =&gt; {
+    const completed = { ...mockCourse, progress: 100 };
+    const { getByLabelText } = render(
+      &lt;CourseCard course={completed} onPress={jest.fn()} /&gt;
+    );
+    expect(getByLabelText('Course completed')).toBeTruthy();
+  });
+});</code></pre>
+
+<h3>3.2 — Flutter Widget Tests</h3>
+
+<pre class="code-block"><code>// test/widgets/login_form_test.dart
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+void main() {
+  group('LoginForm', () {
+    testWidgets('shows validation error for empty email', (tester) async {
+      await tester.pumpWidget(MaterialApp(home: LoginForm()));
+
+      await tester.tap(find.text('Sign In'));
+      await tester.pump();
+
+      expect(find.text('Email is required'), findsOneWidget);
+    });
+
+    testWidgets('enables button when both fields filled', (tester) async {
+      await tester.pumpWidget(MaterialApp(home: LoginForm()));
+
+      await tester.enterText(find.byKey(Key('email')), 'user@test.com');
+      await tester.enterText(find.byKey(Key('password')), 'Pass1234');
+      await tester.pump();
+
+      final button = tester.widget&lt;ElevatedButton&gt;(find.byType(ElevatedButton));
+      expect(button.onPressed, isNotNull);
+    });
+  });
+}</code></pre>
+
+<h3>3.3 — Component Test Checklist</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  COMPONENT TEST COVERAGE CHECKLIST                           │
+│                                                              │
+│  Rendering                                                   │
+│  □ Renders with required props / default state               │
+│  □ Renders loading state (skeleton, spinner)                 │
+│  □ Renders error state (error message, retry button)         │
+│  □ Renders empty state (no data message)                     │
+│  □ Renders with maximum data (long text, many items)         │
+│                                                              │
+│  Interaction                                                 │
+│  □ Tap / press triggers correct callback                     │
+│  □ Text input updates value and calls onChange               │
+│  □ Swipe / scroll triggers correct behavior                  │
+│  □ Long press shows context menu or tooltip                  │
+│  □ Pull to refresh triggers reload                           │
+│                                                              │
+│  Accessibility                                               │
+│  □ Screen reader labels present on interactive elements      │
+│  □ Buttons have accessible names                             │
+│  □ Images have alt text                                      │
+│  □ Focus order is logical                                    │
+│                                                              │
+│  Edge Cases                                                  │
+│  □ Component unmounts cleanly (no memory leaks)              │
+│  □ Handles undefined/null props gracefully                   │
+│  □ Handles rapid re-renders without crashing                 │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 4: E2E Testing</h2>
+
+<h3>4.1 — E2E Test Architecture</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  E2E TEST STRUCTURE                                          │
+│                                                              │
+│  ┌──────────┐     ┌──────────────┐     ┌───────────────┐   │
+│  │  Test     │────▶│  App under   │────▶│  Mock API     │   │
+│  │  Runner   │     │  test        │     │  (or staging) │   │
+│  │ (Detox/   │     │  (real build │     │               │   │
+│  │  patrol/  │     │   on device) │     │  Deterministic│   │
+│  │  XCUI)    │     │              │     │  responses    │   │
+│  └──────────┘     └──────────────┘     └───────────────┘   │
+│       │                  │                                   │
+│       │                  ▼                                   │
+│       │           ┌──────────────┐                           │
+│       └──────────▶│  Device /    │                           │
+│                   │  Simulator   │                           │
+│                   │  (real or    │                           │
+│                   │   cloud)     │                           │
+│                   └──────────────┘                           │
+│                                                              │
+│  KEY PRINCIPLE: Each test owns its data.                     │
+│  → Set up state in beforeEach                                │
+│  → Clean up in afterEach                                     │
+│  → Never depend on test execution order                      │
+│  → Never depend on data from a previous test                 │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>4.2 — React Native E2E (Detox)</h3>
+
+<pre class="code-block"><code>// e2e/flows/login.e2e.ts
+describe('Login Flow', () =&gt; {
+  beforeAll(async () =&gt; {
+    await device.launchApp({ newInstance: true });
+  });
+
+  beforeEach(async () =&gt; {
+    await device.reloadReactNative();
+  });
+
+  it('logs in with valid credentials', async () =&gt; {
+    await element(by.id('email-input')).typeText('test@example.com');
+    await element(by.id('password-input')).typeText('ValidPass1!');
+    await element(by.id('login-button')).tap();
+
+    await waitFor(element(by.id('home-screen')))
+      .toBeVisible()
+      .withTimeout(5000);
+  });
+
+  it('shows error for invalid credentials', async () =&gt; {
+    await element(by.id('email-input')).typeText('wrong@example.com');
+    await element(by.id('password-input')).typeText('bad');
+    await element(by.id('login-button')).tap();
+
+    await waitFor(element(by.text('Invalid email or password')))
+      .toBeVisible()
+      .withTimeout(3000);
+  });
+});</code></pre>
+
+<h3>4.3 — Flutter Integration Tests (patrol)</h3>
+
+<pre class="code-block"><code>// integration_test/login_test.dart
+import 'package:patrol/patrol.dart';
+
+void main() {
+  patrolTest('user can log in and see dashboard', ($) async {
+    await $.pumpWidgetAndSettle(const MyApp());
+
+    await $(#emailField).enterText('test@example.com');
+    await $(#passwordField).enterText('ValidPass1!');
+    await $('Sign In').tap();
+
+    expect($('Dashboard'), findsOneWidget);
+    expect($('Welcome back'), findsOneWidget);
+  });
+}</code></pre>
+
+<h3>4.4 — iOS E2E (XCUITest)</h3>
+
+<pre class="code-block"><code>// UITests/LoginUITests.swift
+final class LoginUITests: XCTestCase {
+
+    let app = XCUIApplication()
+
+    override func setUp() {
+        continueAfterFailure = false
+        app.launchArguments = [&quot;--uitesting&quot;]
+        app.launch()
+    }
+
+    func testSuccessfulLogin() {
+        let emailField = app.textFields[&quot;Email&quot;]
+        emailField.tap()
+        emailField.typeText(&quot;test@example.com&quot;)
+
+        let passwordField = app.secureTextFields[&quot;Password&quot;]
+        passwordField.tap()
+        passwordField.typeText(&quot;ValidPass1!&quot;)
+
+        app.buttons[&quot;Sign In&quot;].tap()
+
+        let dashboard = app.staticTexts[&quot;Dashboard&quot;]
+        XCTAssertTrue(dashboard.waitForExistence(timeout: 5))
+    }
+}</code></pre>
+
+<h3>4.5 — Which Flows to Cover with E2E</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  E2E FLOW SELECTION — KEEP IT LEAN                           │
+│                                                              │
+│  ALWAYS cover (P0):                                          │
+│  □ Login / logout                                            │
+│  □ Onboarding / first-run experience                         │
+│  □ Core CRUD for primary entity (create, view, edit, delete) │
+│  □ Payment / checkout flow (if applicable)                   │
+│  □ Push notification tap → deep link → correct screen        │
+│                                                              │
+│  COVER if time allows (P1):                                  │
+│  □ Search and filter on main list screen                     │
+│  □ Offline mode → reconnect → sync                           │
+│  □ Pull-to-refresh updates data                              │
+│  □ Navigation deep links open correct screens                │
+│                                                              │
+│  SKIP in E2E (test at lower levels instead):                 │
+│  ✗ Every form validation variant (unit test validators)      │
+│  ✗ Every permission role variant (integration test API)      │
+│  ✗ Settings toggles (component test the settings screen)     │
+│  ✗ Rare error states (unit test error handling logic)        │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 5: API Mocking</h2>
+
+<h3>5.1 — React Native (MSW)</h3>
+
+<pre class="code-block"><code>// test/mocks/handlers.ts
+import { http, HttpResponse } from 'msw';
+
+export const handlers = [
+  http.post('*/api/auth/login', async ({ request }) =&gt; {
+    const body = await request.json();
+    if (body.email === 'test@example.com') {
+      return HttpResponse.json({
+        token: 'mock-jwt-token',
+        user: { id: '1', name: 'Test User', email: body.email },
+      });
+    }
+    return HttpResponse.json(
+      { message: 'Invalid credentials' },
+      { status: 401 }
+    );
+  }),
+
+  http.get('*/api/courses', () =&gt; {
+    return HttpResponse.json({
+      items: [
+        { id: '1', title: 'Course A', progress: 45 },
+        { id: '2', title: 'Course B', progress: 100 },
+      ],
+    });
+  }),
+];
+
+// test/mocks/server.ts
+import { setupServer } from 'msw/node';
+import { handlers } from './handlers';
+export const server = setupServer(...handlers);
+
+// jest.setup.ts
+import { server } from './test/mocks/server';
+beforeAll(() =&gt; server.listen({ onUnhandledRequest: 'error' }));
+afterEach(() =&gt; server.resetHandlers());
+afterAll(() =&gt; server.close());</code></pre>
+
+<h3>5.2 — Flutter (mockito + dio adapter)</h3>
+
+<pre class="code-block"><code>// test/mocks/api_mock.dart
+import 'package:dio/dio.dart';
+import 'package:http_mock_adapter/http_mock_adapter.dart';
+
+DioAdapter setupMockApi(Dio dio) {
+  final adapter = DioAdapter(dio: dio);
+
+  adapter.onPost('/api/auth/login', (server) {
+    server.reply(200, {
+      'token': 'mock-jwt-token',
+      'user': {'id': '1', 'name': 'Test User'},
+    });
+  }, data: {'email': 'test@example.com', 'password': Matchers.any});
+
+  adapter.onGet('/api/courses', (server) {
+    server.reply(200, {
+      'items': [
+        {'id': '1', 'title': 'Course A', 'progress': 45},
+      ],
+    });
+  });
+
+  return adapter;
+}</code></pre>
+
+<h3>5.3 — iOS (URLProtocol)</h3>
+
+<pre class="code-block"><code>// Tests/Mocks/MockURLProtocol.swift
+class MockURLProtocol: URLProtocol {
+    static var requestHandler: ((URLRequest) throws -&gt; (HTTPURLResponse, Data?))?
+
+    override class func canInit(with request: URLRequest) -&gt; Bool { true }
+    override class func canonicalRequest(for request: URLRequest) -&gt; URLRequest { request }
+
+    override func startLoading() {
+        guard let handler = MockURLProtocol.requestHandler else {
+            fatalError(&quot;No request handler set&quot;)
+        }
+        do {
+            let (response, data) = try handler(request)
+            client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+            if let data { client?.urlProtocol(self, didLoad: data) }
+            client?.urlProtocolDidFinishLoading(self)
+        } catch {
+            client?.urlProtocol(self, didFailWithError: error)
+        }
+    }
+
+    override func stopLoading() {}
+}</code></pre>
+
+<h3>5.4 — Mocking Strategy</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  API MOCK DECISION TREE                                      │
+│                                                              │
+│  Is this a unit test?                                        │
+│  ├── YES → Mock at the service/repository layer              │
+│  │         (inject mock dependencies)                        │
+│  └── NO                                                      │
+│      │                                                       │
+│      ├── Is this a component/widget test?                     │
+│      │   ├── YES → Mock at the network layer                 │
+│      │   │         (MSW, dio adapter, URLProtocol)            │
+│      │   └── NO                                              │
+│      │                                                       │
+│      └── Is this an E2E test?                                │
+│          ├── Mock API → Faster, deterministic, isolated       │
+│          │               Use for CI runs                     │
+│          └── Real API → Catches integration bugs              │
+│                          Use for pre-release smoke tests     │
+│                                                              │
+│  RULE: Never mock what you don't own unless you also have    │
+│  contract tests validating the mock matches production.      │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 6: Snapshot / Golden Testing</h2>
+
+<h3>6.1 — When to Use Snapshots</h3>
+<div class="table-wrap"><table><thead><tr><th>Use Case</th><th>Snapshot Type</th><th>Platform</th><th></th></tr></thead><tbody><tr><td>Catch unintended UI changes</td><td>Image snapshot</td><td>All</td><td></td></tr><tr><td>Lock down complex layout</td><td>Golden file</td><td>Flutter</td><td></td></tr><tr><td>Prevent text/label regressions</td><td>Inline snapshot</td><td>React Native (Jest)</td><td></td></tr><tr><td>Verify design system compliance</td><td>Image diff</td><td>All</td><td></td></tr></tbody></table></div>
+<h3>6.2 — Snapshot Test Rules</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  SNAPSHOT TESTING RULES                                      │
+│                                                              │
+│  DO:                                                         │
+│  □ Snapshot stable, well-defined components (buttons, cards) │
+│  □ Use deterministic data (fixed dates, known IDs)           │
+│  □ Review snapshot diffs in PRs — don't blindly update       │
+│  □ Snapshot both light and dark mode variants                │
+│  □ Keep snapshot count manageable (&lt;50 per test suite)        │
+│                                                              │
+│  DON'T:                                                      │
+│  □ Snapshot entire screens (too brittle)                     │
+│  □ Snapshot animated components (non-deterministic)          │
+│  □ Snapshot components with timestamps or random IDs         │
+│  □ Use snapshots as a substitute for behavioral tests        │
+│  □ Auto-update snapshots without reviewing the diff          │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>6.3 — Flutter Golden Tests</h3>
+
+<pre class="code-block"><code>// test/golden/course_card_test.dart
+import 'package:flutter_test/flutter_test.dart';
+import 'package:golden_toolkit/golden_toolkit.dart';
+
+void main() {
+  testGoldens('CourseCard renders correctly', (tester) async {
+    final builder = GoldenBuilder.column()
+      ..addScenario('In progress', CourseCard(progress: 45, title: 'Test'))
+      ..addScenario('Completed', CourseCard(progress: 100, title: 'Test'))
+      ..addScenario('Not started', CourseCard(progress: 0, title: 'Test'));
+
+    await tester.pumpWidgetBuilder(builder.build());
+    await screenMatchesGolden(tester, 'course_card_states');
+  });
+}</code></pre>
+<hr class="section-divider">
+<h2>Phase 7: CI Integration</h2>
+
+<h3>7.1 — CI Pipeline Architecture</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  CI PIPELINE — PARALLEL EXECUTION                            │
+│                                                              │
+│  PR opened / push to branch                                  │
+│       │                                                      │
+│       ├──▶ Job 1: Lint + Type Check          (~1 min)        │
+│       │                                                      │
+│       ├──▶ Job 2: Unit Tests                 (~2 min)        │
+│       │    └── jest --ci --coverage                           │
+│       │    └── flutter test --coverage                        │
+│       │    └── xcodebuild test (unit scheme)                  │
+│       │                                                      │
+│       ├──▶ Job 3: Component/Widget Tests     (~3 min)        │
+│       │    └── jest --ci --testPathPattern=components         │
+│       │    └── flutter test test/widgets/                     │
+│       │                                                      │
+│       ├──▶ Job 4: Build (verify compilable)  (~5 min)        │
+│       │    └── eas build --profile preview --non-interactive  │
+│       │    └── flutter build apk --debug                      │
+│       │    └── xcodebuild build                               │
+│       │                                                      │
+│       └──▶ Job 5: E2E Tests (on merge only)  (~10 min)       │
+│            └── Detox / patrol / XCUITest                      │
+│            └── Runs on device cloud (BrowserStack)            │
+│            └── Only critical flows (5-10 tests)               │
+│                                                              │
+│  TOTAL PR WALL TIME: ~5 min (parallel)                       │
+│  TOTAL MERGE TIME:   ~12 min (with E2E)                      │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>7.2 — Coverage Enforcement</h3>
+
+<pre class="code-block"><code># Example GitHub Actions coverage check
+<ul class="skill-list"><li>name: Check coverage threshold</li>
+  </ul>run: |
+    COVERAGE=$(cat coverage/coverage-summary.json | jq '.total.lines.pct')
+    if (( $(echo &quot;$COVERAGE &lt; 80&quot; | bc -l) )); then
+      echo &quot;Coverage $COVERAGE% is below 80% threshold&quot;
+      exit 1
+    fi</code></pre>
+
+<h3>7.3 — Test Artifacts to Collect</h3>
+<div class="table-wrap"><table><thead><tr><th>Artifact</th><th>Why</th><th>Format</th><th></th></tr></thead><tbody><tr><td>Coverage report</td><td>Track trends, enforce thresholds</td><td>HTML + lcov</td><td></td></tr><tr><td>Test results</td><td>Debug failures in CI</td><td>JUnit XML</td><td></td></tr><tr><td>Screenshots on failure</td><td>Visual context for E2E failures</td><td>PNG per test</td><td></td></tr><tr><td>Video on failure</td><td>Replay what happened before crash</td><td>MP4 (Detox/XCUI)</td><td></td></tr><tr><td>Performance traces</td><td>Catch regressions in startup time</td><td>JSON / trace files</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Phase 8: Flaky Test Management</h2>
+
+<h3>8.1 — Flaky Test Decision Tree</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  FLAKY TEST DIAGNOSIS FLOW                                   │
+│                                                              │
+│  Test fails intermittently                                   │
+│       │                                                      │
+│       ├── Does it depend on timing / animations?             │
+│       │   ├── YES → Replace sleep() with waitFor()           │
+│       │   │         Use deterministic animation control       │
+│       │   │         Disable animations in test config         │
+│       │   └── NO ──▼                                         │
+│       │                                                      │
+│       ├── Does it depend on network / API response?          │
+│       │   ├── YES → Mock the API (MSW, mockito, URLProtocol) │
+│       │   │         Never hit real APIs in CI                 │
+│       │   └── NO ──▼                                         │
+│       │                                                      │
+│       ├── Does it depend on data from another test?          │
+│       │   ├── YES → Isolate test data in beforeEach          │
+│       │   │         Each test creates its own state           │
+│       │   │         Never rely on test execution order        │
+│       │   └── NO ──▼                                         │
+│       │                                                      │
+│       ├── Does it depend on device state?                    │
+│       │   │  (locale, timezone, permissions, disk space)      │
+│       │   ├── YES → Pin device config in test setup           │
+│       │   │         Reset permissions before each test        │
+│       │   └── NO ──▼                                         │
+│       │                                                      │
+│       ├── Does it involve async state updates?               │
+│       │   ├── YES → Use act() wrappers, flush microtasks     │
+│       │   │         Await all pending promises                │
+│       │   └── NO ──▼                                         │
+│       │                                                      │
+│       └── Is the root cause unclear?                         │
+│           → QUARANTINE the test immediately                  │
+│           → Move to __tests__/quarantine/                    │
+│           → File a bug ticket with failure logs              │
+│           → Fix within 1 sprint or delete                    │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>8.2 — Flake Prevention Checklist</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  FLAKE PREVENTION — APPLY TO EVERY TEST                      │
+│                                                              │
+│  □ No sleep() or hardcoded delays — use waitFor with timeout │
+│  □ No shared mutable state between tests                     │
+│  □ No dependency on test execution order                     │
+│  □ No real network calls — mock at the boundary              │
+│  □ No real Date.now() — inject a clock or freeze time        │
+│  □ No animation timing — disable animations in test mode     │
+│  □ No random data — use deterministic factories              │
+│  □ No file system side effects — use in-memory or temp dirs  │
+│  □ Assertions wait for condition, not for time               │
+│  □ Teardown runs even if test fails (afterEach, addTeardown) │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>8.3 — Quarantine Process</h3>
+<div class="table-wrap"><table><thead><tr><th>Step</th><th>Action</th><th>Timeline</th><th></th></tr></thead><tbody><tr><td>1</td><td>Test fails intermittently in CI</td><td>Day 0</td><td></td></tr><tr><td>2</td><td>Move to <code class="inline-code">quarantine/</code> directory, exclude from CI</td><td>Day 0</td><td></td></tr><tr><td>3</td><td>File ticket with failure logs and screenshots</td><td>Day 0</td><td></td></tr><tr><td>4</td><td>Investigate root cause (timing, state, data)</td><td>Days 1-3</td><td></td></tr><tr><td>5</td><td>Fix and verify with 10x repeated runs</td><td>Days 3-5</td><td></td></tr><tr><td>6</td><td>Move back to main suite, monitor for 1 week</td><td>Day 5</td><td></td></tr><tr><td>7</td><td>If still flaky after 1 sprint, delete and rewrite</td><td>Day 10</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Phase 9: Device Matrix Selection</h2>
+
+<h3>9.1 — Recommended Device Matrix</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  DEVICE MATRIX — MINIMUM VIABLE COVERAGE                     │
+│                                                              │
+│  iOS (3 devices minimum):                                    │
+│  ┌──────────────┬──────────┬──────────────────────────┐      │
+│  │ Device       │ OS       │ Why                      │      │
+│  ├──────────────┼──────────┼──────────────────────────┤      │
+│  │ iPhone SE 3  │ iOS 16   │ Smallest screen, oldest  │      │
+│  │              │          │ supported OS             │      │
+│  │ iPhone 15    │ iOS 17   │ Most common device class │      │
+│  │ iPhone 16 PM │ iOS 18   │ Largest screen, latest   │      │
+│  │              │          │ OS, Dynamic Island       │      │
+│  └──────────────┴──────────┴──────────────────────────┘      │
+│                                                              │
+│  Android (3 devices minimum):                                │
+│  ┌──────────────┬──────────┬──────────────────────────┐      │
+│  │ Device       │ OS       │ Why                      │      │
+│  ├──────────────┼──────────┼──────────────────────────┤      │
+│  │ Pixel 6a     │ Android  │ Stock Android, mid-range │      │
+│  │              │ 13       │ performance baseline     │      │
+│  │ Samsung S23  │ Android  │ Most popular OEM, custom │      │
+│  │              │ 14       │ Samsung UI layer         │      │
+│  │ Samsung A14  │ Android  │ Low-end device, tests    │      │
+│  │              │ 13       │ performance under stress │      │
+│  └──────────────┴──────────┴──────────────────────────┘      │
+│                                                              │
+│  Optional (add if user base requires):                       │
+│  □ iPad (10th gen) — tablet layout                           │
+│  □ Pixel Tablet — Android tablet                             │
+│  □ Foldables (Samsung Fold) — if supporting fold/unfold      │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>9.2 — Device Selection Criteria</h3>
+
+<pre class="code-block"><code>Is the app targeting a specific market?
+│
+├── Global consumer app
+│   → Cover: smallest, most popular, largest per platform
+│   → Cover: 2 latest OS versions + oldest supported OS
+│   → Cover: at least 1 non-Google Android OEM (Samsung, Xiaomi)
+│
+├── Enterprise / B2B
+│   → Cover: whatever IT departments issue (often iPhone + Samsung)
+│   → Cover: latest OS only (enterprises update faster)
+│   → Add: tablet if used in meetings or field work
+│
+└── Regional app
+    → Check regional device popularity data (StatCounter, AppAnnie)
+    → Prioritize devices popular in your target market
+    → Low-end devices matter more in emerging markets</code></pre>
+<hr class="section-divider">
+<h2>Anti-Patterns — What NOT to Do</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  MOBILE TESTING ANTI-PATTERNS                                │
+│                                                              │
+│  ✗ Testing only on simulator, shipping without real device   │
+│    → Simulators miss touch latency, memory pressure, camera  │
+│                                                              │
+│  ✗ E2E tests for every edge case                             │
+│    → E2E is slow and expensive — use unit tests for edges    │
+│                                                              │
+│  ✗ Mocking internal functions instead of boundaries          │
+│    → Tests break on every refactor, prove nothing about      │
+│      actual API integration                                  │
+│                                                              │
+│  ✗ sleep(3000) instead of waitFor(condition)                 │
+│    → Flaky on slow devices, wastes time on fast devices      │
+│                                                              │
+│  ✗ Sharing test state between test cases                     │
+│    → Test A creates data, test B reads it — breaks if A      │
+│      runs after B, or A fails, or tests run in parallel      │
+│                                                              │
+│  ✗ Ignoring flaky tests (&quot;it passes if you retry&quot;)           │
+│    → Team learns to ignore red CI, then real bugs ship       │
+│                                                              │
+│  ✗ No test IDs / accessibility labels on UI elements         │
+│    → E2E tests query by text or position — brittle and       │
+│      breaks on every copy change or layout shift             │
+│                                                              │
+│  ✗ Running full E2E suite on every PR                        │
+│    → 30-minute CI blocks developer flow — run E2E on merge   │
+│                                                              │
+│  ✗ Chasing 100% coverage                                     │
+│    → Coverage without assertions is theater — a test that    │
+│      exercises code but asserts nothing catches nothing       │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Tips for Best Results</h2>
+
+<ul class="skill-list"><li class="ordered"><strong>Start with the test pyramid</strong> — Before writing any test, classify it: unit, component, or E2E. If your E2E count exceeds your component count, you are building a slow, fragile suite.</li>
+<li class="ordered"><strong>Mock at the network boundary</strong> — MSW for React Native, dio adapter for Flutter, URLProtocol for iOS. Tests stay fast and deterministic without coupling to backend availability.</li>
+<li class="ordered"><strong>Use test IDs for E2E, accessibility labels for everything</strong> — <code class="inline-code">testID="login-button"</code> for Detox/patrol, <code class="inline-code">accessibilityLabel</code> for the accessibility tree. Never query by internal component names.</li>
+<li class="ordered"><strong>Run flaky test detection before merging new tests</strong> — Run the new test 10 times locally. If it fails even once, fix the timing issue before it enters the suite.</li>
+<li class="ordered"><strong>Collect screenshots on failure</strong> — Every E2E framework supports failure screenshots. Configure them in CI. A screenshot of the failure state saves hours of debugging.</li>
+<li class="ordered"><strong>Keep E2E tests under 10 minutes total</strong> — If your E2E suite exceeds 10 minutes, split it into a fast smoke suite (merge gate) and a full suite (nightly). Developers will not wait 30 minutes for CI.</li>
+<li class="ordered"><strong>Test on the smallest screen first</strong> — If your layout works on iPhone SE, it works everywhere. Test the constrained case first, then verify on larger screens.</li>
+<li class="ordered"><strong>Review snapshot diffs like code diffs</strong> — Never run <code class="inline-code">--update-snapshots</code> blindly. Every snapshot change should be intentional and reviewed in the PR.</li></ul>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="mobile-state.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">Mobile State Management — Predictable Data, Responsive UI</span></span></a>
+    <a href="mobile-ui.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Mobile UI Components — Native Feel, Shared Code</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    80 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

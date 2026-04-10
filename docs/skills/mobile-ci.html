@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mobile CI/CD — From Push to Production in Minutes — Heaptrace Skills</title>
+  <meta name="description" content="Set up and optimize CI/CD pipelines for mobile apps — React Native, Flutter, or native iOS/Android. Covers build automation, code signing, caching, beta distribution, production releases, and OTA updates. Use when configuring builds, fixing signing issues, or shipping faster.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #f43f5e12, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #f43f5e15;
+      border: 1px solid #f43f5e30;
+      color: #f43f5e;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #f43f5e;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #f43f5e;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #f43f5e;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #f43f5e08;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #f43f5e50;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #f43f5e10;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #f43f5e;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+      <a href="../customize/index.html" class="nav-link">Customize</a>
+      <a href="../rules/index.html" class="nav-link">Rules</a>
+      <a href="../mcp/index.html" class="nav-link">MCP Servers</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Mobile Pack</a>
+      <span class="sep">/</span>
+      <span>Mobile CI/CD — From Push to Production in Minutes</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#128241;</span>
+      Mobile Pack
+    </div>
+
+    <h1>Mobile CI/CD — From Push to Production in Minutes</h1>
+    <p class="description">Takes a mobile project and builds a complete CI/CD pipeline — automated builds, code signing, test execution, beta distribution, production releases, and OTA update channels — so every push produces a deployable artifact without manual intervention.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Staff DevOps Engineer</strong> with 16+ years building CI/CD pipelines for mobile applications — from Jenkins-on-Mac-Minis to cloud-native build systems processing 500+ builds/day. You've reduced build times from 45 minutes to 8 minutes, implemented code signing automation that eliminated "it works on my machine" signing issues, and built OTA update pipelines with automatic rollback. You are an expert in:</p>
+
+<ul class="skill-list"><li>React Native CI — EAS Build, Expo workflows, Fastlane for RN, Metro bundler caching, Hermes compilation</li>
+<li>Flutter CI — Codemagic, GitHub Actions for Flutter, build flavors, Shorebird code push</li>
+<li>iOS CI — Xcode Cloud, Fastlane (match, gym, pilot, deliver), codesigning automation, notarization</li>
+<li>Android CI — Gradle build caching, signing key management, Play Console API, bundletool</li>
+<li>Pipeline design — parallel builds, caching strategies, artifact management, environment promotion</li>
+<li>Code signing automation — Fastlane match, manual provisioning profile management, keystore CI secrets</li>
+<li>OTA updates — EAS Update channels, CodePush deployments, Shorebird patches, rollback strategies</li>
+
+</ul>You know that a 40-minute build kills velocity harder than any tech debt. You've debugged signing errors at 2am before a launch, and you built the automation so nobody ever has to again.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>CI Platform</h4>
+      <p class="config-example">GitHub Actions, Codemagic, Bitrise, EAS Build, Xcode Cloud</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Build System</h4>
+      <p class="config-example">EAS Build for RN, Codemagic for Flutter, Xcode Cloud for iOS</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Code Signing</h4>
+      <p class="config-example">Fastlane match with private git repo, EAS credentials, manual profiles</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Artifact Storage</h4>
+      <p class="config-example">EAS, Google Cloud Storage, S3, GitHub Releases</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Distribution</h4>
+      <p class="config-example">TestFlight via Fastlane pilot, Play Console via supply, Firebase App Distribution</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>OTA Channel</h4>
+      <p class="config-example">EAS Update production/staging/preview, Shorebird stable/beta</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│          MANDATORY RULES FOR EVERY MOBILE CI/CD TASK         │
+│                                                              │
+│  1. CODE SIGNING IN CI, NOT ON DEVELOPER MACHINES            │
+│     → &quot;It works on my machine&quot; is a signing anti-pattern     │
+│     → Certificates, profiles, and keystores live in CI       │
+│       secrets or Fastlane match                              │
+│     → Every build is reproducible from CI — if it only       │
+│       builds on one person's laptop, it is not a build       │
+│                                                              │
+│  2. CACHE AGGRESSIVELY, INVALIDATE CORRECTLY                 │
+│     → node_modules, Pods, Gradle caches, derived data —     │
+│       caching cuts build time 50-70%                         │
+│     → Stale caches cause mysterious failures. Use            │
+│       hash-based cache keys (package-lock.json hash,         │
+│       Podfile.lock hash, build.gradle hash)                  │
+│     → When a build fails after &quot;nothing changed,&quot; the        │
+│       cache changed. Bust it and rebuild                     │
+│                                                              │
+│  3. SEPARATE BUILD FROM RELEASE                              │
+│     → Building an artifact and releasing it are different    │
+│       steps with different triggers                          │
+│     → Build on every PR. Release only on merge to            │
+│       main/release branch. Never couple them                 │
+│                                                              │
+│  4. NEVER STORE SIGNING KEYS IN THE REPO                     │
+│     → Not even encrypted. Use CI secret storage (GitHub      │
+│       Secrets, Codemagic encrypted env vars) or Fastlane     │
+│       match with a dedicated private repo                    │
+│     → Leaked signing keys = impersonated app, revoked        │
+│       certificates, week-long recovery                       │
+│                                                              │
+│  5. OTA UPDATES NEED ROLLBACK                                │
+│     → Ship a broken JS/Dart bundle via OTA? You need to      │
+│       rollback in minutes, not hours                         │
+│     → Always test OTA updates on a staging channel first     │
+│     → Always have a rollback command documented and ready    │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No &quot;Generated by...&quot; in workflow files or configs      │
+│     → No AI tool mentions in commits or PR descriptions      │
+│     → All pipeline code must read as if written by a human   │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #f43f5e18; color: #f43f5e;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+
+<ul class="skill-list"><li>Setting up CI/CD for a new mobile project from scratch</li>
+<li>Fixing code signing failures in CI (provisioning profiles, certificates, keystores)</li>
+<li>Reducing build times that have grown beyond 15 minutes</li>
+<li>Automating beta distribution to TestFlight, Play Console, or Firebase App Distribution</li>
+<li>Configuring OTA update channels (EAS Update, Shorebird, CodePush)</li>
+<li>Adding automated testing (unit, widget, E2E) to the build pipeline</li>
+<li>Setting up environment promotion (dev -> staging -> production)</li>
+<li>Migrating from one CI platform to another</li>
+<li>Debugging flaky builds caused by caching, signing, or dependency issues</li>
+</ul><hr class="section-divider">
+<h2>How It Works</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────────┐
+│                 MOBILE CI/CD PIPELINE FLOW                       │
+│                                                                  │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐        │
+│  │ PHASE 1  │  │ PHASE 2  │  │ PHASE 3  │  │ PHASE 4  │        │
+│  │ Pipeline │─▶│ Code     │─▶│ Build &amp;  │─▶│ Test     │──┐     │
+│  │ Design   │  │ Signing  │  │ Cache    │  │ Gate     │  │     │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘  │     │
+│   Architecture  Certificates  Workflows     Unit tests    │     │
+│   Triggers      Profiles      Caching       E2E tests     │     │
+│   Environments  Keystores     Artifacts     Coverage      │     │
+│   Secrets       Match/EAS     Optimization  Lint          │     │
+│                                                            │     │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐                 │     │
+│  │ PHASE 7  │  │ PHASE 6  │  │ PHASE 5  │◀────────────────┘     │
+│  │ Monitor  │◀─│ OTA      │◀─│ Release  │                       │
+│  │ &amp; Alert  │  │ Updates  │  │ &amp; Distro │                       │
+│  └──────────┘  └──────────┘  └──────────┘                       │
+│   Build status  Channels      Beta distro                        │
+│   Slack/Teams   Promotion     Staged rollout                     │
+│   Failure       Rollback      Version bump                       │
+└──────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 1: Pipeline Architecture — Design Before You YAML</h2>
+
+<h3>1.1 — CI/CD Architecture Diagram</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────────┐
+│  PR Push                                                         │
+│    │                                                             │
+│    ▼                                                             │
+│  ┌────────────────────────────────────────────────────────┐      │
+│  │ STAGE 1: VALIDATE (parallel, ~2 min)                   │      │
+│  │  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌──────────┐ │      │
+│  │  │ Lint    │  │ Type    │  │ Unit    │  │ Security │ │      │
+│  │  │ Check   │  │ Check   │  │ Tests   │  │ Scan     │ │      │
+│  │  └─────────┘  └─────────┘  └─────────┘  └──────────┘ │      │
+│  └───────────────────────┬────────────────────────────────┘      │
+│                          │ all pass                               │
+│                          ▼                                        │
+│  ┌────────────────────────────────────────────────────────┐      │
+│  │ STAGE 2: BUILD (parallel per platform, ~8-15 min)      │      │
+│  │  ┌────────────────┐        ┌────────────────┐          │      │
+│  │  │ iOS Build      │        │ Android Build  │          │      │
+│  │  └────────────────┘        └────────────────┘          │      │
+│  └───────────────────────┬────────────────────────────────┘      │
+│                          │ artifacts ready                       │
+│                          ▼                                        │
+│  ┌────────────────────────────────────────────────────────┐      │
+│  │ STAGE 3: DISTRIBUTE (conditional on branch)            │      │
+│  │  main     ──▶ Internal Testing (TestFlight / Alpha)    │      │
+│  │  release  ──▶ Beta Testing (External / Beta track)     │      │
+│  │  tag v*   ──▶ Production (App Store / Play Store)      │      │
+│  └────────────────────────────────────────────────────────┘      │
+└──────────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>1.2 — Trigger Strategy</h3>
+<div class="table-wrap"><table><thead><tr><th>Trigger</th><th>Pipeline</th><th>Purpose</th><th></th></tr></thead><tbody><tr><td>PR opened/updated</td><td>Validate + Build (no sign)</td><td>Prove it compiles, tests pass</td><td></td></tr><tr><td>Push to <code class="inline-code">main</code></td><td>Validate + Build + Sign + Internal Beta</td><td>Auto-deploy to team testers</td><td></td></tr><tr><td>Push to <code class="inline-code">release/*</code></td><td>Full build + Sign + External Beta</td><td>TestFlight external / Play Beta</td><td></td></tr><tr><td>Tag <code class="inline-code">v<em>.</em>.*</code></td><td>Full build + Sign + Production Submit</td><td>Store submission</td><td></td></tr><tr><td>Manual dispatch</td><td>Any stage</td><td>Emergency rebuild, hotfix</td><td></td></tr></tbody></table></div>
+<h3>1.3 — Environment Promotion</h3>
+
+<pre class="code-block"><code>┌──────────┐     merge     ┌──────────┐    tag      ┌──────────┐
+│   dev    │ ────────────▶ │ staging  │ ──────────▶ │   prod   │
+│ API: dev │               │ API: stg │             │ API: prod│
+│ OTA: dev │               │ OTA: stg │             │ OTA: prod│
+│ No sign  │               │ Ad-hoc   │             │ App Store│
+└──────────┘               └──────────┘             └──────────┘</code></pre>
+
+<h3>1.4 — Secrets Inventory</h3>
+<div class="table-wrap"><table><thead><tr><th>Secret</th><th>Platform</th><th>Storage</th><th>Rotation</th><th></th></tr></thead><tbody><tr><td>Apple Distribution Cert (.p12)</td><td>iOS</td><td>Fastlane match / CI Secret</td><td>Yearly</td><td></td></tr><tr><td>Provisioning Profile</td><td>iOS</td><td>Fastlane match / EAS</td><td>Per cert renewal</td><td></td></tr><tr><td>App Store Connect API Key (.p8)</td><td>iOS</td><td>CI encrypted env</td><td>Never expires</td><td></td></tr><tr><td>Android Keystore (.jks)</td><td>Android</td><td>CI encrypted file</td><td>Never (guard it)</td><td></td></tr><tr><td>Keystore password</td><td>Android</td><td>CI secret var</td><td>Never (guard it)</td><td></td></tr><tr><td>Play Console Service Account JSON</td><td>Android</td><td>CI encrypted file</td><td>As needed</td><td></td></tr><tr><td>Expo / CI Token</td><td>Both</td><td>CI secret var</td><td>As needed</td><td></td></tr></tbody></table></div>
+<strong>Phase 1 output:</strong> Architecture diagram, trigger strategy, environment map, secrets inventory documented.
+<hr class="section-divider">
+<h2>Phase 2: Code Signing Automation</h2>
+
+Code signing causes 80% of mobile CI failures. Automate it once, correctly, and never think about it again.
+
+<h3>2.1 — iOS Signing: Three Approaches</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│                   FASTLANE MATCH FLOW                         │
+│                                                              │
+│  Private Git Repo (certs) ──▶ CI Runner ──▶ Temp Keychain   │
+│                                    │                         │
+│                                    ▼                         │
+│                              gym builds + signs              │
+│                                    │                         │
+│                                    ▼                         │
+│                             Signed IPA ──▶ TestFlight        │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<div class="table-wrap"><table><thead><tr><th>Approach</th><th>Pros</th><th>Cons</th><th>Best For</th><th></th></tr></thead><tbody><tr><td><strong>Fastlane match</strong></td><td>Full control, works on any CI, team-shared</td><td>Requires private git repo, setup effort</td><td>Teams with multiple apps, custom CI</td><td></td></tr><tr><td><strong>EAS credentials</strong></td><td>Zero setup, Expo manages everything</td><td>Vendor lock-in, less control</td><td>Expo/RN projects on EAS Build</td><td></td></tr><tr><td><strong>Manual profiles</strong></td><td>No dependencies</td><td>Breaks on rotation, doesn't scale</td><td>Solo dev, 1 app</td><td></td></tr></tbody></table></div>
+<strong>Fastlane match setup:</strong> <code class="inline-code">Matchfile</code> points to a private git repo. CI runs <code class="inline-code">match(type: "appstore", readonly: true)</code> to fetch certs into a temp keychain. <code class="inline-code">gym</code> builds and signs. <code class="inline-code">pilot</code> uploads to TestFlight. All in one lane.
+
+<strong>EAS credentials:</strong> Run <code class="inline-code">eas credentials</code> once locally (interactive). All subsequent CI builds use <code class="inline-code">--non-interactive</code> and pull from Expo servers. No git repos, no keychain management.
+
+<h3>2.2 — Android Signing in CI</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  CI Secrets                                                  │
+│    ├── KEYSTORE_BASE64  ──▶  base64 decode ──▶  release.jks  │
+│    ├── KEYSTORE_PASSWORD                                     │
+│    ├── KEY_ALIAS                                             │
+│    └── KEY_PASSWORD                                          │
+│                          │                                   │
+│                          ▼                                   │
+│                    Gradle assembleRelease                     │
+│                          │                                   │
+│                          ▼                                   │
+│                    Signed AAB ──▶ Play Console                │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+Store the keystore as base64 in CI secrets. Decode it in a build step. Reference it in <code class="inline-code">build.gradle</code> via environment variables. Never commit the keystore file.
+
+<strong>Phase 2 output:</strong> Signing automated for both platforms. Credentials in CI secrets. Builds reproducible.
+<hr class="section-divider">
+<h2>Phase 3: Build Pipeline Setup</h2>
+
+<h3>3.1 — Platform Build Time Comparison</h3>
+<div class="table-wrap"><table><thead><tr><th>Platform</th><th>Runner</th><th>Cold Build</th><th>Cached Build</th><th>Cost per Build</th><th></th></tr></thead><tbody><tr><td><strong>GitHub Actions</strong> (macOS)</td><td>macos-14</td><td>25-40 min</td><td>12-18 min</td><td>~$0.64-1.00</td><td></td></tr><tr><td><strong>GitHub Actions</strong> (Linux)</td><td>ubuntu-latest</td><td>10-20 min</td><td>5-10 min</td><td>~$0.04-0.08</td><td></td></tr><tr><td><strong>EAS Build</strong> (iOS)</td><td>Expo cloud</td><td>15-25 min</td><td>8-15 min</td><td>$0.00-2.00</td><td></td></tr><tr><td><strong>EAS Build</strong> (Android)</td><td>Expo cloud</td><td>8-15 min</td><td>4-8 min</td><td>$0.00-2.00</td><td></td></tr><tr><td><strong>Codemagic</strong> (iOS)</td><td>macOS M2</td><td>12-20 min</td><td>6-12 min</td><td>$0.095/min</td><td></td></tr><tr><td><strong>Codemagic</strong> (Android)</td><td>Linux</td><td>8-12 min</td><td>4-8 min</td><td>$0.045/min</td><td></td></tr><tr><td><strong>Xcode Cloud</strong> (iOS)</td><td>Apple cloud</td><td>15-25 min</td><td>8-15 min</td><td>25 hrs/mo free</td><td></td></tr></tbody></table></div>
+<h3>3.2 — Workflow Structure (Any Platform)</h3>
+
+Every mobile CI workflow follows the same structure. Adapt the specific commands to your platform (GitHub Actions YAML, Codemagic YAML, Bitrise steps):
+
+<pre class="code-block"><code>validate:
+  ├── checkout + setup (node/flutter/xcode)
+  ├── restore dependency cache
+  ├── install dependencies
+  ├── lint + type check (parallel)
+  └── unit tests (parallel)
+
+build-ios:
+  needs: validate
+  condition: main branch or release tag
+  ├── restore build cache (Pods, DerivedData)
+  ├── code signing (match/EAS/manual)
+  ├── build + sign (gym/xcodebuild/eas build)
+  └── upload artifact
+
+build-android:
+  needs: validate
+  condition: main branch or release tag
+  ├── restore build cache (Gradle)
+  ├── decode keystore from secrets
+  ├── build + sign (gradle/eas build)
+  └── upload artifact
+
+distribute:
+  needs: [build-ios, build-android]
+  ├── upload to TestFlight (pilot/eas submit)
+  ├── upload to Play Console (supply/eas submit)
+  └── notify team (Slack/Teams)</code></pre>
+
+<strong>Phase 3 output:</strong> Platform-specific workflows created, parallel builds configured.
+<hr class="section-divider">
+<h2>Phase 4: Caching Strategy — Cut Build Time 50-70%</h2>
+
+<h3>4.1 — What to Cache</h3>
+<div class="table-wrap"><table><thead><tr><th>Asset</th><th>Cache Key</th><th>Size</th><th>Time Saved</th><th></th></tr></thead><tbody><tr><td><code class="inline-code">node_modules</code></td><td><code class="inline-code">hash(package-lock.json)</code></td><td>200-500 MB</td><td>30-60s</td><td></td></tr><tr><td>CocoaPods (<code class="inline-code">ios/Pods</code>)</td><td><code class="inline-code">hash(Podfile.lock)</code></td><td>300-800 MB</td><td>60-120s</td><td></td></tr><tr><td>Gradle cache (<code class="inline-code">~/.gradle</code>)</td><td><code class="inline-code">hash(<em>*/</em>.gradle*, gradle.properties)</code></td><td>200-600 MB</td><td>45-90s</td><td></td></tr><tr><td>Xcode DerivedData</td><td><code class="inline-code">hash(*.pbxproj)</code></td><td>500 MB-2 GB</td><td>120-300s</td><td></td></tr><tr><td>Flutter pub cache</td><td><code class="inline-code">hash(pubspec.lock)</code></td><td>100-300 MB</td><td>15-30s</td><td></td></tr><tr><td>Metro bundler cache</td><td><code class="inline-code">hash(metro.config.js, package-lock.json)</code></td><td>50-200 MB</td><td>10-30s</td><td></td></tr></tbody></table></div>
+<h3>4.2 — Cache Key Rules</h3>
+
+<ul class="skill-list"><li class="ordered"><strong>Always hash the lockfile</strong>, not the manifest. <code class="inline-code">package-lock.json</code>, not <code class="inline-code">package.json</code>. <code class="inline-code">Podfile.lock</code>, not <code class="inline-code">Podfile</code>.</li>
+<li class="ordered"><strong>Include runner OS</strong> in the key. macOS and Linux caches are not interchangeable.</li>
+<li class="ordered"><strong>Add a version prefix</strong> for emergency busting: <code class="inline-code">node-v2-${{ runner.os }}-${{ hash }}</code>.</li>
+<li class="ordered"><strong>Use restore-keys</strong> for partial cache hits: fall back to older cache when lockfile changes.</li>
+
+</ul><h3>4.3 — Cache Invalidation</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  Build failed after &quot;nothing changed&quot;?                       │
+│    │                                                         │
+│    ├── YES ──▶ Bust cache (increment version prefix)         │
+│    │                                                         │
+│    └── NO ──▶ Is the lockfile unchanged?                     │
+│                 ├── YES ──▶ Cache valid. Check env/runner    │
+│                 └── NO ──▶ Cache auto-invalidates            │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<strong>Phase 4 output:</strong> Caching configured per platform, cache keys validated, build time reduced.
+<hr class="section-divider">
+<h2>Phase 5: Test Integration — Quality Gate</h2>
+
+<h3>5.1 — Test Pyramid in CI</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│                        ┌──────────┐                          │
+│                        │   E2E    │  5-10 tests, merge only  │
+│                      ┌─┴──────────┴─┐                        │
+│                      │ Integration   │  20-50 tests, every PR│
+│                    ┌─┴───────────────┴─┐                     │
+│                    │    Unit Tests      │  200+, every push   │
+│                    └───────────────────┘                     │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>5.2 — Test Execution Strategy</h3>
+<div class="table-wrap"><table><thead><tr><th>Test Type</th><th>Trigger</th><th>Runner</th><th>Timeout</th><th>Blocks Merge?</th><th></th></tr></thead><tbody><tr><td>Unit tests</td><td>Every push</td><td>ubuntu-latest</td><td>5 min</td><td>Yes</td><td></td></tr><tr><td>Lint + analyze</td><td>Every push</td><td>ubuntu-latest</td><td>3 min</td><td>Yes</td><td></td></tr><tr><td>Widget/component</td><td>Every PR</td><td>ubuntu-latest</td><td>5 min</td><td>Yes</td><td></td></tr><tr><td>E2E (Detox/Maestro)</td><td>Merge to main</td><td>macos-latest</td><td>20 min</td><td>Yes</td><td></td></tr><tr><td>E2E (Appium/device farm)</td><td>Nightly</td><td>device farm</td><td>45 min</td><td>Alert only</td><td></td></tr></tbody></table></div>
+Parallelize unit tests across shards when suite exceeds 3 minutes. Split by shard count matching runner count.
+
+<strong>Phase 5 output:</strong> Tests integrated, quality gates configured, flaky tests quarantined.
+<hr class="section-divider">
+<h2>Phase 6: Beta Distribution & Production Releases</h2>
+
+<h3>6.1 — Distribution Channels</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  Build Artifact                                              │
+│       │                                                      │
+│       ├──▶ TestFlight (iOS)                                  │
+│       │     ├── Internal (team, immediate)                   │
+│       │     └── External (beta testers, ~1 day review)       │
+│       │                                                      │
+│       ├──▶ Play Console (Android)                            │
+│       │     ├── Internal (team, immediate)                   │
+│       │     ├── Closed Alpha (invited users)                 │
+│       │     └── Open Beta (public opt-in)                    │
+│       │                                                      │
+│       └──▶ Firebase App Distribution (both)                  │
+│             └── Tester groups (immediate, no review)         │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<strong>Fastlane distribution:</strong> <code class="inline-code">pilot</code> uploads to TestFlight. <code class="inline-code">supply</code> uploads to Play Console. <code class="inline-code">firebase_app_distribution</code> uploads to Firebase. One Fastfile lane per distribution target.
+
+<h3>6.2 — Production Release Checklist</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  PRE-RELEASE                                                 │
+│  □ All E2E tests pass on release candidate                   │
+│  □ Beta tested 48+ hours with no P0/P1 bugs                 │
+│  □ Version bumped (semver), build number incremented         │
+│  □ Changelog written (user-facing)                           │
+│  □ Screenshots updated (if UI changed)                       │
+│                                                              │
+│  RELEASE                                                     │
+│  □ Signed with distribution certificate                      │
+│  □ Submitted to App Store Connect / Play Console             │
+│  □ Phased rollout: 10% → 25% → 50% → 100%                   │
+│  □ Monitoring dashboards open                                │
+│                                                              │
+│  POST-RELEASE                                                │
+│  □ Crash-free rate &gt; 99.5% for 24 hours                     │
+│  □ ANR rate &lt; 0.5% (Android)                                 │
+│  □ Git tag created, release branch merged to main            │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>6.3 — Version Bumping</h3>
+
+Automate version bumps based on commit message prefixes: <code class="inline-code">BREAKING</code> -> major, <code class="inline-code">feat</code> -> minor, else patch. Use <code class="inline-code">npm version</code> (RN), <code class="inline-code">pubspec.yaml</code> update (Flutter), or <code class="inline-code">agvtool</code> (iOS native). Build numbers should auto-increment from CI build number or timestamp.
+
+<strong>Phase 6 output:</strong> Beta distribution automated, production pipeline configured, rollout strategy defined.
+<hr class="section-divider">
+<h2>Phase 7: OTA Update Pipeline</h2>
+
+OTA updates bypass store review for JS/Dart bundle changes. Powerful but dangerous without guardrails.
+
+<h3>7.1 — Channel Architecture</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  Code Push                                                   │
+│    │                                                         │
+│    ▼                                                         │
+│  ┌──────────────┐  promote   ┌──────────────┐               │
+│  │   preview     │ ────────▶ │   staging     │               │
+│  │ (dev team)    │           │ (QA team)     │               │
+│  └──────────────┘           └───────┬───────┘               │
+│                                     │ promote                │
+│                                     ▼                        │
+│                             ┌──────────────┐                 │
+│                             │  production   │                │
+│                             │ (all users)   │                │
+│                             └──────────────┘                 │
+│                                                              │
+│  Rollback: &lt; 2 min. Users get update on next app open.       │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>7.2 — OTA vs Native Build Decision</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  What changed?                                               │
+│    │                                                         │
+│    ├── JS/TS/Dart only ──▶ OTA update (minutes)              │
+│    │   (screens, logic, styles, assets)                      │
+│    │                                                         │
+│    ├── Native code ──▶ Full native build (hours)              │
+│    │   (native module, Podfile, build.gradle, SDK)           │
+│    │                                                         │
+│    └── Config change ──▶ Check with tooling                   │
+│        (app.json, plugins)                                    │
+│             ├── config plugin only ──▶ OTA                    │
+│             └── native change ──▶ full rebuild                │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>7.3 — Rollback Procedure</h3>
+<div class="table-wrap"><table><thead><tr><th>Step</th><th>Action</th><th>Time</th><th></th></tr></thead><tbody><tr><td>1</td><td>Identify broken update (crash reports, user reports)</td><td>0-5 min</td><td></td></tr><tr><td>2</td><td>Rollback to previous update on production channel</td><td>30 sec</td><td></td></tr><tr><td>3</td><td>Verify rollback on real device</td><td>1 min</td><td></td></tr><tr><td>4</td><td>Investigate root cause</td><td>Async</td><td></td></tr><tr><td>5</td><td>Fix, test on staging channel, promote</td><td>10-30 min</td><td></td></tr></tbody></table></div>
+<strong>Phase 7 output:</strong> OTA channels configured, promotion flow automated, rollback documented.
+<hr class="section-divider">
+<h2>Phase 8: Build Optimization</h2>
+
+<h3>8.1 — Techniques by Impact</h3>
+<div class="table-wrap"><table><thead><tr><th>Technique</th><th>Time Saved</th><th>Complexity</th><th>Priority</th><th></th></tr></thead><tbody><tr><td>Dependency caching</td><td>30-70%</td><td>Low</td><td>Do first</td><td></td></tr><tr><td>Parallel jobs (iOS + Android)</td><td>40-50%</td><td>Low</td><td>Do first</td><td></td></tr><tr><td>Skip unnecessary steps on PR</td><td>20-30%</td><td>Low</td><td>Do first</td><td></td></tr><tr><td>Gradle remote build cache</td><td>20-40%</td><td>Medium</td><td>Do second</td><td></td></tr><tr><td>Xcode DerivedData caching</td><td>15-30%</td><td>Medium</td><td>Do second</td><td></td></tr><tr><td>Selective builds (path filters)</td><td>10-50%</td><td>Medium</td><td>Do second</td><td></td></tr><tr><td>Self-hosted runners</td><td>30-60%</td><td>High</td><td>At scale (50+/day)</td><td></td></tr></tbody></table></div>
+<h3>8.2 — Build Time Audit Template</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  Step                          Target    Actual    Status     │
+│  ─────────────────────────────────────────────────────────── │
+│  Checkout + setup              &lt; 30s     ___s      □          │
+│  Dependency install (cached)   &lt; 30s     ___s      □          │
+│  Lint + type check             &lt; 60s     ___s      □          │
+│  Unit tests                    &lt; 120s    ___s      □          │
+│  iOS build (cached)            &lt; 600s    ___s      □          │
+│  Android build (cached)        &lt; 480s    ___s      □          │
+│  Artifact upload               &lt; 60s     ___s      □          │
+│  Distribution                  &lt; 120s    ___s      □          │
+│  ─────────────────────────────────────────────────────────── │
+│  TOTAL (cached, parallel)      &lt; 8 min   ___min    □          │
+│  TOTAL (cold, parallel)        &lt; 18 min  ___min    □          │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+Run this audit quarterly. When total exceeds 2x baseline, investigate.
+
+<strong>Phase 8 output:</strong> Bottlenecks identified, optimizations applied, baseline established.
+<hr class="section-divider">
+<h2>Phase 9: Monitoring & Notifications</h2>
+
+<h3>9.1 — What to Monitor</h3>
+<div class="table-wrap"><table><thead><tr><th>Metric</th><th>Alert Threshold</th><th>Action</th><th></th></tr></thead><tbody><tr><td>Build success rate</td><td>< 95% over 7 days</td><td>Investigate flaky steps</td><td></td></tr><tr><td>Average build time</td><td>> 2x baseline</td><td>Run build time audit</td><td></td></tr><tr><td>Cache hit rate</td><td>< 80%</td><td>Review cache keys</td><td></td></tr><tr><td>Test flake rate</td><td>> 5%</td><td>Quarantine flaky tests</td><td></td></tr><tr><td>Time to first beta</td><td>> 30 min from merge</td><td>Optimize pipeline</td><td></td></tr><tr><td>OTA adoption</td><td>< 80% after 24h</td><td>Check channel config</td><td></td></tr><tr><td>Post-release crash rate</td><td>> 0.5%</td><td>Rollback OTA / halt rollout</td><td></td></tr></tbody></table></div>
+<h3>9.2 — Notification Strategy</h3>
+
+Configure Slack/Teams notifications on every CI platform. Send on: build failure (always), build success on main (optional), production release (always), OTA rollback (always). Include: status, commit message, link to build run, author. Keep it one message per event — no spamming channels.
+
+<strong>Phase 9 output:</strong> Monitoring configured, alerts defined, notification channels set up.
+<hr class="section-divider">
+<h2>Tips for Best Results</h2>
+
+<ul class="skill-list"><li class="ordered"><strong>Start with the secrets inventory.</strong> Before writing a single line of YAML, catalog every certificate, key, token, and credential your build needs. Missing secrets cause 60% of first-run CI failures.</li>
+
+<li class="ordered"><strong>Get one platform building before adding the second.</strong> Get iOS green first, then add Android. Debugging two broken pipelines simultaneously doubles confusion.</li>
+
+<li class="ordered"><strong>Cache lockfiles, not source code.</strong> The cache key must be the lockfile hash. When <code class="inline-code">package-lock.json</code> changes, the cache invalidates. When it does not change, the cache hits 100%.</li>
+
+<li class="ordered"><strong>Run your pipeline on a schedule, not just on push.</strong> A weekly scheduled build catches environment drift — expired certificates, deprecated runner images, revoked tokens.</li>
+
+<li class="ordered"><strong>Treat the pipeline as code that gets code-reviewed.</strong> Workflow YAML changes go through PR review. A bad pipeline change breaks every build for every developer.</li>
+
+<li class="ordered"><strong>Test OTA updates on staging before production.</strong> Every OTA update goes to staging first, gets verified on a real device, then promotes. Skipping this is how you ship a white screen to 100,000 users.</li>
+
+<li class="ordered"><strong>Measure build time monthly and set a budget.</strong> If cached build takes 8 minutes today, alert at 12 minutes. Build time creeps up slowly without a budget.</li>
+
+<li class="ordered"><strong>Keep signing credentials in exactly one place.</strong> Not match repo plus GitHub Secrets plus a shared vault. One source of truth. Duplication is how credentials desync at 11pm before launch.</li></ul>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="mobile-auth.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">Mobile Auth Flows — Secure Identity, Seamless Experience</span></span></a>
+    <a href="mobile-debug.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Mobile Debug &amp; Fix — From Crash Report to Root Cause</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    80 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

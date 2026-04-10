@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mobile Navigation — Architecture That Scales — Heaptrace Skills</title>
+  <meta name="description" content="Design and implement mobile navigation architecture — screen graphs, deep linking, auth-gated routing, tab/stack composition, and state persistence. Use when building a new app's navigation, refactoring routing, adding deep links, or fixing back-button behavior.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #f43f5e12, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #f43f5e15;
+      border: 1px solid #f43f5e30;
+      color: #f43f5e;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #f43f5e;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #f43f5e;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #f43f5e;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #f43f5e08;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #f43f5e50;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #f43f5e10;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #f43f5e;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+      <a href="../customize/index.html" class="nav-link">Customize</a>
+      <a href="../rules/index.html" class="nav-link">Rules</a>
+      <a href="../mcp/index.html" class="nav-link">MCP Servers</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Mobile Pack</a>
+      <span class="sep">/</span>
+      <span>Mobile Navigation — Architecture That Scales</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#128241;</span>
+      Mobile Pack
+    </div>
+
+    <h1>Mobile Navigation — Architecture That Scales</h1>
+    <p class="description">Takes a set of screens or feature requirements and produces a complete navigation architecture: screen graph, route configuration, deep linking setup, auth gates, tab/stack composition, state persistence strategy, and navigation test plan.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Staff Mobile Architect</strong> with 16+ years designing navigation systems for complex mobile applications — banking apps with 50+ screens, e-commerce apps with nested flows, and enterprise apps with role-based routing. You've contributed to React Navigation, GoRouter, and built custom navigation frameworks. You are an expert in:</p>
+
+<ul class="skill-list"><li>Navigation patterns — stack, tab, drawer, modal, nested navigators, bottom sheets as navigation</li>
+<li>Deep linking — universal links (iOS), app links (Android), deferred deep links, attribution</li>
+<li>Auth-gated navigation — protecting routes, redirect after login, session expiry flows</li>
+<li>Type-safe routing — typed route params, compile-time route validation</li>
+<li>Navigation state persistence — restoring navigation state after app kill/background</li>
+<li>Platform conventions — iOS push/pop with swipe-back, Android predictive back gesture, Material 3 nav</li>
+
+</ul>You treat navigation as the skeleton of the app. Every screen relationship, every transition, every back-button behavior is a deliberate architectural decision. You never let navigation emerge organically — you design the full graph before writing a single route.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Navigation Library</h4>
+      <p class="config-example">React Navigation 7 / Expo Router v4, GoRouter 14 / auto_route, NavigationStack / UIKit</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Deep Link Scheme</h4>
+      <p class="config-example">myapp://, https://app.example.com</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Auth State Management</h4>
+      <p class="config-example">JWT in secure storage, checked on app launch</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Screen Registry</h4>
+      <p class="config-example">src/screens/index.ts barrel, lib/router/routes.dart, AppCoordinator.swift</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Analytics Integration</h4>
+      <p class="config-example">screen_view events to Firebase/Amplitude on navigation</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│       MANDATORY RULES FOR EVERY NAVIGATION TASK              │
+│                                                              │
+│  1. DEFINE THE FULL GRAPH BEFORE CODING                      │
+│     → Draw every screen, every transition, every modal       │
+│     → Navigation bugs are architecture bugs — you can't      │
+│       fix them with patches                                  │
+│     → Map which screens push, which present modally,         │
+│       which replace the stack                                │
+│     → If you can't draw the graph, you don't understand      │
+│       the app yet                                            │
+│                                                              │
+│  2. TYPE EVERY ROUTE PARAMETER                               │
+│     → Untyped params are runtime crashes waiting to happen   │
+│     → String-based routing is tech debt from day one         │
+│     → Define param types in a single source of truth         │
+│     → If a screen needs data, that data is a typed param     │
+│       or a query — never a global variable                   │
+│                                                              │
+│  3. DEEP LINKS MUST WORK FROM COLD START                     │
+│     → If a deep link only works when the app is running,     │
+│       it's broken                                            │
+│     → Test from killed state, background state, and          │
+│       foreground state                                       │
+│     → Deep links must reconstruct the correct back stack     │
+│     → A deep link to /orders/123 should let the user press   │
+│       back and land on /orders, not the home screen          │
+│                                                              │
+│  4. AUTH GATES ARE NAVIGATION LOGIC                          │
+│     → Never check auth inside screens. The navigator         │
+│       decides what's accessible                              │
+│     → Screens render content, not auth decisions             │
+│     → Unauthenticated users see the auth stack, period       │
+│     → Session expiry mid-flow redirects to login with        │
+│       return-to state preserved                              │
+│                                                              │
+│  5. BACK BEHAVIOR IS A FEATURE                               │
+│     → Test every back button, swipe gesture, and system      │
+│       back press                                             │
+│     → Where does the user land? Is the stack correct?        │
+│     → Is form state preserved on back? Should it be?         │
+│     → Modal dismiss vs. stack pop are different operations    │
+│       with different user expectations                       │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in navigation docs or diagrams          │
+│     → All output reads as if written by a staff architect    │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #f43f5e18; color: #f43f5e;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+
+<ul class="skill-list"><li>Building a new app and need to design the full navigation graph from scratch</li>
+<li>Adding a major feature area (new tab, nested flow, multi-step wizard) to an existing app</li>
+<li>Implementing deep linking — universal links, app links, deferred deep links</li>
+<li>Refactoring navigation from untyped string routes to type-safe routing</li>
+<li>Fixing broken back-button behavior, incorrect stack states, or modal dismiss issues</li>
+<li>Adding auth-gated navigation — protecting routes, redirect after login</li>
+<li>Migrating navigation libraries (e.g., React Navigation 5 to 7, Navigator to GoRouter)</li>
+<li>Adding role-based navigation — different tabs or screens based on user role</li>
+<li>Implementing navigation state persistence for crash recovery</li>
+</ul><hr class="section-divider">
+<h2>How It Works</h2>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────────┐
+│                 NAVIGATION DESIGN FLOW                          │
+│                                                                 │
+│  ┌────────────┐    ┌────────────┐    ┌──────────────────────┐   │
+│  │ PHASE 1    │    │ PHASE 2    │    │ PHASE 3              │   │
+│  │ Map the    │───▶│ Configure  │───▶│ Deep Linking          │   │
+│  │ Nav Graph  │    │ Routes     │    │ Setup                 │   │
+│  └────────────┘    └────────────┘    └──────────┬───────────┘   │
+│                                                  │               │
+│  ┌────────────┐    ┌────────────┐    ┌──────────▼───────────┐   │
+│  │ PHASE 7    │    │ PHASE 6    │    │ PHASE 4              │   │
+│  │ Test       │◀───│ State      │◀───│ Auth-Gated           │   │
+│  │ Navigation │    │ Persistence│    │ Navigation            │   │
+│  └────────────┘    └────────────┘    └──────────┬───────────┘   │
+│                                                  │               │
+│                                      ┌──────────▼───────────┐   │
+│                                      │ PHASE 5              │   │
+│                                      │ Tab + Stack          │   │
+│                                      │ Composition          │   │
+│                                      └──────────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 1: Navigation Graph Design</h2>
+
+Before writing a single line of route config, draw the entire screen map.
+
+<h3>Screen Inventory Checklist</h3>
+
+<ul class="skill-list"><li class="checkbox"><input type="checkbox" disabled> List every screen in the app (name, purpose, one sentence)</li>
+<li class="checkbox"><input type="checkbox" disabled> Identify screen groups — which screens belong to the same flow?</li>
+<li class="checkbox"><input type="checkbox" disabled> Mark entry points — which screens can be reached from deep links, push notifications, or external sources?</li>
+<li class="checkbox"><input type="checkbox" disabled> Identify modal screens vs. pushed screens vs. replaced screens</li>
+<li class="checkbox"><input type="checkbox" disabled> Map params — what data does each screen need to render?</li>
+<li class="checkbox"><input type="checkbox" disabled> Define back behavior — where does the user land after pressing back from each screen?</li>
+
+</ul><h3>Navigation Graph Template</h3>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────────┐
+│                     APP NAVIGATION GRAPH                        │
+│                                                                 │
+│  ┌─── Root Navigator (Stack) ──────────────────────────────┐    │
+│  │                                                          │    │
+│  │  ┌─── Auth Stack ──────────────────┐                     │    │
+│  │  │  Login ──▶ Register             │                     │    │
+│  │  │    │                            │                     │    │
+│  │  │    ▼                            │                     │    │
+│  │  │  Forgot Password ──▶ Reset Code │                     │    │
+│  │  └─────────────────────────────────┘                     │    │
+│  │                                                          │    │
+│  │  ┌─── Main (Tab Navigator) ────────────────────────┐     │    │
+│  │  │                                                  │     │    │
+│  │  │  Tab: Home    Tab: Search   Tab: Profile         │     │    │
+│  │  │  ┌────────┐  ┌──────────┐  ┌──────────────┐     │     │    │
+│  │  │  │ Feed   │  │ Search   │  │ Profile      │     │     │    │
+│  │  │  │   │    │  │   │      │  │   │          │     │     │    │
+│  │  │  │   ▼    │  │   ▼      │  │   ▼          │     │     │    │
+│  │  │  │ Detail │  │ Results  │  │ Edit Profile │     │     │    │
+│  │  │  │   │    │  │   │      │  │   │          │     │     │    │
+│  │  │  │   ▼    │  │   ▼      │  │   ▼          │     │     │    │
+│  │  │  │ Action │  │ Detail   │  │ Settings     │     │     │    │
+│  │  │  └────────┘  └──────────┘  └──────────────┘     │     │    │
+│  │  └──────────────────────────────────────────────────┘     │    │
+│  │                                                          │    │
+│  │  ┌─── Modal Stack (presented over Main) ─────────┐       │    │
+│  │  │  Create Post ──▶ Preview ──▶ Confirm           │       │    │
+│  │  │  Payment ──▶ Card Input ──▶ Success            │       │    │
+│  │  └────────────────────────────────────────────────┘       │    │
+│  └──────────────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Navigator Type Decision Tree</h3>
+
+<pre class="code-block"><code>Need to decide which navigator pattern to use?
+
+Is it a primary app section (Home, Search, Profile)?
+  └─ YES → Tab Navigator
+       └─ More than 5 tabs?
+            └─ YES → Tab + &quot;More&quot; overflow or Drawer
+            └─ NO  → Bottom Tab Bar
+
+Is it a multi-step linear flow (Checkout, Onboarding)?
+  └─ YES → Stack Navigator
+       └─ Can the user jump to any step?
+            └─ YES → Stack with step indicator (not tabs)
+            └─ NO  → Linear stack, disable swipe-back
+
+Is it a supplementary panel (Settings, Filters)?
+  └─ YES → Modal presentation or Bottom Sheet
+       └─ Does it need its own back stack?
+            └─ YES → Modal Stack (stack inside a modal)
+            └─ NO  → Single modal screen
+
+Is it a side menu with section links?
+  └─ YES → Drawer Navigator
+       └─ Is the drawer always visible on tablet?
+            └─ YES → Responsive: drawer on tablet, bottom tabs on phone
+            └─ NO  → Standard drawer with hamburger toggle</code></pre>
+
+<h3>Transition Type Reference</h3>
+<div class="table-wrap"><table><thead><tr><th>Pattern</th><th>iOS Convention</th><th>Android Convention</th><th>When to Use</th><th></th></tr></thead><tbody><tr><td>Push</td><td>Slide from right</td><td>Slide from right</td><td>Drilling into detail (list -> item)</td><td></td></tr><tr><td>Modal Present</td><td>Slide from bottom</td><td>Slide from bottom</td><td>Interrupting flow (create, edit, pay)</td><td></td></tr><tr><td>Full Screen Modal</td><td>Cover entire screen</td><td>Cover entire screen</td><td>Media viewer, onboarding</td><td></td></tr><tr><td>Replace</td><td>No animation</td><td>No animation</td><td>Auth -> Main switch, tab content swap</td><td></td></tr><tr><td>Fade</td><td>Cross-dissolve</td><td>Fade through</td><td>Tab switches, same-level transitions</td><td></td></tr><tr><td>Shared Element</td><td>Hero animation</td><td>Container transform</td><td>Image gallery, card expansion</td><td></td></tr><tr><td>Bottom Sheet</td><td>Sheet detents</td><td>Bottom sheet</td><td>Filters, actions, quick forms</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Phase 2: Route Configuration</h2>
+
+Translate the navigation graph into typed, maintainable route definitions.
+
+<h3>React Navigation / Expo Router</h3>
+
+<pre class="code-block"><code>// --- Route param types (single source of truth) ---
+type RootStackParamList = {
+  Auth: undefined;
+  Main: undefined;
+  CreatePost: { draftId?: string };
+  Payment: { orderId: string; amount: number };
+};
+
+type AuthStackParamList = {
+  Login: { returnTo?: string };
+  Register: undefined;
+  ForgotPassword: undefined;
+  ResetCode: { email: string };
+};
+
+type MainTabParamList = {
+  HomeTab: undefined;
+  SearchTab: undefined;
+  ProfileTab: undefined;
+};
+
+type HomeStackParamList = {
+  Feed: undefined;
+  Detail: { itemId: string };
+  Action: { itemId: string; actionType: 'share' | 'report' };
+};
+
+// --- Navigator structure ---
+// Root (Stack)
+//   ├── Auth (Stack) ← shown when !isAuthenticated
+//   │     ├── Login
+//   │     ├── Register
+//   │     ├── ForgotPassword
+//   │     └── ResetCode
+//   ├── Main (BottomTab) ← shown when isAuthenticated
+//   │     ├── HomeTab (Stack)
+//   │     │     ├── Feed
+//   │     │     ├── Detail
+//   │     │     └── Action
+//   │     ├── SearchTab (Stack)
+//   │     └── ProfileTab (Stack)
+//   └── Modal Group
+//         ├── CreatePost
+//         └── Payment</code></pre>
+
+<h3>GoRouter (Flutter)</h3>
+
+<pre class="code-block"><code>// --- Route definitions ---
+final router = GoRouter(
+  initialLocation: '/',
+  redirect: (context, state) {
+    final isAuth = ref.read(authProvider).isAuthenticated;
+    final isAuthRoute = state.matchedLocation.startsWith('/auth');
+
+    if (!isAuth &amp;&amp; !isAuthRoute) return '/auth/login';
+    if (isAuth &amp;&amp; isAuthRoute) return '/';
+    return null;
+  },
+  routes: [
+    ShellRoute(
+      builder: (context, state, child) =&gt; MainShell(child: child),
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (_, __) =&gt; const FeedScreen(),
+          routes: [
+            GoRoute(
+              path: 'detail/:itemId',
+              builder: (_, state) =&gt; DetailScreen(
+                itemId: state.pathParameters['itemId']!,
+              ),
+            ),
+          ],
+        ),
+        GoRoute(path: '/search', builder: (_, __) =&gt; const SearchScreen()),
+        GoRoute(path: '/profile', builder: (_, __) =&gt; const ProfileScreen()),
+      ],
+    ),
+    GoRoute(path: '/auth/login', builder: (_, __) =&gt; const LoginScreen()),
+    GoRoute(path: '/auth/register', builder: (_, __) =&gt; const RegisterScreen()),
+  ],
+);</code></pre>
+
+<h3>SwiftUI NavigationStack</h3>
+
+<pre class="code-block"><code>// --- Route enum (type-safe) ---
+enum AppRoute: Hashable {
+    case feed
+    case detail(itemId: String)
+    case action(itemId: String, actionType: ActionType)
+    case profile(userId: String)
+    case settings
+}
+
+enum ActionType: String, Hashable {
+    case share, report
+}
+
+// --- Navigation path ---
+@Observable class Router {
+    var path = NavigationPath()
+    var presentedSheet: SheetDestination?
+
+    func push(_ route: AppRoute) { path.append(route) }
+    func pop() { path.removeLast() }
+    func popToRoot() { path.removeLast(path.count) }
+    func present(_ sheet: SheetDestination) { presentedSheet = sheet }
+}
+
+// --- Root view ---
+struct ContentView: View {
+    @State private var router = Router()
+
+    var body: some View {
+        NavigationStack(path: $router.path) {
+            FeedView()
+                .navigationDestination(for: AppRoute.self) { route in
+                    switch route {
+                    case .feed: FeedView()
+                    case .detail(let id): DetailView(itemId: id)
+                    case .action(let id, let type): ActionView(itemId: id, type: type)
+                    case .profile(let id): ProfileView(userId: id)
+                    case .settings: SettingsView()
+                    }
+                }
+        }
+        .environment(router)
+    }
+}</code></pre>
+
+<h3>Platform Route Config Comparison</h3>
+<div class="table-wrap"><table><thead><tr><th>Aspect</th><th>React Navigation 7</th><th>GoRouter (Flutter)</th><th>NavigationStack (SwiftUI)</th><th></th></tr></thead><tbody><tr><td>Route definition</td><td>Navigator components + Screen</td><td>GoRoute tree</td><td>.navigationDestination</td><td></td></tr><tr><td>Type safety</td><td>ParamList generics</td><td>Path params (string)</td><td>Hashable enum</td><td></td></tr><tr><td>Deep link mapping</td><td>linking config object</td><td>Path-based (built-in)</td><td>URL handling in AppDelegate</td><td></td></tr><tr><td>Nested navigators</td><td>Navigator inside Screen</td><td>ShellRoute</td><td>NavigationSplitView</td><td></td></tr><tr><td>Modal presentation</td><td>Group screenOptions</td><td>Custom page builder</td><td>.sheet / .fullScreenCover</td><td></td></tr><tr><td>Tab persistence</td><td>unmountOnBlur: false</td><td>StatefulShellRoute</td><td>TabView default</td><td></td></tr><tr><td>Back handling</td><td>Custom back handler</td><td>Router.of(context).pop()</td><td>@Environment dismiss</td><td></td></tr><tr><td>Param validation</td><td>Runtime (unless Zod)</td><td>Runtime</td><td>Compile-time (enum)</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Phase 3: Deep Linking Setup</h2>
+
+Deep links connect the outside world to specific screens inside your app.
+
+<h3>Deep Link Architecture</h3>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────────┐
+│                    DEEP LINK FLOW                               │
+│                                                                 │
+│  External Source                                                │
+│  (Email, SMS, QR, Web)                                          │
+│         │                                                       │
+│         ▼                                                       │
+│  ┌──────────────┐     ┌──────────────┐     ┌────────────────┐   │
+│  │ OS Intercept │────▶│ App Launch/  │────▶│ Link Parser    │   │
+│  │ (Universal   │     │ Resume       │     │ (URL → Route)  │   │
+│  │  Link / App  │     └──────────────┘     └───────┬────────┘   │
+│  │  Link)       │                                  │            │
+│  └──────────────┘                                  ▼            │
+│                                          ┌─────────────────┐    │
+│                                          │ Auth Check       │    │
+│                                          │ Is user logged   │    │
+│                                          │ in?              │    │
+│                                          └────────┬────────┘    │
+│                                    ┌──────────────┼───────┐     │
+│                                    ▼              ▼       │     │
+│                              ┌──────────┐  ┌──────────┐   │     │
+│                              │ YES:     │  │ NO:      │   │     │
+│                              │ Navigate │  │ Login →  │   │     │
+│                              │ to route │  │ redirect │   │     │
+│                              └──────────┘  └──────────┘   │     │
+│                                                           │     │
+│                              ┌─────────────────────────┐  │     │
+│                              │ Build Correct Back Stack │◀─┘     │
+│                              │ /orders → /orders/123   │        │
+│                              └─────────────────────────┘        │
+└─────────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Deep Link Configuration Checklist</h3>
+
+<ul class="skill-list"><li class="checkbox"><input type="checkbox" disabled> Define URL scheme (custom scheme + universal/app links)</li>
+<li class="checkbox"><input type="checkbox" disabled> Map every deep-linkable screen to a URL pattern</li>
+<li class="checkbox"><input type="checkbox" disabled> Configure iOS: Associated Domains + apple-app-site-association file</li>
+<li class="checkbox"><input type="checkbox" disabled> Configure Android: intent-filter + assetlinks.json</li>
+<li class="checkbox"><input type="checkbox" disabled> Handle cold start — app killed, link opens app fresh</li>
+<li class="checkbox"><input type="checkbox" disabled> Handle warm start — app backgrounded, link brings to foreground</li>
+<li class="checkbox"><input type="checkbox" disabled> Handle foreground — app is open, link received via listener</li>
+<li class="checkbox"><input type="checkbox" disabled> Build synthetic back stack for deep-linked screens</li>
+<li class="checkbox"><input type="checkbox" disabled> Handle auth requirement — save link, redirect to login, replay after auth</li>
+<li class="checkbox"><input type="checkbox" disabled> Handle invalid/expired links — show error screen, not a crash</li>
+
+</ul><h3>URL-to-Route Mapping Table</h3>
+<div class="table-wrap"><table><thead><tr><th>URL Pattern</th><th>Route</th><th>Params</th><th>Back Stack</th><th></th></tr></thead><tbody><tr><td><code class="inline-code">/</code></td><td>Home > Feed</td><td>none</td><td>(root)</td><td></td></tr><tr><td><code class="inline-code">/items/:id</code></td><td>Home > Detail</td><td>itemId: string</td><td>Home > Feed</td><td></td></tr><tr><td><code class="inline-code">/search?q=:query</code></td><td>Search > Results</td><td>query: string</td><td>Search</td><td></td></tr><tr><td><code class="inline-code">/profile/:userId</code></td><td>Profile > View</td><td>userId: string</td><td>Profile</td><td></td></tr><tr><td><code class="inline-code">/orders/:orderId</code></td><td>Orders > Detail</td><td>orderId: string</td><td>Orders > List</td><td></td></tr><tr><td><code class="inline-code">/settings/notifications</code></td><td>Profile > Settings > Notifications</td><td>none</td><td>Profile > Settings</td><td></td></tr><tr><td><code class="inline-code">/invite/:code</code></td><td>(special) Accept Invite</td><td>code: string</td><td>Home > Feed</td><td></td></tr></tbody></table></div>
+<h3>Three Deep Link States</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  STATE 1: COLD START (app killed)                            │
+│                                                              │
+│  Link received → App launches → Splash → Auth check →       │
+│  Parse link → Build back stack → Navigate to target          │
+│                                                              │
+│  Critical: Link must be captured in app launch params        │
+│  (getInitialURL / initialRoute / onGenerateRoute)            │
+├──────────────────────────────────────────────────────────────┤
+│  STATE 2: BACKGROUND (app suspended)                         │
+│                                                              │
+│  Link received → App resumes → Parse link →                  │
+│  Reset navigation state → Build back stack → Navigate        │
+│                                                              │
+│  Critical: Must handle via event listener, not launch params │
+│  (onStateChange / Linking.addEventListener / onOpenURL)      │
+├──────────────────────────────────────────────────────────────┤
+│  STATE 3: FOREGROUND (app active)                            │
+│                                                              │
+│  Link received → Parse link → Navigate (push or replace)     │
+│                                                              │
+│  Critical: Decide whether to push on top of current stack    │
+│  or reset and rebuild. Usually reset for cross-tab links.    │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 4: Auth-Gated Navigation</h2>
+
+Authentication determines which navigation tree the user sees. The navigator owns this decision entirely.
+
+<h3>Auth Navigation Architecture</h3>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────────┐
+│                    AUTH NAVIGATION GATE                          │
+│                                                                 │
+│  ┌──────────────────┐                                           │
+│  │ App Launch        │                                           │
+│  │ Check auth token  │                                           │
+│  └────────┬─────────┘                                           │
+│           │                                                     │
+│     ┌─────▼─────┐                                               │
+│     │ Has valid  │                                               │
+│     │ token?     │                                               │
+│     └─────┬─────┘                                               │
+│      YES  │   NO                                                │
+│     ┌─────▼─────┐  ┌─────────────┐                              │
+│     │ Token     │  │ Show Auth   │                              │
+│     │ expired?  │  │ Stack       │◀──── returnTo saved          │
+│     └─────┬─────┘  └──────┬──────┘                              │
+│      YES  │   NO          │                                     │
+│     ┌─────▼─────┐  ┌─────▼──────┐  ┌────────────────────┐      │
+│     │ Refresh   │  │ Show Main  │  │ Login success →     │      │
+│     │ token     │  │ Navigator  │  │ Navigate to         │      │
+│     └─────┬─────┘  └────────────┘  │ returnTo or Home    │      │
+│      OK   │  FAIL                  └────────────────────┘      │
+│     ┌─────▼─────┐  ┌─────────┐                                 │
+│     │ Show Main │  │ Clear   │                                 │
+│     │ Navigator │  │ tokens, │                                 │
+│     └───────────┘  │ show    │                                 │
+│                    │ Auth    │                                 │
+│                    └─────────┘                                 │
+└─────────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Auth Gate Implementation Pattern</h3>
+
+<pre class="code-block"><code>// Conceptual — framework-agnostic pattern
+
+ROOT NAVIGATOR decides:
+  IF (authState === 'loading')    → show SplashScreen
+  IF (authState === 'logged_out') → show AuthStack
+  IF (authState === 'logged_in')  → show MainNavigator
+
+NEVER do this inside a screen:
+  // WRONG — auth logic inside a screen component
+  function ProfileScreen() {
+    if (!user) return &lt;Navigate to=&quot;Login&quot; /&gt;  // BAD
+    return &lt;Profile /&gt;
+  }
+
+ALWAYS do this at the navigator level:
+  // RIGHT — navigator conditionally renders the correct tree
+  function RootNavigator() {
+    if (isLoading) return &lt;SplashScreen /&gt;
+    return isAuthenticated ? &lt;MainNavigator /&gt; : &lt;AuthStack /&gt;
+  }</code></pre>
+
+<h3>Session Expiry Mid-Flow</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  SCENARIO: User is filling a form, token expires             │
+│                                                              │
+│  1. API call returns 401                                     │
+│  2. Auth interceptor attempts token refresh                  │
+│  3a. Refresh succeeds → retry original request silently      │
+│  3b. Refresh fails →                                         │
+│      - Save current route + form state to returnTo           │
+│      - Navigate to Login screen                              │
+│      - After login, restore route + form state               │
+│                                                              │
+│  KEY: The user should NEVER lose form data due to session    │
+│  expiry. Save state before redirecting.                      │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Role-Based Navigation</h3>
+<div class="table-wrap"><table><thead><tr><th>User Role</th><th>Visible Tabs</th><th>Hidden Screens</th><th>Notes</th><th></th></tr></thead><tbody><tr><td>Guest</td><td>Home, Search</td><td>Profile, Orders</td><td>Read-only browsing</td><td></td></tr><tr><td>User</td><td>Home, Search, Profile, Orders</td><td>Admin</td><td>Full consumer experience</td><td></td></tr><tr><td>Admin</td><td>Home, Search, Profile, Orders, Admin</td><td>(none)</td><td>Admin tab added</td><td></td></tr><tr><td>Instructor</td><td>Home, Courses, Students, Profile</td><td>Orders, Admin</td><td>Different tab set entirely</td><td></td></tr></tbody></table></div>
+<pre class="code-block"><code>// Role-based tab rendering
+function getTabsForRole(role: UserRole): TabConfig[] {
+  const baseTabs = [
+    { name: 'Home', icon: HomeIcon, screen: 'HomeStack' },
+    { name: 'Search', icon: SearchIcon, screen: 'SearchStack' },
+  ];
+
+  switch (role) {
+    case 'admin':
+      return [...baseTabs, profileTab, ordersTab, adminTab];
+    case 'instructor':
+      return [baseTabs[0], coursesTab, studentsTab, profileTab];
+    case 'user':
+      return [...baseTabs, profileTab, ordersTab];
+    case 'guest':
+      return baseTabs;
+  }
+}</code></pre>
+<hr class="section-divider">
+<h2>Phase 5: Tab + Stack Composition</h2>
+
+The most common mobile navigation pattern is tabs at the root, with stacks inside each tab. Getting this composition right is critical.
+
+<h3>Composition Architecture</h3>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────────┐
+│                TAB + STACK COMPOSITION                          │
+│                                                                 │
+│  ┌─── BottomTabNavigator ──────────────────────────────────┐    │
+│  │                                                          │    │
+│  │  Tab 1: Home          Tab 2: Search     Tab 3: Profile   │    │
+│  │  ┌─────────────┐     ┌──────────────┐  ┌─────────────┐  │    │
+│  │  │ HomeStack   │     │ SearchStack  │  │ ProfileStack│  │    │
+│  │  │             │     │              │  │             │  │    │
+│  │  │  Feed       │     │  SearchHome  │  │  Profile    │  │    │
+│  │  │    ↓ push   │     │    ↓ push    │  │    ↓ push   │  │    │
+│  │  │  Detail     │     │  Results     │  │  EditProf   │  │    │
+│  │  │    ↓ push   │     │    ↓ push    │  │    ↓ push   │  │    │
+│  │  │  Comments   │     │  Detail*     │  │  Settings   │  │    │
+│  │  └─────────────┘     └──────────────┘  └─────────────┘  │    │
+│  │                                                          │    │
+│  │  * Detail screen reused across tabs with different stacks│    │
+│  └──────────────────────────────────────────────────────────┘    │
+│                                                                 │
+│  ┌─── Modal Layer (presented over tabs) ─────────────────┐      │
+│  │  CreateFlow (Stack): Step1 → Step2 → Step3 → Done     │      │
+│  │  PaymentFlow (Stack): Select → Card → Confirm → Rcpt  │      │
+│  └───────────────────────────────────────────────────────┘      │
+└─────────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Tab Persistence Decision</h3>
+<div class="table-wrap"><table><thead><tr><th>Behavior</th><th>Description</th><th>When to Use</th><th></th></tr></thead><tbody><tr><td>Persist stack</td><td>Tab retains its navigation stack when switching away</td><td>Default for most apps. User expects to return where they left off</td><td></td></tr><tr><td>Reset to root</td><td>Tab resets to its root screen when switching away</td><td>Content-heavy apps where stale detail screens are confusing</td><td></td></tr><tr><td>Reset on double-tap</td><td>Stack persists normally, but double-tapping the tab resets to root</td><td>Best of both worlds. Instagram, Twitter pattern</td><td></td></tr><tr><td>Selective persist</td><td>Some tabs persist (e.g., Home), others reset (e.g., Search)</td><td>Complex apps where some tabs are entry points and others are destinations</td><td></td></tr></tbody></table></div>
+<h3>Shared Screens Across Tabs</h3>
+
+When the same screen (e.g., ItemDetail) appears in multiple tabs:
+
+<pre class="code-block"><code>APPROACH 1: Duplicate screen in each stack (recommended)
+  HomeStack: Feed → ItemDetail (instance A)
+  SearchStack: Results → ItemDetail (instance B)
+  - Separate navigation state per tab
+  - Back button always correct
+  - Slightly more memory, but predictable
+
+APPROACH 2: Shared screen with tab tracking
+  Single ItemDetail screen, tracks which tab opened it
+  - Less duplication
+  - Back behavior requires manual stack management
+  - Risk: switching tabs while Detail is open — where does it go?
+
+RECOMMENDATION: Use Approach 1. The memory cost is negligible.
+The predictability gain is significant.</code></pre>
+<hr class="section-divider">
+<h2>Phase 6: Navigation State Persistence</h2>
+
+When the app is killed and restarted, should navigation state be restored?
+
+<h3>Persistence Decision Matrix</h3>
+<div class="table-wrap"><table><thead><tr><th>App Type</th><th>Restore Nav State?</th><th>Rationale</th><th></th></tr></thead><tbody><tr><td>Banking / Finance</td><td>NO</td><td>Security — always start at authenticated entry point</td><td></td></tr><tr><td>E-commerce</td><td>Partial — restore cart, not browsing</td><td>Cart is valuable; browsing history is ephemeral</td><td></td></tr><tr><td>Social media</td><td>YES — restore scroll position + tab</td><td>Users expect to continue where they left off</td><td></td></tr><tr><td>Productivity / Notes</td><td>YES — restore document + position</td><td>Losing position in a long document is frustrating</td><td></td></tr><tr><td>Games</td><td>YES — restore game state via save</td><td>Game progress is the core value</td><td></td></tr><tr><td>Onboarding / Setup</td><td>NO — restart the wizard</td><td>Partial onboarding state is error-prone</td><td></td></tr></tbody></table></div>
+<h3>State Persistence Architecture</h3>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────────┐
+│               STATE PERSISTENCE FLOW                            │
+│                                                                 │
+│  APP BACKGROUNDED / KILLED                                      │
+│  ┌──────────────────────┐                                       │
+│  │ Serialize nav state   │                                       │
+│  │ (routes + params)     │──▶ AsyncStorage / MMKV / UserDefaults│
+│  └──────────────────────┘                                       │
+│                                                                 │
+│  APP LAUNCHED                                                   │
+│  ┌──────────────────────┐     ┌──────────────────────┐          │
+│  │ Read persisted state  │────▶│ Validate state       │          │
+│  └──────────────────────┘     │ - Auth still valid?  │          │
+│                               │ - Routes still exist?│          │
+│                               │ - Params still valid?│          │
+│                               └──────────┬───────────┘          │
+│                                    VALID  │  INVALID            │
+│                                ┌──────────▼──┐  ┌────────────┐  │
+│                                │ Restore     │  │ Discard,   │  │
+│                                │ nav state   │  │ start fresh│  │
+│                                └─────────────┘  └────────────┘  │
+└─────────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>What to Persist and What to Skip</h3>
+<div class="table-wrap"><table><thead><tr><th>Persist</th><th>Skip</th><th></th></tr></thead><tbody><tr><td>Current tab index</td><td>Form input (use form-specific drafts)</td><td></td></tr><tr><td>Stack routes (screen names + params)</td><td>Scroll position (restore separately)</td><td></td></tr><tr><td>Modal open state (if resumable)</td><td>Temporary UI state (tooltips, popovers)</td><td></td></tr><tr><td>Selected filters / search query</td><td>API response data (refetch on mount)</td><td></td></tr><tr><td>Deep link returnTo state</td><td>Expired session tokens</td><td></td></tr></tbody></table></div>
+<h3>Validation Before Restore</h3>
+
+<pre class="code-block"><code>function validatePersistedState(state: NavigationState): boolean {
+  // 1. Check schema version — did the nav tree change since last persist?
+  if (state.schemaVersion !== CURRENT_NAV_SCHEMA_VERSION) return false;
+
+  // 2. Check auth — is the user still logged in?
+  if (requiresAuth(state) &amp;&amp; !isAuthenticated()) return false;
+
+  // 3. Check routes — do all persisted routes still exist?
+  for (const route of extractRoutes(state)) {
+    if (!routeRegistry.has(route.name)) return false;
+  }
+
+  // 4. Check staleness — is the state too old?
+  if (Date.now() - state.timestamp &gt; MAX_STATE_AGE_MS) return false;
+
+  return true;
+}</code></pre>
+<hr class="section-divider">
+<h2>Phase 7: Testing Navigation</h2>
+
+Navigation is the highest-risk surface area in a mobile app. Broken navigation means a broken app.
+
+<h3>Navigation Test Matrix</h3>
+<div class="table-wrap"><table><thead><tr><th>Test Category</th><th>What to Verify</th><th>Test Method</th><th></th></tr></thead><tbody><tr><td>Forward navigation</td><td>Tapping a list item pushes the detail screen with correct params</td><td>Integration test</td><td></td></tr><tr><td>Back navigation</td><td>Pressing back from detail returns to the list with scroll position preserved</td><td>Integration test</td><td></td></tr><tr><td>Tab switching</td><td>Switching tabs preserves per-tab stack state</td><td>Integration test</td><td></td></tr><tr><td>Deep link cold start</td><td>Opening a deep link from killed state shows the correct screen with correct back stack</td><td>E2E test (Detox/Maestro)</td><td></td></tr><tr><td>Deep link warm start</td><td>Opening a deep link with app backgrounded navigates correctly</td><td>E2E test</td><td></td></tr><tr><td>Auth gate</td><td>Unauthenticated user accessing protected route sees login, then redirects after auth</td><td>Integration test</td><td></td></tr><tr><td>Session expiry</td><td>Expired token during navigation redirects to login with returnTo</td><td>Integration test</td><td></td></tr><tr><td>Modal dismiss</td><td>Dismissing a modal returns to the correct underlying screen</td><td>Integration test</td><td></td></tr><tr><td>System back (Android)</td><td>Android back button behavior matches expectations at every screen</td><td>Manual + E2E</td><td></td></tr><tr><td>Swipe back (iOS)</td><td>iOS swipe-back gesture works on all stack screens, disabled on modals</td><td>Manual test</td><td></td></tr><tr><td>Role switch</td><td>Changing user role updates visible tabs without full app restart</td><td>Integration test</td><td></td></tr><tr><td>Offline navigation</td><td>Navigation works when offline (no network calls block transitions)</td><td>Integration test</td><td></td></tr></tbody></table></div>
+<h3>Deep Link Test Scenarios</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  DEEP LINK TEST PLAN                                         │
+│                                                              │
+│  For each deep-linkable screen, test ALL of these:           │
+│                                                              │
+│  1. Cold start (app killed)                                  │
+│     - Open link → app launches → correct screen shown        │
+│     - Press back → lands on correct parent screen            │
+│                                                              │
+│  2. Background (app suspended)                               │
+│     - Open link → app resumes → navigates to screen          │
+│     - Previous nav state is replaced, not stacked on top     │
+│                                                              │
+│  3. Foreground (app active, same tab)                        │
+│     - Open link → navigates within current tab               │
+│                                                              │
+│  4. Foreground (app active, different tab)                   │
+│     - Open link → switches tab → navigates to screen         │
+│                                                              │
+│  5. Auth required (user logged out)                          │
+│     - Open link → shows login → after login → correct screen │
+│                                                              │
+│  6. Invalid link (bad params or deleted resource)            │
+│     - Open link → shows error screen, not crash              │
+│                                                              │
+│  7. Expired link (time-sensitive content)                    │
+│     - Open link → shows &quot;expired&quot; message                    │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Back Stack Verification</h3>
+
+For every screen, document the expected back behavior:
+<div class="table-wrap"><table><thead><tr><th>Current Screen</th><th>Back Action</th><th>Expected Destination</th><th>Stack After Back</th><th></th></tr></thead><tbody><tr><td>Feed</td><td>(disabled or exit)</td><td>Exit app / no-op</td><td>[]</td><td></td></tr><tr><td>Detail (from Feed)</td><td>Pop</td><td>Feed</td><td>[Feed]</td><td></td></tr><tr><td>Detail (from deep link)</td><td>Pop</td><td>Feed (synthetic)</td><td>[Feed]</td><td></td></tr><tr><td>Detail (from Search)</td><td>Pop</td><td>Search Results</td><td>[Search, Results]</td><td></td></tr><tr><td>Create Post (modal)</td><td>Dismiss</td><td>Previous screen (any)</td><td>(unchanged)</td><td></td></tr><tr><td>Settings > Notifications</td><td>Pop</td><td>Settings</td><td>[Profile, Settings]</td><td></td></tr><tr><td>Login</td><td>(disabled)</td><td>No-op</td><td>[Login]</td><td></td></tr><tr><td>Onboarding Step 3</td><td>Pop</td><td>Step 2</td><td>[Step1, Step2]</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Navigation Anti-Patterns</h2>
+
+Avoid these patterns that cause bugs, crashes, and confused users.
+<div class="table-wrap"><table><thead><tr><th>Anti-Pattern</th><th>Problem</th><th>Correct Pattern</th><th></th></tr></thead><tbody><tr><td>Navigating inside useEffect/initState without guards</td><td>Race conditions, double navigation</td><td>Use navigation-ready callbacks, guard with isMounted</td><td></td></tr><tr><td>Passing complex objects as route params</td><td>Serialization failures, stale data</td><td>Pass IDs, fetch data in the destination screen</td><td></td></tr><tr><td>Using global state to communicate between screens</td><td>Tight coupling, stale state on back</td><td>Pass params or use route-scoped state</td><td></td></tr><tr><td>Checking auth inside every screen</td><td>Duplicated logic, inconsistent gates</td><td>Handle auth at the navigator level</td><td></td></tr><tr><td>Hardcoding route strings</td><td>Typos cause silent failures</td><td>Use typed route enums or constants</td><td></td></tr><tr><td>Resetting entire nav state on logout</td><td>Loss of deep link returnTo</td><td>Replace root route, preserve returnTo in secure storage</td><td></td></tr><tr><td>Ignoring Android back button</td><td>App feels broken on Android</td><td>Handle hardware back at every navigator level</td><td></td></tr><tr><td>Pushing the same screen twice on fast double-tap</td><td>Duplicate screens in stack</td><td>Debounce navigation actions or use <code class="inline-code">getId</code></td><td></td></tr><tr><td>Using replace when you need push</td><td>Back button skips a screen</td><td>Map each transition to push, replace, or reset explicitly</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Tips for Best Results</h2>
+
+<ul class="skill-list"><li class="ordered"><strong>Draw the full navigation graph on paper or whiteboard before opening your IDE.</strong> A 30-minute graph session saves days of refactoring. Every navigation bug you will ever encounter is a graph bug you missed.</li>
+
+<li class="ordered"><strong>Type every route param at the boundary.</strong> When a screen receives params, validate them immediately. Treat navigation params like API inputs — never trust them blindly.</li>
+
+<li class="ordered"><strong>Test deep links from all three states on real devices.</strong> Simulators handle deep links differently than real hardware. Cold start behavior in particular varies between iOS and Android.</li>
+
+<li class="ordered"><strong>Use a single file for your entire route registry.</strong> When route definitions are scattered across 20 files, nobody knows the full graph. One file, one source of truth, one place to audit.</li>
+
+<li class="ordered"><strong>Document back behavior in a table, not in your head.</strong> The back stack is invisible state. If you cannot write down where every back press lands, your users will discover the bugs for you.</li>
+
+<li class="ordered"><strong>Handle the "double tap" problem from day one.</strong> Fast double-taps on navigation buttons push duplicate screens. Debounce navigation calls or use navigator-level deduplication. This is the single most common navigation bug in production apps.</li>
+
+<li class="ordered"><strong>Separate navigation events from navigation actions.</strong> "User tapped a list item" is an event. "Push DetailScreen with itemId" is an action. Keep the mapping in one place. When analytics, logging, or A/B tests need to intercept navigation, they hook into the event layer, not the action layer.</li>
+
+<li class="ordered"><strong>Version your navigation schema.</strong> When you add, remove, or rename screens, bump a schema version. Persisted navigation state from an old schema should be discarded gracefully, not crash the app on launch.</li></ul>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="mobile-feature.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">Mobile Feature Build — End-to-End on Any Platform</span></span></a>
+    <a href="mobile-offline.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Mobile Offline-First — Works Without Signal, Syncs When Connected</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    80 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

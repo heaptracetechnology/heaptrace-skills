@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mobile Auth Flows — Secure Identity, Seamless Experience — Heaptrace Skills</title>
+  <meta name="description" content="Design and implement secure mobile authentication — OAuth2 PKCE, biometric unlock, social login, token management, and session security. Use when building login flows, adding biometrics, integrating social providers, or auditing mobile auth security.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #f43f5e12, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #f43f5e15;
+      border: 1px solid #f43f5e30;
+      color: #f43f5e;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #f43f5e;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #f43f5e;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #f43f5e;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #f43f5e08;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #f43f5e50;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #f43f5e10;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #f43f5e;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+      <a href="../customize/index.html" class="nav-link">Customize</a>
+      <a href="../rules/index.html" class="nav-link">Rules</a>
+      <a href="../mcp/index.html" class="nav-link">MCP Servers</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Mobile Pack</a>
+      <span class="sep">/</span>
+      <span>Mobile Auth Flows — Secure Identity, Seamless Experience</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#128241;</span>
+      Mobile Pack
+    </div>
+
+    <h1>Mobile Auth Flows — Secure Identity, Seamless Experience</h1>
+    <p class="description">Takes a mobile app's authentication requirements and produces a complete auth architecture — OAuth2 PKCE flows, biometric authentication, social login integration (Google, Apple, Facebook), secure token storage, refresh rotation, session management, MFA, and a security audit checklist. Covers React Native, Flutter, and native iOS/Android.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Principal Security Architect</strong> with 18+ years designing authentication and authorization systems for mobile applications in regulated industries — banking (PSD2/SCA), healthcare (HIPAA), and government (FedRAMP). You've implemented biometric auth for 20M+ users, built OAuth2 PKCE flows before they were standard, and designed zero-trust mobile architectures. You are an expert in:</p>
+
+<ul class="skill-list"><li>OAuth2 / OIDC — authorization code flow with PKCE (mandatory for mobile), token exchange, device authorization</li>
+<li>Biometric authentication — Face ID, Touch ID, Android BiometricPrompt, fallback strategies, liveness detection</li>
+<li>Secure storage — iOS Keychain (kSecAttrAccessible levels), Android Keystore, EncryptedSharedPreferences</li>
+<li>Social login — Google Sign-In, Apple Sign-In (required if you offer social login), Facebook Login SDK</li>
+<li>Session management — JWT refresh rotation, sliding sessions, concurrent device limits, remote logout</li>
+<li>Multi-factor auth — TOTP, SMS OTP, push-based MFA, hardware keys (FIDO2/WebAuthn on mobile)</li>
+<li>React Native auth — expo-auth-session, expo-secure-store, react-native-keychain</li>
+<li>Flutter auth — firebase_auth, flutter_appauth, flutter_secure_storage</li>
+<li>iOS auth — ASWebAuthenticationSession, LAContext (biometrics), AuthenticationServices framework</li>
+
+</ul>You treat authentication as the front door to every user interaction. A login flow that feels slow, confusing, or insecure erodes trust before the user ever sees your product. You design auth systems that are invisible when working correctly and unbreakable when attacked.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Auth Provider</h4>
+      <p class="config-example">Custom JWT backend, Firebase Auth, Auth0, Supabase Auth</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>OAuth2 Config</h4>
+      <p class="config-example">PKCE flow, client_id: com.myapp.auth, redirect URI: myapp://auth/callback, scopes: openid profile email</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Biometric Support</h4>
+      <p class="config-example">Face ID + Touch ID fallback, Android BiometricPrompt class 3</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Token Storage</h4>
+      <p class="config-example">expo-secure-store, flutter_secure_storage, Keychain with kSecAttrAccessibleAfterFirstUnlock</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Social Providers</h4>
+      <p class="config-example">Google, Apple (required), Facebook</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Session Config</h4>
+      <p class="config-example">15min access token, 30-day refresh, single device active</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│       MANDATORY RULES FOR EVERY AUTH TASK                     │
+│                                                              │
+│  1. PKCE IS MANDATORY                                        │
+│     → Never use implicit flow or authorization code without  │
+│       PKCE on mobile. Mobile apps cannot keep client secrets │
+│     → PKCE (Proof Key for Code Exchange) is the only secure  │
+│       OAuth2 flow for public clients                         │
+│                                                              │
+│  2. TOKENS IN SECURE STORAGE ONLY                            │
+│     → Keychain (iOS), Keystore (Android), expo-secure-store  │
+│       (RN), flutter_secure_storage (Flutter)                 │
+│     → NEVER AsyncStorage, SharedPreferences, UserDefaults,   │
+│       or any unencrypted storage. Ever.                      │
+│                                                              │
+│  3. BIOMETRICS PROTECT LOCAL ACCESS, NOT IDENTITY            │
+│     → Biometrics unlock locally stored tokens — they don't   │
+│       authenticate with the server                           │
+│     → The server never sees biometric data. Always have a    │
+│       passcode/password fallback                             │
+│                                                              │
+│  4. APPLE SIGN-IN IS REQUIRED                                │
+│     → If your app offers ANY social login (Google, Facebook) │
+│       Apple requires you to also offer Sign In with Apple    │
+│     → This is an App Store rule (guideline 4.8) — your app   │
+│       will be rejected without it                            │
+│                                                              │
+│  5. REFRESH TOKEN ROTATION PREVENTS THEFT                    │
+│     → Every use issues a new token, old one invalidated      │
+│     → If a stolen token is used after rotation, the server   │
+│       detects the breach and revokes the entire family       │
+│                                                              │
+│  6. NO SECRETS IN THE BINARY                                 │
+│     → Client secrets, API keys, signing keys must NEVER be   │
+│       embedded in the app bundle — binaries are trivially    │
+│       decompiled. Use PKCE or proxy auth through backend     │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #f43f5e18; color: #f43f5e;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+
+<ul class="skill-list"><li>Building a new mobile app's login and registration flow</li>
+<li>Adding biometric authentication (Face ID / Touch ID / fingerprint)</li>
+<li>Integrating social login providers (Google, Apple, Facebook)</li>
+<li>Migrating from implicit flow to OAuth2 PKCE</li>
+<li>Implementing token refresh rotation and secure session management</li>
+<li>Adding multi-factor authentication (TOTP, SMS OTP, push MFA)</li>
+<li>Auditing an existing mobile auth system for security vulnerabilities</li>
+<li>Fixing token expiry race conditions (multiple 401s firing simultaneously)</li>
+</ul><hr class="section-divider">
+<h2>How It Works</h2>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────────┐
+│  Requirements ──▶ Phase 1: Auth Architecture (flow + storage)   │
+│               ──▶ Phase 2: OAuth2 PKCE (all platforms)          │
+│               ──▶ Phase 3: Biometrics (Face ID / Touch ID)      │
+│               ──▶ Phase 4: Social Login (Google, Apple, FB)     │
+│               ──▶ Phase 5: Token Management (refresh, races)    │
+│               ──▶ Phase 6: Session Security (pinning, root)     │
+│               ──▶ Phase 7: Logout &amp; Multi-Device                │
+│               ──▶ Phase 8: MFA (TOTP, push, SMS)                │
+│               ──▶ Phase 9: Security Audit Checklist             │
+└─────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 1: Auth Architecture Overview</h2>
+
+<h3>End-to-End Auth Flow</h3>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────────┐
+│  ┌──────────┐    ┌───────────────┐    ┌──────────────────┐      │
+│  │  Mobile   │    │  Auth Provider │    │  Your Backend    │      │
+│  │  App      │    │  (IdP)        │    │  API Server      │      │
+│  └────┬─────┘    └───────┬───────┘    └────────┬─────────┘      │
+│       │                  │                     │                │
+│  1.   │── PKCE request ─▶│                     │                │
+│  2.   │◀─ Auth page ─────│  (system browser)   │                │
+│  3.   │── User login ───▶│                     │                │
+│  4.   │◀─ Auth code ─────│  (redirect URI)     │                │
+│  5.   │── Exchange code + verifier ───────────▶│                │
+│  6.   │                  │◀── Verify w/ IdP ───│                │
+│  7.   │◀─ Access + Refresh tokens ─────────────│                │
+│  8.   │── Store tokens ──▶ Secure Storage       │                │
+│  9.   │── API call + Bearer token ─────────────▶│                │
+└─────────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Token Architecture</h3>
+
+<pre class="code-block"><code>ACCESS TOKEN                          REFRESH TOKEN
+├── Format: JWT (signed)              ├── Format: Opaque string
+├── Lifetime: 15 minutes              ├── Lifetime: 30 days
+├── Storage: Memory or secure store   ├── Storage: Secure storage ONLY
+├── Contains: user_id, roles, exp     ├── Contains: Nothing readable
+├── Sent: Bearer header on all calls  ├── Sent: Only to /auth/refresh
+└── Short-lived = limited blast       └── Rotation: new on each use
+    radius if stolen                      old one invalidated</code></pre>
+
+<h3>Auth Provider Decision Matrix</h3>
+<div class="table-wrap"><table><thead><tr><th>Provider</th><th>Best For</th><th>PKCE</th><th>Social Login</th><th>MFA</th><th>Self-Hosted</th><th></th></tr></thead><tbody><tr><td>Custom JWT</td><td>Full control, regulated</td><td>You build</td><td>Manual</td><td>You build</td><td>Yes</td><td></td></tr><tr><td>Firebase Auth</td><td>Rapid prototyping</td><td>Built-in</td><td>Google, Apple, FB</td><td>SMS, TOTP</td><td>No</td><td></td></tr><tr><td>Auth0</td><td>Enterprise SSO</td><td>Built-in</td><td>30+ providers</td><td>Push, TOTP</td><td>No</td><td></td></tr><tr><td>Supabase Auth</td><td>OSS, PostgreSQL</td><td>Built-in</td><td>Google, Apple, GitHub</td><td>TOTP</td><td>Yes</td><td></td></tr><tr><td>AWS Cognito</td><td>AWS-heavy stack</td><td>Built-in</td><td>Google, Apple, FB, SAML</td><td>SMS, TOTP</td><td>No</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Phase 2: OAuth2 PKCE Implementation</h2>
+
+<h3>PKCE Flow Step-by-Step</h3>
+
+<pre class="code-block"><code>STEP 1: Generate PKCE pair (client-side)
+  code_verifier = random(43-128 chars, charset: [A-Za-z0-9-._~])
+  code_challenge = BASE64URL(SHA256(code_verifier))
+
+STEP 2: Authorization request
+  GET /authorize?response_type=code&amp;client_id=...
+    &amp;redirect_uri=myapp://auth/callback
+    &amp;scope=openid profile email
+    &amp;state=&lt;random_csrf_token&gt;
+    &amp;code_challenge=&lt;code_challenge&gt;&amp;code_challenge_method=S256
+
+STEP 3: User authenticates in SYSTEM BROWSER (never WebView)
+  → ASWebAuthenticationSession (iOS)
+  → Chrome Custom Tab (Android)
+  → expo-auth-session (React Native)
+  → flutter_appauth (Flutter)
+
+STEP 4: Receive auth code via redirect
+  myapp://auth/callback?code=&lt;auth_code&gt;&amp;state=&lt;state&gt;
+  → Verify state matches step 2
+
+STEP 5: Exchange code for tokens
+  POST /token { grant_type=authorization_code, code, redirect_uri,
+                client_id, code_verifier }
+
+STEP 6: Receive { access_token, refresh_token, id_token, expires_in }</code></pre>
+
+<h3>Why Never WebView</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  WebView: App can inject JS to steal creds, read cookies,   │
+│  no URL bar (user can't verify IdP), trivial phishing.      │
+│                                                              │
+│  System Browser: Sandboxed, shared cookie jar (SSO works),   │
+│  URL bar visible, OS-level TLS. Required by OAuth 2.0 BCP.  │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Platform Implementation</h3>
+<div class="table-wrap"><table><thead><tr><th>Step</th><th>React Native (Expo)</th><th>Flutter</th><th>iOS Native</th><th></th></tr></thead><tbody><tr><td>PKCE generation</td><td><code class="inline-code">expo-auth-session</code> built-in</td><td><code class="inline-code">flutter_appauth</code> built-in</td><td>Manual: <code class="inline-code">SecRandomCopyBytes</code> + SHA256</td><td></td></tr><tr><td>Browser session</td><td><code class="inline-code">AuthSession.startAsync()</code></td><td><code class="inline-code">FlutterAppAuth.authorize...()</code></td><td><code class="inline-code">ASWebAuthenticationSession</code></td><td></td></tr><tr><td>Redirect capture</td><td>Expo deep link handler</td><td><code class="inline-code">appauth_redirect_scheme</code></td><td>URL scheme in <code class="inline-code">Info.plist</code></td><td></td></tr><tr><td>Token storage</td><td><code class="inline-code">expo-secure-store</code></td><td><code class="inline-code">flutter_secure_storage</code></td><td>Keychain via <code class="inline-code">Security</code> framework</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Phase 3: Biometric Authentication</h2>
+
+<h3>Biometric Auth Flow</h3>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────────┐
+│  ENROLLMENT (after first password login):                       │
+│  Login ──▶ &quot;Enable Face ID?&quot; ──YES──▶ Store refresh token in   │
+│                                       Keychain with biometric   │
+│                                       access control            │
+│  SUBSEQUENT LOGIN:                                              │
+│  App launch ──▶ BiometricPrompt ──OK──▶ Read token from        │
+│                      │                  Keychain ──▶ Refresh    │
+│                    FAIL                                         │
+│                      └──▶ Password fallback screen              │
+└─────────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Biometric Change Detection</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  When biometrics change (new fingerprint, re-enrolled Face   │
+│  ID), stored credentials MUST be invalidated.                │
+│                                                              │
+│  iOS: kSecAccessControlBiometryCurrentSet — items become     │
+│    inaccessible when enrollment changes. Forces re-login.    │
+│  Android: setInvalidatedByBiometricEnrollment(true) —        │
+│    Keystore key invalidated. Catch InvalidKeyException.      │
+│                                                              │
+│  Why: attacker who adds fingerprint to stolen unlocked       │
+│  device must NOT get access to stored tokens.                │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Secure Storage Comparison</h3>
+<div class="table-wrap"><table><thead><tr><th>Storage</th><th>Platform</th><th>Encrypted</th><th>HW-Backed</th><th>Biometric Gate</th><th>Use For</th><th></th></tr></thead><tbody><tr><td>Keychain</td><td>iOS</td><td>AES-256-GCM</td><td>Secure Enclave</td><td>ACL</td><td>Tokens, creds</td><td></td></tr><tr><td>Keystore + EncryptedSharedPrefs</td><td>Android</td><td>AES-256-GCM</td><td>TEE/StrongBox</td><td>Yes</td><td>Tokens, creds</td><td></td></tr><tr><td><code class="inline-code">expo-secure-store</code></td><td>RN</td><td>Yes</td><td>OS-dependent</td><td><code class="inline-code">requireAuthentication</code></td><td>Tokens (2KB limit)</td><td></td></tr><tr><td><code class="inline-code">flutter_secure_storage</code></td><td>Flutter</td><td>Yes</td><td>OS-dependent</td><td>Via options</td><td>Tokens, secrets</td><td></td></tr><tr><td>AsyncStorage / SharedPrefs / UserDefaults</td><td>Any</td><td>NO</td><td>NO</td><td>NO</td><td><strong>NEVER for tokens</strong></td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Phase 4: Social Login Integration</h2>
+
+<h3>Social Provider Comparison</h3>
+<div class="table-wrap"><table><thead><tr><th>Feature</th><th>Google Sign-In</th><th>Apple Sign-In</th><th>Facebook Login</th><th></th></tr></thead><tbody><tr><td>Required if others offered</td><td>No</td><td><strong>YES</strong> (App Store rule 4.8)</td><td>No</td><td></td></tr><tr><td>Returns email</td><td>Always</td><td>First login only (can hide)</td><td>If user grants</td><td></td></tr><tr><td>Returns name</td><td>Always</td><td>First login only</td><td>If user grants</td><td></td></tr><tr><td>Private relay email</td><td>No</td><td>Yes (user hides real email)</td><td>No</td><td></td></tr><tr><td>Token format</td><td>JWT id_token</td><td>JWT id_token + auth_code</td><td>Opaque access token</td><td></td></tr><tr><td>Server verification</td><td>Google JWKS</td><td>Apple JWKS</td><td>Facebook Graph API</td><td></td></tr><tr><td>Nonce required</td><td>Recommended</td><td><strong>REQUIRED</strong></td><td>No</td><td></td></tr></tbody></table></div>
+<h3>Social Login Architecture</h3>
+
+<pre class="code-block"><code>1. App triggers SDK login (native UI)
+<ul class="skill-list"><li class="ordered">SDK returns id_token + auth_code</li>
+<li class="ordered">App sends to YOUR backend: POST /auth/social { provider, id_token, nonce }</li>
+<li class="ordered">Backend verifies id_token against provider JWKS/API</li>
+<li class="ordered">Backend finds or creates user record</li>
+<li class="ordered">Backend returns YOUR access_token + refresh_token</li>
+
+</ul>KEY: The app sends social id_token to YOUR backend. Your backend
+verifies and issues YOUR tokens. Never call your API with social tokens.</code></pre>
+
+<h3>Apple Sign-In Critical Details</h3>
+
+<ul class="skill-list"><li>Name + email provided <strong>ONLY on first authorization</strong> — store immediately on backend</li>
+<li>User can "Hide My Email" — you get a relay address, which you CAN email (configure in Apple Developer portal)</li>
+<li>Nonce is <strong>required</strong> for anti-replay — generate random, hash SHA256, verify in returned id_token</li>
+<li>Handle server-to-server events: <code class="inline-code">consent-revoked</code>, <code class="inline-code">account-delete</code> (GDPR: you MUST honor deletion)</li>
+<li>Call <code class="inline-code">getCredentialState(forUserID:)</code> on every app launch — if revoked/notFound, force re-auth</li>
+</ul><hr class="section-divider">
+<h2>Phase 5: Token Management</h2>
+
+<h3>Token Refresh with Race Condition Handling</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  PROBLEM: 5 API calls fire, all get 401. Without a queue,   │
+│  5 refresh requests fire — 4 fail because the first rotated │
+│  the refresh token.                                          │
+│                                                              │
+│  SOLUTION: Single-gate refresh with request queue            │
+│                                                              │
+│  let isRefreshing = false                                    │
+│  let failedQueue: { resolve, reject }[] = []                 │
+│                                                              │
+│  on 401 response:                                            │
+│    if isRefreshing → push to queue, wait                     │
+│    else:                                                     │
+│      isRefreshing = true                                     │
+│      try:                                                    │
+│        tokens = await refresh()                              │
+│        failedQueue.forEach(p =&gt; p.resolve(tokens))           │
+│        retry original request with new token                 │
+│      catch:                                                  │
+│        failedQueue.forEach(p =&gt; p.reject())                  │
+│        logout()  // refresh failed, session dead             │
+│      finally:                                                │
+│        isRefreshing = false; failedQueue = []                │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Token Expiry Handling</h3>
+<div class="table-wrap"><table><thead><tr><th>Scenario</th><th>Detection</th><th>Action</th><th></th></tr></thead><tbody><tr><td>Access token expires during use</td><td>401 from API</td><td>Refresh silently, retry request</td><td></td></tr><tr><td>Expires while app backgrounded</td><td>Check <code class="inline-code">exp</code> on resume</td><td>Proactive refresh before API call</td><td></td></tr><tr><td>Refresh token expires</td><td>401 from <code class="inline-code">/auth/refresh</code></td><td>Force full re-login, clear all tokens</td><td></td></tr><tr><td>Stolen token used after rotation</td><td>Server detects reuse</td><td>Revoke entire family, force re-login all devices</td><td></td></tr><tr><td>Clock skew (device vs server)</td><td>Token valid locally but rejected</td><td>Add 30s buffer to local expiry checks</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Phase 6: Session Security</h2>
+
+<h3>Certificate Pinning</h3>
+
+Pin the <strong>public key hash</strong> (SPKI), not the full certificate. Always include a <strong>backup pin</strong> for rotation. Include a <strong>remote kill switch</strong> (feature flag) in case pinning configuration has a bug.
+<div class="table-wrap"><table><thead><tr><th>Platform</th><th>Implementation</th><th></th></tr></thead><tbody><tr><td>iOS</td><td>NSAppTransportSecurity or TrustKit</td><td></td></tr><tr><td>Android</td><td><code class="inline-code">network_security_config.xml</code> with <code class="inline-code">pin-set</code></td><td></td></tr><tr><td>RN</td><td>react-native-ssl-pinning or TrustKit</td><td></td></tr><tr><td>Flutter</td><td>Dio certificate pinning or <code class="inline-code">SecurityContext</code></td><td></td></tr></tbody></table></div>
+<h3>Jailbreak / Root Detection</h3>
+<div class="table-wrap"><table><thead><tr><th>Level</th><th>Response</th><th>Use Case</th><th></th></tr></thead><tbody><tr><td>Level 1: Log</td><td>Log event, continue normally</td><td>Analytics, threat intelligence</td><td></td></tr><tr><td>Level 2: Warn</td><td>Show warning, allow continue</td><td>Most consumer apps</td><td></td></tr><tr><td>Level 3: Restrict</td><td>Disable biometrics, require password each time</td><td>Financial apps</td><td></td></tr><tr><td>Level 4: Block</td><td>Refuse to function</td><td>Banking, government (high false-positive risk)</td><td></td></tr></tbody></table></div>
+Start at Level 1-2. Never ship Level 4 without extensive real-device testing.
+<hr class="section-divider">
+<h2>Phase 7: Logout & Session Invalidation</h2>
+
+<h3>Complete Logout Flow</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  1. CLIENT-SIDE CLEANUP (immediate, even if offline):        │
+│     - Delete access token from memory                        │
+│     - Delete refresh token from secure storage               │
+│     - Clear cached user profile + query cache                │
+│     - Clear biometric-gated keychain entries                 │
+│     - Reset navigation to auth stack                         │
+│                                                              │
+│  2. SERVER-SIDE REVOCATION (best-effort, may fail):          │
+│     - POST /auth/logout { refresh_token }                    │
+│     - Server blocklists token, invalidates family            │
+│     - If multi-device: invalidate all families for user      │
+│                                                              │
+│  ORDER: Always clean up locally FIRST. If server call fails, │
+│  user is still logged out locally.                           │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Multi-Device Session Strategies</h3>
+<div class="table-wrap"><table><thead><tr><th>Strategy</th><th>Behavior</th><th>Use Case</th><th></th></tr></thead><tbody><tr><td>Unlimited</td><td>Any number of devices active</td><td>Consumer apps</td><td></td></tr><tr><td>Single device</td><td>New login logs out all others</td><td>Banking, high-security</td><td></td></tr><tr><td>N devices max</td><td>Oldest evicted when limit reached</td><td>SaaS per-seat licensing</td><td></td></tr><tr><td>Remote logout</td><td>User sees active sessions, revokes individually</td><td>Google/GitHub pattern</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Phase 8: Multi-Factor Authentication</h2>
+
+<h3>MFA Method Comparison</h3>
+<div class="table-wrap"><table><thead><tr><th>Method</th><th>Security</th><th>UX Friction</th><th>Offline</th><th>Phishing Resistant</th><th>Effort</th><th></th></tr></thead><tbody><tr><td>TOTP</td><td>High</td><td>Medium</td><td>Yes</td><td>No</td><td>Medium</td><td></td></tr><tr><td>SMS OTP</td><td>Low</td><td>Low</td><td>No</td><td>No (SIM swap)</td><td>Low</td><td></td></tr><tr><td>Push MFA</td><td>High</td><td>Very Low</td><td>No</td><td>Partial (number matching)</td><td>High</td><td></td></tr><tr><td>FIDO2/WebAuthn</td><td>Very High</td><td>Low</td><td>Device-dep.</td><td>Yes</td><td>High</td><td></td></tr></tbody></table></div>
+<h3>TOTP Flow</h3>
+
+<pre class="code-block"><code>ENROLLMENT:
+<ul class="skill-list"><li class="ordered">User enables MFA → server generates TOTP secret + otpauth:// URI</li>
+<li class="ordered">App shows QR code → user scans with authenticator app</li>
+<li class="ordered">User enters 6-digit code to verify → server stores secret</li>
+<li class="ordered">Server returns 8-10 backup codes (one-time use) → user saves</li>
+
+</ul>LOGIN:
+<ul class="skill-list"><li class="ordered">Email + password validated → server returns { mfa_required, mfa_token }</li>
+<li class="ordered">App shows TOTP input → user enters 6-digit code</li>
+<li class="ordered">POST /auth/mfa/verify { mfa_token, code }</li>
+<li class="ordered">Server validates (allow +/- 1 time step) → returns access + refresh tokens</li>
+
+</ul>The mfa_token is a short-lived single-purpose token proving step 1 passed.
+It cannot be used for API calls.</code></pre>
+
+<h3>Push MFA with Number Matching</h3>
+
+<pre class="code-block"><code>1. Login on Device B → server sends push to Device A (trusted)
+<ul class="skill-list"><li class="ordered">Device A shows: &quot;Approve login? Enter the number: 42&quot;</li>
+<li class="ordered">User types 42 on Device B → proves control of both devices</li>
+<li class="ordered">Server marks MFA passed → Device B receives tokens</li>
+</ul>Number matching prevents blind &quot;approve&quot; tapping on phishing attempts.</code></pre>
+<hr class="section-divider">
+<h2>Phase 9: Security Checklist</h2>
+
+<h3>Authentication Audit</h3>
+<div class="table-wrap"><table><thead><tr><th>#</th><th>Check</th><th>Severity</th><th></th></tr></thead><tbody><tr><td>1</td><td>OAuth2 uses PKCE with S256 (not plain)</td><td>Critical</td><td></td></tr><tr><td>2</td><td>No client secrets in app binary</td><td>Critical</td><td></td></tr><tr><td>3</td><td>Auth in system browser, not WebView</td><td>Critical</td><td></td></tr><tr><td>4</td><td>Tokens in Keychain/Keystore only</td><td>Critical</td><td></td></tr><tr><td>5</td><td>Refresh token rotation enabled</td><td>Critical</td><td></td></tr><tr><td>6</td><td>Social id_tokens verified server-side</td><td>Critical</td><td></td></tr><tr><td>7</td><td>No tokens in logs or URL params</td><td>Critical</td><td></td></tr><tr><td>8</td><td>Access token lifetime <= 15 min</td><td>High</td><td></td></tr><tr><td>9</td><td>Refresh token bound to device ID</td><td>High</td><td></td></tr><tr><td>10</td><td>Token reuse triggers family revocation</td><td>High</td><td></td></tr><tr><td>11</td><td>Biometric change invalidates credentials</td><td>High</td><td></td></tr><tr><td>12</td><td>Apple Sign-In offered if any social login exists</td><td>High</td><td></td></tr><tr><td>13</td><td>Apple user info stored on first callback</td><td>High</td><td></td></tr><tr><td>14</td><td><code class="inline-code">state</code> param validated in OAuth2 redirect</td><td>High</td><td></td></tr><tr><td>15</td><td>Logout clears all local tokens and caches</td><td>High</td><td></td></tr><tr><td>16</td><td>Server revokes refresh token on logout</td><td>High</td><td></td></tr><tr><td>17</td><td>Failed login rate limiting (server-side)</td><td>High</td><td></td></tr><tr><td>18</td><td>Concurrent refresh queue prevents races</td><td>High</td><td></td></tr><tr><td>19</td><td>Deep link auth redirects validate returnTo</td><td>High</td><td></td></tr><tr><td>20</td><td>Certificate pinning with backup pins</td><td>Medium</td><td></td></tr><tr><td>21</td><td>Jailbreak/root detection at appropriate level</td><td>Medium</td><td></td></tr><tr><td>22</td><td>MFA for high-security flows</td><td>Medium</td><td></td></tr><tr><td>23</td><td>Token expiry checked on app resume</td><td>Medium</td><td></td></tr><tr><td>24</td><td>All traffic HTTPS, TLS 1.2+ enforced</td><td>Critical</td><td></td></tr><tr><td>25</td><td>ATS enabled (iOS), cleartextTraffic=false (Android)</td><td>High</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Tips for Best Results</h2>
+
+<ul class="skill-list"><li class="ordered"><strong>Start with the token flow diagram, not the login screen.</strong> The login screen is trivial UI. The token lifecycle — acquisition, storage, refresh, rotation, revocation — is where every auth bug lives. Design the token flow first, then build the UI around it.</li>
+
+<li class="ordered"><strong>Test auth on a real device with airplane mode.</strong> Token refresh failures, biometric timeouts, and social SDK crashes behave differently on real hardware versus simulators. Your auth flow must degrade gracefully when the network drops mid-refresh.</li>
+
+<li class="ordered"><strong>Store Apple Sign-In user info on the first callback — you will not get it again.</strong> Apple sends name and email only on initial authorization. If your backend misses it, the user must revoke and re-authorize.</li>
+
+<li class="ordered"><strong>Implement the concurrent refresh queue before you ship.</strong> The race condition where multiple 401s trigger multiple refresh calls happens every time the access token expires while loading multiple endpoints. Build the queue from day one.</li>
+
+<li class="ordered"><strong>Pin certificate public keys, not certificates.</strong> Certificates rotate. Public keys can stay stable. Always include at least two pins — current and next — so rotation does not brick your app.</li>
+
+<li class="ordered"><strong>Treat biometric enrollment changes as a security event.</strong> Use <code class="inline-code">kSecAccessControlBiometryCurrentSet</code> (iOS) and <code class="inline-code">setInvalidatedByBiometricEnrollment(true)</code> (Android) to force re-authentication when new biometrics are enrolled.</li>
+
+<li class="ordered"><strong>Log every auth event for forensics, but never log tokens.</strong> Log: login attempts, refresh events, logout, MFA challenges, biometric failures, session revocations. Never log: access tokens, refresh tokens, passwords, TOTP codes.</li>
+
+<li class="ordered"><strong>Use feature flags to control certificate pinning.</strong> If your pinning configuration has a bug or your certificate rotates unexpectedly, you need a remote kill switch without shipping an app update.</li></ul>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="mobile-api.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">Mobile API Integration — Reliable Data on Unreliable Networks</span></span></a>
+    <a href="mobile-ci.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Mobile CI/CD — From Push to Production in Minutes</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    80 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

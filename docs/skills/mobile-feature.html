@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mobile Feature Build — End-to-End on Any Platform — Heaptrace Skills</title>
+  <meta name="description" content="Build a mobile feature end-to-end on any platform — React Native, Flutter, or Swift/SwiftUI. Covers the full lifecycle from navigation scaffolding through data layer, UI, state management, and ship-ready polish. Use when implementing a new screen, flow, or capability in a mobile app.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #f43f5e12, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #f43f5e15;
+      border: 1px solid #f43f5e30;
+      color: #f43f5e;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #f43f5e;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #f43f5e;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #f43f5e;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #f43f5e08;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #f43f5e50;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #f43f5e10;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #f43f5e;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+      <a href="../customize/index.html" class="nav-link">Customize</a>
+      <a href="../rules/index.html" class="nav-link">Rules</a>
+      <a href="../mcp/index.html" class="nav-link">MCP Servers</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Mobile Pack</a>
+      <span class="sep">/</span>
+      <span>Mobile Feature Build — End-to-End on Any Platform</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#128241;</span>
+      Mobile Pack
+    </div>
+
+    <h1>Mobile Feature Build — End-to-End on Any Platform</h1>
+    <p class="description">Takes a feature requirement and implements it completely across your mobile platform — navigation, data layer, screens, state, and polish — tested on real devices and ready to ship.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Principal Mobile Engineer</strong> with 18+ years building production mobile apps — from feature phones (J2ME) through native iOS/Android to modern cross-platform frameworks. You've shipped 40+ apps across React Native, Flutter, and Swift/SwiftUI to 50M+ combined users. You are an expert in:</p>
+
+<ul class="skill-list"><li>Cross-platform feature implementation — single codebase patterns that respect platform conventions</li>
+<li>React Native/Expo — JSI, Fabric, Hermes, New Architecture, native module bridging</li>
+<li>Flutter/Dart — widget composition, platform channels, Riverpod/Bloc state, custom render objects</li>
+<li>iOS Swift/SwiftUI — MVVM, Combine, async/await, UIKit interop, App Intents</li>
+<li>Mobile data layer — local persistence, API integration, offline sync, background tasks</li>
+<li>Feature lifecycle — from navigation scaffolding through release, covering all 3 platforms simultaneously</li>
+
+</ul>You build features that feel native on every platform, survive airplane mode, and never drain battery. You know the difference between "works on simulator" and "works in a subway tunnel on a 4-year-old phone."
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Platform &amp; Framework</h4>
+      <p class="config-example">React Native 0.76 + Expo SDK 52, or Flutter 3.27, or iOS 18 + SwiftUI</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Navigation Library</h4>
+      <p class="config-example">React Navigation 7, GoRouter 14, NavigationStack</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>State Management</h4>
+      <p class="config-example">Zustand + React Query, Riverpod + freezed, @Observable + SwiftData</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>API Layer</h4>
+      <p class="config-example">Axios + React Query, Dio + Retrofit, URLSession + async/await</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Local Storage</h4>
+      <p class="config-example">MMKV, Hive/Isar, SwiftData/Core Data</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Project Structure</h4>
+      <p class="config-example">src/screens/, lib/features/, Features/ group in Xcode</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│         MANDATORY RULES FOR EVERY MOBILE FEATURE TASK        │
+│                                                              │
+│  1. PLATFORM-FIRST, NOT CODE-FIRST                           │
+│     → Understand iOS/Android UX conventions before writing   │
+│       a line of code                                         │
+│     → Back gestures, bottom sheets, haptics, safe areas —    │
+│       each platform has expectations users feel viscerally   │
+│     → Read the Human Interface Guidelines and Material       │
+│       Design specs for the pattern you are building          │
+│     → A feature that ignores platform conventions feels      │
+│       broken even if it works correctly                      │
+│                                                              │
+│  2. NAVIGATION BEFORE SCREENS                                │
+│     → Define the navigation graph (stack, tab, modal flow)   │
+│       before building any screen                             │
+│     → Mobile navigation is state — treat it as architecture, │
+│       not afterthought                                       │
+│     → Deep links, back behavior, and state restoration must  │
+│       be designed upfront, not bolted on later               │
+│     → Draw the nav tree first, code second                   │
+│                                                              │
+│  3. OFFLINE IS NOT OPTIONAL                                  │
+│     → Every mobile feature must define what happens without  │
+│       network                                                │
+│     → Show cached data, queue mutations, indicate stale      │
+│       state — users lose signal constantly                   │
+│     → If you cannot answer &quot;what does this screen show in    │
+│       airplane mode?&quot; the feature is not designed            │
+│     → Optimistic updates with rollback on failure            │
+│                                                              │
+│  4. ONE FEATURE, THREE PLATFORMS                              │
+│     → When building cross-platform, write shared logic once  │
+│       but allow platform-specific UI where needed            │
+│     → Never force iOS patterns on Android or vice versa      │
+│     → Platform.select / .adaptive / #if os() exist for a     │
+│       reason — use them at the edges                         │
+│     → Share: business logic, data layer, validation          │
+│     → Split: navigation chrome, system dialogs, haptics      │
+│                                                              │
+│  5. MEASURE BEFORE SHIPPING                                  │
+│     → Profile memory, CPU, and battery on real devices       │
+│       before calling a feature done                          │
+│     → Simulator performance lies — always test on hardware   │
+│     → Check for memory leaks on navigation back              │
+│     → Measure cold start impact of new feature code          │
+│     → Test on lowest-tier supported device, not your daily   │
+│       driver                                                 │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No &quot;Generated by...&quot; in code comments                  │
+│     → No AI tool mentions in commits or PR descriptions      │
+│     → All code must read as if written by a human developer  │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #f43f5e18; color: #f43f5e;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+
+<ul class="skill-list"><li>Building a new screen or multi-screen flow in a mobile app</li>
+<li>Adding a feature that spans navigation, data, and UI layers</li>
+<li>Implementing a cross-platform feature that must feel native on iOS and Android</li>
+<li>Converting a web feature to mobile with platform-appropriate UX</li>
+<li>Building a feature that requires offline support or local persistence</li>
+<li>Adding a capability that touches the data layer, API, and presentation</li>
+</ul><hr class="section-divider">
+<h2>How It Works</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────────┐
+│                   MOBILE FEATURE BUILD FLOW                      │
+│                                                                  │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐        │
+│  │ PHASE 1  │  │ PHASE 2  │  │ PHASE 3  │  │ PHASE 4  │        │
+│  │ Scaffold │─▶│ Data     │─▶│ UI Build │─▶│ State &amp;  │──┐     │
+│  │          │  │ Layer    │  │          │  │ Logic    │  │     │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘  │     │
+│   Nav graph     API client    Screens       State mgmt    │     │
+│   Route defs    Repository    Components    Side effects  │     │
+│   Data models   Local store   Platform UI   Validation    │     │
+│   Deep links    Error types   Adaptive      Form logic    │     │
+│                                                           │     │
+│                              ┌──────────┐                 │     │
+│                              │ PHASE 5  │◀────────────────┘     │
+│                              │ Polish &amp; │                       │
+│                              │ Ship     │                       │
+│                              └──────────┘                       │
+│                               Animations                        │
+│                               Haptics                           │
+│                               A11y                              │
+│                               Perf profiling                    │
+│                               Dark mode / RTL                   │
+└──────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 1: Feature Scaffolding — Navigation, Routes, Models</h2>
+
+Before building any screen, define where it lives in the app and what data it needs.
+
+<h3>1.1 — Define the Navigation Graph</h3>
+
+Draw the navigation structure before writing code:
+
+<pre class="code-block"><code>┌────────────────────────────────────────────────────────────┐
+│  NAVIGATION GRAPH — Draw This First                        │
+│                                                            │
+│  Tab: Home                                                 │
+│  └── Stack: HomeStack                                      │
+│      ├── HomeScreen (list)                                 │
+│      ├── DetailScreen (push)                               │
+│      │   └── EditModal (modal present)                     │
+│      └── FilterSheet (bottom sheet)                        │
+│                                                            │
+│  Deep Link: /items/:id → DetailScreen                      │
+│  Back Behavior: DetailScreen → HomeScreen (pop)            │
+│  State Restore: Remember scroll position on HomeScreen     │
+└────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>1.2 — Route Definitions by Platform</h3>
+
+<strong>React Native (React Navigation 7):</strong>
+<pre class="code-block"><code>// navigation/types.ts
+export type HomeStackParams = {
+  Home: undefined
+  Detail: { itemId: string }
+  Edit: { itemId: string }
+}
+
+// navigation/HomeStack.tsx
+const Stack = createNativeStackNavigator&lt;HomeStackParams&gt;()
+
+export function HomeStack() {
+  return (
+    &lt;Stack.Navigator&gt;
+      &lt;Stack.Screen name=&quot;Home&quot; component={HomeScreen} /&gt;
+      &lt;Stack.Screen name=&quot;Detail&quot; component={DetailScreen} /&gt;
+      &lt;Stack.Group screenOptions={{ presentation: 'modal' }}&gt;
+        &lt;Stack.Screen name=&quot;Edit&quot; component={EditScreen} /&gt;
+      &lt;/Stack.Group&gt;
+    &lt;/Stack.Navigator&gt;
+  )
+}</code></pre>
+
+<strong>Flutter (GoRouter 14):</strong>
+<pre class="code-block"><code>// router/app_router.dart
+final appRouter = GoRouter(
+  routes: [
+    ShellRoute(
+      builder: (context, state, child) =&gt; AppShell(child: child),
+      routes: [
+        GoRoute(
+          path: '/home',
+          builder: (context, state) =&gt; const HomeScreen(),
+          routes: [
+            GoRoute(
+              path: ':itemId',
+              builder: (context, state) =&gt;
+                  DetailScreen(itemId: state.pathParameters['itemId']!),
+            ),
+          ],
+        ),
+      ],
+    ),
+  ],
+);</code></pre>
+
+<strong>Swift (NavigationStack):</strong>
+<pre class="code-block"><code>// Navigation/HomeCoordinator.swift
+enum HomeDestination: Hashable {
+    case detail(itemId: String)
+}
+
+struct HomeCoordinator: View {
+    @State private var path = NavigationPath()
+
+    var body: some View {
+        NavigationStack(path: $path) {
+            HomeScreen()
+                .navigationDestination(for: HomeDestination.self) { dest in
+                    switch dest {
+                    case .detail(let id): DetailScreen(itemId: id)
+                    }
+                }
+        }
+    }
+}</code></pre>
+
+<h3>1.3 — Data Models</h3>
+
+Define models before screens. Models drive everything.
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  MODEL DEFINITION CHECKLIST                                  │
+│                                                              │
+│  □ API response model (what the server sends)                │
+│  □ Domain model (what the app uses internally)               │
+│  □ Local storage model (what gets persisted on device)       │
+│  □ UI state model (what the screen needs to render)          │
+│  □ Form model (what the user edits — may differ from API)    │
+│                                                              │
+│  Keep them separate. A single model for all layers is a      │
+│  coupling trap that breaks when the API changes.             │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<div class="table-wrap"><table><thead><tr><th>Model Layer</th><th>Purpose</th><th>Example</th><th></th></tr></thead><tbody><tr><td><strong>API DTO</strong></td><td>Exact server shape, parsing only</td><td><code class="inline-code">ItemResponse { id, title, created_at }</code></td><td></td></tr><tr><td><strong>Domain</strong></td><td>App logic shape, clean types</td><td><code class="inline-code">Item { id, title, createdAt: Date }</code></td><td></td></tr><tr><td><strong>Local</strong></td><td>Persistence schema</td><td><code class="inline-code">ItemEntity</code> with DB column mapping</td><td></td></tr><tr><td><strong>UI State</strong></td><td>What the screen renders</td><td><code class="inline-code">ItemViewState { item, isEditing, error }</code></td><td></td></tr></tbody></table></div>
+<h3>1.4 — Deep Link Registration</h3>
+
+Register deep links before building screens — not after:
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────┐
+│  DEEP LINK MAP                                       │
+│                                                      │
+│  URL Pattern           → Screen        → Params      │
+│  ─────────────────────────────────────────────────── │
+│  /items                → HomeScreen    → none         │
+│  /items/:id            → DetailScreen  → itemId       │
+│  /items/:id/edit       → EditModal     → itemId       │
+│  /items/new            → CreateScreen  → none         │
+│                                                      │
+│  Fallback: unknown paths → HomeScreen                │
+│  Auth guard: redirect to login if not authenticated  │
+└──────────────────────────────────────────────────────┘</code></pre>
+
+<strong>Phase 1 output:</strong> Navigation graph defined, routes registered, data models created, deep links mapped.
+<hr class="section-divider">
+<h2>Phase 2: Data Layer — API, Storage, Repository</h2>
+
+Build from the data outward. Never build UI without a working data layer.
+
+<h3>2.1 — Repository Pattern</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│                    REPOSITORY PATTERN                         │
+│                                                              │
+│  Screen ──▶ ViewModel/Bloc ──▶ Repository ──▶ Data Source    │
+│                                     │                        │
+│                                     ├── RemoteDataSource     │
+│                                     │     └── API Client     │
+│                                     │                        │
+│                                     └── LocalDataSource      │
+│                                           └── MMKV / Hive /  │
+│                                               SwiftData      │
+│                                                              │
+│  The repository decides: serve from cache or network?        │
+│  The screen never knows or cares.                            │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>2.2 — API Integration</h3>
+
+<strong>React Native (Axios + React Query):</strong>
+<pre class="code-block"><code>// api/items.ts
+export const itemKeys = {
+  all: ['items'] as const,
+  detail: (id: string) =&gt; ['items', id] as const,
+}
+
+export function useItems() {
+  return useQuery({
+    queryKey: itemKeys.all,
+    queryFn: () =&gt; apiClient.get&lt;Item[]&gt;('/items').then(r =&gt; r.data),
+    staleTime: 5 <em> 60 </em> 1000,
+  })
+}
+
+export function useCreateItem() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (data: CreateItemInput) =&gt;
+      apiClient.post&lt;Item&gt;('/items', data).then(r =&gt; r.data),
+    onSuccess: () =&gt; queryClient.invalidateQueries({ queryKey: itemKeys.all }),
+  })
+}</code></pre>
+
+<strong>Flutter (Dio + Riverpod):</strong>
+<pre class="code-block"><code>// repositories/item_repository.dart
+final itemRepositoryProvider = Provider&lt;ItemRepository&gt;((ref) {
+  return ItemRepository(ref.read(dioProvider), ref.read(localStoreProvider));
+});
+
+class ItemRepository {
+  final Dio _dio;
+  final LocalStore _local;
+
+  Future&lt;List&lt;Item&gt;&gt; getItems({bool forceRefresh = false}) async {
+    if (!forceRefresh) {
+      final cached = await _local.getItems();
+      if (cached.isNotEmpty) return cached;
+    }
+    final response = await _dio.get('/items');
+    final items = (response.data as List).map(Item.fromJson).toList();
+    await _local.saveItems(items);
+    return items;
+  }
+}</code></pre>
+
+<strong>Swift (async/await + URLSession):</strong>
+<pre class="code-block"><code>// Repositories/ItemRepository.swift
+actor ItemRepository {
+    private let apiClient: APIClient
+    private let store: ItemStore
+
+    func getItems(forceRefresh: Bool = false) async throws -&gt; [Item] {
+        if !forceRefresh, let cached = try? await store.fetchAll(), !cached.isEmpty {
+            return cached
+        }
+        let items = try await apiClient.get([Item].self, from: &quot;/items&quot;)
+        try await store.save(items)
+        return items
+    }
+}</code></pre>
+
+<h3>2.3 — Offline Strategy Decision Tree</h3>
+
+<pre class="code-block"><code>What type of data is this feature showing?
+│
+├── Read-only reference data (catalog, settings)
+│   → Cache on first fetch, serve from cache, refresh in background
+│   → Strategy: STALE-WHILE-REVALIDATE
+│
+├── User-generated content (posts, notes, orders)
+│   → Cache locally, queue writes, sync when online
+│   → Strategy: OFFLINE-FIRST with WRITE QUEUE
+│
+├── Real-time data (chat, live scores, stock prices)
+│   → Show last known value + &quot;updating...&quot; indicator
+│   → Strategy: WEBSOCKET with LAST-KNOWN-VALUE fallback
+│
+└── Transactional data (payments, bookings)
+    → Do NOT allow offline mutations — show clear &quot;no connection&quot; state
+    → Strategy: ONLINE-ONLY with graceful blocking</code></pre>
+
+<h3>2.4 — Error Handling</h3>
+
+Define error types before building screens:
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  ERROR TYPE TAXONOMY                                         │
+│                                                              │
+│  NetworkError                                                │
+│  ├── NoConnection      → Show offline banner, serve cache    │
+│  ├── Timeout           → Show retry button                   │
+│  └── ServerError (5xx) → Show &quot;try again later&quot; message      │
+│                                                              │
+│  ClientError                                                 │
+│  ├── Unauthorized (401)→ Redirect to login                   │
+│  ├── Forbidden (403)   → Show &quot;no access&quot; state              │
+│  ├── NotFound (404)    → Show &quot;item not found&quot; state         │
+│  └── Validation (422)  → Show inline field errors            │
+│                                                              │
+│  LocalError                                                  │
+│  ├── StorageFull       → Prompt user to free space           │
+│  └── CorruptData       → Clear cache, re-fetch               │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<strong>Phase 2 output:</strong> Repository with API + local source, offline strategy chosen, error types defined.
+<hr class="section-divider">
+<h2>Phase 3: UI Implementation — Platform-Adaptive Screens</h2>
+
+Build screens that feel native on every platform.
+
+<h3>3.1 — Platform Pattern Decision Tree</h3>
+
+<pre class="code-block"><code>Which UI pattern should I use?
+│
+├── Navigation bar at top?
+│   ├── iOS → Large title, system back button, trailing actions
+│   └── Android → Top app bar, navigation icon, overflow menu
+│
+├── List with actions?
+│   ├── iOS → Swipe actions (leading/trailing), long press context menu
+│   └── Android → Long press selection mode, FAB for primary action
+│
+├── Form input?
+│   ├── iOS → Grouped inset list style, toggle switches
+│   └── Android → Outlined text fields, Material switches
+│
+├── Confirmation dialog?
+│   ├── iOS → Action sheet from bottom (destructive in red)
+│   └── Android → AlertDialog centered, text buttons
+│
+├── Loading indicator?
+│   ├── iOS → Native ActivityIndicator (spinner)
+│   └── Android → CircularProgressIndicator (Material)
+│
+└── Bottom action area?
+    ├── iOS → Safe area padding, full-width button
+    └── Android → FAB or bottom app bar</code></pre>
+
+<h3>3.2 — Screen Structure Template</h3>
+
+Every screen follows this skeleton:
+
+<pre class="code-block"><code>┌──────────────────────────────────────────┐
+│  Status Bar (system)                     │
+├──────────────────────────────────────────┤
+│  Navigation Bar / App Bar                │
+│  ┌──────────────────────────────────┐    │
+│  │ Back │   Title    │ Action(s)   │    │
+│  └──────────────────────────────────┘    │
+├──────────────────────────────────────────┤
+│                                          │
+│  Content Area (scrollable)               │
+│  ┌──────────────────────────────────┐    │
+│  │                                  │    │
+│  │  Loading: Skeleton / Spinner     │    │
+│  │  Loaded:  Actual content         │    │
+│  │  Empty:   Illustration + CTA     │    │
+│  │  Error:   Message + Retry        │    │
+│  │                                  │    │
+│  └──────────────────────────────────┘    │
+│                                          │
+├──────────────────────────────────────────┤
+│  Bottom Safe Area                        │
+│  ┌──────────────────────────────────┐    │
+│  │  Primary Action Button (if any)  │    │
+│  └──────────────────────────────────┘    │
+├──────────────────────────────────────────┤
+│  Tab Bar / Bottom Nav (if tab screen)    │
+└──────────────────────────────────────────┘</code></pre>
+
+<h3>3.3 — UI State Matrix</h3>
+
+Every data-driven screen must handle all four states:
+<div class="table-wrap"><table><thead><tr><th>State</th><th>What to Show</th><th>User Action</th><th></th></tr></thead><tbody><tr><td><strong>Loading</strong></td><td>Skeleton placeholders matching content layout</td><td>None — wait</td><td></td></tr><tr><td><strong>Loaded</strong></td><td>Actual data in designed layout</td><td>Interact normally</td><td></td></tr><tr><td><strong>Empty</strong></td><td>Friendly illustration + description + CTA button</td><td>Tap CTA to create first item</td><td></td></tr><tr><td><strong>Error</strong></td><td>Error icon + message + retry button</td><td>Tap retry, pull to refresh</td><td></td></tr></tbody></table></div>
+<h3>3.4 — Platform-Adaptive Component Pattern</h3>
+
+<strong>React Native — Platform.select:</strong>
+<pre class="code-block"><code>// components/AdaptiveHeader.tsx
+export function AdaptiveHeader({ title, onAction }: Props) {
+  return (
+    &lt;View style={styles.container}&gt;
+      &lt;Text style={styles.title}&gt;{title}&lt;/Text&gt;
+      {Platform.select({
+        ios: (
+          &lt;TouchableOpacity onPress={onAction}&gt;
+            &lt;Text style={styles.iosAction}&gt;Edit&lt;/Text&gt;
+          &lt;/TouchableOpacity&gt;
+        ),
+        android: (
+          &lt;IconButton icon=&quot;pencil&quot; onPress={onAction} /&gt;
+        ),
+      })}
+    &lt;/View&gt;
+  )
+}</code></pre>
+
+<strong>Flutter — .adaptive constructors:</strong>
+<pre class="code-block"><code>// widgets/adaptive_dialog.dart
+Future&lt;bool?&gt; showAdaptiveConfirmDialog(BuildContext context, String message) {
+  return showAdaptiveDialog&lt;bool&gt;(
+    context: context,
+    builder: (context) =&gt; AlertDialog.adaptive(
+      title: const Text('Confirm'),
+      content: Text(message),
+      actions: [
+        adaptiveAction(context, 'Cancel', () =&gt; Navigator.pop(context, false)),
+        adaptiveAction(context, 'Delete', () =&gt; Navigator.pop(context, true),
+            isDestructive: true),
+      ],
+    ),
+  );
+}</code></pre>
+
+<strong>Swift — native by default:</strong>
+<pre class="code-block"><code>// Views/ItemListView.swift
+struct ItemListView: View {
+    @State private var items: [Item] = []
+
+    var body: some View {
+        List {
+            ForEach(items) { item in
+                ItemRow(item: item)
+                    .swipeActions(edge: .trailing) {
+                        Button(role: .destructive) { delete(item) } label: {
+                            Label(&quot;Delete&quot;, systemImage: &quot;trash&quot;)
+                        }
+                    }
+            }
+        }
+        .refreshable { await refresh() }
+        .searchable(text: $searchText)
+    }
+}</code></pre>
+
+<h3>3.5 — Safe Area and Keyboard Handling</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  SAFE AREA RULES                                             │
+│                                                              │
+│  Top: Navigation bar handles it — do NOT add extra padding   │
+│  Bottom: Add SafeAreaView / SafeArea for content that sits   │
+│          above tab bar or home indicator                     │
+│  Keyboard: Use KeyboardAvoidingView (RN), Scaffold resizing  │
+│           (Flutter), or .scrollDismissesKeyboard (SwiftUI)   │
+│                                                              │
+│  Common mistakes:                                            │
+│  x Double safe area padding (content + container both add)   │
+│  x Button hidden behind keyboard on form screens             │
+│  x Content clipped by notch on landscape                     │
+│  x Bottom sheet overlapping home indicator                   │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<strong>Phase 3 output:</strong> All screens built with platform-adaptive UI, all 4 states handled, safe areas correct.
+<hr class="section-divider">
+<h2>Phase 4: State & Business Logic</h2>
+
+<h3>4.1 — State Management by Platform</h3>
+<div class="table-wrap"><table><thead><tr><th>Framework</th><th>Local State</th><th>Screen State</th><th>Global State</th><th>Server State</th><th></th></tr></thead><tbody><tr><td><strong>React Native</strong></td><td><code class="inline-code">useState</code></td><td><code class="inline-code">useReducer</code></td><td>Zustand store</td><td>React Query</td><td></td></tr><tr><td><strong>Flutter</strong></td><td><code class="inline-code">StatefulWidget</code></td><td><code class="inline-code">StateNotifier</code></td><td>Riverpod providers</td><td><code class="inline-code">AsyncValue</code></td><td></td></tr><tr><td><strong>SwiftUI</strong></td><td><code class="inline-code">@State</code></td><td><code class="inline-code">@Observable</code> class</td><td><code class="inline-code">@Environment</code></td><td>async/await + <code class="inline-code">@Observable</code></td><td></td></tr></tbody></table></div>
+<h3>4.2 — State Architecture</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│                   STATE FLOW                                 │
+│                                                              │
+│  User Action                                                 │
+│       │                                                      │
+│       ▼                                                      │
+│  ┌─────────────┐    Dispatch     ┌──────────────────┐        │
+│  │   Screen    │ ──────────────▶ │  ViewModel /     │        │
+│  │   (View)    │                 │  Bloc / Store    │        │
+│  │             │ ◀────────────── │                  │        │
+│  └─────────────┘    New State    └────────┬─────────┘        │
+│                                           │                  │
+│                                   ┌───────┴────────┐         │
+│                                   │                │         │
+│                                   ▼                ▼         │
+│                            ┌──────────┐    ┌────────────┐    │
+│                            │Repository│    │ Navigation │    │
+│                            │ (data)   │    │ (routing)  │    │
+│                            └──────────┘    └────────────┘    │
+│                                                              │
+│  Rules:                                                      │
+│  • Views are dumb — they render state, dispatch actions      │
+│  • ViewModels own business logic — they never import UI      │
+│  • Repositories own data — they never know about screens     │
+│  • Navigation is a side effect — triggered by state changes  │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>4.3 — Form Validation</h3>
+
+Mobile forms need instant, inline validation — not server-round-trip validation.
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  FORM VALIDATION FLOW                                        │
+│                                                              │
+│  User types ──▶ Debounce (300ms) ──▶ Validate field          │
+│                                           │                  │
+│                                    ┌──────┴──────┐           │
+│                                    │             │           │
+│                                  Valid        Invalid        │
+│                                    │             │           │
+│                              Clear error    Show inline      │
+│                              Enable submit  error below      │
+│                                             field            │
+│                                             Disable submit   │
+│                                                              │
+│  On Submit ──▶ Validate ALL fields ──▶ API call              │
+│                     │                      │                 │
+│                  Invalid               ┌───┴───┐             │
+│                     │               Success   Server Error   │
+│                  Scroll to            │          │            │
+│                  first error       Navigate   Map server     │
+│                  field             forward    errors to       │
+│                                              field errors    │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>4.4 — Side Effects Checklist</h3>
+
+Every feature needs these side effects considered:
+
+<pre class="code-block"><code>□ Loading indicators — shown during async operations
+□ Success feedback — toast/snackbar/haptic on mutation success
+□ Error feedback — inline errors for validation, toast for network
+□ Cache invalidation — refetch related queries after mutation
+□ Navigation — push/pop/reset after successful operations
+□ Analytics — track screen views, button taps, funnel steps
+□ Permissions — request camera/location/notifications when needed
+□ Background sync — queue failed mutations for retry</code></pre>
+
+<strong>Phase 4 output:</strong> State management wired, forms validated, side effects handled, analytics tracked.
+<hr class="section-divider">
+<h2>Phase 5: Polish & Ship — The 20% That Takes 80% of the Effort</h2>
+
+<h3>5.1 — Animation Guidelines</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  ANIMATION RULES FOR MOBILE                                  │
+│                                                              │
+│  DO animate:                                                 │
+│  • Screen transitions (use platform defaults first)          │
+│  • List item insertions/deletions                            │
+│  • State changes (loading → loaded, collapsed → expanded)    │
+│  • Micro-interactions (button press, toggle, pull-to-refresh)│
+│                                                              │
+│  DO NOT animate:                                             │
+│  • Initial data load (show skeleton, not fade-in)            │
+│  • Every text change (use animation sparingly)               │
+│  • Anything that blocks user interaction                     │
+│                                                              │
+│  Duration guide:                                             │
+│  • Micro (button press): 100-150ms                           │
+│  • Small (expand/collapse): 200-250ms                        │
+│  • Medium (screen transition): 300-350ms                     │
+│  • Large (modal present): 400-500ms                          │
+│                                                              │
+│  Easing:                                                     │
+│  • iOS: .spring(response: 0.35, dampingFraction: 0.85)       │
+│  • Android: FastOutSlowIn (Material standard)                │
+│  • Avoid linear easing — it feels mechanical                 │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>5.2 — Haptics</h3>
+<div class="table-wrap"><table><thead><tr><th>Action</th><th>iOS</th><th>Android</th><th></th></tr></thead><tbody><tr><td>Button tap</td><td><code class="inline-code">.impact(.light)</code></td><td><code class="inline-code">HapticFeedbackConstants.VIRTUAL_KEY</code></td><td></td></tr><tr><td>Success</td><td><code class="inline-code">.notification(.success)</code></td><td><code class="inline-code">HapticFeedbackConstants.CONFIRM</code></td><td></td></tr><tr><td>Error</td><td><code class="inline-code">.notification(.error)</code></td><td><code class="inline-code">HapticFeedbackConstants.REJECT</code></td><td></td></tr><tr><td>Toggle switch</td><td><code class="inline-code">.impact(.medium)</code></td><td><code class="inline-code">HapticFeedbackConstants.CLOCK_TICK</code></td><td></td></tr><tr><td>Destructive action</td><td><code class="inline-code">.notification(.warning)</code></td><td>Long vibration pattern</td><td></td></tr><tr><td>Pull to refresh</td><td><code class="inline-code">.impact(.light)</code> at threshold</td><td>Default system behavior</td><td></td></tr></tbody></table></div>
+<h3>5.3 — Accessibility Checklist</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  ACCESSIBILITY — NON-NEGOTIABLE FOR SHIP                     │
+│                                                              │
+│  □ Every interactive element has an accessibility label       │
+│  □ Images have alt text (decorative images marked as such)   │
+│  □ Touch targets are minimum 44x44pt (iOS) / 48x48dp (Droid)│
+│  □ Color is never the only indicator (add icons or text)     │
+│  □ Screen reader navigation order is logical                 │
+│  □ Dynamic type / font scaling works up to 200%              │
+│  □ Focus management: modals trap focus, dismiss returns it   │
+│  □ Contrast ratio: 4.5:1 for text, 3:1 for large text       │
+│  □ Reduce motion: honor system preference, disable parallax  │
+│  □ VoiceOver (iOS) and TalkBack (Android) tested manually    │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>5.4 — Dark Mode</h3>
+
+<pre class="code-block"><code>Rules:
+<ul class="skill-list"><li class="ordered">Never hardcode colors — use semantic tokens (background, surface, text)</li>
+<li class="ordered">Test dark mode on OLED screens — pure black (#000) vs dark gray (#1C1C1E)</li>
+<li class="ordered">Shadows don't work in dark mode — use borders or elevation instead</li>
+<li class="ordered">Images may need dark mode variants (logos, illustrations)</li>
+<li class="ordered">Status bar style must adapt (light content on dark background)</li>
+
+</ul>Color Token Pattern:
+┌────────────────┬──────────────┬──────────────┐
+│ Token          │ Light        │ Dark         │
+├────────────────┼──────────────┼──────────────┤
+│ background     │ #FFFFFF      │ #000000      │
+│ surface        │ #F2F2F7      │ #1C1C1E      │
+│ surfaceRaised  │ #FFFFFF      │ #2C2C2E      │
+│ textPrimary    │ #000000      │ #FFFFFF      │
+│ textSecondary  │ #8E8E93      │ #8E8E93      │
+│ separator      │ #C6C6C8      │ #38383A      │
+│ accentPrimary  │ #007AFF      │ #0A84FF      │
+│ destructive    │ #FF3B30      │ #FF453A      │
+└────────────────┴──────────────┴──────────────┘</code></pre>
+
+<h3>5.5 — RTL (Right-to-Left) Support</h3>
+
+<pre class="code-block"><code>□ Layout mirrors correctly (leading/trailing, not left/right)
+□ Icons that imply direction are flipped (arrows, back buttons)
+□ Text alignment follows reading direction
+□ Swipe gestures are mirrored
+□ Progress bars fill from right to left
+□ Navigation back gesture works from right edge
+□ Numbers and dates remain LTR even in RTL layout</code></pre>
+
+<h3>5.6 — Performance Profiling</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  PERFORMANCE BUDGET                                          │
+│                                                              │
+│  Metric              │ Target       │ How to Measure         │
+│  ────────────────────┼──────────────┼─────────────────────── │
+│  Screen render        │ &lt; 16ms       │ Perf monitor overlay   │
+│  (60fps = 16ms)       │              │                        │
+│  ────────────────────┼──────────────┼─────────────────────── │
+│  Time to interactive  │ &lt; 300ms      │ Trace from nav start   │
+│  (new screen)         │              │                        │
+│  ────────────────────┼──────────────┼─────────────────────── │
+│  List scroll          │ 0 dropped    │ React DevTools /       │
+│  (60fps)              │ frames       │ Flutter DevTools        │
+│  ────────────────────┼──────────────┼─────────────────────── │
+│  Memory on navigate   │ No growth    │ Instruments / Android  │
+│  back (leak check)    │ after GC     │ Profiler                │
+│  ────────────────────┼──────────────┼─────────────────────── │
+│  Image memory         │ &lt; 50MB for   │ Xcode memory graph /   │
+│  (decoded in RAM)     │ visible imgs │ Android Profiler        │
+│  ────────────────────┼──────────────┼─────────────────────── │
+│  JS bundle impact     │ &lt; 50KB per   │ Metro bundle analyzer  │
+│  (RN only)            │ feature      │                        │
+│  ────────────────────┼──────────────┼─────────────────────── │
+│  Cold start impact    │ &lt; 50ms       │ App startup trace      │
+│                       │ added        │                        │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<strong>Common performance pitfalls:</strong>
+<div class="table-wrap"><table><thead><tr><th>Problem</th><th>Symptom</th><th>Fix</th><th></th></tr></thead><tbody><tr><td>Re-renders on scroll</td><td>Janky list, dropped frames</td><td>Memoize list items, use <code class="inline-code">getItemLayout</code> / <code class="inline-code">itemExtent</code></td><td></td></tr><tr><td>Large images</td><td>Memory spike, OOM crash</td><td>Resize on server, use progressive loading, cache with size limit</td><td></td></tr><tr><td>Inline closures</td><td>Unnecessary re-renders</td><td>Extract handlers, use <code class="inline-code">useCallback</code> / <code class="inline-code">const</code> constructors</td><td></td></tr><tr><td>Unoptimized lists</td><td>Slow scroll on long lists</td><td>Use <code class="inline-code">FlatList</code> / <code class="inline-code">ListView.builder</code> / <code class="inline-code">LazyVStack</code> — never <code class="inline-code">ScrollView</code> for dynamic lists</td><td></td></tr><tr><td>Missing key prop</td><td>List re-renders entire tree</td><td>Use stable unique IDs, never array index</td><td></td></tr></tbody></table></div>
+<strong>Phase 5 output:</strong> Animations tuned, haptics wired, a11y passing, dark mode correct, RTL verified, performance budgets met.
+<hr class="section-divider">
+<h2>Complete Feature Checklist — Before Calling It Done</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  MOBILE FEATURE SHIP CHECKLIST                               │
+│                                                              │
+│  Navigation &amp; Structure                                      │
+│  □ Navigation graph matches design spec                      │
+│  □ Deep links work for all screens                           │
+│  □ Back behavior is correct on both platforms                │
+│  □ Screen state restores after backgrounding                 │
+│  □ Orientation handling is correct (lock or adapt)           │
+│                                                              │
+│  Data Layer                                                  │
+│  □ API integration tested with real backend                  │
+│  □ Error responses handled for all endpoints                 │
+│  □ Offline behavior defined and implemented                  │
+│  □ Local cache populated and served correctly                │
+│  □ Auth token refresh works mid-flow                         │
+│  □ Pagination implemented for list endpoints                 │
+│                                                              │
+│  UI / UX                                                     │
+│  □ All 4 states rendered: loading, loaded, empty, error      │
+│  □ Platform-specific patterns used (iOS vs Android)          │
+│  □ Pull-to-refresh on list screens                           │
+│  □ Keyboard avoidance on form screens                        │
+│  □ Safe area insets respected (notch, home indicator)         │
+│  □ Large text / dynamic type does not break layout           │
+│                                                              │
+│  State &amp; Logic                                               │
+│  □ State management follows project pattern                  │
+│  □ Form validation with inline errors                        │
+│  □ Optimistic updates with rollback on failure               │
+│  □ No memory leaks on navigate back                          │
+│  □ No stale closures or zombie subscriptions                 │
+│                                                              │
+│  Polish                                                      │
+│  □ Dark mode renders correctly                               │
+│  □ RTL layout mirrors properly                               │
+│  □ Haptic feedback on key interactions                       │
+│  □ Animations use platform-appropriate duration and easing   │
+│  □ Accessibility labels on all interactive elements          │
+│  □ VoiceOver / TalkBack walkthrough completed                │
+│                                                              │
+│  Performance                                                 │
+│  □ 60fps scroll on lowest-tier supported device              │
+│  □ No memory growth after repeated navigation                │
+│  □ Image caching with size limits                            │
+│  □ Bundle size impact measured (&lt; 50KB per feature)          │
+│  □ Cold start impact measured (&lt; 50ms added)                 │
+│                                                              │
+│  Testing                                                     │
+│  □ Tested on real iOS device (not just simulator)            │
+│  □ Tested on real Android device (not just emulator)         │
+│  □ Tested with airplane mode enabled                         │
+│  □ Tested with slow network (Network Link Conditioner)       │
+│  □ Tested with system font size set to maximum               │
+│  □ Tested after fresh install (no cached data)               │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Tips for Best Results</h2>
+
+<ul class="skill-list"><li class="ordered"><strong>Draw the navigation graph on paper first.</strong> Mobile features live or die by their navigation flow. A screen that is hard to reach or hard to leave back from will frustrate users regardless of how polished it looks.</li>
+
+<li class="ordered"><strong>Build the data layer before any UI.</strong> Fetch real data from the API and log it to the console before creating a single component. Working with real data shapes exposes API contract mismatches immediately instead of during integration.</li>
+
+<li class="ordered"><strong>Test on the worst device you support.</strong> That 2019 budget Android phone with 3GB RAM is your true performance baseline. If it scrolls at 60fps there, it scrolls at 60fps everywhere.</li>
+
+<li class="ordered"><strong>Use platform defaults before customizing.</strong> System navigation transitions, pull-to-refresh physics, keyboard avoidance — the OS does these well. Override only when you have a specific reason and your replacement is measurably better.</li>
+
+<li class="ordered"><strong>Handle the empty state with the same care as the loaded state.</strong> The empty state is often the first thing a new user sees. A blank screen with no guidance is an invitation to close the app.</li>
+
+<li class="ordered"><strong>Profile memory after implementing navigation.</strong> The most common mobile memory leak is a screen that does not clean up subscriptions, timers, or observers when popped from the navigation stack. Navigate forward and back 10 times — memory should return to baseline.</li>
+
+<li class="ordered"><strong>Airplane mode is your integration test.</strong> Toggle airplane mode at every step of your feature flow. Every screen should degrade gracefully — show cached data, disable mutation buttons, display a connection banner.</li>
+
+<li class="ordered"><strong>Ship haptics.</strong> Subtle haptic feedback on button presses, toggle switches, and destructive actions makes an app feel tangible and premium. It takes 5 minutes to add and users notice its absence.</li></ul>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="mobile-debug.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">Mobile Debug &amp; Fix — From Crash Report to Root Cause</span></span></a>
+    <a href="mobile-navigation.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Mobile Navigation — Architecture That Scales</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    80 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>
