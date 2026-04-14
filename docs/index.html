@@ -39,6 +39,13 @@
       <a href="index.html#packs" class="nav-link">Packs</a>
       <a href="setup/index.html" class="nav-link">Setup</a>
       <a href="customize/index.html" class="nav-link">Customize</a>
+      <div class="nav-dropdown">
+        <button class="nav-dropdown-trigger">Security <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button>
+        <div class="nav-dropdown-menu">
+          <a href="compliance-overview.html" class="nav-dropdown-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>Compliance Overview</a>
+          <a href="ci-cd-security.html" class="nav-dropdown-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>CI/CD Security Gateway</a>
+        </div>
+      </div>
       <a href="rules/index.html" class="nav-link">Rules</a>
       <a href="mcp/index.html" class="nav-link">MCP Servers</a>
     </div>
@@ -422,6 +429,12 @@ const packs = [
     desc: 'Build, test, and ship mobile apps across React Native, Flutter, and iOS Swift.',
     skills: ['feature-build', 'navigation', 'state-mgmt', 'ui-components', 'debug-fix', 'performance', 'testing', 'app-release', 'api-integration', 'push-notifications', 'auth-flows', 'offline-first', 'ci-cd', 'platform-adapt'],
     skillNames: ['Feature Build', 'Navigation', 'State Mgmt', 'UI Components', 'Debug & Fix', 'Performance', 'Testing', 'App Release', 'API Integration', 'Push Notifications', 'Auth Flows', 'Offline-First', 'CI/CD', 'Platform Adapt']
+  },
+  {
+    id: 'compliance', name: 'Compliance', icon: '\u{1F6E1}\uFE0F', color: '#dc2626',
+    desc: 'HIPAA, GDPR, SOC 2, PCI-DSS audits, cloud security, infrastructure hardening, and incident response.',
+    skills: ['hipaa-audit', 'gdpr-audit', 'soc2-readiness', 'pci-dss-audit', 'cloud-security', 'infra-hardening', 'network-audit', 'secrets-scan', 'dep-vulnerability', 'privacy-review', 'access-audit', 'audit-logging', 'incident-response', 'compliance-report'],
+    skillNames: ['HIPAA Audit', 'GDPR Audit', 'SOC 2 Readiness', 'PCI-DSS Audit', 'Cloud Security', 'Infra Hardening', 'Network Audit', 'Secrets Scan', 'Dep Vulnerability', 'Privacy Review', 'Access Audit', 'Audit Logging', 'Incident Response', 'Compliance Report']
   }
 ];
 

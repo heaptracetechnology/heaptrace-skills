@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CI/CD Security Gateway — Heaptrace Skills</title>
+  <meta name="description" content="Automated compliance checks in every CI/CD pipeline. Catch HIPAA violations, leaked secrets, vulnerable dependencies, and access control gaps before production.">
+  <meta name="keywords" content="CI/CD security, GitHub Actions, compliance automation, HIPAA, GDPR, SOC 2, PCI-DSS, Claude Code, GitHub Copilot, Cursor IDE, security pipeline">
+  <meta name="author" content="Heaptrace Technology">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="CI/CD Security Gateway — Heaptrace Skills">
+  <meta property="og:description" content="Automated compliance checks that run on every PR. 14 security skills integrated into GitHub Actions.">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/styles.css">
+
+  <style>
+    /* ══════════════════════════════════════════
+       PAGE-SPECIFIC STYLES
+       ══════════════════════════════════════════ */
+
+    /* ── PIPELINE FLOW DIAGRAM ── */
+    .pipeline-flow {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      max-width: 1100px;
+      margin: 0 auto;
+      position: relative;
+    }
+    .pipeline-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .pipeline-box {
+      padding: 20px 22px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      min-width: 120px;
+      transition: var(--transition);
+    }
+    .pipeline-box:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+    }
+    .pipeline-box-icon {
+      font-size: 24px;
+      line-height: 1;
+    }
+    .pipeline-box-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+    .pipeline-arrow {
+      display: flex;
+      align-items: center;
+      padding: 0 6px;
+      flex-shrink: 0;
+      align-self: center;
+    }
+    .pipeline-arrow svg {
+      color: var(--text-muted);
+    }
+
+    /* Gateway — the large expanded box */
+    .pipeline-gateway {
+      flex: 1;
+      min-width: 0;
+    }
+    .gateway-box {
+      border: 2px solid rgba(6, 182, 212, 0.3);
+      background: linear-gradient(180deg, rgba(6, 182, 212, 0.04) 0%, var(--bg-card) 100%);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .gateway-box::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--red), var(--amber), var(--purple), var(--cyan));
+    }
+    .gateway-title {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--cyan);
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .gateway-title svg {
+      flex-shrink: 0;
+    }
+    .gateway-layers {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .gateway-layer {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--bg-secondary);
+    }
+    .gateway-layer-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+      min-width: 130px;
+    }
+    .gateway-layer-skills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      flex: 1;
+    }
+    .skill-pill {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-family: 'JetBrains Mono', monospace;
+      white-space: nowrap;
+      border: 1px solid;
+    }
+    /* Layer colors */
+    .layer-red { border-color: rgba(239, 68, 68, 0.2); }
+    .layer-red .gateway-layer-label { color: var(--red); }
+    .layer-red .skill-pill { background: rgba(239, 68, 68, 0.08); color: #fca5a5; border-color: rgba(239, 68, 68, 0.2); }
+
+    .layer-amber { border-color: rgba(245, 158, 11, 0.2); }
+    .layer-amber .gateway-layer-label { color: var(--amber); }
+    .layer-amber .skill-pill { background: rgba(245, 158, 11, 0.08); color: #fcd34d; border-color: rgba(245, 158, 11, 0.2); }
+
+    .layer-purple { border-color: rgba(168, 85, 247, 0.2); }
+    .layer-purple .gateway-layer-label { color: var(--purple); }
+    .layer-purple .skill-pill { background: rgba(168, 85, 247, 0.08); color: #d8b4fe; border-color: rgba(168, 85, 247, 0.2); }
+
+    .layer-blue { border-color: rgba(6, 182, 212, 0.2); }
+    .layer-blue .gateway-layer-label { color: var(--cyan); }
+    .layer-blue .skill-pill { background: rgba(6, 182, 212, 0.08); color: #67e8f9; border-color: rgba(6, 182, 212, 0.2); }
+
+    @media (max-width: 900px) {
+      .pipeline-flow {
+        flex-direction: column;
+        align-items: center;
+        gap: 0;
+      }
+      .pipeline-arrow {
+        transform: rotate(90deg);
+        padding: 6px 0;
+      }
+      .pipeline-stage { width: 100%; }
+      .pipeline-box { width: 160px; }
+      .pipeline-gateway { width: 100%; }
+      .gateway-layer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+      .gateway-layer-label { min-width: 0; }
+    }
+
+    /* ── INTEGRATION CARDS ── */
+    .integration-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .integration-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px 28px;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    .integration-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      opacity: 0;
+      transition: var(--transition);
+    }
+    .integration-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+    }
+    .integration-card:hover::before { opacity: 1; }
+    .integration-card:nth-child(1)::before { background: linear-gradient(90deg, var(--cyan), var(--purple)); }
+    .integration-card:nth-child(2)::before { background: linear-gradient(90deg, #6e40c9, #79c0ff); }
+    .integration-card:nth-child(3)::before { background: linear-gradient(90deg, var(--green), var(--cyan)); }
+
+    .integration-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      font-size: 26px;
+    }
+    .integration-icon-claude { background: rgba(6, 182, 212, 0.1); border: 1px solid rgba(6, 182, 212, 0.15); }
+    .integration-icon-copilot { background: rgba(110, 64, 201, 0.1); border: 1px solid rgba(110, 64, 201, 0.15); }
+    .integration-icon-cursor { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.15); }
+
+    .integration-name {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .integration-desc {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    @media (max-width: 900px) {
+      .integration-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── CODE BLOCK ── */
+    .code-container {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .code-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 20px;
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom: 1px solid var(--border);
+    }
+    .code-dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+    }
+    .code-dot-red { background: #ff5f57; }
+    .code-dot-yellow { background: #ffbd2e; }
+    .code-dot-green { background: #28c840; }
+    .code-filename {
+      margin-left: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .code-body {
+      padding: 20px 0;
+      overflow-x: auto;
+      font-size: 0.82rem;
+      line-height: 1.8;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .code-line {
+      display: flex;
+      padding: 0 20px;
+      min-height: 1.8em;
+    }
+    .code-line:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .code-num {
+      width: 40px;
+      flex-shrink: 0;
+      color: var(--text-muted);
+      text-align: right;
+      padding-right: 16px;
+      user-select: none;
+      opacity: 0.5;
+    }
+    .code-content {
+      white-space: pre;
+    }
+    /* Syntax colors */
+    .syn-key { color: var(--cyan); }
+    .syn-str { color: var(--green); }
+    .syn-bool { color: var(--amber); }
+    .syn-comment { color: var(--text-muted); font-style: italic; }
+    .syn-var { color: var(--purple-light); }
+    .syn-tag { color: var(--red); }
+
+    /* ── CHECKS TABLE ── */
+    .checks-grid {
+      display: grid;
+      gap: 2px;
+      background: var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .checks-header {
+      display: grid;
+      grid-template-columns: 160px 1fr 180px 140px;
+      background: var(--bg-elevated);
+    }
+    .checks-header-cell {
+      padding: 14px 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+    }
+    .checks-row {
+      display: grid;
+      grid-template-columns: 160px 1fr 180px 140px;
+      background: var(--bg-card);
+      transition: var(--transition-fast);
+    }
+    .checks-row:hover {
+      background: var(--bg-card-hover);
+    }
+    .checks-cell {
+      padding: 14px 20px;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+    }
+    .checks-cell-skill {
+      font-weight: 600;
+      color: var(--text-primary);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+    }
+    .checks-cell-frameworks {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .fw-tag {
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(6, 182, 212, 0.08);
+      color: var(--cyan);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+    }
+    .when-tag {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+    .when-pr { background: rgba(16, 185, 129, 0.1); color: var(--green); border: 1px solid rgba(16, 185, 129, 0.2); }
+    .when-infra { background: rgba(245, 158, 11, 0.1); color: var(--amber); border: 1px solid rgba(245, 158, 11, 0.2); }
+    .when-release { background: rgba(239, 68, 68, 0.1); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.2); }
+
+    @media (max-width: 900px) {
+      .checks-header { display: none; }
+      .checks-row {
+        grid-template-columns: 1fr;
+        padding: 16px;
+        gap: 8px;
+      }
+      .checks-cell { padding: 4px 0; }
+      .checks-cell::before {
+        content: attr(data-label);
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-muted);
+        min-width: 100px;
+        margin-right: 12px;
+      }
+    }
+
+    /* ── BEFORE/AFTER COMPARISON ── */
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .comparison-card {
+      border-radius: var(--radius);
+      padding: 32px 28px;
+      position: relative;
+      overflow: hidden;
+    }
+    .comparison-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+    }
+    .comparison-without {
+      background: rgba(239, 68, 68, 0.04);
+      border: 1px solid rgba(239, 68, 68, 0.15);
+    }
+    .comparison-without::before { background: var(--red); }
+    .comparison-with {
+      background: rgba(16, 185, 129, 0.04);
+      border: 1px solid rgba(16, 185, 129, 0.15);
+    }
+    .comparison-with::before { background: var(--green); }
+    .comparison-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 20px;
+    }
+    .comparison-without .comparison-label { color: var(--red); }
+    .comparison-with .comparison-label { color: var(--green); }
+    .comparison-items {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .comparison-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    .comparison-item svg {
+      flex-shrink: 0;
+      margin-top: 3px;
+    }
+
+    @media (max-width: 700px) {
+      .comparison-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── STATS ROW (hero override) ── */
+    .cicd-stats {
+      display: flex;
+      justify-content: center;
+      gap: 48px;
+      flex-wrap: wrap;
+    }
+    .cicd-stat {
+      text-align: center;
+      min-width: 120px;
+    }
+    .cicd-stat-value {
+      font-size: 2.2rem;
+      font-weight: 800;
+      line-height: 1;
+      background: linear-gradient(135deg, var(--cyan), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .cicd-stat-label {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 6px;
+      font-weight: 500;
+    }
+
+    @media (max-width: 640px) {
+      .cicd-stats { gap: 28px; }
+      .cicd-stat-value { font-size: 1.7rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     NAVIGATION
+     ══════════════════════════════════════════ -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+
+    <div class="nav-links" id="navLinks">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="index.html#packs" class="nav-link">Packs</a>
+      <a href="setup/index.html" class="nav-link">Setup</a>
+      <a href="customize/index.html" class="nav-link">Customize</a>
+      <div class="nav-dropdown"><button class="nav-dropdown-trigger">Security <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button><div class="nav-dropdown-menu"><a href="compliance-overview.html" class="nav-dropdown-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>Compliance Overview</a><a href="ci-cd-security.html" class="nav-dropdown-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>CI/CD Security Gateway</a></div></div>
+      <a href="rules/index.html" class="nav-link">Rules</a>
+      <a href="mcp/index.html" class="nav-link">MCP Servers</a>
+    </div>
+
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M4 6h16M4 12h16M4 18h16"/>
+      </svg>
+    </button>
+  </div>
+</nav>
+
+
+<!-- ══════════════════════════════════════════
+     SECTION 1: HERO
+     ══════════════════════════════════════════ -->
+<section class="hero">
+  <div class="container hero-content">
+
+    <div class="hero-badge">
+      <span class="hero-badge-dot"></span>
+      CI/CD Security &middot; Automated
+    </div>
+
+    <h1>Security Gate in<br>Every Pipeline</h1>
+
+    <p class="hero-subtitle">
+      Automated compliance checks that run on every PR. Catch HIPAA violations, leaked secrets,
+      vulnerable dependencies, and access control gaps before they reach production.
+    </p>
+
+    <div class="hero-ctas">
+      <a href="#github-actions" class="btn-primary">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+        View GitHub Actions Config
+      </a>
+      <a href="packs/compliance.html" class="btn-secondary">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        Browse Compliance Pack
+      </a>
+    </div>
+
+    <div class="cicd-stats">
+      <div class="cicd-stat">
+        <div class="cicd-stat-value">14</div>
+        <div class="cicd-stat-label">Security Checks</div>
+      </div>
+      <div class="cicd-stat">
+        <div class="cicd-stat-value">8</div>
+        <div class="cicd-stat-label">Frameworks</div>
+      </div>
+      <div class="cicd-stat">
+        <div class="cicd-stat-value">&lt;5m</div>
+        <div class="cicd-stat-label">Pipeline Time</div>
+      </div>
+      <div class="cicd-stat">
+        <div class="cicd-stat-value">0</div>
+        <div class="cicd-stat-label">Config Required</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     SECTION 2: PIPELINE FLOW DIAGRAM
+     ══════════════════════════════════════════ -->
+<section class="section" id="pipeline">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-eyebrow">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        Pipeline Architecture
+      </div>
+      <h2 class="section-title">How It Works</h2>
+      <p class="section-desc">Every push triggers a security gateway. Compliance skills run as structured audits between your CI and deployment stages.</p>
+    </div>
+
+    <div class="pipeline-flow">
+      <!-- Stage 1: Developer Push -->
+      <div class="pipeline-stage">
+        <div class="pipeline-box">
+          <div class="pipeline-box-icon">
+            <svg width="28" height="28" fill="none" stroke="var(--text-secondary)" stroke-width="1.8" viewBox="0 0 24 24"><path d="M16 18l2-2-2-2M8 18l-2-2 2-2M15 6l-6 12"/></svg>
+          </div>
+          <div class="pipeline-box-label">Developer<br>Push</div>
+        </div>
+      </div>
+
+      <!-- Arrow -->
+      <div class="pipeline-arrow">
+        <svg width="32" height="16" viewBox="0 0 32 16"><path d="M0 8h28M22 2l6 6-6 6" fill="none" stroke="var(--text-muted)" stroke-width="1.5"/></svg>
+      </div>
+
+      <!-- Stage 2: CI Triggers -->
+      <div class="pipeline-stage">
+        <div class="pipeline-box">
+          <div class="pipeline-box-icon">
+            <svg width="28" height="28" fill="none" stroke="var(--text-secondary)" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+          </div>
+          <div class="pipeline-box-label">CI<br>Triggers</div>
+        </div>
+      </div>
+
+      <!-- Arrow -->
+      <div class="pipeline-arrow">
+        <svg width="32" height="16" viewBox="0 0 32 16"><path d="M0 8h28M22 2l6 6-6 6" fill="none" stroke="var(--cyan)" stroke-width="2"/></svg>
+      </div>
+
+      <!-- Stage 3: SECURITY GATEWAY (expanded) -->
+      <div class="pipeline-stage pipeline-gateway">
+        <div class="gateway-box">
+          <div class="gateway-title">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Security Gateway
+          </div>
+          <div class="gateway-layers">
+            <!-- Layer 1: Framework Compliance -->
+            <div class="gateway-layer layer-red">
+              <div class="gateway-layer-label">Framework Compliance</div>
+              <div class="gateway-layer-skills">
+                <span class="skill-pill">hipaa-audit</span>
+                <span class="skill-pill">gdpr-audit</span>
+                <span class="skill-pill">soc2-audit</span>
+                <span class="skill-pill">pci-audit</span>
+              </div>
+            </div>
+            <!-- Layer 2: Infrastructure Security -->
+            <div class="gateway-layer layer-amber">
+              <div class="gateway-layer-label">Infra Security</div>
+              <div class="gateway-layer-skills">
+                <span class="skill-pill">cloud-security</span>
+                <span class="skill-pill">infra-harden</span>
+                <span class="skill-pill">network-audit</span>
+              </div>
+            </div>
+            <!-- Layer 3: Code Security -->
+            <div class="gateway-layer layer-purple">
+              <div class="gateway-layer-label">Code Security</div>
+              <div class="gateway-layer-skills">
+                <span class="skill-pill">secrets-scan</span>
+                <span class="skill-pill">dep-vuln</span>
+                <span class="skill-pill">privacy-review</span>
+                <span class="skill-pill">access-audit</span>
+                <span class="skill-pill">audit-log</span>
+              </div>
+            </div>
+            <!-- Layer 4: Reporting -->
+            <div class="gateway-layer layer-blue">
+              <div class="gateway-layer-label">Reporting</div>
+              <div class="gateway-layer-skills">
+                <span class="skill-pill">incident-plan</span>
+                <span class="skill-pill">compliance-report</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Arrow -->
+      <div class="pipeline-arrow">
+        <svg width="32" height="16" viewBox="0 0 32 16"><path d="M0 8h28M22 2l6 6-6 6" fill="none" stroke="var(--green)" stroke-width="2"/></svg>
+      </div>
+
+      <!-- Stage 4: Build & Test -->
+      <div class="pipeline-stage">
+        <div class="pipeline-box">
+          <div class="pipeline-box-icon">
+            <svg width="28" height="28" fill="none" stroke="var(--green)" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </div>
+          <div class="pipeline-box-label">Build<br>&amp; Test</div>
+        </div>
+      </div>
+
+      <!-- Arrow -->
+      <div class="pipeline-arrow">
+        <svg width="32" height="16" viewBox="0 0 32 16"><path d="M0 8h28M22 2l6 6-6 6" fill="none" stroke="var(--text-muted)" stroke-width="1.5"/></svg>
+      </div>
+
+      <!-- Stage 5: Deploy -->
+      <div class="pipeline-stage">
+        <div class="pipeline-box">
+          <div class="pipeline-box-icon">
+            <svg width="28" height="28" fill="none" stroke="var(--text-secondary)" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M12 3v12M8 7l4-4 4 4"/></svg>
+          </div>
+          <div class="pipeline-box-label">Deploy</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<div class="divider"></div>
+
+
+<!-- ══════════════════════════════════════════
+     SECTION 3: INTEGRATION METHODS
+     ══════════════════════════════════════════ -->
+<section class="section" id="integrations">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-eyebrow">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+        Tool Support
+      </div>
+      <h2 class="section-title">Works With Your Tools</h2>
+      <p class="section-desc">Drop compliance skills into your existing workflow. No vendor lock-in, no proprietary agents.</p>
+    </div>
+
+    <div class="integration-grid">
+      <!-- Claude Code CLI -->
+      <div class="integration-card">
+        <div class="integration-icon integration-icon-claude">
+          <svg width="28" height="28" fill="none" stroke="var(--cyan)" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 17l6-6-6-6M12 19h8"/></svg>
+        </div>
+        <div class="integration-name">Claude Code CLI</div>
+        <div class="integration-desc">
+          Run compliance skills directly from your terminal or CI pipeline via Claude Code. Each skill runs as a structured prompt with expert-level auditing.
+        </div>
+      </div>
+
+      <!-- GitHub Copilot -->
+      <div class="integration-card">
+        <div class="integration-icon integration-icon-copilot">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="1.8"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        </div>
+        <div class="integration-name">GitHub Copilot</div>
+        <div class="integration-desc">
+          Use skills as Copilot custom instructions. Drop SKILL.md files into your repo and Copilot references them during code review and suggestions.
+        </div>
+      </div>
+
+      <!-- Cursor IDE -->
+      <div class="integration-card">
+        <div class="integration-icon integration-icon-cursor">
+          <svg width="28" height="28" fill="none" stroke="var(--green)" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        </div>
+        <div class="integration-name">Cursor IDE</div>
+        <div class="integration-desc">
+          Import skills as Cursor rules. Get real-time compliance guidance while writing code, with inline suggestions based on HIPAA, GDPR, SOC 2 rules.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<div class="divider"></div>
+
+
+<!-- ══════════════════════════════════════════
+     SECTION 4: GITHUB ACTIONS CONFIGURATION
+     ══════════════════════════════════════════ -->
+<section class="section" id="github-actions">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-eyebrow">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+        Configuration
+      </div>
+      <h2 class="section-title">Drop-In GitHub Actions</h2>
+      <p class="section-desc">Copy this workflow into your repo. Security scans run on every PR, framework audits on release branches.</p>
+    </div>
+
+    <div class="code-container">
+      <div class="code-header">
+        <div class="code-dot code-dot-red"></div>
+        <div class="code-dot code-dot-yellow"></div>
+        <div class="code-dot code-dot-green"></div>
+        <div class="code-filename">.github/workflows/security-gateway.yml</div>
+      </div>
+      <div class="code-body">
+        <div class="code-line"><span class="code-num">1</span><span class="code-content"><span class="syn-key">name</span>: <span class="syn-str">Security Gateway</span></span></div>
+        <div class="code-line"><span class="code-num">2</span><span class="code-content"><span class="syn-key">on</span>:</span></div>
+        <div class="code-line"><span class="code-num">3</span><span class="code-content">  <span class="syn-key">pull_request</span>:</span></div>
+        <div class="code-line"><span class="code-num">4</span><span class="code-content">    <span class="syn-key">branches</span>: [<span class="syn-str">main</span>, <span class="syn-str">staging</span>]</span></div>
+        <div class="code-line"><span class="code-num">5</span><span class="code-content"></span></div>
+        <div class="code-line"><span class="code-num">6</span><span class="code-content"><span class="syn-key">jobs</span>:</span></div>
+        <div class="code-line"><span class="code-num">7</span><span class="code-content">  <span class="syn-key">compliance-scan</span>:</span></div>
+        <div class="code-line"><span class="code-num">8</span><span class="code-content">    <span class="syn-key">runs-on</span>: <span class="syn-str">ubuntu-latest</span></span></div>
+        <div class="code-line"><span class="code-num">9</span><span class="code-content">    <span class="syn-key">steps</span>:</span></div>
+        <div class="code-line"><span class="code-num">10</span><span class="code-content">      - <span class="syn-key">uses</span>: <span class="syn-str">actions/checkout@v4</span></span></div>
+        <div class="code-line"><span class="code-num">11</span><span class="code-content"></span></div>
+        <div class="code-line"><span class="code-num">12</span><span class="code-content">      - <span class="syn-key">name</span>: <span class="syn-str">Install Claude Code</span></span></div>
+        <div class="code-line"><span class="code-num">13</span><span class="code-content">        <span class="syn-key">run</span>: <span class="syn-str">npm install -g @anthropic-ai/claude-code</span></span></div>
+        <div class="code-line"><span class="code-num">14</span><span class="code-content"></span></div>
+        <div class="code-line"><span class="code-num">15</span><span class="code-content">      - <span class="syn-key">name</span>: <span class="syn-str">Run Security Gateway</span></span></div>
+        <div class="code-line"><span class="code-num">16</span><span class="code-content">        <span class="syn-key">env</span>:</span></div>
+        <div class="code-line"><span class="code-num">17</span><span class="code-content">          <span class="syn-key">ANTHROPIC_API_KEY</span>: <span class="syn-var">${{ secrets.ANTHROPIC_API_KEY }}</span></span></div>
+        <div class="code-line"><span class="code-num">18</span><span class="code-content">        <span class="syn-key">run</span>: |</span></div>
+        <div class="code-line"><span class="code-num">19</span><span class="code-content">          <span class="syn-str">claude -p "Run /secrets-scan on this codebase" --output-format json > results/secrets.json</span></span></div>
+        <div class="code-line"><span class="code-num">20</span><span class="code-content">          <span class="syn-str">claude -p "Run /dep-vuln on this codebase" --output-format json > results/deps.json</span></span></div>
+        <div class="code-line"><span class="code-num">21</span><span class="code-content">          <span class="syn-str">claude -p "Run /sec-audit on this codebase" --output-format json > results/security.json</span></span></div>
+        <div class="code-line"><span class="code-num">22</span><span class="code-content">          <span class="syn-str">claude -p "Run /privacy-review on this codebase" --output-format json > results/privacy.json</span></span></div>
+        <div class="code-line"><span class="code-num">23</span><span class="code-content"></span></div>
+        <div class="code-line"><span class="code-num">24</span><span class="code-content">      - <span class="syn-key">name</span>: <span class="syn-str">Framework Compliance (on release branches)</span></span></div>
+        <div class="code-line"><span class="code-num">25</span><span class="code-content">        <span class="syn-key">if</span>: <span class="syn-var">github.base_ref == 'main'</span></span></div>
+        <div class="code-line"><span class="code-num">26</span><span class="code-content">        <span class="syn-key">run</span>: |</span></div>
+        <div class="code-line"><span class="code-num">27</span><span class="code-content">          <span class="syn-str">claude -p "Run /hipaa-audit on this codebase" --output-format json > results/hipaa.json</span></span></div>
+        <div class="code-line"><span class="code-num">28</span><span class="code-content">          <span class="syn-str">claude -p "Run /gdpr-audit on this codebase" --output-format json > results/gdpr.json</span></span></div>
+        <div class="code-line"><span class="code-num">29</span><span class="code-content">          <span class="syn-str">claude -p "Run /soc2-audit on this codebase" --output-format json > results/soc2.json</span></span></div>
+        <div class="code-line"><span class="code-num">30</span><span class="code-content"></span></div>
+        <div class="code-line"><span class="code-num">31</span><span class="code-content">      - <span class="syn-key">name</span>: <span class="syn-str">Generate Compliance Report</span></span></div>
+        <div class="code-line"><span class="code-num">32</span><span class="code-content">        <span class="syn-key">run</span>: <span class="syn-str">claude -p "Run /compliance-report for this PR" > results/report.md</span></span></div>
+        <div class="code-line"><span class="code-num">33</span><span class="code-content"></span></div>
+        <div class="code-line"><span class="code-num">34</span><span class="code-content">      - <span class="syn-key">name</span>: <span class="syn-str">Post Results to PR</span></span></div>
+        <div class="code-line"><span class="code-num">35</span><span class="code-content">        <span class="syn-key">uses</span>: <span class="syn-str">actions/github-script@v7</span></span></div>
+        <div class="code-line"><span class="code-num">36</span><span class="code-content">        <span class="syn-key">with</span>:</span></div>
+        <div class="code-line"><span class="code-num">37</span><span class="code-content">          <span class="syn-key">script</span>: |</span></div>
+        <div class="code-line"><span class="code-num">38</span><span class="code-content">            <span class="syn-comment">const fs = require('fs');</span></span></div>
+        <div class="code-line"><span class="code-num">39</span><span class="code-content">            <span class="syn-comment">const report = fs.readFileSync('results/report.md', 'utf8');</span></span></div>
+        <div class="code-line"><span class="code-num">40</span><span class="code-content">            <span class="syn-comment">github.rest.issues.createComment({</span></span></div>
+        <div class="code-line"><span class="code-num">41</span><span class="code-content">            <span class="syn-comment">  issue_number: context.issue.number,</span></span></div>
+        <div class="code-line"><span class="code-num">42</span><span class="code-content">            <span class="syn-comment">  owner: context.repo.owner,</span></span></div>
+        <div class="code-line"><span class="code-num">43</span><span class="code-content">            <span class="syn-comment">  repo: context.repo.repo,</span></span></div>
+        <div class="code-line"><span class="code-num">44</span><span class="code-content">            <span class="syn-comment">  body: '## Security Gateway Report\n\n' + report</span></span></div>
+        <div class="code-line"><span class="code-num">45</span><span class="code-content">            <span class="syn-comment">});</span></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<div class="divider"></div>
+
+
+<!-- ══════════════════════════════════════════
+     SECTION 5: WHAT EACH GATE CHECKS
+     ══════════════════════════════════════════ -->
+<section class="section" id="checks">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-eyebrow">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        Full Coverage
+      </div>
+      <h2 class="section-title">14 Security Checks, Every PR</h2>
+      <p class="section-desc">Each check runs as a structured audit with expert-level analysis. Results are machine-readable JSON for pipeline integration.</p>
+    </div>
+
+    <div class="checks-grid">
+      <!-- Header -->
+      <div class="checks-header">
+        <div class="checks-header-cell">Skill</div>
+        <div class="checks-header-cell">What It Catches</div>
+        <div class="checks-header-cell">Frameworks</div>
+        <div class="checks-header-cell">When It Runs</div>
+      </div>
+
+      <!-- Row 1 -->
+      <div class="checks-row">
+        <div class="checks-cell checks-cell-skill" data-label="Skill">secrets-scan</div>
+        <div class="checks-cell" data-label="Catches">API keys, tokens, passwords in code &amp; git history</div>
+        <div class="checks-cell checks-cell-frameworks" data-label="Frameworks"><span class="fw-tag">All</span></div>
+        <div class="checks-cell" data-label="When"><span class="when-tag when-pr">Every PR</span></div>
+      </div>
+
+      <!-- Row 2 -->
+      <div class="checks-row">
+        <div class="checks-cell checks-cell-skill" data-label="Skill">dep-vuln</div>
+        <div class="checks-cell" data-label="Catches">CVEs in dependencies, license violations, supply chain risks</div>
+        <div class="checks-cell checks-cell-frameworks" data-label="Frameworks"><span class="fw-tag">All</span></div>
+        <div class="checks-cell" data-label="When"><span class="when-tag when-pr">Every PR</span></div>
+      </div>
+
+      <!-- Row 3 -->
+      <div class="checks-row">
+        <div class="checks-cell checks-cell-skill" data-label="Skill">sec-audit</div>
+        <div class="checks-cell" data-label="Catches">OWASP Top 10, injection, XSS, broken auth</div>
+        <div class="checks-cell checks-cell-frameworks" data-label="Frameworks"><span class="fw-tag">All</span></div>
+        <div class="checks-cell" data-label="When"><span class="when-tag when-pr">Every PR</span></div>
+      </div>
+
+      <!-- Row 4 -->
+      <div class="checks-row">
+        <div class="checks-cell checks-cell-skill" data-label="Skill">privacy-review</div>
+        <div class="checks-cell" data-label="Catches">PII in logs, unencrypted data, third-party leaks</div>
+        <div class="checks-cell checks-cell-frameworks" data-label="Frameworks">
+          <span class="fw-tag">GDPR</span><span class="fw-tag">CCPA</span><span class="fw-tag">HIPAA</span>
+        </div>
+        <div class="checks-cell" data-label="When"><span class="when-tag when-pr">Every PR</span></div>
+      </div>
+
+      <!-- Row 5 -->
+      <div class="checks-row">
+        <div class="checks-cell checks-cell-skill" data-label="Skill">access-audit</div>
+        <div class="checks-cell" data-label="Catches">Missing RBAC checks, privilege escalation, orphaned accounts</div>
+        <div class="checks-cell checks-cell-frameworks" data-label="Frameworks">
+          <span class="fw-tag">SOC 2</span><span class="fw-tag">HIPAA</span><span class="fw-tag">PCI</span>
+        </div>
+        <div class="checks-cell" data-label="When"><span class="when-tag when-pr">Every PR</span></div>
+      </div>
+
+      <!-- Row 6 -->
+      <div class="checks-row">
+        <div class="checks-cell checks-cell-skill" data-label="Skill">audit-log</div>
+        <div class="checks-cell" data-label="Catches">Missing audit events, PII in logs, retention gaps</div>
+        <div class="checks-cell checks-cell-frameworks" data-label="Frameworks">
+          <span class="fw-tag">SOC 2</span><span class="fw-tag">HIPAA</span><span class="fw-tag">PCI</span>
+        </div>
+        <div class="checks-cell" data-label="When"><span class="when-tag when-pr">Every PR</span></div>
+      </div>
+
+      <!-- Row 7 -->
+      <div class="checks-row">
+        <div class="checks-cell checks-cell-skill" data-label="Skill">cloud-security</div>
+        <div class="checks-cell" data-label="Catches">Public S3, overpermissive IAM, unencrypted volumes</div>
+        <div class="checks-cell checks-cell-frameworks" data-label="Frameworks">
+          <span class="fw-tag">CIS</span><span class="fw-tag">SOC 2</span>
+        </div>
+        <div class="checks-cell" data-label="When"><span class="when-tag when-infra">Infra changes</span></div>
+      </div>
+
+      <!-- Row 8 -->
+      <div class="checks-row">
+        <div class="checks-cell checks-cell-skill" data-label="Skill">infra-harden</div>
+        <div class="checks-cell" data-label="Catches">Root containers, missing TLS, unpatched images</div>
+        <div class="checks-cell checks-cell-frameworks" data-label="Frameworks">
+          <span class="fw-tag">CIS</span><span class="fw-tag">PCI</span>
+        </div>
+        <div class="checks-cell" data-label="When"><span class="when-tag when-infra">Infra changes</span></div>
+      </div>
+
+      <!-- Row 9 -->
+      <div class="checks-row">
+        <div class="checks-cell checks-cell-skill" data-label="Skill">network-audit</div>
+        <div class="checks-cell" data-label="Catches">Open security groups, missing WAF, egress gaps</div>
+        <div class="checks-cell checks-cell-frameworks" data-label="Frameworks">
+          <span class="fw-tag">CIS</span><span class="fw-tag">PCI</span>
+        </div>
+        <div class="checks-cell" data-label="When"><span class="when-tag when-infra">Infra changes</span></div>
+      </div>
+
+      <!-- Row 10 -->
+      <div class="checks-row">
+        <div class="checks-cell checks-cell-skill" data-label="Skill">hipaa-audit</div>
+        <div class="checks-cell" data-label="Catches">PHI exposure, missing encryption, BAA gaps</div>
+        <div class="checks-cell checks-cell-frameworks" data-label="Frameworks"><span class="fw-tag">HIPAA</span></div>
+        <div class="checks-cell" data-label="When"><span class="when-tag when-release">Release branch</span></div>
+      </div>
+
+      <!-- Row 11 -->
+      <div class="checks-row">
+        <div class="checks-cell checks-cell-skill" data-label="Skill">gdpr-audit</div>
+        <div class="checks-cell" data-label="Catches">Consent issues, missing rights, cross-border transfers</div>
+        <div class="checks-cell checks-cell-frameworks" data-label="Frameworks"><span class="fw-tag">GDPR</span></div>
+        <div class="checks-cell" data-label="When"><span class="when-tag when-release">Release branch</span></div>
+      </div>
+
+      <!-- Row 12 -->
+      <div class="checks-row">
+        <div class="checks-cell checks-cell-skill" data-label="Skill">soc2-audit</div>
+        <div class="checks-cell" data-label="Catches">Control gaps, missing evidence, access review failures</div>
+        <div class="checks-cell checks-cell-frameworks" data-label="Frameworks"><span class="fw-tag">SOC 2</span></div>
+        <div class="checks-cell" data-label="When"><span class="when-tag when-release">Release branch</span></div>
+      </div>
+
+      <!-- Row 13 -->
+      <div class="checks-row">
+        <div class="checks-cell checks-cell-skill" data-label="Skill">pci-audit</div>
+        <div class="checks-cell" data-label="Catches">CDE scope issues, tokenization gaps, log retention</div>
+        <div class="checks-cell checks-cell-frameworks" data-label="Frameworks"><span class="fw-tag">PCI-DSS</span></div>
+        <div class="checks-cell" data-label="When"><span class="when-tag when-release">Release branch</span></div>
+      </div>
+
+      <!-- Row 14 -->
+      <div class="checks-row">
+        <div class="checks-cell checks-cell-skill" data-label="Skill">compliance-report</div>
+        <div class="checks-cell" data-label="Catches">Generates auditor-ready evidence package</div>
+        <div class="checks-cell checks-cell-frameworks" data-label="Frameworks"><span class="fw-tag">All</span></div>
+        <div class="checks-cell" data-label="When"><span class="when-tag when-release">Release branch</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<div class="divider"></div>
+
+
+<!-- ══════════════════════════════════════════
+     SECTION 6: BEFORE VS AFTER
+     ══════════════════════════════════════════ -->
+<section class="section" id="comparison">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-eyebrow">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 3h5v5M8 3H3v5M3 16v5h5M21 16v5h-5"/></svg>
+        Impact
+      </div>
+      <h2 class="section-title">Before vs After Security Gateway</h2>
+      <p class="section-desc">The difference between manual security reviews and automated compliance gates.</p>
+    </div>
+
+    <div class="comparison-grid">
+      <!-- Without -->
+      <div class="comparison-card comparison-without">
+        <div class="comparison-label">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+          Without Security Gateway
+        </div>
+        <ul class="comparison-items">
+          <li class="comparison-item">
+            <svg width="16" height="16" fill="none" stroke="var(--red)" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+            Secrets in git history discovered 6 months later
+          </li>
+          <li class="comparison-item">
+            <svg width="16" height="16" fill="none" stroke="var(--red)" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+            CVEs in dependencies found by customers
+          </li>
+          <li class="comparison-item">
+            <svg width="16" height="16" fill="none" stroke="var(--red)" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+            HIPAA violations caught during audit
+          </li>
+          <li class="comparison-item">
+            <svg width="16" height="16" fill="none" stroke="var(--red)" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+            Manual compliance evidence collection before every audit
+          </li>
+        </ul>
+      </div>
+
+      <!-- With -->
+      <div class="comparison-card comparison-with">
+        <div class="comparison-label">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          With Security Gateway
+        </div>
+        <ul class="comparison-items">
+          <li class="comparison-item">
+            <svg width="16" height="16" fill="none" stroke="var(--green)" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Secrets blocked before they enter git
+          </li>
+          <li class="comparison-item">
+            <svg width="16" height="16" fill="none" stroke="var(--green)" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            CVEs caught on every PR, patches enforced by SLA
+          </li>
+          <li class="comparison-item">
+            <svg width="16" height="16" fill="none" stroke="var(--green)" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            HIPAA compliance verified on every release
+          </li>
+          <li class="comparison-item">
+            <svg width="16" height="16" fill="none" stroke="var(--green)" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Automated compliance reports generated on demand
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<div class="divider"></div>
+
+
+<!-- ══════════════════════════════════════════
+     SECTION 7: CTA BANNER
+     ══════════════════════════════════════════ -->
+<section class="section">
+  <div class="container">
+    <div class="cta-banner">
+      <h2>Add Security Gates to Your Pipeline Today</h2>
+      <p>
+        Clone the repo, drop skills into your project, and configure GitHub Actions.
+        Your first compliance scan runs in under 5 minutes.
+      </p>
+      <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="btn-primary">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+        Clone from GitHub
+      </a>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     FOOTER
+     ══════════════════════════════════════════ -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-links">
+      <a href="index.html" class="footer-link">Home</a>
+      <a href="index.html#packs" class="footer-link">Packs</a>
+      <a href="setup/index.html" class="footer-link">Setup Guide</a>
+      <a href="customize/index.html" class="footer-link">Customize</a>
+      <a href="rules/index.html" class="footer-link">Rules</a>
+      <a href="mcp/index.html" class="footer-link">MCP Servers</a>
+      <a href="https://heaptrace.com" class="footer-link" target="_blank" rel="noopener">Heaptrace</a>
+    </div>
+    <div class="footer-copy">
+      MIT License &middot; Built by <a href="https://heaptrace.com" target="_blank" rel="noopener">Heaptrace Technology</a>
+      <br>94 Skills &middot; 10 Packs &middot; Free &amp; Open Source
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
