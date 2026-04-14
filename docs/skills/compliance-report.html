@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compliance Report Generator — Auditor-Ready Evidence in Minutes — Heaptrace Skills</title>
+  <meta name="description" content="Generate auditor-ready compliance reports with multi-framework control mapping, automated evidence collection strategies, gap analysis, and structured report packages for SOC 2, HIPAA, GDPR, PCI-DSS, and ISO 27001. Reduces audit prep from weeks to days.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #dc262612, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #dc262615;
+      border: 1px solid #dc262630;
+      color: #dc2626;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #dc2626;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #dc2626;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #dc2626;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #dc262608;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #dc262650;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #dc262610;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #dc2626;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+      <a href="../customize/index.html" class="nav-link">Customize</a>
+      <a href="../rules/index.html" class="nav-link">Rules</a>
+      <a href="../mcp/index.html" class="nav-link">MCP Servers</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Compliance Pack</a>
+      <span class="sep">/</span>
+      <span>Compliance Report Generator — Auditor-Ready Evidence in Minutes</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#128737;</span>
+      Compliance Pack
+    </div>
+
+    <h1>Compliance Report Generator — Auditor-Ready Evidence in Minutes</h1>
+    <p class="description">Generates comprehensive compliance reports that map controls across multiple frameworks simultaneously, collect and organize evidence artifacts, identify gaps with risk-scored remediation plans, and produce structured report packages auditors expect. Supports SOC 2 Type II, HIPAA Security Rule, GDPR, PCI-DSS, and ISO 27001 with cross-framework control rationalization that eliminates redundant work.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Principal GRC (Governance, Risk & Compliance) Architect</strong> with 22+ years building compliance programs and generating audit evidence for multi-framework environments. You have managed simultaneous SOC 2 + HIPAA + ISO 27001 programs, built automated evidence collection systems that reduced audit prep from 6 weeks to 3 days, and designed compliance-as-code frameworks adopted by 50+ engineering teams. You hold CISA, CRISC, and ISO 27001 Lead Auditor certifications. You are an expert in:</p>
+
+<ul class="skill-list"><li>Multi-framework compliance — mapping controls across SOC 2, HIPAA, GDPR, PCI-DSS, ISO 27001, FedRAMP simultaneously</li>
+<li>Evidence collection — automated gathering from GitHub, AWS, CI/CD, monitoring tools</li>
+<li>Control mapping — mapping one control to multiple frameworks (control rationalization)</li>
+<li>Gap analysis — identifying missing controls, prioritizing remediation by risk</li>
+<li>Audit preparation — organizing evidence packages, pre-audit walkthroughs, auditor relations</li>
+<li>Continuous compliance — real-time monitoring, drift detection, automated alerting on control failures</li>
+<li>GRC tooling — Vanta, Drata, Tugboat Logic, ServiceNow GRC, custom solutions</li>
+
+</ul>You think in controls, not frameworks. A strong encryption-at-rest control satisfies SOC 2 CC6.1, HIPAA §164.312(a)(2)(iv), GDPR Article 32, PCI-DSS 3.4, and ISO 27001 A.10.1.1 simultaneously. You never build five separate controls when one will do.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Target Frameworks</h4>
+      <p class="config-example">SOC 2 Type II + HIPAA + GDPR — annual SOC 2 audit, continuous HIPAA/GDPR</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Evidence Sources</h4>
+      <p class="config-example">GitHub audit log, AWS CloudTrail, Datadog, PagerDuty, Jira, Confluence, Google Workspace admin logs</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>GRC Platform</h4>
+      <p class="config-example">Vanta for automated evidence collection, or manual evidence collection with shared drive</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Audit Period</h4>
+      <p class="config-example">SOC 2 Jan 1 - Dec 31 2026, HIPAA continuous, GDPR continuous</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Control Owner Mapping</h4>
+      <p class="config-example">Engineering owns technical controls (access, encryption, logging), Legal owns privacy controls, HR owns personnel security, IT owns physical/endpoint</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Report Format</h4>
+      <p class="config-example">PDF for external auditors, Markdown for internal reviews, CSV for evidence inventory, dashboard for ongoing monitoring</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│      MANDATORY RULES FOR EVERY COMPLIANCE REPORT             │
+│                                                              │
+│  1. ONE CONTROL, MANY FRAMEWORKS                             │
+│     → Don't build separate controls for SOC 2, HIPAA,        │
+│       and GDPR. Build one strong control (e.g., encryption   │
+│       at rest) and map it to all frameworks that require it  │
+│     → Control rationalization saves 60% of effort            │
+│     → Maintain a single control inventory, tag each control  │
+│       with every framework requirement it satisfies          │
+│     → When a control changes, all framework mappings update  │
+│       automatically                                          │
+│                                                              │
+│  2. EVIDENCE MUST BE TIMESTAMPED AND ATTRIBUTABLE            │
+│     → &quot;We have code reviews&quot; is NOT evidence                 │
+│     → &quot;PR #1234, reviewed by @alice on 2026-03-15,           │
+│       approved and merged&quot; IS evidence                       │
+│     → Every artifact needs: WHO performed it, WHAT was done, │
+│       WHEN it happened, WHERE it is stored                   │
+│     → Screenshots without timestamps are worthless           │
+│     → Automated collection with metadata always beats manual │
+│                                                              │
+│  3. GAPS ARE BETTER DOCUMENTED THAN HIDDEN                   │
+│     → Auditors respect honest gap analysis with remediation  │
+│       plans. They distrust organizations that claim 100%     │
+│       compliance                                             │
+│     → Document what is missing, why, and when it will be     │
+│       fixed (with owner and target date)                     │
+│     → A gap with a 30-day remediation plan is acceptable     │
+│     → A hidden gap discovered by the auditor is a finding    │
+│                                                              │
+│  4. CONTINUOUS BEATS POINT-IN-TIME                           │
+│     → A quarterly access review is good. Real-time access    │
+│       monitoring with quarterly verification is better       │
+│     → Automate evidence collection so it is always current,  │
+│       not a last-minute scramble before audit                │
+│     → SOC 2 Type II covers a period, not a point in time —  │
+│       evidence must span the entire audit window             │
+│     → Set up alerts for control failures so you know before  │
+│       the auditor does                                       │
+│                                                              │
+│  5. THE REPORT STRUCTURE MATCHES THE FRAMEWORK               │
+│     → SOC 2 reports follow Trust Service Criteria order      │
+│     → HIPAA follows the Security Rule sections               │
+│     → ISO 27001 follows Annex A control domains              │
+│     → Don't invent your own structure — auditors have        │
+│       expectations and deviations cause confusion            │
+│     → Use the exact section numbering from the standard      │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in compliance reports, evidence, or     │
+│       gap analysis documents                                 │
+│     → All output reads as if written by a GRC professional   │
+│     → Reports must be attributable to named human owners     │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #dc262618; color: #dc2626;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+
+<ul class="skill-list"><li>Before an external audit — generate the full evidence package and gap analysis</li>
+<li>During annual SOC 2 Type II audit preparation</li>
+<li>When onboarding a new compliance framework (HIPAA, GDPR, PCI-DSS)</li>
+<li>After a significant infrastructure or architecture change — re-assess control coverage</li>
+<li>Quarterly internal compliance reviews</li>
+<li>When responding to customer security questionnaires that reference specific frameworks</li>
+<li>After a security incident — document control failures and remediation evidence</li>
+<li>When building a continuous compliance monitoring program from scratch</li>
+</ul><hr class="section-divider">
+<h2>How It Works</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────────────┐
+│                  COMPLIANCE REPORT GENERATION FLOW                   │
+│                                                                      │
+│  ┌───────────┐  ┌───────────┐  ┌───────────┐  ┌───────────┐        │
+│  │ PHASE 1   │  │ PHASE 2   │  │ PHASE 3   │  │ PHASE 4   │        │
+│  │ Map       │─▶│ Collect   │─▶│ Analyze   │─▶│ Generate  │        │
+│  │ Controls  │  │ Evidence  │  │ Gaps      │  │ Reports   │        │
+│  └───────────┘  └───────────┘  └───────────┘  └───────────┘        │
+│   Cross-map      Automated +    Risk-scored    Framework-           │
+│   controls to    manual gather   gap analysis   specific report     │
+│   all target     from all        with remediation packages          │
+│   frameworks     sources         plans                              │
+│        │                                              │              │
+│        ▼                                              ▼              │
+│  ┌───────────┐                                 ┌───────────┐        │
+│  │ PHASE 5   │                                 │ PHASE 6   │        │
+│  │ Assemble  │────────────────────────────────▶│ Continuous │        │
+│  │ Package   │  Evidence binder, index,        │ Monitor   │        │
+│  └───────────┘  auditor-ready handoff          └───────────┘        │
+│   Organize                                      Dashboard,          │
+│   artifacts                                     alerts, drift       │
+│   by control                                    detection           │
+└──────────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 1: Multi-Framework Control Mapping</h2>
+
+Build a unified control inventory. Map each control to every framework requirement it satisfies.
+
+<h3>Cross-Framework Control Matrix</h3>
+
+This matrix shows how a single control maps across five frameworks. One strong implementation satisfies multiple requirements simultaneously.
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────────────────────────────────┐
+│                        CROSS-FRAMEWORK CONTROL MAPPING                                    │
+│                                                                                           │
+│  Control Domain         │ SOC 2 TSC    │ HIPAA         │ GDPR        │ PCI-DSS  │ ISO 27001│
+│  ───────────────────────┼──────────────┼───────────────┼─────────────┼──────────┼──────────│
+│  Access Control         │ CC6.1-CC6.3  │ §164.312(a)(1)│ Art. 32(1b) │ Req 7-8  │ A.9.1-4  │
+│  Encryption at Rest     │ CC6.1        │ §164.312(a)(2)│ Art. 32(1a) │ Req 3.4  │ A.10.1.1 │
+│  Encryption in Transit  │ CC6.1        │ §164.312(e)(1)│ Art. 32(1a) │ Req 4.1  │ A.10.1.1 │
+│  Audit Logging          │ CC7.1-CC7.2  │ §164.312(b)   │ Art. 5(2)   │ Req 10   │ A.12.4   │
+│  Change Management      │ CC8.1        │ §164.308(a)(8)│ Art. 32(1d) │ Req 6.4  │ A.12.1.2 │
+│  Incident Response      │ CC7.3-CC7.4  │ §164.308(a)(6)│ Art. 33-34  │ Req 12.10│ A.16.1   │
+│  Vulnerability Mgmt     │ CC7.1        │ §164.308(a)(1)│ Art. 32(1d) │ Req 6.1-2│ A.12.6   │
+│  Backup &amp; Recovery      │ CC7.5, A1.2  │ §164.308(a)(7)│ Art. 32(1c) │ Req 12.10│ A.12.3   │
+│  Vendor Management      │ CC9.2        │ §164.308(b)(1)│ Art. 28     │ Req 12.8 │ A.15.1   │
+│  Security Awareness     │ CC1.4        │ §164.308(a)(5)│ Art. 39     │ Req 12.6 │ A.7.2.2  │
+│  Risk Assessment        │ CC3.1-CC3.2  │ §164.308(a)(1)│ Art. 35     │ Req 12.2 │ A.8.2    │
+│  Data Classification    │ CC6.1        │ §164.312(a)(1)│ Art. 30     │ Req 9.6  │ A.8.2.1  │
+│  Physical Security      │ CC6.4        │ §164.310(a-d) │ Art. 32(1b) │ Req 9    │ A.11.1-2 │
+│  Personnel Security     │ CC1.4        │ §164.308(a)(3)│ Art. 32     │ Req 12.7 │ A.7.1-3  │
+│  Network Security       │ CC6.6        │ §164.312(e)   │ Art. 32(1a) │ Req 1-2  │ A.13.1   │
+│  Data Retention/Disposal│ CC6.5        │ §164.310(d)(2)│ Art. 5(1e)  │ Req 3.1  │ A.8.3.2  │
+└──────────────────────────────────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Control Inventory Template</h3>
+
+For each control in the unified inventory, document:
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  CONTROL RECORD                                              │
+│                                                              │
+│  Control ID:    CTRL-001                                     │
+│  Control Name:  Encryption at Rest                           │
+│  Domain:        Data Protection                              │
+│  Owner:         Engineering / Platform Team                  │
+│                                                              │
+│  Description:                                                │
+│  All data at rest in production databases and object storage  │
+│  is encrypted using AES-256 with keys managed by AWS KMS.    │
+│                                                              │
+│  Framework Mapping:                                          │
+│  ├── SOC 2:     CC6.1 (Logical and Physical Access)          │
+│  ├── HIPAA:     §164.312(a)(2)(iv) (Encryption/Decryption)   │
+│  ├── GDPR:      Article 32(1)(a) (Pseudonymisation/Encrypt)  │
+│  ├── PCI-DSS:   Req 3.4 (Render PAN Unreadable)             │
+│  └── ISO 27001: A.10.1.1 (Cryptographic Controls)           │
+│                                                              │
+│  Implementation:                                             │
+│  ├── RDS: encryption enabled (aws_rds_cluster.encryption)    │
+│  ├── S3: SSE-KMS default encryption on all buckets           │
+│  └── EBS: encrypted volumes enforced via SCP                 │
+│                                                              │
+│  Evidence Type:     Automated (Terraform config + AWS API)   │
+│  Evidence Location: /evidence/data-protection/encryption/    │
+│  Test Frequency:    Continuous (AWS Config rule)              │
+│  Last Tested:       2026-04-01                               │
+│  Status:            Effective                                │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Mapping Procedure</h3>
+
+<pre class="code-block"><code>Step 1: List all controls you currently have
+        → Pull from existing policies, security tools, infra config
+
+Step 2: For each target framework, list required controls
+        → SOC 2: Trust Service Criteria (CC1-CC9, A1, C1, PI1)
+        → HIPAA: Security Rule (§164.308, .310, .312)
+        → GDPR: Articles 5, 25, 28, 30, 32-35
+        → PCI-DSS: Requirements 1-12
+        → ISO 27001: Annex A controls (A.5-A.18)
+
+Step 3: Map each existing control to framework requirements
+        → One control may satisfy 3-5 framework requirements
+        → Tag the control record with all applicable references
+
+Step 4: Identify unmapped requirements (gaps)
+        → Framework requirements with no existing control = gap
+        → Feed gaps into Phase 3 (Gap Analysis)</code></pre>
+<hr class="section-divider">
+<h2>Phase 2: Evidence Collection Strategy</h2>
+
+Evidence is the proof that controls exist and operate effectively. Every control needs evidence. Every piece of evidence needs a timestamp, an actor, and a source.
+
+<h3>Evidence Quality Criteria</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│              EVIDENCE QUALITY REQUIREMENTS                    │
+│                                                              │
+│  Every piece of evidence MUST have:                          │
+│                                                              │
+│  1. TIMESTAMP — When was this artifact created/captured?     │
+│     → Date and time, ideally UTC                             │
+│     → Must fall within the audit period                      │
+│     → Undated evidence is rejected by auditors               │
+│                                                              │
+│  2. ATTRIBUTION — Who performed the action?                  │
+│     → Named individual or system account                     │
+│     → &quot;The team does code reviews&quot; is not attributable       │
+│     → &quot;PR #402 reviewed by alice@co.com on 2026-03-15&quot; is   │
+│                                                              │
+│  3. SOURCE — Where does this evidence come from?             │
+│     → System name: GitHub, AWS Console, Jira, PagerDuty     │
+│     → Must be retrievable and verifiable by the auditor      │
+│     → Screenshots are acceptable but system exports are      │
+│       preferred (harder to fabricate)                        │
+│                                                              │
+│  4. RELEVANCE — Does this evidence prove the control works?  │
+│     → Evidence must directly demonstrate the control         │
+│     → &quot;We have a firewall&quot; vs &quot;Firewall rule denying all     │
+│       inbound except port 443, exported 2026-03-15&quot;          │
+│                                                              │
+│  5. COMPLETENESS — Does it cover the full audit period?      │
+│     → SOC 2 Type II: evidence must span Jan-Dec (or period)  │
+│     → A single sample from March does not prove the control  │
+│       operated all year                                      │
+│     → Population + sample methodology for recurring controls │
+│                                                              │
+│  EVIDENCE RATING SCALE                                       │
+│  ─────────────────────                                       │
+│  A — Automated, continuous, system-generated (best)          │
+│  B — System export with timestamp and attribution            │
+│  C — Dated screenshot with visible metadata                  │
+│  D — Manual attestation (signed statement from owner)        │
+│  F — Undated, unattributed, or self-reported (rejected)      │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Evidence Source Collection Matrix</h3>
+<div class="table-wrap"><table><thead><tr><th>Evidence Source</th><th>What to Collect</th><th>Frequency</th><th>Rating</th><th>Automation</th><th></th></tr></thead><tbody><tr><td>GitHub</td><td>PR reviews, branch protection, CODEOWNERS, commit signing</td><td>Continuous</td><td>A</td><td>GitHub API / audit log export</td><td></td></tr><tr><td>AWS CloudTrail</td><td>API calls, console logins, IAM changes, resource creation</td><td>Continuous</td><td>A</td><td>CloudTrail → S3 → query</td><td></td></tr><tr><td>AWS Config</td><td>Resource compliance snapshots, config rule evaluations</td><td>Continuous</td><td>A</td><td>Config rules + conformance packs</td><td></td></tr><tr><td>CI/CD Pipeline</td><td>Build logs, test results, SAST/DAST scan results, deploy approvals</td><td>Per deploy</td><td>A</td><td>Pipeline artifact export</td><td></td></tr><tr><td>Jira / Tickets</td><td>Change requests, incident tickets, risk register entries</td><td>Per event</td><td>B</td><td>Jira API export</td><td></td></tr><tr><td>PagerDuty</td><td>Incident timeline, escalation records, response times</td><td>Per incident</td><td>A</td><td>PagerDuty API export</td><td></td></tr><tr><td>Monitoring Tool</td><td>Uptime reports, alert history, SLA metrics</td><td>Daily/Monthly</td><td>A</td><td>Datadog/Grafana report export</td><td></td></tr><tr><td>IAM / SSO</td><td>User access list, role assignments, MFA enrollment, deprovisioning</td><td>Quarterly</td><td>B</td><td>IAM export + SSO admin report</td><td></td></tr><tr><td>HR System</td><td>Background check records, security training completion, termination process</td><td>Per event</td><td>B</td><td>HRIS export</td><td></td></tr><tr><td>Vulnerability Scanner</td><td>Scan results, remediation timelines, open finding counts</td><td>Weekly/Monthly</td><td>A</td><td>Scanner API export</td><td></td></tr><tr><td>Penetration Test</td><td>Pen test report, findings, remediation evidence</td><td>Annual</td><td>B</td><td>Third-party report PDF</td><td></td></tr><tr><td>Policy Repository</td><td>Policy versions, approval signatures, review dates, distribution records</td><td>Annual review</td><td>B</td><td>Confluence/SharePoint export</td><td></td></tr></tbody></table></div>
+<h3>Automated vs Manual Collection</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│            EVIDENCE COLLECTION DECISION TREE                  │
+│                                                              │
+│  Can the evidence be pulled from an API?                     │
+│  ├── YES → Automate it (Rating A)                            │
+│  │   ├── Write a script or use GRC platform integration      │
+│  │   ├── Schedule daily/weekly/monthly pulls                 │
+│  │   └── Store in evidence repository with metadata          │
+│  │                                                           │
+│  └── NO → Is it a system export (CSV, PDF, screenshot)?      │
+│      ├── YES → Semi-automate it (Rating B-C)                 │
+│      │   ├── Create a runbook with exact export steps         │
+│      │   ├── Assign an owner and a calendar reminder          │
+│      │   └── Owner exports and uploads per schedule           │
+│      │                                                       │
+│      └── NO → Manual attestation required (Rating D)         │
+│          ├── Create a signed attestation template             │
+│          ├── Control owner signs quarterly/annually            │
+│          └── Store signed copy in evidence repository         │
+│                                                              │
+│  TARGET: 70%+ of evidence at Rating A (automated)            │
+│          20% at Rating B (system exports)                    │
+│          10% or less at Rating C-D (manual)                  │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 3: Gap Analysis Process</h2>
+
+A gap is a framework requirement that has no corresponding control, or a control that exists but lacks sufficient evidence of effectiveness.
+
+<h3>Gap Assessment Methodology</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│                 GAP ANALYSIS WORKFLOW                         │
+│                                                              │
+│  ┌────────────┐       ┌────────────┐       ┌────────────┐   │
+│  │ List all   │       │ Map to     │       │ Identify   │   │
+│  │ framework  │──────▶│ existing   │──────▶│ unmapped   │   │
+│  │ requirements│       │ controls   │       │ requirements│   │
+│  └────────────┘       └────────────┘       └────────────┘   │
+│                                                    │         │
+│                                                    ▼         │
+│                                             ┌────────────┐   │
+│                                             │ Score risk  │   │
+│                                             │ for each    │   │
+│  ┌────────────┐       ┌────────────┐       │ gap         │   │
+│  │ Assign     │       │ Create     │◀──────└────────────┘   │
+│  │ owners +   │◀──────│ remediation│                         │
+│  │ deadlines  │       │ plans      │                         │
+│  └────────────┘       └────────────┘                         │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Gap Risk Scoring Matrix</h3>
+
+Score each gap on two dimensions: <strong>likelihood of exploitation</strong> and <strong>impact if exploited</strong>.
+
+<pre class="code-block"><code>              IMPACT
+              Low(1)    Medium(2)   High(3)    Critical(4)
+           ┌──────────┬──────────┬──────────┬──────────┐
+ L  High(4)│  Medium  │   High   │ Critical │ Critical │
+ I         │    4     │    8     │    12    │    16    │
+ K  ───────┼──────────┼──────────┼──────────┼──────────┤
+ E  Med(3) │   Low    │  Medium  │   High   │ Critical │
+ L         │    3     │    6     │    9     │    12    │
+ I  ───────┼──────────┼──────────┼──────────┼──────────┤
+ H  Low(2) │   Low    │   Low    │  Medium  │   High   │
+ O         │    2     │    4     │    6     │    8     │
+ O  ───────┼──────────┼──────────┼──────────┼──────────┤
+ D  Min(1) │  Accept  │   Low    │   Low    │  Medium  │
+           │    1     │    2     │    3     │    4     │
+           └──────────┴──────────┴──────────┴──────────┘
+
+  Risk Score    Priority         Remediation Timeline
+  ──────────    ────────         ────────────────────
+  12-16         Critical         Immediate (&lt; 7 days)
+   8-11         High             Short-term (&lt; 30 days)
+   4-7          Medium           Medium-term (&lt; 90 days)
+   1-3          Low              Long-term (next review cycle)</code></pre>
+
+<h3>Gap Analysis Template</h3>
+
+For each identified gap, document:
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  GAP RECORD                                                  │
+│                                                              │
+│  Gap ID:          GAP-017                                    │
+│  Framework Ref:   SOC 2 CC6.2 / HIPAA §164.308(a)(4)        │
+│  Requirement:     Formal access review process               │
+│  Current State:   No documented periodic access review.      │
+│                   Access is granted but never reviewed.       │
+│  Risk Score:      9 (Likelihood: 3 x Impact: 3)              │
+│  Priority:        High                                       │
+│                                                              │
+│  Remediation Plan:                                           │
+│  ├── Action: Implement quarterly access certification        │
+│  ├── Owner:  IT Security Manager                             │
+│  ├── Target: 2026-06-30                                      │
+│  ├── Milestones:                                             │
+│  │   ├── Define access review policy (2026-05-15)            │
+│  │   ├── Configure IAM reporting (2026-05-31)                │
+│  │   └── Complete first quarterly review (2026-06-30)        │
+│  └── Evidence: Access review report + manager sign-off       │
+│                                                              │
+│  Compensating Control (interim):                             │
+│  ├── Manual review of privileged accounts monthly            │
+│  └── Automated alert on new admin role assignments           │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 4: Framework-Specific Report Structures</h2>
+
+<h3>SOC 2 Type II Report Structure</h3>
+
+SOC 2 reports follow the AICPA Trust Service Criteria. Auditors expect this exact structure.
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  SOC 2 TYPE II REPORT STRUCTURE                              │
+│                                                              │
+│  Section I — Independent Auditor's Report                    │
+│  (Prepared by the audit firm, not by you)                    │
+│                                                              │
+│  Section II — Management's Assertion                         │
+│  ├── Description of the system                               │
+│  ├── Boundaries of the system                                │
+│  ├── Trust Service Categories in scope                       │
+│  └── Period covered (e.g., Jan 1 - Dec 31 2026)             │
+│                                                              │
+│  Section III — System Description                            │
+│  ├── Overview of services provided                           │
+│  ├── System components (infra, software, people, data)       │
+│  ├── System boundaries and interfaces                        │
+│  ├── Relevant aspects of the control environment             │
+│  ├── Complementary user entity controls (CUECs)              │
+│  └── Subservice organizations                                │
+│                                                              │
+│  Section IV — Trust Service Criteria + Controls + Evidence   │
+│  ├── CC1: Control Environment                                │
+│  │   ├── CC1.1: Board/mgmt oversight of controls             │
+│  │   ├── CC1.2: Independence and competence                  │
+│  │   ├── CC1.3: Organizational structure                     │
+│  │   ├── CC1.4: Hiring and training                          │
+│  │   └── CC1.5: Accountability                               │
+│  ├── CC2: Communication and Information                      │
+│  ├── CC3: Risk Assessment                                    │
+│  ├── CC4: Monitoring Activities                              │
+│  ├── CC5: Control Activities                                 │
+│  ├── CC6: Logical and Physical Access Controls               │
+│  ├── CC7: System Operations                                  │
+│  ├── CC8: Change Management                                  │
+│  ├── CC9: Risk Mitigation                                    │
+│  ├── A1: Availability (if in scope)                          │
+│  ├── C1: Confidentiality (if in scope)                       │
+│  └── PI1: Processing Integrity (if in scope)                 │
+│                                                              │
+│  Section V — Other Information (optional)                    │
+│  └── Management's response to exceptions                     │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+For each Trust Service Criterion, provide:
+<div class="table-wrap"><table><thead><tr><th>Field</th><th>Description</th><th>Example</th><th></th></tr></thead><tbody><tr><td>Criterion</td><td>TSC reference and description</td><td>CC6.1 — Logical access security</td><td></td></tr><tr><td>Control Description</td><td>What the organization does to meet the criterion</td><td>MFA required for all production access via SSO</td><td></td></tr><tr><td>Control Activity</td><td>The specific procedure that operates</td><td>Okta enforces MFA on every authentication. No bypass.</td><td></td></tr><tr><td>Test Performed</td><td>How the auditor tests the control</td><td>Inspected Okta MFA policy. Sampled 25 logins for MFA evidence.</td><td></td></tr><tr><td>Evidence</td><td>Specific artifacts proving the control works</td><td>Okta MFA policy config export, login log sample with MFA method</td><td></td></tr><tr><td>Result</td><td>Operating effectively / Exception noted</td><td>Operating effectively, no exceptions</td><td></td></tr></tbody></table></div>
+<h3>HIPAA Compliance Report Structure</h3>
+
+HIPAA reports follow the Security Rule sections. Map every safeguard to the specific regulatory citation.
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  HIPAA SECURITY RULE REPORT STRUCTURE                        │
+│                                                              │
+│  1. Administrative Safeguards (§164.308)                     │
+│     ├── (a)(1) Security Management Process                   │
+│     │   ├── Risk Analysis (required)                         │
+│     │   ├── Risk Management (required)                       │
+│     │   ├── Sanction Policy (required)                       │
+│     │   └── Information System Activity Review (required)    │
+│     ├── (a)(2) Assigned Security Responsibility              │
+│     ├── (a)(3) Workforce Security                            │
+│     │   ├── Authorization/Supervision (addressable)          │
+│     │   ├── Workforce Clearance (addressable)                │
+│     │   └── Termination Procedures (addressable)             │
+│     ├── (a)(4) Information Access Management                 │
+│     │   ├── Access Authorization (addressable)               │
+│     │   └── Access Establishment/Modification (addressable)  │
+│     ├── (a)(5) Security Awareness and Training               │
+│     ├── (a)(6) Security Incident Procedures                  │
+│     ├── (a)(7) Contingency Plan                              │
+│     │   ├── Data Backup Plan (required)                      │
+│     │   ├── Disaster Recovery Plan (required)                │
+│     │   └── Emergency Mode Operation Plan (required)         │
+│     └── (a)(8) Evaluation                                    │
+│                                                              │
+│  2. Physical Safeguards (§164.310)                           │
+│     ├── (a) Facility Access Controls                         │
+│     ├── (b) Workstation Use                                  │
+│     ├── (c) Workstation Security                             │
+│     └── (d) Device and Media Controls                        │
+│                                                              │
+│  3. Technical Safeguards (§164.312)                          │
+│     ├── (a) Access Control                                   │
+│     │   ├── Unique User Identification (required)            │
+│     │   ├── Emergency Access Procedure (required)            │
+│     │   ├── Automatic Logoff (addressable)                   │
+│     │   └── Encryption and Decryption (addressable)          │
+│     ├── (b) Audit Controls                                   │
+│     ├── (c) Integrity                                        │
+│     ├── (d) Person or Entity Authentication                  │
+│     └── (e) Transmission Security                            │
+│                                                              │
+│  4. Business Associate Agreements (§164.314)                 │
+│  5. Documentation Requirements (§164.316)                    │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>GDPR Compliance Report Structure</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  GDPR COMPLIANCE REPORT STRUCTURE                            │
+│                                                              │
+│  1. Data Processing Inventory (Article 30 — ROPA)            │
+│     ├── Processing activities register                       │
+│     ├── Legal basis for each processing activity             │
+│     ├── Data categories and subject categories               │
+│     ├── Retention periods per activity                       │
+│     └── Cross-border transfer mechanisms                     │
+│                                                              │
+│  2. Privacy by Design (Article 25)                           │
+│     ├── Data minimization evidence                           │
+│     ├── Purpose limitation controls                          │
+│     └── Default privacy settings                             │
+│                                                              │
+│  3. Security of Processing (Article 32)                      │
+│     ├── Encryption (at rest and in transit)                   │
+│     ├── Confidentiality, integrity, availability              │
+│     ├── Resilience of processing systems                     │
+│     └── Regular testing and evaluation                       │
+│                                                              │
+│  4. Data Protection Impact Assessments (Article 35)          │
+│     ├── DPIA register                                        │
+│     ├── High-risk processing identified                      │
+│     └── Mitigation measures documented                       │
+│                                                              │
+│  5. Data Processor Agreements (Article 28)                   │
+│     ├── DPA inventory with all processors                    │
+│     ├── Standard contractual clauses where needed            │
+│     └── Sub-processor authorization chain                    │
+│                                                              │
+│  6. Data Subject Rights (Articles 15-22)                     │
+│     ├── Access request process                               │
+│     ├── Erasure/portability/rectification processes          │
+│     └── Response time compliance (30 days)                   │
+│                                                              │
+│  7. Breach Notification (Articles 33-34)                     │
+│     ├── 72-hour notification process                         │
+│     ├── Breach register                                      │
+│     └── Communication templates                              │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 5: Evidence Package Assembly</h2>
+
+Organize all evidence into a structured package that auditors can navigate efficiently.
+
+<h3>Evidence Repository Structure</h3>
+
+<pre class="code-block"><code>evidence/
+├── index.md                          ← Master index (control → evidence mapping)
+├── 01-control-environment/
+│   ├── CC1.1-governance-charter.pdf
+│   ├── CC1.4-security-training-completion.csv
+│   └── CC1.4-background-check-policy.pdf
+├── 02-communication/
+│   ├── CC2.1-security-policy-v3.2.pdf
+│   └── CC2.2-incident-comm-procedure.pdf
+├── 03-risk-assessment/
+│   ├── CC3.1-annual-risk-assessment-2026.pdf
+│   └── CC3.2-risk-register-Q1-2026.xlsx
+├── 04-monitoring/
+│   ├── CC4.1-vulnerability-scan-march-2026.pdf
+│   └── CC4.2-pentest-report-2026.pdf
+├── 05-control-activities/
+│   └── CC5.1-change-approval-board-minutes.pdf
+├── 06-access-control/
+│   ├── CC6.1-iam-user-list-export.csv
+│   ├── CC6.1-mfa-policy-config.json
+│   ├── CC6.2-quarterly-access-review-Q1.pdf
+│   └── CC6.3-terminated-user-deprovisioning-log.csv
+├── 07-system-operations/
+│   ├── CC7.1-monitoring-dashboard-export.pdf
+│   ├── CC7.2-incident-response-runbook.md
+│   └── CC7.3-incident-log-2026.csv
+├── 08-change-management/
+│   ├── CC8.1-pr-review-sample-25.csv
+│   ├── CC8.1-branch-protection-config.json
+│   └── CC8.1-deploy-approval-log.csv
+├── 09-risk-mitigation/
+│   └── CC9.2-vendor-assessment-log.xlsx
+├── hipaa/
+│   ├── baa-inventory.xlsx
+│   ├── risk-analysis-2026.pdf
+│   └── phi-inventory.xlsx
+├── gdpr/
+│   ├── ropa-register.xlsx
+│   ├── dpia-inventory.xlsx
+│   └── dpa-inventory.xlsx
+└── gap-analysis/
+    ├── gap-register.xlsx
+    └── remediation-tracker.xlsx</code></pre>
+
+<h3>Evidence Naming Convention</h3>
+
+<pre class="code-block"><code>Format: {Control-ID}_{Description}_{Date}.{ext}
+
+Examples:
+  CC6.1_IAM-User-List-Export_2026-03-15.csv
+  CC8.1_PR-Review-Sample-25_2026-Q1.csv
+  HIPAA-312a_Encryption-Config-RDS_2026-04-01.json
+
+Rules:
+  → Use the control ID as the prefix (ties evidence to control)
+  → Use descriptive kebab-case name
+  → Include date or period (YYYY-MM-DD or YYYY-QN)
+  → Never use spaces in filenames
+  → Keep file names under 80 characters</code></pre>
+
+<h3>Master Evidence Index</h3>
+
+Create a master index that maps every control to its evidence artifacts:
+<div class="table-wrap"><table><thead><tr><th>Control ID</th><th>Control Name</th><th>Framework(s)</th><th>Evidence Artifact</th><th>Rating</th><th>Location</th><th>Last Updated</th><th></th></tr></thead><tbody><tr><td>CTRL-001</td><td>Encryption at Rest</td><td>SOC2/HIPAA/GDPR/PCI</td><td>RDS encryption config export</td><td>A</td><td>/06-access/CC6.1_RDS-Encryption.json</td><td>2026-04-01</td><td></td></tr><tr><td>CTRL-001</td><td>Encryption at Rest</td><td>SOC2/HIPAA/GDPR/PCI</td><td>S3 bucket policy export</td><td>A</td><td>/06-access/CC6.1_S3-Encryption.json</td><td>2026-04-01</td><td></td></tr><tr><td>CTRL-002</td><td>MFA Enforcement</td><td>SOC2/HIPAA/PCI</td><td>Okta MFA policy screenshot</td><td>B</td><td>/06-access/CC6.1_MFA-Policy.pdf</td><td>2026-03-15</td><td></td></tr><tr><td>CTRL-003</td><td>Code Review</td><td>SOC2/ISO</td><td>GitHub PR review sample (25)</td><td>A</td><td>/08-change/CC8.1_PR-Sample.csv</td><td>2026-Q1</td><td></td></tr><tr><td>CTRL-004</td><td>Access Review</td><td>SOC2/HIPAA/PCI</td><td>Quarterly access certification</td><td>B</td><td>/06-access/CC6.2_Access-Review-Q1.pdf</td><td>2026-03-31</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Phase 6: Continuous Compliance Monitoring</h2>
+
+<h3>Compliance Dashboard Metrics</h3>
+
+Track these KPIs to maintain continuous compliance between audits:
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│           CONTINUOUS COMPLIANCE DASHBOARD                     │
+│                                                              │
+│  CONTROL HEALTH                                              │
+│  ├── Total controls:           87                            │
+│  ├── Controls effective:       79 (91%)        ████████░ 91% │
+│  ├── Controls with exceptions: 5  (6%)         █░░░░░░░  6%  │
+│  └── Controls not tested:      3  (3%)         ░░░░░░░░  3%  │
+│                                                              │
+│  EVIDENCE FRESHNESS                                          │
+│  ├── Evidence current:         142 (85%)       ████████░ 85% │
+│  ├── Evidence stale (&gt;90d):    18  (11%)       █░░░░░░░ 11%  │
+│  └── Evidence missing:         7   (4%)        ░░░░░░░░  4%  │
+│                                                              │
+│  GAP STATUS                                                  │
+│  ├── Total gaps:               12                            │
+│  ├── Remediation in progress:  8                             │
+│  ├── Remediation overdue:      2   ← ALERT                  │
+│  └── Accepted risk:            2                             │
+│                                                              │
+│  FRAMEWORK COVERAGE                                          │
+│  ├── SOC 2:    94% mapped  ████████░                         │
+│  ├── HIPAA:    91% mapped  ████████░                         │
+│  ├── GDPR:     88% mapped  ███████░░                         │
+│  ├── PCI-DSS:  85% mapped  ███████░░                         │
+│  └── ISO 27001:82% mapped  ██████░░░                         │
+│                                                              │
+│  ALERTS                                                      │
+│  ├── Control failure detected: MFA bypass on staging          │
+│  ├── Evidence expiring in 7d: Pen test report                │
+│  └── Remediation overdue: GAP-003 (access review process)    │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Control Monitoring Rules</h3>
+<div class="table-wrap"><table><thead><tr><th>Control Type</th><th>Monitoring Method</th><th>Alert Trigger</th><th>Response SLA</th><th></th></tr></thead><tbody><tr><td>Access Control</td><td>IAM config change detection</td><td>New admin role, MFA disabled, bypass created</td><td>4 hours</td><td></td></tr><tr><td>Encryption</td><td>AWS Config rule</td><td>Unencrypted resource detected</td><td>24 hours</td><td></td></tr><tr><td>Audit Logging</td><td>Log pipeline health check</td><td>Log gap > 15 minutes</td><td>1 hour</td><td></td></tr><tr><td>Change Mgmt</td><td>GitHub webhook</td><td>Direct push to main (bypass PR)</td><td>4 hours</td><td></td></tr><tr><td>Vulnerability</td><td>Scanner integration</td><td>New critical/high CVE</td><td>24 hours</td><td></td></tr><tr><td>Backup</td><td>Backup job monitoring</td><td>Failed backup job</td><td>4 hours</td><td></td></tr><tr><td>Incident</td><td>PagerDuty integration</td><td>New P1/P2 incident</td><td>Immediate</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Phase 7: Audit Preparation Checklist</h2>
+
+<h3>Pre-Audit Walkthrough (4-6 Weeks Before Audit)</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│          PRE-AUDIT PREPARATION TIMELINE                       │
+│                                                              │
+│  6 WEEKS OUT                                                 │
+│  □ Confirm audit scope and period with auditor               │
+│  □ Verify all control owners are assigned                    │
+│  □ Review and update system description                      │
+│  □ Confirm subservice organizations list is current          │
+│  □ Update complementary user entity controls (CUECs)         │
+│                                                              │
+│  4 WEEKS OUT                                                 │
+│  □ Run full evidence collection cycle                        │
+│  □ Verify evidence covers entire audit period                │
+│  □ Fill any evidence gaps (collect missing artifacts)         │
+│  □ Complete gap analysis — document all known gaps            │
+│  □ Prepare remediation status updates for open gaps           │
+│  □ Review and update all policies (version + approval date)  │
+│                                                              │
+│  2 WEEKS OUT                                                 │
+│  □ Organize evidence package per Phase 5 structure            │
+│  □ Create master evidence index                              │
+│  □ Conduct internal walkthrough with control owners          │
+│  □ Brief each control owner on what to expect                │
+│  □ Prepare conference room / shared workspace for auditors   │
+│  □ Set up auditor access (read-only) to evidence repo        │
+│                                                              │
+│  1 WEEK OUT                                                  │
+│  □ Final evidence freshness check — nothing stale            │
+│  □ Prepare opening meeting presentation                      │
+│  □ Assign point of contact for each control domain           │
+│  □ Brief executives on audit scope and timeline              │
+│  □ Prepare list of key changes since last audit period       │
+│                                                              │
+│  DURING AUDIT                                                │
+│  □ Respond to Information Requests (IRs) within 24 hours     │
+│  □ Track all auditor requests in a shared log                │
+│  □ Escalate blockers to GRC lead immediately                 │
+│  □ Document any auditor observations or concerns             │
+│  □ Conduct daily standup with audit team and control owners   │
+│                                                              │
+│  POST-AUDIT                                                  │
+│  □ Review draft report for factual accuracy                  │
+│  □ Prepare management responses to any exceptions            │
+│  □ Update remediation plans based on findings                │
+│  □ Archive evidence package with audit period label           │
+│  □ Conduct lessons learned session                           │
+│  □ Begin collecting evidence for next audit period            │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Report Templates</h2>
+
+<h3>SOC 2 Control Description + Evidence Template</h3>
+
+<pre class="code-block"><code>### CC6.1 — Logical and Physical Access Controls
+
+<strong>Control Objective:</strong> The entity implements logical access security software,
+infrastructure, and architectures over protected information assets to protect
+them from security events.
+
+<strong>Control Description:</strong>
+The organization restricts logical access to production systems through:
+<ul class="skill-list"><li class="ordered">Role-based access control (RBAC) enforced via [SSO provider]</li>
+<li class="ordered">Multi-factor authentication required for all production access</li>
+<li class="ordered">Principle of least privilege — access granted per job function</li>
+<li class="ordered">Privileged access requires manager approval via ticketing system</li>
+
+</ul><strong>Control Activities:</strong>
+<ul class="skill-list"><li>All user authentication flows through [SSO provider] with MFA enforced</li>
+<li>Production infrastructure access requires VPN + SSH key + MFA</li>
+<li>Database access restricted to application service accounts and authorized DBAs</li>
+<li>Admin console access logged and reviewed quarterly</li>
+
+</ul><strong>Evidence:</strong><div class="table-wrap"><table><thead><tr><th>#</th><th>Artifact</th><th>Type</th><th>Date</th><th>Rating</th><th></th></tr></thead><tbody><tr><td>1</td><td>SSO MFA policy configuration export</td><td>Config</td><td>2026-04-01</td><td>A</td><td></td></tr><tr><td>2</td><td>IAM user list with roles and last login</td><td>Export</td><td>2026-04-01</td><td>A</td><td></td></tr><tr><td>3</td><td>VPN access log sample (25 connections)</td><td>Log</td><td>2026-Q1</td><td>A</td><td></td></tr><tr><td>4</td><td>Quarterly access review report — Q1</td><td>Report</td><td>2026-03-31</td><td>B</td><td></td></tr><tr><td>5</td><td>New hire access provisioning ticket sample</td><td>Ticket</td><td>2026-Q1</td><td>B</td><td></td></tr><tr><td>6</td><td>Terminated user deprovisioning log</td><td>Export</td><td>2026-Q1</td><td>A</td><td></td></tr></tbody></table></div>
+<strong>Test Results:</strong> Operating effectively. No exceptions noted.</code></pre>
+
+<h3>HIPAA Safeguard + Evidence Template</h3>
+
+<pre class="code-block"><code>### §164.312(a)(1) — Access Control
+
+<strong>Regulatory Requirement:</strong> Implement technical policies and procedures for
+electronic information systems that maintain ePHI to allow access only to those
+persons or software programs that have been granted access rights as specified
+in §164.308(a)(4).
+
+<strong>Implementation Specification:</strong>
+<ul class="skill-list"><li>(i) Unique User Identification (Required)</li>
+<li>(ii) Emergency Access Procedure (Required)</li>
+<li>(iii) Automatic Logoff (Addressable)</li>
+<li>(iv) Encryption and Decryption (Addressable)</li>
+
+</ul><strong>Control Implementation:</strong>
+<ul class="skill-list"><li class="ordered">Unique user IDs assigned via SSO — no shared accounts permitted</li>
+<li class="ordered">Emergency access procedure documented — break-glass with post-hoc review</li>
+<li class="ordered">Session timeout configured: 30 minutes inactive for web, 15 minutes for admin</li>
+<li class="ordered">AES-256 encryption at rest for all databases containing ePHI</li>
+
+</ul><strong>Evidence:</strong><div class="table-wrap"><table><thead><tr><th>#</th><th>Safeguard Spec</th><th>Artifact</th><th>Date</th><th>Status</th><th></th></tr></thead><tbody><tr><td>1</td><td>Unique User ID</td><td>SSO user directory export</td><td>2026-04-01</td><td>Compliant</td><td></td></tr><tr><td>2</td><td>Emergency Access</td><td>Break-glass procedure document v2.1</td><td>2026-01-15</td><td>Compliant</td><td></td></tr><tr><td>3</td><td>Automatic Logoff</td><td>Session timeout config screenshot</td><td>2026-03-01</td><td>Compliant</td><td></td></tr><tr><td>4</td><td>Encryption</td><td>RDS encryption config + KMS key policy</td><td>2026-04-01</td><td>Compliant</td><td></td></tr></tbody></table></div>
+<strong>Addressable Specs Assessment:</strong>
+Automatic logoff and encryption are addressable, not required. Both have been
+implemented as the organization determined they are reasonable and appropriate
+given the risk analysis documented in §164.308(a)(1) risk assessment.</code></pre>
+<hr class="section-divider">
+<h2>Compliance Report Checklist</h2>
+
+Run this checklist before finalizing any compliance report.
+
+<pre class="code-block"><code>REPORT COMPLETENESS
+□ All in-scope framework requirements are addressed
+□ Every control has at least one evidence artifact
+□ Every evidence artifact has timestamp + attribution + source
+□ Gap analysis is included with risk scores and remediation plans
+□ System description / scope is accurate and current
+□ Audit period is clearly stated and evidence spans the full period
+□ Control owners are named for every control domain
+
+EVIDENCE QUALITY
+□ 70%+ of evidence is Rating A (automated/system-generated)
+□ No undated or unattributed evidence (Rating F)
+□ Screenshots include visible timestamps and system context
+□ Exports are in original format (CSV, JSON, PDF — not copy-pasted text)
+□ Population and sample sizes are documented for recurring controls
+□ Evidence file names follow the naming convention
+
+MULTI-FRAMEWORK MAPPING
+□ Control rationalization applied — no duplicate controls across frameworks
+□ Cross-reference matrix is complete and accurate
+□ Each framework section uses the standard's own numbering scheme
+□ Framework-specific terminology is used correctly
+□ Addressable vs required specifications noted (HIPAA)
+
+GAP ANALYSIS
+□ All gaps have risk scores (likelihood x impact)
+□ All gaps have remediation plans with owners and target dates
+□ Compensating controls documented for critical gaps
+□ Accepted risks are formally documented with business justification
+□ Remediation progress is tracked and current
+□ No gaps are hidden or understated
+
+REPORT STRUCTURE
+□ SOC 2 report follows Trust Service Criteria order exactly
+□ HIPAA report follows Security Rule section order exactly
+□ GDPR report covers ROPA, DPIAs, DPAs, data subject rights, breach process
+□ Report language is professional, precise, and free of jargon
+□ Findings use consistent severity levels across the report
+□ Executive summary highlights key strengths AND gaps honestly
+
+AUDIT READINESS
+□ Evidence package is organized per Phase 5 structure
+□ Master evidence index is complete and accurate
+□ All control owners have been briefed on their responsibilities
+□ Auditor access (read-only) to evidence repository is configured
+□ Response plan for Information Requests is in place
+□ Contact list for each control domain is prepared
+
+CONTINUOUS COMPLIANCE
+□ Monitoring dashboard is configured with KPIs from Phase 6
+□ Alert rules are active for control failures
+□ Evidence collection automation is running
+□ Next review cycle dates are scheduled
+□ Lessons learned from last audit are incorporated</code></pre>
+<hr class="section-divider">
+<h2>Tips for Best Results</h2>
+
+<ul class="skill-list"><li class="ordered"><strong>Start with your control inventory, not the frameworks</strong> — List every security control you have today. Then map each one to framework requirements. This prevents the mistake of building framework-first and duplicating effort.</li>
+
+<li class="ordered"><strong>Automate evidence collection before the audit, not during</strong> — The worst time to set up automated evidence collection is two weeks before an audit. Build it into your infrastructure early. AWS Config rules, GitHub webhook exports, and CI/CD artifact retention cost almost nothing to maintain.</li>
+
+<li class="ordered"><strong>Use the 80/20 rule for control rationalization</strong> — About 20 strong controls will satisfy 80% of requirements across all five major frameworks. Identify those 20 controls and make them bulletproof before worrying about the remaining edge cases.</li>
+
+<li class="ordered"><strong>Make gaps your ally, not your enemy</strong> — Every organization has gaps. Auditors know this. The difference between a clean report and a qualified report is not zero gaps — it is how well you document, explain, and remediate them. A gap with a signed remediation plan is professional. A hidden gap discovered during testing is a finding.</li>
+
+<li class="ordered"><strong>Evidence freshness matters as much as evidence existence</strong> — A penetration test from 18 months ago does not prove your current security posture. Set calendar reminders for evidence expiration: pen tests annually, access reviews quarterly, vulnerability scans monthly, config exports at least quarterly.</li>
+
+<li class="ordered"><strong>Brief your control owners before the auditor arrives</strong> — Control owners who understand what the auditor will ask, what evidence is expected, and how to explain their controls in business terms reduce audit duration by 30-40%. Conduct a 30-minute walkthrough with each owner.</li>
+
+<li class="ordered"><strong>Maintain your evidence repository year-round</strong> — The organizations that struggle most with audits are those that treat compliance as an annual event. Collect evidence continuously, review monthly, and your audit prep shrinks from weeks to days.</li></ul>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="cloud-security.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">Cloud Security Posture — No Misconfiguration Reaches Production</span></span></a>
+    <a href="dep-vuln.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Dependency Vulnerability Scan — Your Code Is Only as Secure as Your Dependencies</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    94 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

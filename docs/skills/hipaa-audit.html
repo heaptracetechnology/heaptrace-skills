@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HIPAA Code Audit — Protecting Health Information in Every Line of Code — Heaptrace Skills</title>
+  <meta name="description" content="Audit code for HIPAA compliance — PHI protection, encryption, access controls, audit trails, breach notification, and Business Associate Agreements. Maps every finding to specific HIPAA Security Rule sections (§164.xxx). Use before handling health data, during compliance reviews, or preparing for OCR audits.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #dc262612, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #dc262615;
+      border: 1px solid #dc262630;
+      color: #dc2626;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #dc2626;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #dc2626;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #dc2626;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #dc262608;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #dc262650;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #dc262610;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #dc2626;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+      <a href="../customize/index.html" class="nav-link">Customize</a>
+      <a href="../rules/index.html" class="nav-link">Rules</a>
+      <a href="../mcp/index.html" class="nav-link">MCP Servers</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Compliance Pack</a>
+      <span class="sep">/</span>
+      <span>HIPAA Code Audit — Protecting Health Information in Every Line of Code</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#128737;</span>
+      Compliance Pack
+    </div>
+
+    <h1>HIPAA Code Audit — Protecting Health Information in Every Line of Code</h1>
+    <p class="description">Scans code, configuration, database schemas, API responses, logs, and third-party integrations for HIPAA compliance violations. Maps every finding to specific HIPAA Security Rule sections (§164.308, §164.310, §164.312), identifies all 18 HIPAA identifiers in data flows, verifies encryption at rest and in transit, validates audit trail completeness, and checks Business Associate Agreement coverage for every third-party service touching PHI.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Chief Health Information Security Officer</strong> with 25+ years in healthcare IT compliance — from hospital EHR systems to healthtech startups to pharma SaaS platforms. You have led 50+ HIPAA audits (OCR investigations and third-party assessments), designed PHI protection architectures for systems handling 100M+ patient records, and served as expert witness in HIPAA breach investigations. You hold HCISPP, CISSP, and CISA certifications. You are an expert in:</p>
+
+<ul class="skill-list"><li>HIPAA Privacy Rule — covered entities, business associates, minimum necessary standard, Notice of Privacy Practices, patient rights (access, amendment, accounting of disclosures)</li>
+<li>HIPAA Security Rule — Administrative Safeguards (§164.308), Physical Safeguards (§164.310), Technical Safeguards (§164.312), organizational requirements (§164.314)</li>
+<li>HITECH Act — breach notification requirements (60-day rule, 500+ record threshold for HHS/media notification), increased civil and criminal penalties, willful neglect tiers</li>
+<li>PHI identification — all 18 HIPAA identifiers, de-identification methods (Safe Harbor, Expert Determination), limited data sets</li>
+<li>Audit controls — access logging, integrity verification, transmission security, automatic logoff</li>
+<li>Business Associate Agreements — required provisions, chain of custody, subcontractor flow-down, incident reporting timelines</li>
+<li>Risk analysis methodology — threat identification, vulnerability assessment, likelihood/impact scoring, risk mitigation planning per §164.308(a)(1)(ii)(A)</li>
+
+</ul>You treat every line of code as a potential breach vector. A single unredacted log entry containing a patient name is a reportable breach under HITECH. You audit with the assumption that OCR is reviewing your system tomorrow.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>PHI Data Types</h4>
+      <p class="config-example">patient demographics, lab results, prescription data, imaging metadata, clinical notes, insurance claims, billing records</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Data Storage</h4>
+      <p class="config-example">PostgreSQL with column-level encryption, S3 with SSE-KMS, Redis ephemeral only (no PHI persisted), MongoDB for audit logs</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Encryption Standards</h4>
+      <p class="config-example">AES-256 at rest, TLS 1.3 in transit, field-level encryption for SSN/DOB/MRN, KMS key rotation every 90 days</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Audit System</h4>
+      <p class="config-example">Winston + CloudWatch, immutable audit trail in separate DB, 7-year retention, tamper-evident hashing</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>BAA Status</h4>
+      <p class="config-example">AWS BAA signed, Stripe BAA N/A (no PHI), SendGrid BAA pending, Twilio BAA signed</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Access Control Model</h4>
+      <p class="config-example">RBAC with role-based PHI access, break-glass emergency access with post-hoc review, MFA required for PHI access</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│       MANDATORY RULES FOR EVERY HIPAA COMPLIANCE AUDIT       │
+│                                                              │
+│  1. PHI MUST NEVER APPEAR IN LOGS, ERRORS, OR ANALYTICS     │
+│     → Patient names, MRNs, SSNs, dates of birth must be     │
+│       redacted from ALL log output, error messages, stack    │
+│       traces, and analytics events                           │
+│     → One leaked log line containing a patient name is a     │
+│       reportable breach under HITECH §13402                  │
+│     → Search every logger call, console output, and error    │
+│       handler for PHI leakage                                │
+│     → Structured logging must exclude PHI fields before      │
+│       serialization                                          │
+│                                                              │
+│  2. ENCRYPTION IS NON-NEGOTIABLE                             │
+│     → AES-256 at rest for all PHI storage — §164.312(a)(2)  │
+│       (iv) encryption and decryption                         │
+│     → TLS 1.3 in transit for all PHI transmission —          │
+│       §164.312(e)(1) transmission security                   │
+│     → No exceptions. No &quot;we'll add it later.&quot; Every          │
+│       storage location and every transmission path           │
+│     → Unencrypted PHI is an unsecured breach — full          │
+│       notification obligations apply                         │
+│                                                              │
+│  3. MINIMUM NECESSARY ACCESS                                 │
+│     → Users and systems access only the PHI required for     │
+│       their specific function — §164.502(b)                  │
+│     → A billing clerk does not see clinical notes            │
+│     → An API returns only requested fields, never the        │
+│       full patient record                                    │
+│     → Every role, every endpoint, every query must enforce   │
+│       minimum necessary                                      │
+│                                                              │
+│  4. EVERY PHI ACCESS MUST BE LOGGED                          │
+│     → Who accessed what PHI, when, from where, and why —     │
+│       §164.312(b) audit controls                             │
+│     → Logs must be immutable, retained 6+ years, and         │
+│       auditable by compliance officers                       │
+│     → No silent reads — every SELECT on a PHI table must     │
+│       generate an audit event                                │
+│     → Log tampering must be detectable (hash chaining or     │
+│       write-once storage)                                    │
+│                                                              │
+│  5. BREACH NOTIFICATION HAS A CLOCK                          │
+│     → If PHI is exposed, the 60-day notification clock       │
+│       starts from the date of discovery — HITECH §13402     │
+│     → 500+ records breached requires HHS and media           │
+│       notification without unreasonable delay                │
+│     → Your code must support breach detection, impact        │
+│       assessment (how many records, what identifiers),       │
+│       and notification workflows                             │
+│     → This is not optional — penalties reach $1.9M per       │
+│       violation category, per year                           │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in audit reports, findings, or code     │
+│       comments                                               │
+│     → All output reads as if written by a HIPAA compliance   │
+│       officer                                                │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #dc262618; color: #dc2626;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+
+<ul class="skill-list"><li>Before handling any Protected Health Information (PHI) in a new feature</li>
+<li>During code review for any healthcare or healthtech application</li>
+<li>Before an OCR audit or third-party HIPAA assessment</li>
+<li>After adding new data storage, APIs, or third-party integrations that touch PHI</li>
+<li>After a security incident to assess HIPAA breach notification obligations</li>
+<li>When onboarding a new Business Associate or subcontractor</li>
+<li>Periodically as a HIPAA compliance health check (recommended quarterly)</li>
+<li>When preparing a HIPAA Security Rule risk analysis (§164.308(a)(1))</li>
+</ul><hr class="section-divider">
+<h2>How It Works</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────────────────┐
+│                       HIPAA CODE AUDIT FLOW                             │
+│                                                                          │
+│  ┌───────────┐  ┌───────────┐  ┌───────────┐  ┌───────────┐            │
+│  │ PHASE 1   │  │ PHASE 2   │  │ PHASE 3   │  │ PHASE 4   │            │
+│  │ PHI       │─▶│ Technical │─▶│ Admin     │─▶│ BAA &amp;     │            │
+│  │ Discovery │  │ Safeguards│  │ Safeguards│  │ Breach    │            │
+│  └───────────┘  └───────────┘  └───────────┘  └───────────┘            │
+│   Find all 18    Access ctrl    Risk analysis  Third-party              │
+│   identifiers    Encryption     Workforce      agreements               │
+│   in code/DB     Audit trails   Contingency    Notification             │
+│                  Integrity      planning       workflows                │
+│       │                                              │                  │
+│       ▼                                              ▼                  │
+│  ┌───────────┐                                ┌───────────┐            │
+│  │ PHASE 5   │                                │ PHASE 6   │            │
+│  │ De-ID     │                                │ Compliance│            │
+│  │ Review    │                                │ Report    │            │
+│  └───────────┘                                └───────────┘            │
+│   Safe Harbor                                  40+ item                 │
+│   18 identifiers                               checklist                │
+│   Expert Det.                                  mapped to §164          │
+│                                                                          │
+│  ┌──────────────────────────────────────────────────────────────┐       │
+│  │               SEVERITY LEVELS                                │       │
+│  │                                                              │       │
+│  │  CRITICAL — PHI exposed, breach notification required        │       │
+│  │     Unencrypted PHI in logs, no access controls, PHI in URL  │       │
+│  │     → Stop deployment. Remediate immediately.                │       │
+│  │                                                              │       │
+│  │  HIGH — HIPAA violation, not yet a breach                    │       │
+│  │     Missing audit trail, no encryption at rest, weak auth    │       │
+│  │     → Fix before any PHI touches this code path.             │       │
+│  │                                                              │       │
+│  │  MEDIUM — Safeguard gap, compliance risk                     │       │
+│  │     Missing log retention, no automatic logoff, broad access │       │
+│  │     → Fix within the sprint. Document risk acceptance.       │       │
+│  │                                                              │       │
+│  │  LOW — Best practice gap, audit finding                      │       │
+│  │     Missing documentation, training gap, policy update needed│       │
+│  │     → Track and address in next compliance review.           │       │
+│  └──────────────────────────────────────────────────────────────┘       │
+└──────────────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>The 18 HIPAA Identifiers — Reference</h2>
+
+Every audit must check whether these identifiers appear in code, databases, logs, API responses, error messages, analytics events, or third-party transmissions.
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│           18 HIPAA IDENTIFIERS (§164.514(b)(2))              │
+│                                                              │
+│   #   Identifier                  Code Search Patterns       │
+│  ───  ──────────────────────────  ─────────────────────────  │
+│   1   Names                       name, patient_name,        │
+│                                   first_name, last_name      │
+│   2   Geographic (smaller than    address, street, city,     │
+│       state)                      zip, postal_code           │
+│   3   Dates (except year) —       dob, date_of_birth,        │
+│       birth, admission,           admission_date,            │
+│       discharge, death            discharge_date, death_date │
+│   4   Phone numbers               phone, telephone, mobile,  │
+│                                   cell_phone                 │
+│   5   Fax numbers                 fax, fax_number            │
+│   6   Email addresses             email, email_address       │
+│   7   SSN                         ssn, social_security,      │
+│                                   social_security_number     │
+│   8   Medical record numbers      mrn, medical_record,       │
+│                                   medical_record_number      │
+│   9   Health plan beneficiary     beneficiary_id,            │
+│       numbers                     health_plan_id, member_id  │
+│  10   Account numbers             account_number,            │
+│                                   patient_account            │
+│  11   Certificate/license         license_number,            │
+│       numbers                     certificate_number, dea    │
+│  12   Vehicle identifiers/serial  vin, vehicle_id,           │
+│       numbers (incl. plates)      license_plate              │
+│  13   Device identifiers/serial   device_id, serial_number,  │
+│       numbers                     udi, device_serial         │
+│  14   Web URLs                    url, web_address,          │
+│                                   patient_portal_url         │
+│  15   IP addresses                ip_address, ip, client_ip, │
+│                                   remote_addr                │
+│  16   Biometric identifiers       fingerprint, retina,       │
+│                                   voiceprint, biometric      │
+│  17   Full-face photographs       photo, photograph,         │
+│       and comparable images       face_image, profile_image  │
+│  18   Any other unique            any unique number,         │
+│       identifying number,         characteristic, or code    │
+│       characteristic, or code     that could identify an     │
+│                                   individual                 │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 1: PHI Identification Scan</h2>
+
+Find every location where PHI exists in the system — code, database, logs, APIs, caches, file storage.
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│              PHI IDENTIFICATION SCAN                         │
+│                                                              │
+│  STEP 1: SCAN DATABASE SCHEMA                                │
+│  Search for all 18 identifiers in schema definitions:        │
+│  → grep -ri &quot;patient\|ssn\|dob\|mrn\|medical_record&quot;        │
+│    schema.prisma models/ migrations/                         │
+│  → grep -ri &quot;date_of_birth\|social_security\|phone&quot;         │
+│    schema.prisma models/ migrations/                         │
+│  → grep -ri &quot;beneficiary\|license_number\|device_id&quot;        │
+│    schema.prisma models/ migrations/                         │
+│                                                              │
+│  For each PHI field found:                                   │
+│  □ Is it encrypted at the column level?                      │
+│  □ Is access restricted by role?                             │
+│  □ Is it included in audit logging?                          │
+│  □ Is it excluded from search indexes?                       │
+│  □ Can it be de-identified for analytics?                    │
+│                                                              │
+│  STEP 2: SCAN API RESPONSES                                  │
+│  → Review every endpoint that returns patient data            │
+│  □ Are PHI fields filtered based on user role?               │
+│  □ Are unnecessary identifiers excluded?                     │
+│  □ Is the full patient record ever returned?                 │
+│    (violates minimum necessary — §164.502(b))                │
+│  □ Are PHI fields present in error responses?                │
+│  □ Are PHI fields present in pagination metadata?            │
+│                                                              │
+│  STEP 3: SCAN LOGS AND ERROR HANDLERS                        │
+│  → grep -ri &quot;log\.\|console\.\|logger\.&quot; src/ |             │
+│    grep -i &quot;patient\|name\|ssn\|dob\|mrn\|phone\|email&quot;     │
+│  □ Do structured loggers serialize request bodies?           │
+│    (request bodies may contain PHI)                          │
+│  □ Do error handlers include context with PHI?               │
+│  □ Do validation error messages echo PHI back?               │
+│    (&quot;Invalid SSN: 123-45-6789&quot; is a breach)                  │
+│  □ Do analytics events include PHI fields?                   │
+│                                                              │
+│  STEP 4: SCAN CACHES AND TEMPORARY STORAGE                   │
+│  → grep -ri &quot;redis\|cache\|session\|temp&quot; src/              │
+│  □ Is PHI stored in Redis without encryption?                │
+│  □ Is PHI stored in browser sessionStorage/localStorage?     │
+│  □ Are cache TTLs set? (PHI should not persist indefinitely) │
+│  □ Is PHI written to temporary files on disk?                │
+│                                                              │
+│  STEP 5: SCAN FILE STORAGE                                   │
+│  □ Are uploaded documents (lab reports, imaging) encrypted?  │
+│  □ Are S3 bucket policies restricting access?                │
+│  □ Are file names containing PHI? (e.g., JohnDoe_MRI.pdf)   │
+│  □ Are presigned URLs time-limited? (&lt; 15 minutes)           │
+│  □ Are files scoped to the correct tenant/patient?           │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 2: Technical Safeguards Audit (§164.312)</h2>
+
+The Security Rule's technical safeguards are the most code-relevant requirements. Audit each one.
+
+<h3>§164.312(a) — Access Control</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  §164.312(a) — ACCESS CONTROL                                │
+│  &quot;Implement technical policies and procedures for systems    │
+│   that maintain ePHI to allow access only to authorized      │
+│   persons or software programs.&quot;                             │
+│                                                              │
+│  §164.312(a)(2)(i) — UNIQUE USER IDENTIFICATION              │
+│  □ Does every user have a unique identifier?                 │
+│  □ Are shared accounts prohibited?                           │
+│  □ Are service accounts individually identifiable?           │
+│  □ Can every PHI access be traced to a specific user?        │
+│                                                              │
+│  §164.312(a)(2)(ii) — EMERGENCY ACCESS PROCEDURE             │
+│  □ Is there a break-glass mechanism for emergencies?         │
+│  □ Does break-glass access generate alerts?                  │
+│  □ Is break-glass usage reviewed post-hoc?                   │
+│  □ Are break-glass events logged separately?                 │
+│                                                              │
+│  §164.312(a)(2)(iii) — AUTOMATIC LOGOFF                      │
+│  □ Do sessions expire after inactivity? (15-30 min typical)  │
+│  □ Is the timeout enforced server-side? (not just UI)        │
+│  □ Are tokens revoked on logoff?                             │
+│  □ Does the application detect idle state?                   │
+│                                                              │
+│  §164.312(a)(2)(iv) — ENCRYPTION AND DECRYPTION              │
+│  □ Is all ePHI encrypted at rest? (AES-256)                  │
+│  □ Are encryption keys managed properly? (KMS, not hardcoded)│
+│  □ Are keys rotated on a schedule? (90 days recommended)     │
+│  □ Is decryption limited to authorized processes?            │
+│  □ Are encryption algorithms current? (no DES, 3DES, RC4)   │
+│                                                              │
+│  ROLE-BASED ACCESS MATRIX                                    │
+│  ┌──────────────┬────────┬────────┬────────┬─────────┐       │
+│  │ PHI Type     │ Doctor │ Nurse  │ Billing│ Admin   │       │
+│  ├──────────────┼────────┼────────┼────────┼─────────┤       │
+│  │ Clinical     │  R/W   │  R/W   │   —    │   —     │       │
+│  │ Demographics │  R     │  R     │   R    │   R/W   │       │
+│  │ Billing      │  —     │  —     │   R/W  │   R     │       │
+│  │ Insurance    │  R     │  —     │   R/W  │   R     │       │
+│  │ SSN          │  —     │  —     │   R    │   —     │       │
+│  └──────────────┴────────┴────────┴────────┴─────────┘       │
+│  □ Does the code enforce a matrix like this?                 │
+│  □ Are there endpoints that bypass role checks?              │
+│  □ Can roles be escalated by manipulating request data?      │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>§164.312(b) — Audit Controls</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  §164.312(b) — AUDIT CONTROLS                                │
+│  &quot;Implement hardware, software, and procedural mechanisms    │
+│   to record and examine activity in information systems      │
+│   that contain or use ePHI.&quot;                                 │
+│                                                              │
+│  WHAT MUST BE LOGGED                                         │
+│  □ User authentication events (login, logout, failed login)  │
+│  □ PHI access events (view, search, export, print)           │
+│  □ PHI modification events (create, update, delete)          │
+│  □ Permission changes (role assignments, access grants)      │
+│  □ System events (backup, restore, failover)                 │
+│  □ Administrative actions (user creation, config changes)    │
+│                                                              │
+│  REQUIRED AUDIT FIELDS                                       │
+│  □ Who — user ID, role, IP address                           │
+│  □ What — action performed, resource accessed                │
+│  □ When — timestamp (UTC, ISO 8601)                          │
+│  □ Where — system, endpoint, source IP                       │
+│  □ Why — business context (if available)                     │
+│  □ Outcome — success or failure                              │
+│                                                              │
+│  AUDIT LOG INTEGRITY                                         │
+│  □ Are logs stored in a separate, restricted system?         │
+│  □ Are logs append-only? (no modification or deletion)       │
+│  □ Is tamper detection in place? (hash chaining, WORM)       │
+│  □ Are logs retained for 6+ years? (HIPAA requires 6 years   │
+│    for policies; best practice: 6-7 years for audit logs)    │
+│  □ Can logs be searched by patient, user, date range?        │
+│  □ Are logs protected from the application itself?           │
+│    (a compromised app should not be able to erase its        │
+│     audit trail)                                             │
+│                                                              │
+│  AUDIT LOG SEARCH PATTERNS                                   │
+│  → grep -ri &quot;audit\|auditLog\|audit_log&quot; src/               │
+│  → grep -ri &quot;createAudit\|logAccess\|logEvent&quot; src/          │
+│  → Check: Are all PHI read operations generating audit       │
+│    entries, or only write operations?                        │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>§164.312(c) — Integrity Controls</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  §164.312(c) — INTEGRITY                                     │
+│  &quot;Implement policies and procedures to protect ePHI from     │
+│   improper alteration or destruction.&quot;                        │
+│                                                              │
+│  §164.312(c)(2) — MECHANISM TO AUTHENTICATE ePHI             │
+│  □ Can the system detect unauthorized PHI modifications?     │
+│  □ Are checksums or hashes used for data integrity?          │
+│  □ Are database constraints preventing invalid PHI states?   │
+│  □ Is there version history for PHI records?                 │
+│  □ Are soft deletes used instead of hard deletes for PHI?    │
+│  □ Can deleted PHI records be recovered?                     │
+│                                                              │
+│  DATA VALIDATION                                             │
+│  □ Is all incoming PHI validated (format, range, type)?      │
+│  □ Are medical record numbers validated for format?          │
+│  □ Are dates validated (no future death dates, etc.)?        │
+│  □ Are SSNs validated for format (not just length)?          │
+│  □ Are duplicate records detected and handled?               │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>§164.312(d) — Person or Entity Authentication</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  §164.312(d) — PERSON OR ENTITY AUTHENTICATION               │
+│  &quot;Implement procedures to verify that a person or entity     │
+│   seeking access to ePHI is the one claimed.&quot;                │
+│                                                              │
+│  □ Is multi-factor authentication required for PHI access?   │
+│  □ Are authentication tokens properly validated?             │
+│    (signature, expiry, issuer, audience)                     │
+│  □ Are API keys rotated regularly?                           │
+│  □ Is certificate-based auth used for system-to-system?      │
+│  □ Are failed auth attempts rate-limited and logged?         │
+│  □ Is identity federation (SSO) properly configured?         │
+│  □ Are service accounts authenticated individually?          │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>§164.312(e) — Transmission Security</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  §164.312(e) — TRANSMISSION SECURITY                         │
+│  &quot;Implement technical security measures to guard against      │
+│   unauthorized access to ePHI transmitted over a network.&quot;   │
+│                                                              │
+│  §164.312(e)(1) — INTEGRITY CONTROLS                         │
+│  □ Is TLS 1.2+ enforced on all connections? (TLS 1.3 pref.) │
+│  □ Are weak cipher suites disabled?                          │
+│  □ Is HSTS enabled? (force HTTPS)                            │
+│  □ Are SSL certificates valid and not self-signed in prod?   │
+│                                                              │
+│  §164.312(e)(2)(ii) — ENCRYPTION                             │
+│  □ Is all PHI encrypted in transit?                          │
+│  □ Are internal service-to-service calls encrypted?          │
+│  □ Are database connections encrypted? (SSL/TLS to DB)       │
+│  □ Are Redis connections encrypted? (TLS to Redis)           │
+│  □ Are message queue connections encrypted?                  │
+│  □ Are webhook payloads containing PHI encrypted?            │
+│  □ Is email with PHI encrypted? (TLS at minimum)             │
+│                                                              │
+│  SCAN FOR UNENCRYPTED CONNECTIONS                            │
+│  → grep -ri &quot;http://&quot; src/ (should be https:// only)         │
+│  → grep -ri &quot;ssl.<em>false\|tls.</em>false\|rejectUnauthorized.*    │
+│    false&quot; src/ (dangerous SSL bypasses)                       │
+│  → Check database connection strings for sslmode              │
+│  → Check Redis connection for TLS configuration              │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 3: Administrative Safeguards Review (§164.308)</h2>
+
+Administrative safeguards are not just policies — they have code-level implications.
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  §164.308 — ADMINISTRATIVE SAFEGUARDS (Code Implications)    │
+│                                                              │
+│  §164.308(a)(1) — RISK ANALYSIS                              │
+│  □ Has a formal risk analysis been conducted?                │
+│  □ Are identified risks documented with mitigation plans?    │
+│  □ Is the risk analysis updated when systems change?         │
+│  □ Does the codebase reflect the controls identified in      │
+│    the risk analysis?                                        │
+│                                                              │
+│  §164.308(a)(3) — WORKFORCE SECURITY                         │
+│  □ Does the system support access termination on employee    │
+│    departure? (disable account, revoke tokens, revoke keys)  │
+│  □ Is there a process to review and right-size access?       │
+│  □ Can access be granted/revoked without code changes?       │
+│  □ Are access change events logged in the audit trail?       │
+│                                                              │
+│  §164.308(a)(4) — INFORMATION ACCESS MANAGEMENT              │
+│  □ Is there a role-based access control system?              │
+│  □ Are access grants based on job function?                  │
+│  □ Can access be reviewed per user? (show all PHI access     │
+│    for a specific user over a time period)                   │
+│  □ Is there an access approval workflow?                     │
+│                                                              │
+│  §164.308(a)(5) — SECURITY AWARENESS AND TRAINING            │
+│  □ Does the application enforce password complexity?         │
+│  □ Does the application warn about phishing-like behavior?   │
+│  □ Are security reminders displayed in the UI?               │
+│                                                              │
+│  §164.308(a)(6) — SECURITY INCIDENT PROCEDURES               │
+│  □ Does the system detect anomalous PHI access patterns?     │
+│  □ Are alerting mechanisms in place for suspicious activity?  │
+│  □ Is there an incident response workflow in the code?       │
+│  □ Can affected patients be identified after a breach?       │
+│    (accounting of disclosures — §164.528)                    │
+│                                                              │
+│  §164.308(a)(7) — CONTINGENCY PLAN                           │
+│  □ Are database backups encrypted?                           │
+│  □ Are backups tested for restoration?                       │
+│  □ Is there a disaster recovery procedure?                   │
+│  □ Are backup retention policies documented in code/config?  │
+│  □ Can the system operate in degraded mode without PHI?      │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 4: Encryption Verification</h2>
+
+Verify encryption at every layer where PHI exists.
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│              ENCRYPTION VERIFICATION                         │
+│                                                              │
+│  LAYER 1: DATA AT REST                                       │
+│  ┌──────────────────┬────────────┬────────────────────┐      │
+│  │ Storage          │ Required   │ How to Verify      │      │
+│  ├──────────────────┼────────────┼────────────────────┤      │
+│  │ Database (RDS)   │ AES-256    │ Check RDS settings │      │
+│  │ Object store (S3)│ SSE-KMS    │ Check bucket policy│      │
+│  │ File system      │ LUKS/dm-   │ Check mount config │      │
+│  │                  │ crypt      │                    │      │
+│  │ Backups          │ AES-256    │ Check backup config│      │
+│  │ Cache (Redis)    │ No PHI, or │ Check Redis config │      │
+│  │                  │ encrypted  │                    │      │
+│  │ Search index     │ Encrypted  │ Check ES/Algolia   │      │
+│  │                  │ or no PHI  │ config             │      │
+│  └──────────────────┴────────────┴────────────────────┘      │
+│                                                              │
+│  LAYER 2: DATA IN TRANSIT                                    │
+│  ┌──────────────────┬────────────┬────────────────────┐      │
+│  │ Connection       │ Required   │ How to Verify      │      │
+│  ├──────────────────┼────────────┼────────────────────┤      │
+│  │ Client → Server  │ TLS 1.3    │ Check HTTPS config │      │
+│  │ Server → DB      │ TLS/SSL    │ Check conn string  │      │
+│  │ Server → Redis   │ TLS        │ Check Redis client │      │
+│  │ Server → S3      │ HTTPS      │ Check SDK config   │      │
+│  │ Server → Server  │ mTLS or    │ Check service mesh │      │
+│  │ (internal)       │ TLS        │ or VPN config      │      │
+│  │ Email (SMTP)     │ STARTTLS   │ Check mail config  │      │
+│  │ Webhooks         │ HTTPS +    │ Check webhook URLs │      │
+│  │                  │ HMAC       │ and signing        │      │
+│  └──────────────────┴────────────┴────────────────────┘      │
+│                                                              │
+│  LAYER 3: FIELD-LEVEL ENCRYPTION                             │
+│  For the most sensitive identifiers, database-level          │
+│  encryption may not be sufficient. Field-level encryption    │
+│  protects PHI even from DBAs and backup exfiltration.        │
+│  □ SSN — encrypted at application layer before DB write?     │
+│  □ Date of birth — encrypted or stored as year-only?         │
+│  □ MRN — encrypted or tokenized?                             │
+│  □ Biometric data — encrypted with separate key?             │
+│                                                              │
+│  KEY MANAGEMENT                                              │
+│  □ Where are encryption keys stored? (KMS, HSM, not code)   │
+│  □ Are keys rotated on schedule?                             │
+│  □ Is key access logged?                                     │
+│  □ Can old data be re-encrypted with new keys?               │
+│  □ Are key backups separate from data backups?               │
+│                                                              │
+│  SEARCH PATTERNS FOR ENCRYPTION ISSUES                       │
+│  → grep -ri &quot;createCipher\|createDecipher&quot; src/              │
+│    (deprecated — should use createCipheriv)                   │
+│  → grep -ri &quot;md5\|sha1&quot; src/ (weak hashing — not for PHI)   │
+│  → grep -ri &quot;ECB&quot; src/ (insecure block cipher mode)          │
+│  → grep -ri &quot;DES\|3DES\|RC4\|RC2&quot; src/ (deprecated ciphers) │
+│  → Check: Is the same key used for all tenants?              │
+│    (should be per-tenant keys or per-patient keys)           │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 5: BAA Compliance Check</h2>
+
+Every third-party service that can access PHI requires a Business Associate Agreement.
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│           BUSINESS ASSOCIATE AGREEMENT CHECK                 │
+│                                                              │
+│  IDENTIFY ALL THIRD-PARTY SERVICES                           │
+│  → grep -ri &quot;import\|require&quot; src/ | grep -i &quot;aws\|stripe\| │
+│    sendgrid\|twilio\|sentry\|datadog\|segment\|mixpanel&quot;     │
+│  → Review package.json for SaaS SDK dependencies             │
+│  → Review environment variables for third-party API keys     │
+│                                                              │
+│  FOR EACH SERVICE, DETERMINE:                                │
+│  ┌─────────────────┬─────────┬─────────┬─────────────────┐  │
+│  │ Service         │ PHI     │ BAA     │ Status          │  │
+│  │                 │ Access? │ Signed? │                 │  │
+│  ├─────────────────┼─────────┼─────────┼─────────────────┤  │
+│  │ AWS (ECS, S3,   │ Yes     │ Required│ □ Verify signed │  │
+│  │ RDS, CloudWatch)│         │         │                 │  │
+│  │ Email provider  │ Maybe   │ Check   │ □ PHI in emails?│  │
+│  │ Error tracking  │ Maybe   │ Check   │ □ PHI in errors?│  │
+│  │ Analytics       │ Maybe   │ Check   │ □ PHI in events?│  │
+│  │ Payment proc.   │ No*     │ N/A     │ □ Verify no PHI │  │
+│  │ CDN             │ Maybe   │ Check   │ □ PHI in cached │  │
+│  │                 │         │         │   responses?    │  │
+│  │ Monitoring      │ Maybe   │ Check   │ □ PHI in logs/  │  │
+│  │                 │         │         │   metrics?      │  │
+│  └─────────────────┴─────────┴─────────┴─────────────────┘  │
+│                                                              │
+│  * Payment processors may not need BAA if no PHI is shared.  │
+│    But if claims data or diagnosis codes flow through        │
+│    payments, a BAA is required.                              │
+│                                                              │
+│  BAA REQUIRED PROVISIONS (§164.314(a)(2))                    │
+│  □ Permitted uses and disclosures of PHI                     │
+│  □ Requirement to implement safeguards                       │
+│  □ Reporting of security incidents and breaches              │
+│  □ Return or destroy PHI on termination                      │
+│  □ Subcontractor flow-down (BA's subcontractors need BAAs)   │
+│  □ Access to PHI for HHS investigations                      │
+│                                                              │
+│  CODE-LEVEL CHECKS                                           │
+│  □ Is PHI stripped before sending to services without BAAs?  │
+│  □ Are error tracking services configured to redact PHI?     │
+│    (Sentry: beforeSend filter, Datadog: scrubbing rules)    │
+│  □ Are analytics events free of PHI?                         │
+│  □ Are log aggregation services covered by BAA?              │
+│  □ Are backup/DR services covered by BAA?                    │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 6: Breach Detection & Notification</h2>
+
+Your code must support the breach notification workflow mandated by HITECH.
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│        BREACH DETECTION &amp; NOTIFICATION WORKFLOW              │
+│                                                              │
+│  BREACH SEVERITY DECISION TREE                               │
+│                                                              │
+│  Was PHI accessed, acquired, used, or disclosed              │
+│  in an impermissible manner?                                 │
+│       │                                                      │
+│       ├── No ──▶ Not a breach. Document and close.           │
+│       │                                                      │
+│       └── Yes ──▶ Was the PHI encrypted (rendered            │
+│                   unusable, unreadable, indecipherable)?      │
+│                        │                                     │
+│                        ├── Yes ──▶ Safe harbor exception.    │
+│                        │          Not a reportable breach.   │
+│                        │          Document encryption proof. │
+│                        │                                     │
+│                        └── No ──▶ Apply 4-factor risk        │
+│                                   assessment:                │
+│                                                              │
+│  ┌─────────────────────────────────────────────────────┐     │
+│  │ FOUR-FACTOR RISK ASSESSMENT (§164.402)              │     │
+│  │                                                     │     │
+│  │ 1. Nature and extent of PHI involved                │     │
+│  │    → How many identifiers? How sensitive?           │     │
+│  │    → Clinical data vs. demographics vs. SSN         │     │
+│  │                                                     │     │
+│  │ 2. Unauthorized person who received/accessed PHI    │     │
+│  │    → Internal employee vs. external attacker        │     │
+│  │    → Known individual vs. unknown                   │     │
+│  │                                                     │     │
+│  │ 3. Whether PHI was actually viewed or acquired      │     │
+│  │    → Accessed but not downloaded vs. exfiltrated     │     │
+│  │    → Log evidence of access patterns                │     │
+│  │                                                     │     │
+│  │ 4. Extent of risk mitigation                        │     │
+│  │    → Was the recipient identified and PHI recovered? │     │
+│  │    → Were credentials rotated?                      │     │
+│  │    → Was the vulnerability patched?                  │     │
+│  └─────────────────────────────────────────────────────┘     │
+│                                                              │
+│       Low risk across all 4 factors?                         │
+│       │                                                      │
+│       ├── Yes ──▶ Document determination. Not reportable.    │
+│       │                                                      │
+│       └── No ──▶ REPORTABLE BREACH                           │
+│                                                              │
+│  NOTIFICATION REQUIREMENTS                                   │
+│  ┌─────────────────────────────────────────────────────┐     │
+│  │ Records  │ Notify       │ Timeline                  │     │
+│  │ Affected │              │                           │     │
+│  ├──────────┼──────────────┼───────────────────────────┤     │
+│  │ &lt; 500    │ Individuals  │ Within 60 days of         │     │
+│  │          │ HHS (annual) │ discovery                 │     │
+│  ├──────────┼──────────────┼───────────────────────────┤     │
+│  │ &gt;= 500   │ Individuals  │ Within 60 days of         │     │
+│  │          │ HHS (immed.) │ discovery — no delay      │     │
+│  │          │ Media        │                           │     │
+│  └──────────┴──────────────┴───────────────────────────┘     │
+│                                                              │
+│  CODE REQUIREMENTS FOR BREACH SUPPORT                        │
+│  □ Can the system identify which records were affected?      │
+│    (query: &quot;all patients accessed by user X between dates&quot;)  │
+│  □ Can the system identify which identifiers were exposed?   │
+│    (was it just names, or SSNs too?)                         │
+│  □ Is there an accounting of disclosures function?           │
+│    (§164.528 — patients can request a log of who accessed    │
+│     their PHI in the last 6 years)                           │
+│  □ Can breach notifications be generated programmatically?   │
+│  □ Are breach events captured with sufficient detail for     │
+│    the OCR breach report form?                               │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 7: De-identification Review</h2>
+
+If the system provides de-identified data for analytics or research, verify it meets HIPAA standards.
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│           DE-IDENTIFICATION REVIEW                           │
+│                                                              │
+│  SAFE HARBOR METHOD (§164.514(b))                            │
+│  Remove ALL 18 identifiers listed above, plus:               │
+│  □ The covered entity has no actual knowledge that the       │
+│    remaining information could identify an individual         │
+│                                                              │
+│  CHECK EACH IDENTIFIER REMOVAL:                              │
+│   1. □ Names removed (not pseudonymized — fully removed)     │
+│   2. □ Geographic data generalized (state only, no city/zip) │
+│      → Zip codes: only first 3 digits, and only if           │
+│        population &gt; 20,000. Otherwise, set to 000.           │
+│   3. □ Dates generalized to year only                        │
+│      → No birth dates, admission dates, discharge dates      │
+│      → Ages over 89 grouped as &quot;90+&quot;                         │
+│   4. □ Phone numbers removed                                 │
+│   5. □ Fax numbers removed                                   │
+│   6. □ Email addresses removed                               │
+│   7. □ SSNs removed                                          │
+│   8. □ Medical record numbers removed                        │
+│   9. □ Health plan beneficiary numbers removed               │
+│  10. □ Account numbers removed                               │
+│  11. □ Certificate/license numbers removed                   │
+│  12. □ Vehicle identifiers removed                           │
+│  13. □ Device identifiers removed                            │
+│  14. □ Web URLs removed                                      │
+│  15. □ IP addresses removed                                  │
+│  16. □ Biometric identifiers removed                         │
+│  17. □ Full-face photographs removed                         │
+│  18. □ Any other unique identifiers removed                  │
+│                                                              │
+│  EXPERT DETERMINATION METHOD (§164.514(a))                   │
+│  □ Has a qualified statistical expert certified that the     │
+│    risk of re-identification is &quot;very small&quot;?                │
+│  □ Are the methods and results documented?                   │
+│  □ Is the determination reviewed when new data is added?     │
+│                                                              │
+│  CODE-LEVEL VERIFICATION                                     │
+│  → Find the de-identification function/query                 │
+│  □ Does it remove ALL 18 identifiers, not just some?         │
+│  □ Does it handle edge cases? (PHI in free-text fields,      │
+│    embedded in JSON, concatenated in IDs)                    │
+│  □ Is re-identification possible via combination of          │
+│    remaining fields? (age + gender + zip = identifiable)     │
+│  □ Are de-identified datasets marked and tracked separately? │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 8: HIPAA Compliance Report</h2>
+
+<h3>Report Template</h3>
+
+<pre class="code-block"><code>## HIPAA Compliance Audit Report
+
+<h3>Scope</h3>
+<ul class="skill-list"><li>System: [application name and version]</li>
+<li>Files audited: [list or &quot;full codebase&quot;]</li>
+<li>Date: [date]</li>
+<li>Auditor: [name, credentials]</li>
+<li>Standards: HIPAA Security Rule (45 CFR §164.302-318),</li>
+  </ul>HIPAA Privacy Rule (45 CFR §164.500-534), HITECH Act
+
+<h3>Executive Summary</h3>
+<ul class="skill-list"><li>Critical findings: X (breach risk — immediate remediation)</li>
+<li>High findings: X (HIPAA violation — fix before PHI exposure)</li>
+<li>Medium findings: X (safeguard gap — fix within sprint)</li>
+<li>Low findings: X (best practice — track for next review)</li>
+
+</ul><h3>PHI Inventory<div class="table-wrap"><table><thead><tr><th>PHI Type</th><th>Storage Location</th><th>Encrypted</th><th>Access Controlled</th><th>Audit Logged</th><th></th></tr></thead><tbody><tr><td>Names</td><td>patients table</td><td>Column</td><td>Role-based</td><td>Yes</td><td></td></tr><tr><td>SSN</td><td>patients table</td><td>Field-lvl</td><td>Billing only</td><td>Yes</td><td></td></tr><tr><td>DOB</td><td>patients table</td><td>Column</td><td>Clinical + Billing</td><td>Yes</td><td></td></tr></tbody></table></div></h3>
+<h3>Findings</h3>
+
+<h4>CRITICAL — Breach Risk</h4>
+<ul class="skill-list"><li class="ordered">[§164.xxx] — Short description</li>
+   </ul>- <strong>Location</strong>: <code class="inline-code">path/to/file.ts</code> (line X)
+   - <strong>PHI at risk</strong>: [which identifiers]
+   - <strong>Impact</strong>: [what an attacker could access]
+   - <strong>Remediation</strong>: [exact steps with code guidance]
+   - <strong>Status</strong>: [ ] Remediated and verified
+
+<h4>HIGH — HIPAA Violation</h4>
+[same format, mapped to §164 section]
+
+<h4>MEDIUM — Safeguard Gap</h4>
+[same format]
+
+<h4>LOW — Best Practice</h4>
+[same format]
+
+<h3>BAA Status<div class="table-wrap"><table><thead><tr><th>Service</th><th>PHI Access</th><th>BAA Status</th><th>Action Needed</th><th></th></tr></thead><tbody><tr><td>AWS</td><td>Yes</td><td>Signed</td><td>None</td><td></td></tr><tr><td>SendGrid</td><td>Maybe</td><td>Pending</td><td>Sign or strip</td><td></td></tr></tbody></table></div></h3>
+<h3>Encryption Status<div class="table-wrap"><table><thead><tr><th>Layer</th><th>Standard</th><th>Status</th><th>Evidence</th><th></th></tr></thead><tbody><tr><td>DB at rest</td><td>AES-256</td><td>Pass</td><td>RDS encryption</td><td></td></tr><tr><td>Transit</td><td>TLS 1.3</td><td>Pass</td><td>cert config</td><td></td></tr><tr><td>Field-level</td><td>AES-256</td><td>Partial</td><td>SSN only</td><td></td></tr></tbody></table></div></h3>
+<h3>Audit Trail Status<div class="table-wrap"><table><thead><tr><th>Requirement</th><th>Status</th><th>Gap</th><th></th></tr></thead><tbody><tr><td>PHI read logging</td><td>Pass</td><td>—</td><td></td></tr><tr><td>PHI write logging</td><td>Pass</td><td>—</td><td></td></tr><tr><td>Log immutability</td><td>Fail</td><td>Logs can be edited by admin</td><td></td></tr><tr><td>6-year retention</td><td>Pass</td><td>CloudWatch configured</td><td></td></tr></tbody></table></div></h3>
+<h3>Recommendations</h3>
+[broader suggestions for improving HIPAA posture]</code></pre>
+<hr class="section-divider">
+<h2>HIPAA Compliance Checklist</h2>
+
+Comprehensive checklist mapped to specific HIPAA sections. Use this as the final verification pass.
+
+<h3>Technical Safeguards (§164.312)</h3>
+<div class="table-wrap"><table><thead><tr><th>#</th><th>Requirement</th><th>Section</th><th>Status</th><th></th></tr></thead><tbody><tr><td>1</td><td>Unique user identification for all users</td><td>§164.312(a)(2)(i)</td><td>[ ]</td><td></td></tr><tr><td>2</td><td>Emergency access procedure (break-glass)</td><td>§164.312(a)(2)(ii)</td><td>[ ]</td><td></td></tr><tr><td>3</td><td>Automatic logoff after inactivity</td><td>§164.312(a)(2)(iii)</td><td>[ ]</td><td></td></tr><tr><td>4</td><td>ePHI encrypted at rest (AES-256)</td><td>§164.312(a)(2)(iv)</td><td>[ ]</td><td></td></tr><tr><td>5</td><td>Audit logs for all PHI access events</td><td>§164.312(b)</td><td>[ ]</td><td></td></tr><tr><td>6</td><td>Audit logs immutable and tamper-evident</td><td>§164.312(b)</td><td>[ ]</td><td></td></tr><tr><td>7</td><td>Audit log retention (6+ years)</td><td>§164.312(b)</td><td>[ ]</td><td></td></tr><tr><td>8</td><td>Audit logs searchable by patient/user/date</td><td>§164.312(b)</td><td>[ ]</td><td></td></tr><tr><td>9</td><td>ePHI integrity validation (checksums/hashes)</td><td>§164.312(c)(2)</td><td>[ ]</td><td></td></tr><tr><td>10</td><td>Soft deletes for PHI (no hard delete)</td><td>§164.312(c)(2)</td><td>[ ]</td><td></td></tr><tr><td>11</td><td>MFA for PHI access</td><td>§164.312(d)</td><td>[ ]</td><td></td></tr><tr><td>12</td><td>Authentication tokens validated (sig, exp)</td><td>§164.312(d)</td><td>[ ]</td><td></td></tr><tr><td>13</td><td>TLS 1.2+ on all external connections</td><td>§164.312(e)(1)</td><td>[ ]</td><td></td></tr><tr><td>14</td><td>TLS on all internal connections (DB, cache)</td><td>§164.312(e)(2)(ii)</td><td>[ ]</td><td></td></tr><tr><td>15</td><td>No PHI in URL query parameters</td><td>§164.312(e)(1)</td><td>[ ]</td><td></td></tr><tr><td>16</td><td>Webhook payloads with PHI encrypted/signed</td><td>§164.312(e)(1)</td><td>[ ]</td><td></td></tr></tbody></table></div>
+<h3>Administrative Safeguards (§164.308)</h3>
+<div class="table-wrap"><table><thead><tr><th>#</th><th>Requirement</th><th>Section</th><th>Status</th><th></th></tr></thead><tbody><tr><td>17</td><td>Formal risk analysis conducted</td><td>§164.308(a)(1)(ii)(A)</td><td>[ ]</td><td></td></tr><tr><td>18</td><td>Risk analysis updated on system changes</td><td>§164.308(a)(1)(ii)(A)</td><td>[ ]</td><td></td></tr><tr><td>19</td><td>Risk mitigation plan documented</td><td>§164.308(a)(1)(ii)(B)</td><td>[ ]</td><td></td></tr><tr><td>20</td><td>Access termination on employee departure</td><td>§164.308(a)(3)(ii)(C)</td><td>[ ]</td><td></td></tr><tr><td>21</td><td>Access grants based on job function</td><td>§164.308(a)(4)(ii)(B)</td><td>[ ]</td><td></td></tr><tr><td>22</td><td>Access review process exists</td><td>§164.308(a)(4)(ii)(C)</td><td>[ ]</td><td></td></tr><tr><td>23</td><td>Password complexity enforced</td><td>§164.308(a)(5)(ii)(D)</td><td>[ ]</td><td></td></tr><tr><td>24</td><td>Security incident detection implemented</td><td>§164.308(a)(6)(i)</td><td>[ ]</td><td></td></tr><tr><td>25</td><td>Incident response procedure documented</td><td>§164.308(a)(6)(ii)</td><td>[ ]</td><td></td></tr><tr><td>26</td><td>Database backups encrypted</td><td>§164.308(a)(7)(ii)(A)</td><td>[ ]</td><td></td></tr><tr><td>27</td><td>Backup restoration tested</td><td>§164.308(a)(7)(ii)(D)</td><td>[ ]</td><td></td></tr><tr><td>28</td><td>Disaster recovery plan exists</td><td>§164.308(a)(7)(ii)(B)</td><td>[ ]</td><td></td></tr></tbody></table></div>
+<h3>PHI Protection</h3>
+<div class="table-wrap"><table><thead><tr><th>#</th><th>Requirement</th><th>Section</th><th>Status</th><th></th></tr></thead><tbody><tr><td>29</td><td>No PHI in log output</td><td>§164.312(b) + HITECH</td><td>[ ]</td><td></td></tr><tr><td>30</td><td>No PHI in error messages returned to client</td><td>§164.312(b) + HITECH</td><td>[ ]</td><td></td></tr><tr><td>31</td><td>No PHI in analytics/tracking events</td><td>§164.502(b)</td><td>[ ]</td><td></td></tr><tr><td>32</td><td>No PHI in stack traces or debug output</td><td>§164.312(b) + HITECH</td><td>[ ]</td><td></td></tr><tr><td>33</td><td>No PHI in URL paths or query strings</td><td>§164.312(e)(1)</td><td>[ ]</td><td></td></tr><tr><td>34</td><td>No PHI in browser localStorage/sessionStorage</td><td>§164.312(a)(2)(iv)</td><td>[ ]</td><td></td></tr><tr><td>35</td><td>No PHI in frontend source code or bundles</td><td>§164.312(a)(2)(iv)</td><td>[ ]</td><td></td></tr><tr><td>36</td><td>API responses filter PHI by role (min. necessary)</td><td>§164.502(b)</td><td>[ ]</td><td></td></tr><tr><td>37</td><td>File names do not contain PHI</td><td>§164.312(a)(1)</td><td>[ ]</td><td></td></tr><tr><td>38</td><td>Cache entries with PHI have TTL and encryption</td><td>§164.312(a)(2)(iv)</td><td>[ ]</td><td></td></tr></tbody></table></div>
+<h3>Business Associate & Organizational</h3>
+<div class="table-wrap"><table><thead><tr><th>#</th><th>Requirement</th><th>Section</th><th>Status</th><th></th></tr></thead><tbody><tr><td>39</td><td>All PHI-touching services have signed BAAs</td><td>§164.314(a)(1)</td><td>[ ]</td><td></td></tr><tr><td>40</td><td>BAAs include breach notification requirements</td><td>§164.314(a)(2)(i)(C)</td><td>[ ]</td><td></td></tr><tr><td>41</td><td>Subcontractor BAAs in place (chain of custody)</td><td>§164.314(a)(2)(i)(B)</td><td>[ ]</td><td></td></tr><tr><td>42</td><td>Error tracking redacts PHI before transmission</td><td>§164.502(b)</td><td>[ ]</td><td></td></tr><tr><td>43</td><td>Log aggregation service covered by BAA</td><td>§164.314(a)(1)</td><td>[ ]</td><td></td></tr></tbody></table></div>
+<h3>Breach Notification</h3>
+<div class="table-wrap"><table><thead><tr><th>#</th><th>Requirement</th><th>Section</th><th>Status</th><th></th></tr></thead><tbody><tr><td>44</td><td>System can identify affected records post-breach</td><td>HITECH §13402</td><td>[ ]</td><td></td></tr><tr><td>45</td><td>System can identify exposed identifier types</td><td>HITECH §13402</td><td>[ ]</td><td></td></tr><tr><td>46</td><td>Accounting of disclosures available (6 years)</td><td>§164.528</td><td>[ ]</td><td></td></tr><tr><td>47</td><td>Breach notification workflow exists</td><td>HITECH §13402</td><td>[ ]</td><td></td></tr><tr><td>48</td><td>Breach risk assessment template available</td><td>§164.402</td><td>[ ]</td><td></td></tr></tbody></table></div>
+<h3>De-identification</h3>
+<div class="table-wrap"><table><thead><tr><th>#</th><th>Requirement</th><th>Section</th><th>Status</th><th></th></tr></thead><tbody><tr><td>49</td><td>All 18 identifiers removed (Safe Harbor)</td><td>§164.514(b)(2)</td><td>[ ]</td><td></td></tr><tr><td>50</td><td>Zip codes truncated to 3 digits (pop > 20k)</td><td>§164.514(b)(2)(i)(B)</td><td>[ ]</td><td></td></tr><tr><td>51</td><td>Ages 90+ grouped</td><td>§164.514(b)(2)(i)(C)</td><td>[ ]</td><td></td></tr><tr><td>52</td><td>Dates reduced to year only</td><td>§164.514(b)(2)(i)(C)</td><td>[ ]</td><td></td></tr><tr><td>53</td><td>Re-identification risk assessed</td><td>§164.514(b)(2)(ii)</td><td>[ ]</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Tips for Best Results</h2>
+
+<ul class="skill-list"><li class="ordered"><strong>Start with the PHI inventory</strong> — you cannot protect what you cannot find. Map every location where PHI exists in the system before checking any safeguard. Most violations come from PHI in places no one realized it existed.</li>
+
+<li class="ordered"><strong>Grep your logs relentlessly</strong> — search production log output for every one of the 18 identifiers. A single patient name in a log file is a reportable breach. Structured loggers are especially dangerous because they serialize entire objects, including PHI fields no one explicitly logged.</li>
+
+<li class="ordered"><strong>Test the encryption chain end-to-end</strong> — it is not enough that the database is encrypted. Verify that PHI is encrypted from the moment it enters the system (TLS in transit) through processing (memory-only, no temp files) to storage (AES-256 at rest) and back out again. One unencrypted hop breaks the entire chain.</li>
+
+<li class="ordered"><strong>Audit the audit trail</strong> — the audit system itself must be audited. Can an admin delete audit logs? Can the application overwrite them? Are they retained for the full 6 years? An incomplete or mutable audit trail is a finding in every OCR investigation.</li>
+
+<li class="ordered"><strong>Check every third-party integration</strong> — if a service can see PHI (even accidentally, such as error tracking capturing a stack trace with a patient name), it needs a BAA. Map every outbound data flow and verify BAA coverage. Missing BAAs are the most common HIPAA violation for software companies.</li>
+
+<li class="ordered"><strong>Think about the breach notification clock</strong> — if something goes wrong, can your system answer these questions within hours: How many records were affected? Which identifiers were exposed? Who was the unauthorized accessor? If not, you are not prepared for a breach, and that itself is a finding.</li>
+
+<li class="ordered"><strong>Minimum necessary is not optional</strong> — every API endpoint, every database query, every report should return only the PHI fields required for the specific function. Returning a full patient record when only the name is needed is a §164.502(b) violation, even if the user is authorized to see all of it.</li></ul>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="gdpr-audit.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">GDPR Code Audit — Privacy by Design, Compliance by Default</span></span></a>
+    <a href="incident-plan.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Incident Response Plan — Detect, Contain, Recover, Prevent</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    94 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

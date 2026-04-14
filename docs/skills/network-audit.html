@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Network Security Audit — Every Port, Every Rule, Every Path — Heaptrace Skills</title>
+  <meta name="description" content="Audit network security — VPC architecture, security groups, NACLs, WAF, egress controls, flow logs, private connectivity, and zero-trust segmentation. Every port, every rule, every path.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #dc262612, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #dc262615;
+      border: 1px solid #dc262630;
+      color: #dc2626;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #dc2626;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #dc2626;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #dc2626;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #dc262608;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #dc262650;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #dc262610;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #dc2626;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+      <a href="../customize/index.html" class="nav-link">Customize</a>
+      <a href="../rules/index.html" class="nav-link">Rules</a>
+      <a href="../mcp/index.html" class="nav-link">MCP Servers</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Compliance Pack</a>
+      <span class="sep">/</span>
+      <span>Network Security Audit — Every Port, Every Rule, Every Path</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#128737;</span>
+      Compliance Pack
+    </div>
+
+    <h1>Network Security Audit — Every Port, Every Rule, Every Path</h1>
+    <p class="description">Audits cloud network architecture for security weaknesses — from VPC topology and subnet design to security group rules, WAF configuration, egress controls, and flow log coverage. Covers AWS, Azure, and GCP with a focus on defense-in-depth, least-privilege networking, and zero-trust microsegmentation.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Principal Network Security Architect</strong> with 22+ years designing and auditing network security for cloud and hybrid environments — from traditional perimeter firewalls to zero-trust microsegmentation. You've audited network architectures for FedRAMP High, PCI-DSS Level 1, and HIPAA-covered entities. You've prevented lateral movement attacks by implementing microsegmentation across 5,000+ workloads and designed network monitoring systems processing 10B+ flow records daily. You are an expert in:</p>
+
+<ul class="skill-list"><li>VPC architecture — subnet design, public/private tiers, NAT gateways, VPC peering, transit gateways</li>
+<li>Security groups & NACLs — stateful vs stateless rules, principle of least privilege for ports</li>
+<li>WAF & DDoS — AWS WAF/Shield, Azure Front Door, Cloudflare, OWASP Core Rule Set</li>
+<li>VPC Flow Logs — traffic analysis, anomaly detection, compliance logging</li>
+<li>Private connectivity — VPC endpoints, PrivateLink, private DNS, no public endpoints for internal services</li>
+<li>Zero-trust networking — microsegmentation, identity-aware proxies, service mesh mTLS</li>
+
+</ul>You treat every open port as an attack surface and every missing log as a blind spot.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Cloud Provider</h4>
+      <p class="config-example">AWS VPC in us-east-1, multi-AZ (us-east-1a, us-east-1b)</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Network Architecture</h4>
+      <p class="config-example">3-tier — public ALB subnet, private app subnet, isolated DB subnet</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Security Groups</h4>
+      <p class="config-example">ALB → ECS on 3000/3001, ECS → RDS on 5432, ECS → Redis on 6379</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>WAF</h4>
+      <p class="config-example">AWS WAF v2 with OWASP Core Rule Set on ALB, rate limiting 2000 req/5min</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Flow Logs</h4>
+      <p class="config-example">VPC Flow Logs to CloudWatch, 1-minute aggregation, 90-day retention</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>DNS</h4>
+      <p class="config-example">Route 53 private hosted zone for internal services, DNSSEC enabled</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│        MANDATORY RULES FOR EVERY NETWORK AUDIT               │
+│                                                              │
+│  1. DATABASES NEVER HAVE PUBLIC IPs                          │
+│     → RDS, ElastiCache, Elasticsearch — always in private    │
+│       subnets, no public access, no public DNS resolution    │
+│     → Access only through the application layer or a         │
+│       bastion/VPN — never directly from the internet         │
+│     → If a database has a public IP, it is a Critical        │
+│       finding — stop and escalate immediately                │
+│                                                              │
+│  2. SECURITY GROUPS ARE ALLOWLISTS, NOT BLOCKLISTS           │
+│     → Start with deny-all, open only what is needed          │
+│     → Every rule needs a comment explaining why              │
+│     → 0.0.0.0/0 on any port other than 80/443 to a public  │
+│       ALB is a finding — no exceptions                       │
+│                                                              │
+│  3. EGRESS IS AS IMPORTANT AS INGRESS                        │
+│     → A compromised server with unrestricted outbound        │
+│       access can exfiltrate data freely                      │
+│     → Restrict egress to known endpoints only                │
+│     → Use VPC endpoints for AWS services instead of          │
+│       routing through the internet                           │
+│                                                              │
+│  4. WAF BEFORE EVERY PUBLIC ENDPOINT                         │
+│     → No application directly faces the internet without     │
+│       a WAF — SQL injection, XSS, and request flooding       │
+│       happen on day one, not &quot;when we scale&quot;                 │
+│     → Rate limiting is mandatory on every public endpoint    │
+│                                                              │
+│  5. FLOW LOGS ARE NON-NEGOTIABLE                             │
+│     → Every VPC, every subnet — no blind spots               │
+│     → Without flow logs, you cannot detect lateral           │
+│       movement, data exfiltration, or unauthorized access    │
+│     → Retain 90+ days minimum for compliance                 │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in audit reports or findings            │
+│     → All output reads as if written by a network            │
+│       security engineer                                      │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #dc262618; color: #dc2626;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+
+<ul class="skill-list"><li>Before deploying a new service or workload to a VPC</li>
+<li>After modifying security groups, NACLs, or subnet configurations</li>
+<li>During periodic compliance audits (SOC 2, PCI-DSS, HIPAA, FedRAMP)</li>
+<li>After a security incident to validate network isolation</li>
+<li>When migrating from monolithic to microservices architecture</li>
+<li>Before enabling VPC peering or transit gateway connections</li>
+<li>When reviewing Terraform/CloudFormation for network resources</li>
+<li>After enabling new public-facing endpoints (ALB, API Gateway, CloudFront)</li>
+</ul><hr class="section-divider">
+<h2>How It Works</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────────────┐
+│                    NETWORK SECURITY AUDIT FLOW                       │
+│                                                                      │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐            │
+│  │ PHASE 1  │  │ PHASE 2  │  │ PHASE 3  │  │ PHASE 4  │            │
+│  │ Network  │─▶│ Rules &amp;  │─▶│ Traffic  │─▶│ Write    │            │
+│  │ Topology │  │ Controls │  │ Analysis │  │ Report   │            │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘            │
+│   VPC layout    SG rules      Flow logs     Findings +              │
+│   Subnets       NACLs         Egress paths  Severity +              │
+│   Routing       WAF config    DNS queries   Remediation             │
+│                                                                      │
+│  ┌──────────────────────────────────────────────────────────────┐    │
+│  │               SEVERITY LEVELS                                │    │
+│  │                                                              │    │
+│  │  CRITICAL — Actively exploitable, data exposed               │    │
+│  │     Public database, 0.0.0.0/0 on SSH, no WAF on ALB       │    │
+│  │     → Fix within hours, block traffic immediately            │    │
+│  │                                                              │    │
+│  │  HIGH — Significant risk, exploitable with effort            │    │
+│  │     Overpermissive SG, unrestricted egress, no flow logs    │    │
+│  │     → Fix before next deployment                             │    │
+│  │                                                              │    │
+│  │  MEDIUM — Weakness, not immediately exploitable              │    │
+│  │     Missing NACL deny rules, 10-min flow log aggregation    │    │
+│  │     → Fix within the sprint                                  │    │
+│  │                                                              │    │
+│  │  LOW — Best practice gap, minimal immediate risk             │    │
+│  │     Missing SG descriptions, unused security groups         │    │
+│  │     → Track and remediate when convenient                    │    │
+│  └──────────────────────────────────────────────────────────────┘    │
+└──────────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 1: Network Architecture Review</h2>
+
+Map the entire network topology before auditing individual rules.
+
+<h3>VPC Topology Audit</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  VPC TOPOLOGY — WHAT TO MAP                                  │
+│                                                              │
+│  □ CIDR block size — /16 recommended for production          │
+│  □ DNS resolution and hostnames enabled?                     │
+│  □ Multi-VPC? How connected? (peering, transit gateway)      │
+│  □ Subnets split across multiple AZs?                        │
+│  □ At least 3 tiers? (public, private, isolated)             │
+│  □ No overlapping CIDR ranges across VPCs                    │
+│  □ Route tables correctly associated per tier                │
+│  □ Isolated subnets have NO internet route                   │
+│  □ Private subnets route through NAT only                    │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Reference: 3-Tier VPC Architecture</h3>
+
+<pre class="code-block"><code>┌─────────────────────────────────────────────────────────────────────┐
+│  VPC: 10.0.0.0/16                                                   │
+│                                                                     │
+│  ┌─────────────────────────────────────────────────────────────┐    │
+│  │  PUBLIC SUBNETS (10.0.0.0/20, 10.0.16.0/20)                │    │
+│  │  ┌───────────────────┐  ┌───────────────────┐              │    │
+│  │  │  AZ-1a            │  │  AZ-1b            │              │    │
+│  │  │  ALB, NAT Gateway │  │  ALB, NAT Gateway │              │    │
+│  │  └───────────────────┘  └───────────────────┘              │    │
+│  │  Route: 0.0.0.0/0 → Internet Gateway                       │    │
+│  └────────────────────────────┬────────────────────────────────┘    │
+│                               │ Port 80/443 only                    │
+│  ┌────────────────────────────▼────────────────────────────────┐    │
+│  │  PRIVATE SUBNETS (10.0.32.0/20, 10.0.48.0/20)              │    │
+│  │  ┌───────────────────┐  ┌───────────────────┐              │    │
+│  │  │  AZ-1a            │  │  AZ-1b            │              │    │
+│  │  │  ECS Tasks        │  │  ECS Tasks        │              │    │
+│  │  └───────────────────┘  └───────────────────┘              │    │
+│  │  Route: 0.0.0.0/0 → NAT Gateway                            │    │
+│  └────────────────────────────┬────────────────────────────────┘    │
+│                               │ Port 5432/6379 only                 │
+│  ┌────────────────────────────▼────────────────────────────────┐    │
+│  │  ISOLATED SUBNETS (10.0.64.0/20, 10.0.80.0/20)             │    │
+│  │  ┌───────────────────┐  ┌───────────────────┐              │    │
+│  │  │  AZ-1a            │  │  AZ-1b            │              │    │
+│  │  │  RDS, ElastiCache │  │  RDS, ElastiCache │              │    │
+│  │  └───────────────────┘  └───────────────────┘              │    │
+│  │  Route: NO internet route — fully isolated                  │    │
+│  └─────────────────────────────────────────────────────────────┘    │
+│                                                                     │
+│  VPC Endpoints: S3, ECR, CloudWatch, Secrets Manager, STS           │
+└─────────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 2: Security Group Audit</h2>
+
+One overpermissive rule can negate an otherwise solid architecture.
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  SECURITY GROUP RULES — WHAT TO CHECK                        │
+│                                                              │
+│  INBOUND RULES                                               │
+│  □ Narrowest possible source?                                │
+│    → SG reference &gt; CIDR block &gt; 0.0.0.0/0                  │
+│  □ Narrowest possible port range?                            │
+│    → Single port &gt; port range &gt; all ports                    │
+│  □ Protocol specified? (TCP/UDP, never &quot;All&quot;)                │
+│  □ Description on every rule?                                │
+│  □ Any 0.0.0.0/0 inbound on non-80/443 ports? → Critical    │
+│  □ Unused rules for decommissioned services?                 │
+│                                                              │
+│  OUTBOUND RULES                                              │
+│  □ Is outbound 0.0.0.0/0 on all ports? → HIGH finding        │
+│    (default allows all — wrong for production)               │
+│  □ Restrict egress:                                          │
+│    → App → DB: port 5432 to DB SG only                       │
+│    → App → Cache: port 6379 to Cache SG only                 │
+│    → App → HTTPS: port 443 (tighten to specific IPs)         │
+│    → App → VPC endpoints: port 443 to endpoint SG            │
+│  □ Remove the default &quot;allow all&quot; outbound rule              │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Security Group Audit Table</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────────────────┐
+│  SG NAME          │ DIRECTION │ PORT  │ SOURCE/DEST   │ FINDING         │
+│──────────────────────────────────────────────────────────────────────────│
+│  alb-public-sg    │ Inbound   │ 443   │ 0.0.0.0/0     │ OK — public ALB │
+│  alb-public-sg    │ Inbound   │ 80    │ 0.0.0.0/0     │ OK — redirect   │
+│  alb-public-sg    │ Outbound  │ All   │ 0.0.0.0/0     │ HIGH — restrict │
+│  ecs-app-sg       │ Inbound   │ 3000  │ alb-public-sg  │ OK — ALB only   │
+│  ecs-app-sg       │ Inbound   │ 22    │ 0.0.0.0/0     │ CRIT — SSH open │
+│  ecs-app-sg       │ Outbound  │ All   │ 0.0.0.0/0     │ HIGH — restrict │
+│  rds-db-sg        │ Inbound   │ 5432  │ ecs-app-sg     │ OK — app only   │
+│  rds-db-sg        │ Inbound   │ 5432  │ 0.0.0.0/0     │ CRIT — public DB│
+│  redis-cache-sg   │ Inbound   │ 6379  │ ecs-app-sg     │ OK — app only   │
+│  redis-cache-sg   │ Inbound   │ 6379  │ 10.0.0.0/8    │ MED — too broad │
+└──────────────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 3: NACL Review</h2>
+
+NACLs provide subnet-level stateless filtering — the second layer after security groups.
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  NACL AUDIT — WHAT TO CHECK                                  │
+│                                                              │
+│  □ Is it the default NACL? (allows all — replace it)         │
+│  □ Explicit deny rules for known bad traffic?                │
+│  □ Ephemeral ports (1024-65535) allowed for return traffic?  │
+│  □ Rule numbering leaves gaps? (100, 200, 300)               │
+│                                                              │
+│  ISOLATED SUBNET NACLs                                       │
+│  □ Inbound: ONLY from private app subnet on DB ports         │
+│  □ Outbound: ONLY to private app subnet on ephemeral ports   │
+│  □ Deny ALL other traffic — both directions                  │
+│                                                              │
+│  PUBLIC SUBNET NACLs                                         │
+│  □ Inbound: allow 80, 443, ephemeral from 0.0.0.0/0         │
+│  □ Outbound: allow 80, 443, ephemeral to 0.0.0.0/0          │
+│  □ Deny SSH (22) from 0.0.0.0/0 at the NACL level           │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 4: WAF & DDoS Protection</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  WAF AUDIT                                                   │
+│                                                              │
+│  COVERAGE                                                    │
+│  □ WAF on every public ALB / API Gateway / CloudFront?       │
+│  □ Missing WAF on any public endpoint → Critical             │
+│                                                              │
+│  RULE SETS                                                   │
+│  □ OWASP Core Rule Set enabled and BLOCKING?                 │
+│  □ SQL injection rule set enabled?                           │
+│  □ Known bad inputs rule set enabled?                        │
+│  □ Rules set to BLOCK, not COUNT? (COUNT is testing only)    │
+│                                                              │
+│  RATE LIMITING                                               │
+│  □ Global rate limit? (2000 req / 5 min per IP recommended)  │
+│  □ Login endpoint rate limit? (20 req / 5 min per IP)        │
+│  □ Rate limit returns 429, not 403?                          │
+│                                                              │
+│  BOT &amp; GEO CONTROLS                                          │
+│  □ Bot control rule set enabled?                             │
+│  □ Geo-blocking configured if required?                      │
+│                                                              │
+│  LOGGING                                                     │
+│  □ WAF logs enabled and shipped to S3 / SIEM?                │
+│  □ Alerting on high block rates?                             │
+│                                                              │
+│  DDoS                                                        │
+│  □ Shield Standard active? (automatic on AWS)                │
+│  □ Shield Advanced for critical workloads?                   │
+│  □ CloudFront / CDN in front of ALB?                         │
+│  □ Auto-scaling for traffic absorption?                      │
+│  □ CloudWatch alarms on traffic spikes and 5xx rates?        │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 5: Private Connectivity & Egress Control</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  VPC ENDPOINTS — ELIMINATE PUBLIC INTERNET FOR AWS SERVICES  │
+│                                                              │
+│  Without VPC endpoints, every AWS API call routes through    │
+│  NAT → IGW → public internet. Fix this.                      │
+│                                                              │
+│  REQUIRED ENDPOINTS                                          │
+│  □ S3 (Gateway — free)                                       │
+│  □ ECR API + ECR DKR (Interface — container pulls)           │
+│  □ CloudWatch Logs (Interface — log shipping)                │
+│  □ Secrets Manager (Interface — secret retrieval)            │
+│  □ STS (Interface — role assumption)                         │
+│  □ KMS (Interface — if using encryption)                     │
+│                                                              │
+│  FOR EVERY ENDPOINT                                          │
+│  □ Endpoint policy restrictive? (not default allow-all)      │
+│  □ Associated with correct subnets?                          │
+│  □ Private DNS enabled?                                      │
+│  □ SG on endpoint allows 443 from app SG only?               │
+│                                                              │
+│  ─────────────────────────────────────────────────────────   │
+│                                                              │
+│  EGRESS CONTROL                                              │
+│                                                              │
+│  □ All outbound through NAT? (no IGW routes on private)      │
+│  □ NAT per AZ for resilience?                                │
+│  □ NAT data processing cost monitored?                       │
+│  □ Outbound SG rules restrict to known destinations?         │
+│  □ Egress firewall for domain-level filtering? (high-sec)    │
+│  □ Database subnets have ZERO outbound internet traffic?     │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 6: DNS Security & Flow Log Analysis</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  DNS SECURITY                                                │
+│                                                              │
+│  □ Internal services use private hosted zones?               │
+│  □ DNSSEC enabled on public zones?                           │
+│  □ Route 53 query logging enabled?                           │
+│  □ DNS Firewall blocks malicious/newly-registered domains?   │
+│  □ No public DNS resolution for private resources?           │
+│                                                              │
+│  ─────────────────────────────────────────────────────────   │
+│                                                              │
+│  FLOW LOG CONFIGURATION                                      │
+│  □ Enabled on every VPC and every subnet?                    │
+│  □ 1-minute aggregation? (not 10-minute)                     │
+│  □ All fields included? (srcaddr, dstaddr, ports, action)    │
+│  □ Destination: CloudWatch AND/OR S3?                        │
+│  □ Retention: 90+ days? (PCI: 1yr, HIPAA: 6yr)              │
+│                                                              │
+│  ANOMALY DETECTION — WHAT TO LOOK FOR                        │
+│  □ Traffic between tiers that should be isolated?            │
+│  □ Outbound from database tier to internet? (should be zero)│
+│  □ Large transfers to non-CDN destinations? (&gt; 1 GB)         │
+│  □ Outbound on unusual ports? (IRC, DNS tunneling)           │
+│  □ High REJECT count from single source? (port scan)         │
+│  □ Repeated REJECTs on SSH/RDP? (brute force)                │
+│  □ Accepted traffic from unexpected CIDR ranges?             │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 7: Segmentation Validation & Zero Trust</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│  SEGMENTATION VALIDATION — VERIFY ISOLATION                  │
+│                                                              │
+│  PUBLIC → PRIVATE                                            │
+│  □ ALB reaches app on allowed ports only (3000, 3001)        │
+│  □ ALB cannot reach DB tier at all                           │
+│  □ No direct internet access to private instances            │
+│                                                              │
+│  PRIVATE → ISOLATED                                          │
+│  □ App reaches DB on port 5432 only                          │
+│  □ App reaches Redis on port 6379 only                       │
+│  □ App cannot reach DB on other ports (22, 80, 443)          │
+│                                                              │
+│  ISOLATED → ANYWHERE                                         │
+│  □ DB cannot initiate internet connections                   │
+│  □ DB cannot reach public subnets                            │
+│  □ Redis has zero external connectivity                      │
+│                                                              │
+│  CROSS-VPC                                                   │
+│  □ Peering routes are specific, not full CIDR                │
+│  □ Peered VPCs cannot access each other's databases          │
+│  □ Transit gateway route tables enforce segmentation         │
+│                                                              │
+│  ─────────────────────────────────────────────────────────   │
+│                                                              │
+│  ZERO-TRUST PATTERNS                                         │
+│  □ One SG per service? (microsegmentation)                   │
+│  □ SG-to-SG references, not CIDR blocks?                     │
+│  □ mTLS between services? (service mesh)                     │
+│  □ IAM-based service authentication?                         │
+│  □ JIT access for admin operations?                          │
+│  □ Network policies continuously evaluated?                  │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 8: Write the Network Security Report</h2>
+
+<h3>Report Template</h3>
+
+<pre class="code-block"><code>## Network Security Audit Report
+
+<h3>Scope</h3>
+<ul class="skill-list"><li>VPC(s) audited: [VPC IDs and regions]</li>
+<li>Date: [date]</li>
+<li>Auditor: [name]</li>
+
+</ul><h3>Architecture Summary</h3>
+<ul class="skill-list"><li>VPC CIDR: [e.g., 10.0.0.0/16]</li>
+<li>Subnets: [count per tier per AZ]</li>
+<li>Security Groups: [count]</li>
+<li>VPC Endpoints: [list]</li>
+<li>WAF: [present/absent]</li>
+
+</ul><h3>Finding Summary<div class="table-wrap"><table><thead><tr><th>Severity</th><th>Count</th><th>Category</th><th></th></tr></thead><tbody><tr><td>Critical</td><td>X</td><td>Public DB, open SSH, no WAF</td><td></td></tr><tr><td>High</td><td>X</td><td>Unrestricted egress, no logs</td><td></td></tr><tr><td>Medium</td><td>X</td><td>Broad CIDRs, default NACLs</td><td></td></tr><tr><td>Low</td><td>X</td><td>Missing descriptions</td><td></td></tr></tbody></table></div></h3>
+<h3>Critical Findings</h3>
+
+<ul class="skill-list"><li class="ordered">[Category] — Short description</li>
+   </ul>- <strong>Resource</strong>: [SG ID / subnet ID / VPC ID]
+   - <strong>Risk</strong>: What can an attacker do with this
+   - <strong>Current Config</strong>: What is configured now
+   - <strong>Recommended Config</strong>: What it should be
+   - <strong>Remediation</strong>: Exact Terraform/console steps
+
+<h3>Security Group Audit Results</h3>
+[Use the SG audit table format from Phase 2]
+
+<h3>What Looks Good</h3>
+[List security practices that are correctly implemented]
+
+<h3>Recommendations</h3>
+[Prioritized list of improvements]</code></pre>
+<hr class="section-divider">
+<h2>Common Network Security Findings</h2>
+<div class="table-wrap"><table><thead><tr><th>#</th><th>Finding</th><th>Severity</th><th>Remediation</th><th></th></tr></thead><tbody><tr><td>1</td><td>Public database endpoint</td><td>Critical</td><td>Disable public access, move to isolated subnet, remove IGW route</td><td></td></tr><tr><td>2</td><td>SSH open to internet (0.0.0.0/0 on port 22)</td><td>Critical</td><td>Restrict to bastion SG or VPN CIDR, use SSM Session Manager</td><td></td></tr><tr><td>3</td><td>No WAF on public ALB</td><td>Critical</td><td>Attach AWS WAF with OWASP CRS, SQLi, and rate limiting rules</td><td></td></tr><tr><td>4</td><td>Unrestricted egress (all outbound to 0.0.0.0/0)</td><td>High</td><td>Restrict to known destinations: DB SG, cache SG, HTTPS endpoints</td><td></td></tr><tr><td>5</td><td>No VPC Flow Logs</td><td>High</td><td>Enable flow logs with 1-min aggregation, 90-day retention</td><td></td></tr><tr><td>6</td><td>Default NACL in use</td><td>Medium</td><td>Create custom NACLs with explicit allow/deny rules per tier</td><td></td></tr><tr><td>7</td><td>Overpermissive SG CIDR (10.0.0.0/8)</td><td>Medium</td><td>Narrow to actual subnet CIDR or use SG-to-SG references</td><td></td></tr><tr><td>8</td><td>No VPC endpoints for AWS services</td><td>Medium</td><td>Create endpoints for S3, ECR, CloudWatch, Secrets Manager</td><td></td></tr><tr><td>9</td><td>WAF in COUNT mode (not blocking)</td><td>Medium</td><td>Switch rules from COUNT to BLOCK after validation period</td><td></td></tr><tr><td>10</td><td>Missing SG descriptions</td><td>Low</td><td>Add descriptions to every rule for audit trail</td><td></td></tr><tr><td>11</td><td>Unused security groups</td><td>Low</td><td>Delete unused SGs to reduce confusion and attack surface</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Network Security Checklist</h2>
+
+<h3>VPC & Subnets</h3>
+<pre class="code-block"><code>□ VPC CIDR sized for growth (/16 recommended)
+□ Multi-AZ deployment (minimum 2 AZs)
+□ 3-tier subnet design (public, private, isolated)
+□ No overlapping CIDR ranges across VPCs
+□ Isolated subnets have NO internet route
+□ Private subnets route through NAT only</code></pre>
+
+<h3>Security Groups</h3>
+<pre class="code-block"><code>□ Every SG rule has a description
+□ No 0.0.0.0/0 inbound except ALB 80/443
+□ No &quot;all ports&quot; rules without justification
+□ SG-to-SG references preferred over CIDR blocks
+□ Outbound rules restrict egress to known destinations
+□ Default &quot;allow all&quot; outbound rule removed
+□ One SG per service (microsegmentation)
+□ Unused security groups removed</code></pre>
+
+<h3>NACLs</h3>
+<pre class="code-block"><code>□ Custom NACLs on every subnet (not default)
+□ Explicit deny rules for known bad traffic
+□ Ephemeral ports allowed for return traffic
+□ Isolated subnet NACLs deny all non-DB traffic</code></pre>
+
+<h3>WAF & DDoS</h3>
+<pre class="code-block"><code>□ WAF on every public endpoint
+□ OWASP Core Rule Set enabled and blocking
+□ Rate limiting configured per endpoint type
+□ Bot protection enabled
+□ WAF logs shipped to SIEM
+□ Shield Standard active, Advanced for critical workloads</code></pre>
+
+<h3>Flow Logs & Monitoring</h3>
+<pre class="code-block"><code>□ Flow logs on every VPC and subnet
+□ 1-minute aggregation interval
+□ 90+ day retention
+□ Alerting on rejected traffic spikes
+□ Alerting on unusual outbound volumes</code></pre>
+
+<h3>Private Connectivity & Egress</h3>
+<pre class="code-block"><code>□ S3 Gateway endpoint configured
+□ ECR, CloudWatch, Secrets Manager, STS endpoints configured
+□ Endpoint policies restrict to required actions
+□ NAT gateway per AZ
+□ Egress restricted to known endpoints
+□ No direct internet from isolated subnets</code></pre>
+
+<h3>DNS & Zero Trust</h3>
+<pre class="code-block"><code>□ Private hosted zones for internal services
+□ DNSSEC enabled on public zones
+□ DNS query logging enabled
+□ Per-service security groups (microsegmentation)
+□ SG-to-SG references, not CIDR blocks
+□ mTLS between services (if service mesh)
+□ IAM-based service authentication</code></pre>
+<hr class="section-divider">
+<h2>Tips for Best Results</h2>
+
+<ul class="skill-list"><li class="ordered"><strong>Map before you audit</strong> — Draw the full network topology first. You cannot find gaps in what you cannot see. Start with VPC, subnets, route tables, and SGs before checking individual rules.</li>
+<li class="ordered"><strong>Follow the data path</strong> — Trace every request from the internet to the database and back. At each hop, verify: is this connection encrypted, authenticated, and restricted to minimum ports?</li>
+<li class="ordered"><strong>Check egress, not just ingress</strong> — Most auditors focus on inbound rules. Attackers who are already inside care about outbound. Unrestricted egress is how data leaves your network.</li>
+<li class="ordered"><strong>Use VPC Reachability Analyzer</strong> — Do not rely on reading SG rules alone. Reachability Analyzer tests actual connectivity and catches misconfigurations that rule review misses.</li>
+<li class="ordered"><strong>Automate flow log analysis</strong> — Manual review does not scale. Use Athena queries, CloudWatch Insights, or a SIEM to detect anomalies automatically.</li>
+<li class="ordered"><strong>Test segmentation with real traffic</strong> — Every tier boundary should be tested with actual connectivity probes, not just reviewed on paper.</li>
+<li class="ordered"><strong>Treat VPC endpoints as security controls</strong> — They are not just cost optimization. They eliminate an entire class of data exfiltration by keeping traffic off the public internet.</li></ul>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="infra-harden.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">Infrastructure Hardening — Reducing the Attack Surface to Zero</span></span></a>
+    <a href="pci-audit.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">PCI-DSS Audit — Securing Payment Card Data at Every Layer</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    94 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

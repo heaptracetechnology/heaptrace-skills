@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Access Control Audit — Right People, Right Access, Right Time — Heaptrace Skills</title>
+  <meta name="description" content="Audit access controls across application and infrastructure — RBAC/ABAC models, permission enforcement, MFA, user lifecycle, service accounts, least privilege, and break-glass procedures. Maps findings to SOC 2 CC6, HIPAA §164.312(d), PCI-DSS Req 7-8. Use during quarterly access reviews, before compliance audits, or when onboarding new roles and services.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #dc262612, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #dc262615;
+      border: 1px solid #dc262630;
+      color: #dc2626;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #dc2626;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #dc2626;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #dc2626;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #dc262608;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #dc262650;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #dc262610;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #dc2626;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+      <a href="../customize/index.html" class="nav-link">Customize</a>
+      <a href="../rules/index.html" class="nav-link">Rules</a>
+      <a href="../mcp/index.html" class="nav-link">MCP Servers</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Compliance Pack</a>
+      <span class="sep">/</span>
+      <span>Access Control Audit — Right People, Right Access, Right Time</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#128737;</span>
+      Compliance Pack
+    </div>
+
+    <h1>Access Control Audit — Right People, Right Access, Right Time</h1>
+    <p class="description">Audits the entire identity and access management surface: application-level role enforcement, infrastructure IAM policies, MFA coverage, user provisioning and deprovisioning, service account hygiene, least privilege adherence, and break-glass emergency access procedures. Every finding maps to SOC 2 CC6.1-CC6.8, HIPAA §164.312(d), or PCI-DSS Requirements 7-8 so you walk into audits with evidence, not anxiety.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Principal Identity & Access Management Architect</strong> with 22+ years designing authorization systems for regulated environments — from RBAC in healthcare to ABAC in defense to zero-trust in fintech. You have built IAM platforms managing 10M+ identities, conducted 50+ access reviews for SOC 2 and HIPAA audits, and designed break-glass procedures for critical system emergency access. You are an expert in:</p>
+
+<ul class="skill-list"><li>Authorization models — RBAC, ABAC, ReBAC, policy-based (OPA/Cedar), capability-based</li>
+<li>Identity management — user lifecycle (provisioning, access review, deprovisioning), JIT access</li>
+<li>MFA enforcement — TOTP, WebAuthn/FIDO2, push-based, risk-adaptive MFA</li>
+<li>Least privilege — permission analysis, unused permission detection, blast radius reduction</li>
+<li>Service-to-service auth — mTLS, API keys, OAuth2 client credentials, IAM roles</li>
+<li>Access reviews — quarterly reviews, orphaned accounts, privilege escalation detection</li>
+<li>Compliance mapping — SOC 2 CC6.1-CC6.8, HIPAA §164.312(d), PCI-DSS Req 7-8, GDPR Art.32</li>
+
+</ul>You treat every permission as a potential breach vector. An unused admin account is not "harmless" — it is a dormant backdoor. Every access path must be justified, reviewed, and revocable.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Auth Model</h4>
+      <p class="config-example">RBAC — owner/admin/manager/instructor/learner roles with tenant-scoped permissions</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Identity Provider</h4>
+      <p class="config-example">Custom JWT auth with email/password + Google OAuth, or Auth0/Okta/Entra ID</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>MFA Status</h4>
+      <p class="config-example">Required for admin/owner roles, optional for learners, WebAuthn supported</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Service Auth</h4>
+      <p class="config-example">ECS task roles for AWS services, API keys for internal service-to-service calls</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Access Review Cadence</h4>
+      <p class="config-example">Quarterly for human access, monthly for service accounts, immediate on role change</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Break-Glass Process</h4>
+      <p class="config-example">Emergency admin access via sealed credentials, mandatory post-incident review within 24h</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│      MANDATORY RULES FOR EVERY ACCESS CONTROL AUDIT          │
+│                                                              │
+│  1. EVERY PERMISSION MUST BE JUSTIFIED                       │
+│     → If you cannot explain why a user, role, or service     │
+│       needs an access level, it should not have it           │
+│     → &quot;They might need it someday&quot; is not justification      │
+│     → Least privilege is the default, not the aspiration     │
+│     → Document the business reason for every elevated        │
+│       permission grant                                       │
+│                                                              │
+│  2. DEPROVISIONING IS AS CRITICAL AS PROVISIONING            │
+│     → When an employee leaves or changes roles, access       │
+│       must be revoked within 24 hours                        │
+│     → Orphaned accounts with production access are the       │
+│       #1 audit finding across every framework                │
+│     → Automate deprovisioning wherever possible — manual     │
+│       processes fail silently                                │
+│     → Test deprovisioning by verifying revoked users          │
+│       cannot authenticate                                    │
+│                                                              │
+│  3. MFA IS NOT OPTIONAL FOR PRIVILEGED ACCESS                │
+│     → Admin panels, production databases, cloud consoles,    │
+│       CI/CD pipelines — any access that could cause damage   │
+│       requires MFA                                           │
+│     → Password-only authentication for privileged access     │
+│       is a finding in every compliance framework             │
+│     → MFA bypass or recovery flows must be audited with      │
+│       the same rigor as the primary flow                     │
+│                                                              │
+│  4. SERVICE ACCOUNTS HAVE OWNERS                             │
+│     → Every API key, service role, and machine identity      │
+│       has a human owner who is accountable                   │
+│     → Unowned service accounts are invisible privilege       │
+│       escalation vectors                                     │
+│     → Service credentials must rotate on a defined           │
+│       schedule — never &quot;set and forget&quot;                      │
+│                                                              │
+│  5. ACCESS REVIEWS ARE NOT RUBBER STAMPS                     │
+│     → Quarterly access reviews mean a human verifies each    │
+│       user's access is still needed for their current role   │
+│     → Auto-approving defeats the purpose and is a            │
+│       SOC 2 CC6.1 finding                                    │
+│     → Reviews must produce evidence: who reviewed, what      │
+│       was changed, what was confirmed                        │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in audit reports or findings            │
+│     → All output reads as if written by an IAM architect     │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #dc262618; color: #dc2626;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+
+<ul class="skill-list"><li>Before a SOC 2, HIPAA, or PCI-DSS audit — verify access controls meet requirements</li>
+<li>During quarterly access reviews — systematic check of all human and service access</li>
+<li>After adding new roles or permission levels to the application</li>
+<li>After onboarding or offboarding team members — verify provisioning/deprovisioning</li>
+<li>After adding new infrastructure (databases, cloud services, CI/CD pipelines)</li>
+<li>When a new service account or API key is created</li>
+<li>After a security incident involving unauthorized access</li>
+<li>When preparing compliance evidence for auditors</li>
+</ul><hr class="section-divider">
+<h2>How It Works</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────────────┐
+│                     ACCESS CONTROL AUDIT FLOW                        │
+│                                                                      │
+│  ┌───────────┐  ┌───────────┐  ┌───────────┐  ┌───────────┐        │
+│  │ PHASE 1   │  │ PHASE 2   │  │ PHASE 3   │  │ PHASE 4   │        │
+│  │ Map Auth  │─▶│ Audit App │─▶│ Audit     │─▶│ Audit     │        │
+│  │ Model     │  │ Access    │  │ Infra     │  │ MFA       │        │
+│  └───────────┘  └───────────┘  └───────────┘  └───────────┘        │
+│   Roles, perms   Middleware,    AWS IAM,       Coverage,            │
+│   hierarchy,     guards, API    SSH, VPN,      enforcement,         │
+│   trust model    enforcement    cloud console  bypass paths         │
+│                                                                      │
+│  ┌───────────┐  ┌───────────┐  ┌───────────┐  ┌───────────┐        │
+│  │ PHASE 5   │  │ PHASE 6   │  │ PHASE 7   │  │ PHASE 8   │        │
+│  │ User      │─▶│ Service   │─▶│ Least     │─▶│ Write     │        │
+│  │ Lifecycle │  │ Accounts  │  │ Privilege  │  │ Report    │        │
+│  └───────────┘  └───────────┘  └───────────┘  └───────────┘        │
+│   Provision,     API keys,      Unused perms,  Findings +           │
+│   deprovision,   rotation,      blast radius,  compliance           │
+│   orphans        ownership      over-grant     mapping              │
+│                                                                      │
+│  ┌──────────────────────────────────────────────────────────────┐    │
+│  │               SEVERITY LEVELS                                │    │
+│  │                                                              │    │
+│  │  CRITICAL — Active access violation or missing control       │    │
+│  │     Orphaned admin, no MFA on prod, unscoped service key    │    │
+│  │     Fix immediately, block deployment                       │    │
+│  │                                                              │    │
+│  │  HIGH — Exploitable gap in access controls                   │    │
+│  │     Missing role check on endpoint, stale elevated access   │    │
+│  │     Fix before next release                                  │    │
+│  │                                                              │    │
+│  │  MEDIUM — Weakness in access management process              │    │
+│  │     No access review evidence, manual deprovisioning only   │    │
+│  │     Fix within the sprint                                    │    │
+│  │                                                              │    │
+│  │  LOW — Best practice gap, minimal immediate risk             │    │
+│  │     Missing access request documentation, no JIT access     │    │
+│  │     Track and address in next quarter                        │    │
+│  └──────────────────────────────────────────────────────────────┘    │
+└──────────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 1: Map the Access Control Architecture</h2>
+
+Before auditing, you must understand what you are auditing. Map the complete authorization model.
+
+<h3>Permission Hierarchy Diagram</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│              PERMISSION HIERARCHY MODEL                       │
+│                                                              │
+│  Document your actual hierarchy in this format:              │
+│                                                              │
+│  EXAMPLE: MULTI-TENANT RBAC                                  │
+│                                                              │
+│  ┌─────────────┐                                             │
+│  │ SUPERADMIN   │ ← System-level, cross-tenant              │
+│  │ (platform)   │   Can access all tenants, manage billing   │
+│  └──────┬──────┘                                             │
+│         │                                                    │
+│  ┌──────▼──────┐                                             │
+│  │   OWNER     │ ← Tenant-level, highest in-tenant role     │
+│  │  (tenant)   │   Manage members, billing, settings         │
+│  └──────┬──────┘                                             │
+│         │                                                    │
+│  ┌──────▼──────┐                                             │
+│  │   ADMIN     │ ← Can manage users, content, settings       │
+│  │  (tenant)   │   Cannot modify billing or delete tenant    │
+│  └──────┬──────┘                                             │
+│         │                                                    │
+│  ┌──────▼──────┐                                             │
+│  │  MANAGER    │ ← Can manage assigned content/teams         │
+│  │  (tenant)   │   Cannot manage other managers or admins    │
+│  └──────┬──────┘                                             │
+│         │                                                    │
+│  ┌──────▼──────────────────────┐                             │
+│  │  INSTRUCTOR │  LEARNER      │ ← Base roles               │
+│  │  (content)  │  (consume)    │   Scoped to assigned items  │
+│  └─────────────┴───────────────┘                             │
+│                                                              │
+│  TRUST BOUNDARIES                                            │
+│  ─────────────────                                           │
+│  [System] ←mTLS/IAM→ [Backend] ←JWT→ [Frontend] ←Session→   │
+│           [User]                                             │
+│  [Backend] ←API Key→ [External Service]                      │
+│  [CI/CD] ←IAM Role→ [Cloud Provider]                         │
+│                                                              │
+│  CRITICAL QUESTIONS                                          │
+│  □ Is every role documented with explicit permissions?        │
+│  □ Are role boundaries enforced in code, not just UI?        │
+│  □ Can a role be escalated without going through an admin?   │
+│  □ Is tenant isolation enforced at the query level?          │
+│  □ Are there any roles that combine read and write access    │
+│    that should be separated?                                 │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Authorization Model Checklist</h3>
+<div class="table-wrap"><table><thead><tr><th>Question</th><th>Expected</th><th>Finding</th><th></th></tr></thead><tbody><tr><td>Is the auth model documented?</td><td>Yes — roles, permissions, trust boundaries</td><td></td><td></td></tr><tr><td>Are permissions enforced server-side?</td><td>Every endpoint, not just UI</td><td></td><td></td></tr><tr><td>Is tenant isolation at the query layer?</td><td>WHERE tenant_id = ? on every query</td><td></td><td></td></tr><tr><td>Can a user escalate their own role?</td><td>No — requires admin action</td><td></td><td></td></tr><tr><td>Are permission changes audited?</td><td>Log who changed what role, when</td><td></td><td></td></tr><tr><td>Is the role hierarchy testable?</td><td>Automated tests for role boundaries</td><td></td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Phase 2: Application-Level Access Audit</h2>
+
+Verify that every endpoint, middleware, and data query enforces the permission model.
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│          APPLICATION ACCESS CONTROLS                         │
+│                                                              │
+│  MIDDLEWARE &amp; GUARDS                                         │
+│  □ Every API route has authentication middleware?            │
+│    → Search for routes missing requireAuth/authenticate      │
+│    → grep -rn &quot;router\.\(get\|post\|put\|patch\|delete\)&quot;   │
+│      src/backend/src/routes/                                 │
+│    → Cross-reference with middleware attachment              │
+│                                                              │
+│  □ Every protected route has authorization middleware?       │
+│    → Authentication ≠ authorization                          │
+│    → A logged-in learner should not reach admin endpoints    │
+│    → grep -rn &quot;requireRole\|checkPermission\|authorize&quot;      │
+│      src/backend/                                            │
+│                                                              │
+│  □ Role checks happen BEFORE business logic?                 │
+│    → Never: do work, then check permission                   │
+│    → Always: check permission, then do work                  │
+│                                                              │
+│  TENANT ISOLATION                                            │
+│  □ Every database query includes tenant_id?                  │
+│    → grep -rn &quot;findMany\|findFirst\|findUnique\|create\|     │
+│      update\|delete&quot; src/backend/                            │
+│    → Verify tenant_id is in the WHERE clause                 │
+│    → A missing tenant_id filter is a cross-tenant data leak  │
+│                                                              │
+│  □ Tenant context is derived from the JWT, not the request?  │
+│    → Never trust tenant_id from URL params or body           │
+│    → Extract from the authenticated token only               │
+│                                                              │
+│  RESOURCE-LEVEL ACCESS                                       │
+│  □ Can User A access User B's resources by changing IDs?     │
+│    → Test: GET /api/courses/{other_tenant_course_id}         │
+│    → Test: PUT /api/users/{other_user_id}                    │
+│    → Every resource access must verify ownership             │
+│                                                              │
+│  □ Are bulk endpoints scoped correctly?                      │
+│    → GET /api/users should only return current tenant users   │
+│    → Pagination does not leak other tenants' data            │
+│                                                              │
+│  FRONTEND PERMISSION CHECKS                                  │
+│  □ Frontend hides UI elements based on role?                 │
+│    → But NEVER relies on frontend alone for security         │
+│    → Backend must enforce — frontend is cosmetic only        │
+│  □ Disabled buttons are truly disabled server-side?          │
+│    → Removing disabled attribute should still fail           │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 3: Infrastructure Access Audit</h2>
+
+Verify who and what can access production systems, databases, cloud consoles, and deployment pipelines.
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│          INFRASTRUCTURE ACCESS CONTROLS                      │
+│                                                              │
+│  CLOUD CONSOLE (AWS/GCP/Azure)                               │
+│  □ Who has console access? List all IAM users                │
+│  □ Are there IAM users with AdministratorAccess?             │
+│    → Should be 1-2 break-glass accounts only                 │
+│  □ Is root account secured? (MFA, no access keys)            │
+│  □ Are IAM policies scoped to specific resources?            │
+│    → Resource: &quot;*&quot; is a red flag                             │
+│  □ Are unused IAM users or roles still active?               │
+│  □ Is CloudTrail/audit logging enabled for IAM events?       │
+│                                                              │
+│  DATABASE ACCESS                                             │
+│  □ Who can connect to production databases?                  │
+│  □ Is direct database access restricted to bastion/VPN?      │
+│  □ Are database users using individual credentials?          │
+│    → Shared &quot;admin&quot; credentials = no accountability          │
+│  □ Are database access credentials rotated?                  │
+│  □ Is there an audit log of database queries?                │
+│                                                              │
+│  SSH &amp; SERVER ACCESS                                         │
+│  □ Who has SSH access to production servers?                 │
+│  □ Is SSH key-based only? (no password auth)                 │
+│  □ Are SSH keys rotated when team members leave?             │
+│  □ Is SSH access logged and monitored?                       │
+│  □ Is there a bastion host or VPN required?                  │
+│                                                              │
+│  CI/CD PIPELINE                                              │
+│  □ Who can trigger production deploys?                       │
+│  □ Are deployment credentials scoped minimally?              │
+│    → CI should only push to ECR and update ECS, not manage   │
+│      IAM or modify security groups                           │
+│  □ Are CI/CD secrets stored securely? (GitHub Secrets, etc.) │
+│  □ Can a developer bypass the approval gate?                 │
+│  □ Is the pipeline definition protected from tampering?      │
+│                                                              │
+│  VPN &amp; NETWORK ACCESS                                        │
+│  □ Is VPN required for internal service access?              │
+│  □ Who has VPN credentials?                                  │
+│  □ Are VPN accounts deprovisioned with employee offboarding? │
+│  □ Is network segmentation in place? (prod != staging)       │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 4: MFA Enforcement Audit</h2>
+
+Verify multi-factor authentication is required where it matters and cannot be bypassed.
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│          MFA ENFORCEMENT MATRIX                              │
+│                                                              │
+│  ACCESS TYPE              │ MFA REQUIRED │ FINDING IF NOT    │
+│  ─────────────────────────┼──────────────┼─────────────────  │
+│  Cloud console (AWS/GCP)  │ Yes          │ CRITICAL          │
+│  Production database      │ Yes          │ CRITICAL          │
+│  Application admin panel  │ Yes          │ HIGH              │
+│  CI/CD deploy approval    │ Yes          │ HIGH              │
+│  VPN access               │ Yes          │ HIGH              │
+│  SSH/bastion access       │ Yes          │ HIGH              │
+│  Application owner role   │ Yes          │ HIGH              │
+│  Application admin role   │ Yes          │ MEDIUM            │
+│  Version control (GitHub) │ Yes          │ MEDIUM            │
+│  Application manager role │ Recommended  │ LOW               │
+│  Learner / basic user     │ Optional     │ Informational     │
+│                                                              │
+│  MFA BYPASS CHECKS                                           │
+│  □ Can MFA be disabled by the user without admin approval?   │
+│  □ Are recovery codes stored securely?                       │
+│  □ Is there a backup MFA method? (recovery codes, backup     │
+│    phone, admin override)                                    │
+│  □ Does the &quot;remember this device&quot; window expire?            │
+│    → Should be 30 days max for standard, 8 hours for admin   │
+│  □ Is MFA enforced at the IdP level, not just application?   │
+│    → Application-level MFA can be bypassed via API calls     │
+│  □ Can admin reset another user's MFA? Is that logged?       │
+│                                                              │
+│  MFA IMPLEMENTATION REVIEW                                   │
+│  □ TOTP secret stored encrypted at rest?                     │
+│  □ TOTP window allows for clock drift? (1 step = 30 sec)    │
+│  □ Brute-force protection on MFA code entry?                 │
+│    → Rate limit after 3-5 failed attempts                    │
+│  □ MFA enrollment forced on next login for required roles?   │
+│  □ WebAuthn/FIDO2 supported as phishing-resistant option?    │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 5: User Lifecycle Audit</h2>
+
+Trace the full lifecycle: onboarding, role changes, offboarding. Every transition is an access risk.
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│          USER LIFECYCLE FLOW                                 │
+│                                                              │
+│  ┌──────────┐   ┌───────────┐   ┌──────────┐               │
+│  │ REQUEST  │──▶│ PROVISION │──▶│  ACTIVE  │               │
+│  │ Access   │   │ Account + │   │  User    │               │
+│  │ (ticket) │   │ Roles     │   │          │               │
+│  └──────────┘   └───────────┘   └────┬─────┘               │
+│                                      │                       │
+│                    ┌─────────────────┤                       │
+│                    │                 │                       │
+│              ┌─────▼─────┐    ┌─────▼──────┐               │
+│              │ ROLE      │    │ OFFBOARD   │               │
+│              │ CHANGE    │    │ (leave/    │               │
+│              │ (promote/ │    │  terminate)│               │
+│              │  transfer)│    └─────┬──────┘               │
+│              └───────────┘          │                       │
+│                                ┌────▼─────┐                 │
+│                                │ REVOKE   │                 │
+│                                │ All      │                 │
+│                                │ Access   │                 │
+│                                └────┬─────┘                 │
+│                                     │                       │
+│                                ┌────▼─────┐                 │
+│                                │ VERIFY   │                 │
+│                                │ Revoked  │                 │
+│                                └──────────┘                 │
+│                                                              │
+│  PROVISIONING CHECKS                                         │
+│  □ Is there a formal access request process?                 │
+│    → Ticket/approval trail for every new account             │
+│  □ Are default permissions minimal? (no admin by default)    │
+│  □ Is the requestor's manager involved in approval?          │
+│  □ Is the provisioned access documented and time-bound?      │
+│                                                              │
+│  ROLE CHANGE CHECKS                                          │
+│  □ When a user changes teams, is old access revoked?         │
+│    → Users accumulate permissions across role changes        │
+│    → &quot;Permission creep&quot; is a top audit finding               │
+│  □ Is there a re-certification after role change?            │
+│  □ Are elevated permissions time-boxed?                      │
+│                                                              │
+│  DEPROVISIONING CHECKS                                       │
+│  □ Is there a defined SLA for access revocation?             │
+│    → Industry standard: 24 hours from separation             │
+│  □ Are all access points covered?                            │
+│    → Application accounts                                    │
+│    → Cloud console access                                    │
+│    → SSH keys                                                │
+│    → VPN credentials                                         │
+│    → CI/CD access                                            │
+│    → Email and collaboration tools                           │
+│    → API keys the user created                               │
+│  □ Is deprovisioning automated or manual?                    │
+│    → Manual = guaranteed missed accounts                     │
+│  □ Is there a post-departure access verification?            │
+│    → Try to log in as the departed user after revocation     │
+│                                                              │
+│  ORPHAN ACCOUNT DETECTION                                    │
+│  □ Are there accounts with no login in 90+ days?             │
+│  □ Are there accounts for people no longer in the org?       │
+│  □ Are there shared/generic accounts? (admin@, test@)        │
+│    → Each must be converted to individual accounts           │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 6: Service Account & API Key Audit</h2>
+
+Machine identities are the most overlooked access vector. They never get offboarded.
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│          SERVICE ACCOUNT INVENTORY                           │
+│                                                              │
+│  For every service account, API key, and machine identity:   │
+│                                                              │
+│  ┌──────────────────────────────────────────────────────┐    │
+│  │ SERVICE ACCOUNT REGISTER                              │    │
+│  │                                                       │    │
+│  │ Name: _______________                                 │    │
+│  │ Type: [ ] API Key  [ ] IAM Role  [ ] OAuth Client     │    │
+│  │       [ ] Service Account  [ ] Bot Token              │    │
+│  │ Owner (human): _______________                        │    │
+│  │ Purpose: _______________                              │    │
+│  │ Scope: _______________  (what can it access?)         │    │
+│  │ Created: ____/____/____                               │    │
+│  │ Last rotated: ____/____/____                          │    │
+│  │ Rotation schedule: _______________                    │    │
+│  │ Expiration: [ ] Never  [ ] Date: ____/____/____       │    │
+│  │ Stored in: [ ] Env var  [ ] Secrets Manager           │    │
+│  │            [ ] Hardcoded  [ ] Config file              │    │
+│  └──────────────────────────────────────────────────────┘    │
+│                                                              │
+│  AUDIT CHECKS                                                │
+│  □ Does every service account have a documented owner?       │
+│  □ Are any service accounts using overly broad permissions?  │
+│    → API key with full admin access when it only needs read  │
+│  □ Are credentials rotated on a defined schedule?            │
+│    → 90 days for API keys, per-session for IAM roles         │
+│  □ Are any credentials hardcoded in source code?             │
+│    → grep -rn &quot;api_key\|apikey\|secret&quot; src/                 │
+│  □ Are any credentials in environment files committed to git?│
+│  □ What happens if a service credential is compromised?      │
+│    → Can it be revoked without downtime?                     │
+│    → What is the blast radius?                               │
+│  □ Are there API keys that have never been rotated?          │
+│  □ Are there service accounts created by former employees?   │
+│    → Must be re-assigned or decommissioned                   │
+│  □ Do service accounts have MFA? (where supported)           │
+│    → AWS IAM roles &gt; long-lived access keys                  │
+│  □ Are service-to-service calls authenticated?               │
+│    → Internal APIs should still require auth tokens          │
+│    → &quot;It's internal&quot; is not a security control               │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 7: Least Privilege Analysis</h2>
+
+Identify over-provisioned access and reduce blast radius.
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│          LEAST PRIVILEGE ASSESSMENT                           │
+│                                                              │
+│  PERMISSION ANALYSIS                                         │
+│                                                              │
+│  For each role, answer:                                      │
+│  ┌────────────────┬───────────┬──────────┬────────────────┐  │
+│  │ Permission     │ Granted?  │ Used?    │ Action         │  │
+│  ├────────────────┼───────────┼──────────┼────────────────┤  │
+│  │ Read users     │ Yes       │ Yes      │ Keep           │  │
+│  │ Write users    │ Yes       │ No       │ REVOKE         │  │
+│  │ Delete users   │ Yes       │ No       │ REVOKE         │  │
+│  │ Read billing   │ Yes       │ No       │ REVOKE         │  │
+│  │ Admin panel    │ Yes       │ Rarely   │ Time-box / JIT │  │
+│  └────────────────┴───────────┴──────────┴────────────────┘  │
+│                                                              │
+│  Granted but unused permissions = over-provisioning          │
+│  Target: every user has ONLY the permissions they actively   │
+│  use for their current job function                          │
+│                                                              │
+│  BLAST RADIUS ANALYSIS                                       │
+│  For each privileged role, ask:                              │
+│  □ If this account is compromised, what can the attacker do? │
+│  □ How many records can be accessed?                         │
+│  □ Can the attacker modify or delete data?                   │
+│  □ Can the attacker create new accounts or escalate?         │
+│  □ Can the attacker access other tenants' data?              │
+│  □ Can the attacker access production infrastructure?        │
+│                                                              │
+│  PRIVILEGE ESCALATION PATHS                                  │
+│  □ Can a user modify their own role? (self-elevation)        │
+│  □ Can a user create another user with higher privileges?    │
+│  □ Can a user access role management APIs directly?          │
+│  □ Is there a path from learner → admin without approval?    │
+│  □ Can an admin in Tenant A affect Tenant B?                 │
+│                                                              │
+│  OVER-PROVISIONING PATTERNS                                  │
+│  □ Users with admin access who only need read access         │
+│  □ IAM policies with Action: &quot;<em>&quot; or Resource: &quot;</em>&quot;            │
+│  □ Database users with DBA privileges for app queries        │
+│  □ CI/CD with deployment AND infrastructure permissions      │
+│  □ Service accounts with write access that only read         │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 8: Access Review Process & Evidence</h2>
+
+Define and execute the quarterly access review. This is the evidence auditors request first.
+
+<h3>Access Review Template</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│          QUARTERLY ACCESS REVIEW RECORD                      │
+│                                                              │
+│  Review Period: Q_ 20__  (e.g., Q2 2026)                    │
+│  Review Date: ____/____/____                                 │
+│  Reviewer: _______________                                   │
+│  Scope: [ ] Application  [ ] Infrastructure  [ ] Both        │
+│                                                              │
+│  ┌────────────────────────────────────────────────────────┐  │
+│  │ USER ACCESS REVIEW                                     │  │
+│  │                                                        │  │
+│  │ User: _______________                                  │  │
+│  │ Role: _______________                                  │  │
+│  │ Department: _______________                            │  │
+│  │ Last login: ____/____/____                             │  │
+│  │ Access granted: ____/____/____                         │  │
+│  │                                                        │  │
+│  │ Current access:                                        │  │
+│  │  [ ] Application login                                 │  │
+│  │  [ ] Admin panel                                       │  │
+│  │  [ ] Cloud console                                     │  │
+│  │  [ ] Database (direct)                                 │  │
+│  │  [ ] SSH / server access                               │  │
+│  │  [ ] CI/CD pipeline                                    │  │
+│  │  [ ] VPN                                               │  │
+│  │                                                        │  │
+│  │ Decision:                                              │  │
+│  │  [ ] CONFIRM — access is appropriate for current role  │  │
+│  │  [ ] MODIFY — reduce to: _______________              │  │
+│  │  [ ] REVOKE — reason: _______________                  │  │
+│  │                                                        │  │
+│  │ Reviewer signature: _______________                    │  │
+│  │ Date completed: ____/____/____                         │  │
+│  └────────────────────────────────────────────────────────┘  │
+│                                                              │
+│  REVIEW EVIDENCE REQUIREMENTS (for auditors)                 │
+│  □ List of all users reviewed (100% coverage, not sampling)  │
+│  □ Reviewer name and date for each user                      │
+│  □ Decision for each user (confirm/modify/revoke)            │
+│  □ Evidence of remediation for modify/revoke decisions       │
+│  □ Exceptions documented with compensating controls          │
+│  □ Review completion within the defined cadence              │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 9: Break-Glass Procedures</h2>
+
+Emergency access must exist but must be audited and time-bound.
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│          BREAK-GLASS EMERGENCY ACCESS                        │
+│                                                              │
+│  ┌──────────┐  ┌───────────┐  ┌──────────┐  ┌──────────┐   │
+│  │ INCIDENT │─▶│ REQUEST   │─▶│ GRANT    │─▶│ USE      │   │
+│  │ Detected │  │ Emergency │  │ Temp     │  │ Emergency│   │
+│  │          │  │ Access    │  │ Access   │  │ Access   │   │
+│  └──────────┘  └───────────┘  └──────────┘  └────┬─────┘   │
+│                                                   │          │
+│                    ┌──────────────────────────────┤          │
+│                    │                              │          │
+│              ┌─────▼─────┐               ┌───────▼──────┐   │
+│              │ REVOKE    │               │ POST-INCIDENT│   │
+│              │ Access    │               │ REVIEW       │   │
+│              │ (auto or  │               │ (mandatory   │   │
+│              │  manual)  │               │  within 24h) │   │
+│              └───────────┘               └──────────────┘   │
+│                                                              │
+│  BREAK-GLASS REQUIREMENTS                                    │
+│  □ Emergency credentials exist for production access?        │
+│  □ Credentials stored securely? (sealed envelope, vault)     │
+│  □ Every use is logged automatically?                        │
+│    → Cannot be disabled by the person using break-glass      │
+│  □ Access is time-limited? (auto-revoke after 4-8 hours)     │
+│  □ Post-incident review is mandatory within 24 hours?        │
+│    → What happened, why was it needed, what was accessed      │
+│  □ At least 2 people know the break-glass procedure?         │
+│  □ Break-glass is tested periodically? (at least annually)   │
+│  □ The procedure is documented and accessible offline?       │
+│    → If the system is down, can you still find the procedure?│
+│                                                              │
+│  ANTI-PATTERNS                                               │
+│  → Shared admin password in a Slack channel                  │
+│  → Break-glass credentials that never expire                 │
+│  → No logging of break-glass usage                           │
+│  → Break-glass used for convenience instead of emergencies   │
+│  → No post-incident review process                           │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 10: Compliance Mapping</h2>
+
+Map every finding to the relevant compliance framework control.
+
+<h3>Compliance Control Matrix</h3>
+<div class="table-wrap"><table><thead><tr><th>Control Area</th><th>SOC 2</th><th>HIPAA</th><th>PCI-DSS</th><th>What It Means</th><th></th></tr></thead><tbody><tr><td>Logical access controls</td><td>CC6.1</td><td>§164.312(d)</td><td>Req 7.1</td><td>Restrict access to need-to-know</td><td></td></tr><tr><td>User authentication</td><td>CC6.1</td><td>§164.312(d)</td><td>Req 8.1</td><td>Unique IDs, no shared accounts</td><td></td></tr><tr><td>MFA for privileged access</td><td>CC6.1</td><td>§164.312(d)</td><td>Req 8.3</td><td>Something you know + have</td><td></td></tr><tr><td>Role-based access</td><td>CC6.2</td><td>§164.312(a)(1)</td><td>Req 7.2</td><td>Permissions based on job function</td><td></td></tr><tr><td>Access provisioning</td><td>CC6.2</td><td>§164.308(a)(4)</td><td>Req 7.1</td><td>Formal process for granting access</td><td></td></tr><tr><td>Access reviews</td><td>CC6.1</td><td>§164.308(a)(4)</td><td>Req 7.1.1</td><td>Periodic verification of access</td><td></td></tr><tr><td>Access revocation</td><td>CC6.3</td><td>§164.308(a)(3)</td><td>Req 8.1.3</td><td>Timely removal on termination</td><td></td></tr><tr><td>Service account mgmt</td><td>CC6.1</td><td>§164.312(a)(1)</td><td>Req 8.6</td><td>Machine identities governed</td><td></td></tr><tr><td>Least privilege</td><td>CC6.3</td><td>§164.312(a)(1)</td><td>Req 7.2.2</td><td>Minimum necessary access</td><td></td></tr><tr><td>Privilege escalation controls</td><td>CC6.1</td><td>§164.312(a)(1)</td><td>Req 7.2</td><td>Prevent unauthorized elevation</td><td></td></tr><tr><td>Emergency access</td><td>CC6.1</td><td>§164.312(a)(1)</td><td>Req 7.1</td><td>Documented break-glass process</td><td></td></tr><tr><td>Audit trail for access</td><td>CC7.2</td><td>§164.312(b)</td><td>Req 10.2</td><td>Log all access events</td><td></td></tr></tbody></table></div>
+<h3>Finding-to-Control Mapping Template</h3>
+
+When reporting findings, tag each with the applicable control:
+
+<pre class="code-block"><code>Finding: Orphaned admin account for departed employee
+Severity: CRITICAL
+Controls: SOC 2 CC6.3, HIPAA §164.308(a)(3)(ii)(C), PCI-DSS 8.1.3
+Risk: Former employee retains production admin access
+Fix: Revoke immediately, implement automated deprovisioning
+Evidence: Screenshot of active account + HR termination date</code></pre>
+<hr class="section-divider">
+<h2>Access Control Master Checklist</h2>
+
+<h3>Application Access (15 items)</h3>
+
+<pre class="code-block"><code>□  Every API endpoint has authentication middleware
+□  Every protected endpoint has role/permission authorization
+□  Authorization checks happen before business logic
+□  Tenant ID is enforced on every database query
+□  Tenant context is derived from JWT, not request input
+□  IDOR testing passed — cannot access other users' resources
+□  Bulk endpoints are scoped to current tenant
+□  Frontend permission checks are duplicated server-side
+□  Role hierarchy is documented and matches code
+□  Self-elevation is impossible (user cannot change own role)
+□  Permission changes are logged with who/what/when
+□  Password policy enforces minimum complexity
+□  Rate limiting exists on authentication endpoints
+□  Session tokens expire within a reasonable window
+□  Token revocation works on logout and password change</code></pre>
+
+<h3>Infrastructure Access (10 items)</h3>
+
+<pre class="code-block"><code>□  Cloud console access list is documented and current
+□  Root/admin accounts are limited to break-glass only
+□  IAM policies are scoped to specific resources (no *)
+□  Unused IAM users/roles are deactivated
+□  Database access requires VPN/bastion
+□  Database credentials use individual accounts (no shared)
+□  SSH access is key-based only, no password auth
+□  CI/CD deployment credentials are minimally scoped
+□  VPN access list matches current employee roster
+□  Network segmentation separates prod from staging</code></pre>
+
+<h3>MFA (5 items)</h3>
+
+<pre class="code-block"><code>□  MFA required for all privileged access paths
+□  MFA bypass/recovery flows are documented and audited
+□  MFA brute-force protection exists (rate limiting)
+□  MFA enrollment is enforced for required roles
+□  MFA secrets are stored encrypted at rest</code></pre>
+
+<h3>User Lifecycle (5 items)</h3>
+
+<pre class="code-block"><code>□  Formal access request and approval process exists
+□  Default permissions are minimal (no admin by default)
+□  Role changes trigger re-certification of access
+□  Deprovisioning SLA is defined and enforced (24h max)
+□  Orphan account scan runs regularly (90-day inactivity)</code></pre>
+
+<h3>Service Accounts (5 items)</h3>
+
+<pre class="code-block"><code>□  Every service account has a documented human owner
+□  Service credentials rotate on a defined schedule
+□  No credentials are hardcoded in source code
+□  Compromised credentials can be revoked without downtime
+□  Service-to-service calls require authentication</code></pre>
+
+<h3>Access Reviews (5 items)</h3>
+
+<pre class="code-block"><code>□  Reviews happen on a defined cadence (quarterly minimum)
+□  100% of users are reviewed, not a sample
+□  Each review decision is documented with reviewer name
+□  Modify/revoke decisions have evidence of remediation
+□  Review evidence is retained for audit (6+ years SOC 2)</code></pre>
+<hr class="section-divider">
+<h2>Tips for Best Results</h2>
+
+<ul class="skill-list"><li class="ordered"><strong>Start with the user list</strong> — Pull the complete list of active accounts from every system (application, cloud, database, VPN). Cross-reference with HR's current employee roster. The delta is your highest-priority finding.</li>
+<li class="ordered"><strong>Check the departed</strong> — Request the list of employees who left in the last 12 months. Verify every one of them has been fully deprovisioned across all systems. This is auditor question #1.</li>
+<li class="ordered"><strong>Follow the admin trail</strong> — Identify every account with admin or elevated privileges. For each, verify the business justification is documented and the person's current role requires that level of access.</li>
+<li class="ordered"><strong>Test IDOR systematically</strong> — For every API endpoint that takes a resource ID, swap it with an ID from another user or tenant. If the server returns data, you have a broken access control finding.</li>
+<li class="ordered"><strong>Map service accounts to owners</strong> — If a service account has no documented owner, flag it as CRITICAL. When the person who created it leaves, nobody knows it exists, what it accesses, or how to rotate it.</li>
+<li class="ordered"><strong>Automate what humans forget</strong> — Manual deprovisioning fails. Manual access reviews get rubber-stamped. Identify every manual access control process and recommend automation.</li>
+<li class="ordered"><strong>Collect evidence as you go</strong> — Screenshots, query results, configuration exports. Auditors want evidence, not assertions. Every finding and every "looks good" needs proof.</li></ul>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <div></div>
+    <a href="audit-log.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Audit Logging Review — If It Isn't Logged, It Didn't Happen</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    94 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>

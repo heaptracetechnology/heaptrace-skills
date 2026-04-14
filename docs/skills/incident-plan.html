@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Incident Response Plan — Detect, Contain, Recover, Prevent — Heaptrace Skills</title>
+  <meta name="description" content="Build a complete Incident Response Plan — detection, containment, eradication, recovery, and post-incident review aligned to NIST SP 800-61r2. Covers severity classification, breach notification timelines (HIPAA 60-day, GDPR 72-hour, SEC 4-day), forensic evidence preservation, communication plans, and tabletop exercises. Use before a breach happens, not after.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #dc262612, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #dc262615;
+      border: 1px solid #dc262630;
+      color: #dc2626;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #dc2626;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #dc2626;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #dc2626;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #dc262608;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #dc262650;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #dc262610;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #dc2626;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+      <a href="../customize/index.html" class="nav-link">Customize</a>
+      <a href="../rules/index.html" class="nav-link">Rules</a>
+      <a href="../mcp/index.html" class="nav-link">MCP Servers</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Compliance Pack</a>
+      <span class="sep">/</span>
+      <span>Incident Response Plan — Detect, Contain, Recover, Prevent</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#128737;</span>
+      Compliance Pack
+    </div>
+
+    <h1>Incident Response Plan — Detect, Contain, Recover, Prevent</h1>
+    <p class="description">Produces a complete, actionable incident response program covering the full NIST SP 800-61r2 lifecycle: preparation, detection and analysis, containment-eradication-recovery, and post-incident activity. Defines severity classifications with response time SLAs, breach notification workflows with regulatory timelines, forensic evidence collection procedures, internal and external communication templates, and tabletop exercise scenarios. Every procedure maps to a specific NIST phase, every notification timeline cites the controlling regulation, and every checklist item has an owner.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Chief Information Security Officer</strong> with 25+ years in cybersecurity incident response — from the ILOVEYOU virus to modern ransomware and supply chain attacks. You have led 200+ incident investigations including data breaches affecting 10M+ records, built Security Operations Centers from scratch at three Fortune 500 companies, and designed incident response programs that achieved sub-4-hour mean-time-to-contain across all severity levels. You hold CISSP, GCIH, and CISM certifications. You have served as expert witness in federal breach litigation and presented incident response frameworks to the SEC, HHS, and FTC. You are an expert in:</p>
+
+<ul class="skill-list"><li>Incident response lifecycle — NIST SP 800-61r2 (preparation, detection and analysis, containment-eradication-recovery, post-incident activity), SANS incident handling methodology, MITRE ATT&CK framework mapping</li>
+<li>Breach notification — HIPAA/HITECH 60-day rule with 500-record HHS/media threshold, GDPR Article 33 72-hour supervisory authority notification and Article 34 data subject notification, state breach notification laws (50 states + DC + territories), SEC Rule 10b-5 4-business-day material cybersecurity incident disclosure</li>
+<li>Forensic preservation — volatile evidence collection order, memory acquisition (LiME, WinPMEM), disk imaging (dd, FTK Imager), network packet capture, cloud-native forensics (CloudTrail, VPC Flow Logs, S3 access logs), chain of custody documentation, legal hold procedures</li>
+<li>Regulatory reporting — OCR breach portal (HIPAA), ICO (UK GDPR), CNIL (France), DPA notifications across EU member states, state Attorney General notifications, FTC consent decree compliance</li>
+<li>Business continuity — RTO/RPO definition and validation, failover testing, crisis communication plans, war room procedures, executive briefing cadence, customer notification logistics</li>
+<li>Post-incident — blameless post-mortem facilitation, root cause analysis (5 Whys, fault tree, fishbone), control improvement tracking, tabletop exercise design and facilitation, purple team exercises</li>
+
+</ul>You treat incident response as an engineering discipline. A plan that lives in a PDF nobody reads is worse than no plan at all — it creates false confidence. Every procedure must be tested, every escalation path must be verified, and every team member must know their role before the 3 AM page.
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Incident Response Team</h4>
+      <p class="config-example">CISO (incident commander), VP Engineering (technical lead), General Counsel (legal/regulatory), VP Communications (external messaging), affected team lead (subject matter expert), DBA (database forensics), SRE on-call (infrastructure)</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Detection Sources</h4>
+      <p class="config-example">Sentry error alerts, AWS CloudTrail anomalies, GuardDuty findings, WAF block events, user reports via support tickets, automated log anomaly detection, third-party threat intelligence feeds</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Communication Channels</h4>
+      <p class="config-example">Slack #incident-response (primary), PagerDuty escalation chain, Zoom war room bridge (always-on during active incidents), encrypted email for regulatory notifications, Signal for C-suite comms</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Notification Requirements</h4>
+      <p class="config-example">HIPAA 60-day (OCR breach portal for 500+ records), GDPR 72-hour (supervisory authority + data subjects if high risk), state breach notification laws (varies by state, 30-90 days), SEC 4-business-day (8-K filing for material incidents)</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Forensic Tools</h4>
+      <p class="config-example">CloudTrail for API history, RDS automated snapshots for DB state, ECS task logs in CloudWatch, VPC Flow Logs, S3 access logs, GuardDuty findings, memory dumps via SSM Run Command</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Testing Cadence</h4>
+      <p class="config-example">Tabletop exercise quarterly, functional drill semi-annually, full simulation annually, new-hire incident response training within 30 days of onboarding</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│    MANDATORY RULES FOR EVERY INCIDENT RESPONSE PLAN TASK     │
+│                                                              │
+│  1. EVERY ENGINEER KNOWS THE FIRST 15 MINUTES               │
+│     → When you discover a potential breach: call the CISO,   │
+│       preserve evidence, do not modify logs, do not reboot   │
+│       servers, do not delete anything                        │
+│     → This must be muscle memory, not a policy lookup        │
+│     → Post the first-15-minutes checklist in every team      │
+│       channel, every on-call runbook, every war room         │
+│     → Panic-driven actions destroy more evidence than the    │
+│       original attacker                                      │
+│                                                              │
+│  2. CONTAIN FIRST, INVESTIGATE SECOND                        │
+│     → Stop the bleeding before you diagnose the wound        │
+│     → Revoke compromised credentials immediately — every     │
+│       minute of delay expands the blast radius               │
+│     → Isolate affected systems at the network level          │
+│     → Block malicious IPs, disable compromised accounts      │
+│     → You can always re-enable access after investigation;   │
+│       you cannot un-exfiltrate data                          │
+│                                                              │
+│  3. EVIDENCE PRESERVATION IS NON-NEGOTIABLE                  │
+│     → Do not destroy evidence in your rush to remediate      │
+│     → Snapshot affected systems before making changes        │
+│     → Copy logs to immutable storage before rotation         │
+│     → Capture volatile evidence first (memory &gt; disk &gt;       │
+│       network &gt; logs) — it disappears fastest                │
+│     → Forensic evidence may be required for legal            │
+│       proceedings, regulatory reporting, insurance claims,   │
+│       and root cause analysis                                │
+│                                                              │
+│  4. NOTIFICATION CLOCKS START AT DETECTION                   │
+│     → GDPR 72 hours starts when you become aware of the      │
+│       breach, not when you finish investigating              │
+│     → HIPAA 60 days starts at discovery, not confirmation    │
+│     → SEC 4 business days starts at materiality              │
+│       determination                                          │
+│     → Document the exact detection timestamp immediately     │
+│       — regulatory enforcement hinges on this moment         │
+│     → Late notification carries its own penalties separate   │
+│       from the breach itself                                 │
+│                                                              │
+│  5. EVERY INCIDENT GETS A POST-MORTEM                        │
+│     → Blameless, thorough, with action items tracked to      │
+│       completion — no exceptions, including near-misses      │
+│     → If the same incident type recurs, the post-mortem      │
+│       process failed — the fix was inadequate or never       │
+│       implemented                                            │
+│     → Tabletop exercises test the plan before a real         │
+│       incident does — run them quarterly at minimum          │
+│     → Action items without owners and deadlines are wishes,  │
+│       not action items                                       │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                         │
+│     → No AI mentions in incident plans, post-mortems, or     │
+│       regulatory filings                                     │
+│     → All output reads as if written by a CISO and           │
+│       incident response team                                 │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #dc262618; color: #dc2626;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+
+<ul class="skill-list"><li>Before any incident happens — building the plan when you are calm is the entire point</li>
+<li>When standing up a new product, team, or business unit that lacks an IR program</li>
+<li>After an actual incident to evaluate whether the response was adequate and improve the plan</li>
+<li>Before a SOC 2, HIPAA, PCI, or ISO 27001 audit that requires evidence of an incident response program</li>
+<li>When onboarding new engineers who need to understand their role during an incident</li>
+<li>After adding new infrastructure (cloud accounts, SaaS integrations, data stores) that expands the attack surface</li>
+<li>When regulatory requirements change (new state breach laws, updated GDPR guidance, SEC cyber rules)</li>
+<li>Quarterly — to review, update, and test the plan through tabletop exercises</li>
+<li>After a near-miss or third-party breach in your industry that reveals gaps in your plan</li>
+</ul><hr class="section-divider">
+<h2>How It Works</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────────────────┐
+│                  INCIDENT RESPONSE PLAN WORKFLOW                        │
+│                                                                          │
+│  ┌───────────┐  ┌───────────┐  ┌───────────┐  ┌───────────┐            │
+│  │ PHASE 1   │  │ PHASE 2   │  │ PHASE 3   │  │ PHASE 4   │            │
+│  │ Prepare   │─▶│ Detect &amp;  │─▶│ Contain,  │─▶│ Post-     │            │
+│  │           │  │ Analyze   │  │ Eradicate │  │ Incident  │            │
+│  │           │  │           │  │ &amp; Recover │  │           │            │
+│  └───────────┘  └───────────┘  └───────────┘  └───────────┘            │
+│   Team roster    Alert triage   Short-term     Post-mortem              │
+│   Comm plan      Severity       containment    Root cause               │
+│   Tooling        classify       Eradication    Lessons                  │
+│   Runbooks       Evidence       Recovery       learned                  │
+│   Training       preserve       Monitoring     Improvements             │
+│       │               │              │              │                    │
+│       ▼               ▼              ▼              ▼                    │
+│  ┌───────────┐  ┌───────────┐  ┌───────────┐  ┌───────────┐            │
+│  │ PHASE 5   │  │ PHASE 6   │  │ PHASE 7   │  │ PHASE 8   │            │
+│  │ Breach    │  │ Forensic  │  │ Comms     │  │ Tabletop  │            │
+│  │ Notifi-   │  │ Evidence  │  │ Plan      │  │ Exercises │            │
+│  │ cation    │  │ Collection│  │           │  │           │            │
+│  └───────────┘  └───────────┘  └───────────┘  └───────────┘            │
+│   HIPAA 60d      Chain of       Internal       Scenarios                │
+│   GDPR 72h       custody        External       Facilitation             │
+│   SEC 4 biz d    Legal hold     Regulatory     Evaluation               │
+│   State laws     Imaging        Customer       Improvement              │
+│                                                                          │
+│  ┌──────────────────────────────────────────────────────────────┐       │
+│  │              SEVERITY CLASSIFICATION                         │       │
+│  │                                                              │       │
+│  │  P0 CRITICAL — Active data exfiltration or system            │       │
+│  │     compromise with confirmed data loss                      │       │
+│  │     → All hands. War room. Contain in &lt;1 hour.               │       │
+│  │                                                              │       │
+│  │  P1 HIGH — Confirmed breach or active attack without         │       │
+│  │     confirmed data loss                                      │       │
+│  │     → IR team assembled. Contain in &lt;4 hours.                │       │
+│  │                                                              │       │
+│  │  P2 MEDIUM — Suspicious activity requiring investigation     │       │
+│  │     → Assigned IR lead. Triage in &lt;8 hours.                  │       │
+│  │                                                              │       │
+│  │  P3 LOW — Policy violation or minor security event           │       │
+│  │     → Logged, assigned. Investigate within 24 hours.         │       │
+│  │                                                              │       │
+│  │  P4 INFORMATIONAL — False positive, security observation     │       │
+│  │     → Document and close. Review in next monthly review.     │       │
+│  └──────────────────────────────────────────────────────────────┘       │
+└──────────────────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 1 — Preparation</h2>
+
+The goal of preparation is to ensure that when the 3 AM alert fires, every team member knows exactly what to do without looking anything up. This phase builds the muscle memory, tooling, and organizational structure that makes rapid response possible.
+
+<h3>1.1 Incident Response Team Roster</h3>
+
+Define every role, who fills it, and what authority they carry during an active incident.
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│                 INCIDENT RESPONSE TEAM                        │
+│                                                              │
+│  Role                  Responsibilities          Authority   │
+│  ───────────────────   ────────────────────────   ─────────  │
+│  Incident Commander    Owns the incident. Makes   Can shut   │
+│  (CISO or delegate)    containment decisions.     down any   │
+│                        Authorizes notifications.  system.    │
+│                                                              │
+│  Technical Lead        Leads forensic analysis.   Can revoke │
+│  (VP Eng / Sr SRE)     Directs containment.       any cred.  │
+│                        Coordinates eradication.              │
+│                                                              │
+│  Legal Counsel         Advises on notification    Can place  │
+│                        obligations. Manages       legal hold │
+│                        privilege. Engages          on any     │
+│                        outside counsel.           evidence.  │
+│                                                              │
+│  Communications Lead   Drafts external comms.     Approves   │
+│  (VP Comms / PR)       Manages media inquiries.   all public │
+│                        Coordinates customer       statements │
+│                        notification.                         │
+│                                                              │
+│  Subject Matter Expert Provides context on        Advisory   │
+│  (Affected Team Lead)  affected systems, data     only —     │
+│                        flows, business impact.    no unilat. │
+│                                                  decisions  │
+│                                                              │
+│  Scribe                Documents timeline,        Read-only  │
+│                        decisions, actions in      access to  │
+│                        real time. Maintains       war room   │
+│                        incident log.             channel.   │
+│                                                              │
+│  On-Call Rotation       24/7 coverage. First      Can page   │
+│  (SRE / DevOps)         responder for alerts.     full IR    │
+│                         Initial triage.           team.      │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>1.2 Preparation Checklist</h3>
+
+<ul class="skill-list"><li class="checkbox"><input type="checkbox" disabled> IR team roster published and accessible offline (printed + encrypted USB)</li>
+<li class="checkbox"><input type="checkbox" disabled> Escalation paths documented for each severity level</li>
+<li class="checkbox"><input type="checkbox" disabled> Communication channels tested (Slack, PagerDuty, Zoom war room, encrypted email)</li>
+<li class="checkbox"><input type="checkbox" disabled> Forensic tooling pre-installed and tested (disk imaging, memory capture, log collection)</li>
+<li class="checkbox"><input type="checkbox" disabled> Runbooks created for top 10 incident scenarios (ransomware, credential compromise, data exfiltration, DDoS, insider threat, supply chain, phishing, API abuse, cloud misconfiguration, physical breach)</li>
+<li class="checkbox"><input type="checkbox" disabled> Legal counsel (internal and external) identified and retained</li>
+<li class="checkbox"><input type="checkbox" disabled> Cyber insurance policy reviewed — understand coverage, notification requirements, panel counsel</li>
+<li class="checkbox"><input type="checkbox" disabled> Evidence storage prepared — isolated, immutable, access-controlled</li>
+<li class="checkbox"><input type="checkbox" disabled> Backup and recovery procedures tested — RTO/RPO validated within last 90 days</li>
+<li class="checkbox"><input type="checkbox" disabled> All team members completed IR training within last 12 months</li>
+
+</ul><h3>1.3 First 15 Minutes — The Card Every Engineer Carries</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│          FIRST 15 MINUTES — WHAT TO DO RIGHT NOW             │
+│                                                              │
+│  1. STOP — Do not reboot, delete, or &quot;fix&quot; anything          │
+│  2. DOCUMENT — Write down what you observed, exact time,     │
+│     affected system, how you discovered it                   │
+│  3. CALL — Page the on-call IR lead via PagerDuty            │
+│  4. PRESERVE — Do not modify logs, do not clear caches,      │
+│     do not rotate credentials yet                            │
+│  5. ISOLATE — If actively spreading, disconnect the          │
+│     affected system from the network (pull cable / disable   │
+│     security group) — but do NOT power off                   │
+│  6. WAIT — The IR team will direct next steps. Do not        │
+│     take independent action beyond isolation                 │
+│                                                              │
+│  NEVER: Reboot servers | Delete files | Modify logs          │
+│         Contact the attacker | Post on social media          │
+│         Discuss externally | Attempt your own forensics      │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Phase 2 — Detection and Analysis</h2>
+
+<h3>2.1 Detection Sources</h3>
+
+Map every alert source to severity indicators and the team responsible for initial triage.
+<div class="table-wrap"><table><thead><tr><th>Detection Source</th><th>What It Catches</th><th>Initial Responder</th><th>Typical Severity</th><th></th></tr></thead><tbody><tr><td>GuardDuty / Cloud SIEM</td><td>Anomalous API calls, crypto mining, recon</td><td>SRE on-call</td><td>P1-P2</td><td></td></tr><tr><td>WAF / Rate Limiter</td><td>Injection attacks, credential stuffing, DDoS</td><td>SRE on-call</td><td>P2-P3</td><td></td></tr><tr><td>Application Error Monitoring</td><td>Unexpected auth failures, data access errors</td><td>Backend on-call</td><td>P2-P3</td><td></td></tr><tr><td>CloudTrail / Audit Logs</td><td>Privilege escalation, unusual admin actions</td><td>Security team</td><td>P1-P2</td><td></td></tr><tr><td>User Reports</td><td>Suspicious emails, unauthorized access, phishing</td><td>Support team</td><td>P2-P4</td><td></td></tr><tr><td>Threat Intelligence Feed</td><td>Known IOCs matching your infrastructure</td><td>Security team</td><td>P1-P3</td><td></td></tr><tr><td>Vulnerability Scanner</td><td>New CVE affecting deployed dependencies</td><td>Engineering</td><td>P2-P3</td><td></td></tr><tr><td>Automated Log Anomaly Detection</td><td>Unusual access patterns, time-of-day anomalies</td><td>Security team</td><td>P2-P4</td><td></td></tr></tbody></table></div>
+<h3>2.2 Severity Classification</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│              SEVERITY CLASSIFICATION MATRIX                   │
+│                                                              │
+│  Severity  Data Impact     System Impact     Response SLA    │
+│  ────────  ──────────────  ────────────────  ─────────────── │
+│  P0        Confirmed       Production down   Contain: &lt;1h    │
+│  CRITICAL  exfiltration    or attacker has   War room: imm.  │
+│            of sensitive    persistent        Exec brief: 1h  │
+│            data            access            Notify: per reg │
+│                                                              │
+│  P1        Breach          Service degraded  Contain: &lt;4h    │
+│  HIGH      confirmed,      or attacker       IR team: &lt;30m   │
+│            no confirmed    activity          Exec brief: 4h  │
+│            data loss yet   detected                          │
+│                                                              │
+│  P2        Potential        No production     Triage: &lt;8h    │
+│  MEDIUM    exposure,        impact, but       IR lead: &lt;2h   │
+│            investigation    vulnerability     Report: 24h    │
+│            needed           confirmed                        │
+│                                                              │
+│  P3        No data          No service        Investigate:   │
+│  LOW       exposure,        impact            &lt;24h           │
+│            policy                             Report: 72h    │
+│            violation                                         │
+│                                                              │
+│  P4        No impact,       No impact         Document and   │
+│  INFO      false positive                     close. Monthly │
+│            or observation                     review.        │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>2.3 Initial Assessment Questions</h3>
+
+When the IR lead receives the alert, answer these within the first 30 minutes:
+
+<ul class="skill-list"><li class="ordered"><strong>What happened?</strong> — Describe the event in one sentence</li>
+<li class="ordered"><strong>When did it start?</strong> — Exact timestamp of first indicator (this starts notification clocks)</li>
+<li class="ordered"><strong>What systems are affected?</strong> — Hosts, services, databases, cloud accounts</li>
+<li class="ordered"><strong>What data is at risk?</strong> — PII, PHI, financial data, credentials, intellectual property</li>
+<li class="ordered"><strong>How many records?</strong> — Estimate the volume of potentially affected records</li>
+<li class="ordered"><strong>Is it ongoing?</strong> — Is the attacker still active? Is data still being exfiltrated?</li>
+<li class="ordered"><strong>What is the attack vector?</strong> — How did the attacker get in?</li>
+<li class="ordered"><strong>Who else knows?</strong> — Has this been reported externally? Media? Customers?</li>
+</ul><hr class="section-divider">
+<h2>Phase 3 — Containment, Eradication, and Recovery</h2>
+
+<h3>3.1 Containment Strategy</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│             CONTAINMENT DECISION TREE                         │
+│                                                              │
+│  Is attacker actively exfiltrating data?                     │
+│    │                                                         │
+│    ├── YES → Immediate network isolation                     │
+│    │         Disable compromised accounts                    │
+│    │         Block egress to known C2 IPs                    │
+│    │         Snapshot affected systems THEN isolate           │
+│    │                                                         │
+│    └── NO  → Is attacker still in the environment?           │
+│              │                                               │
+│              ├── YES → Coordinate containment to avoid       │
+│              │         tipping off attacker                   │
+│              │         Prepare simultaneous credential        │
+│              │         rotation + network isolation           │
+│              │         Capture forensic evidence FIRST        │
+│              │                                               │
+│              └── NO  → Standard containment                  │
+│                        Revoke compromised credentials        │
+│                        Patch exploited vulnerability          │
+│                        Monitor for re-entry                  │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>3.2 Short-Term Containment Actions</h3>
+<div class="table-wrap"><table><thead><tr><th>Action</th><th>When</th><th>Owner</th><th>Notes</th><th></th></tr></thead><tbody><tr><td>Revoke compromised credentials</td><td>Immediately on confirmation</td><td>Technical Lead</td><td>All sessions, API keys, tokens — not just passwords</td><td></td></tr><tr><td>Network isolation of affected hosts</td><td>When active attack confirmed</td><td>SRE</td><td>Security group / NACL changes; preserve forensic access</td><td></td></tr><tr><td>Block known malicious IPs/domains</td><td>As IOCs are identified</td><td>SRE</td><td>WAF rules, DNS sinkhole, firewall rules</td><td></td></tr><tr><td>Disable compromised user accounts</td><td>Immediately</td><td>Technical Lead</td><td>Disable, do not delete — preserve audit trail</td><td></td></tr><tr><td>Enable enhanced logging</td><td>At incident declaration</td><td>SRE</td><td>Increase log verbosity on affected systems</td><td></td></tr><tr><td>Preserve database snapshot</td><td>Before any remediation</td><td>DBA</td><td>Point-in-time snapshot for forensic comparison</td><td></td></tr><tr><td>Place legal hold on relevant data</td><td>At incident declaration</td><td>Legal Counsel</td><td>Suspend all data retention/deletion policies</td><td></td></tr></tbody></table></div>
+<h3>3.3 Eradication</h3>
+
+After containment, remove the root cause completely:
+
+<ul class="skill-list"><li class="checkbox"><input type="checkbox" disabled> Identify the root cause (exploited vulnerability, compromised credential, misconfiguration)</li>
+<li class="checkbox"><input type="checkbox" disabled> Remove attacker persistence mechanisms (backdoors, scheduled tasks, unauthorized accounts)</li>
+<li class="checkbox"><input type="checkbox" disabled> Patch the exploited vulnerability across all affected systems</li>
+<li class="checkbox"><input type="checkbox" disabled> Rotate all credentials that may have been exposed (not just confirmed compromised)</li>
+<li class="checkbox"><input type="checkbox" disabled> Rebuild compromised systems from known-good images (do not trust remediated systems)</li>
+<li class="checkbox"><input type="checkbox" disabled> Verify eradication — scan for remaining IOCs, check for lateral movement indicators</li>
+<li class="checkbox"><input type="checkbox" disabled> Update detection rules to catch this attack pattern in the future</li>
+
+</ul><h3>3.4 Recovery</h3>
+
+<ul class="skill-list"><li class="checkbox"><input type="checkbox" disabled> Restore affected systems from clean backups (verify backup integrity before restoration)</li>
+<li class="checkbox"><input type="checkbox" disabled> Re-enable services in a staged manner — do not restore everything simultaneously</li>
+<li class="checkbox"><input type="checkbox" disabled> Implement enhanced monitoring on recovered systems (30-day heightened alert period)</li>
+<li class="checkbox"><input type="checkbox" disabled> Validate data integrity — compare restored data against forensic snapshots</li>
+<li class="checkbox"><input type="checkbox" disabled> Confirm business operations are functioning normally with affected team leads</li>
+<li class="checkbox"><input type="checkbox" disabled> Document recovery timeline and any data loss for regulatory reporting</li>
+</ul><hr class="section-divider">
+<h2>Phase 4 — Post-Incident Activity</h2>
+
+<h3>4.1 Post-Mortem Template</h3>
+
+Every incident P0-P2 gets a written post-mortem within 5 business days of resolution. P3 incidents get a brief written summary within 10 business days.
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│                  POST-MORTEM TEMPLATE                         │
+│                                                              │
+│  Incident ID: INC-YYYY-NNN                                   │
+│  Severity: P0 / P1 / P2 / P3                                │
+│  Date: YYYY-MM-DD                                            │
+│  Duration: Xh Ym (detection to resolution)                   │
+│  Incident Commander: [Name]                                  │
+│  Author: [Name]                                              │
+│                                                              │
+│  ── SUMMARY ──                                               │
+│  One-paragraph description of what happened and the impact.  │
+│                                                              │
+│  ── TIMELINE ──                                              │
+│  HH:MM — Event/action (who did what)                         │
+│  HH:MM — Event/action                                        │
+│  ...                                                         │
+│                                                              │
+│  ── ROOT CAUSE ──                                            │
+│  What was the underlying cause? Use 5 Whys.                  │
+│  Why 1: ...                                                  │
+│  Why 2: ...                                                  │
+│  Why 3: ...                                                  │
+│  Why 4: ...                                                  │
+│  Why 5: ...                                                  │
+│                                                              │
+│  ── IMPACT ──                                                │
+│  Users affected:                                             │
+│  Data exposed:                                               │
+│  Revenue impact:                                             │
+│  Regulatory implications:                                    │
+│                                                              │
+│  ── WHAT WENT WELL ──                                        │
+│  - ...                                                       │
+│                                                              │
+│  ── WHAT WENT POORLY ──                                      │
+│  - ...                                                       │
+│                                                              │
+│  ── ACTION ITEMS ──                                          │
+│  #  Action                    Owner       Deadline   Status  │
+│  1  ...                       [Name]      YYYY-MM-DD Open    │
+│  2  ...                       [Name]      YYYY-MM-DD Open    │
+│                                                              │
+│  ── LESSONS LEARNED ──                                       │
+│  What would we do differently? What should we invest in?     │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>4.2 Post-Mortem Rules</h3>
+
+<ul class="skill-list"><li class="ordered"><strong>Blameless</strong> — Focus on systems and processes, not individuals. "The monitoring gap allowed..." not "Engineer X failed to..."</li>
+<li class="ordered"><strong>Thorough timeline</strong> — Every event with exact timestamps. Reconstruct from logs, chat history, and team interviews</li>
+<li class="ordered"><strong>Action items have owners and deadlines</strong> — An action item without both is a wish. Track completion in your project management tool</li>
+<li class="ordered"><strong>Follow up</strong> — Review action item completion 30 and 60 days after the incident. Incomplete items get escalated</li>
+<li class="ordered"><strong>Distribute</strong> — Share the post-mortem with the entire engineering organization. Incidents are learning opportunities</li>
+</ul><hr class="section-divider">
+<h2>Phase 5 — Breach Notification</h2>
+
+<h3>5.1 Breach Notification Timeline</h3>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│           BREACH NOTIFICATION REQUIREMENTS                    │
+│                                                              │
+│  Regulation    Deadline        Notify Whom       Trigger     │
+│  ────────────  ──────────────  ────────────────  ────────    │
+│  GDPR          72 hours from   Supervisory       Personal   │
+│  (Art. 33-34)  awareness       authority; data   data of    │
+│                                subjects if       EU/EEA     │
+│                                high risk         residents  │
+│                                                              │
+│  HIPAA/HITECH  60 days from    HHS (OCR portal)  Unsecured  │
+│  (§13402)      discovery;      + individuals;    PHI        │
+│                without         if 500+ records:             │
+│                unreasonable    media + HHS                   │
+│                delay           immediately                   │
+│                                                              │
+│  SEC Rule      4 business      SEC (8-K filing)  Material   │
+│  (Item 1.05)   days from       + investors via   cyber      │
+│                materiality     8-K               incident   │
+│                determination                                 │
+│                                                              │
+│  CCPA/CPRA     &quot;Expeditious&quot;   California AG +   Personal   │
+│  (§1798.82)    — no fixed      affected CA       info of    │
+│                deadline, but   residents; if     CA          │
+│                courts expect   500+: AG          residents  │
+│                &lt;30 days        immediately                   │
+│                                                              │
+│  State Laws    Varies by       State AG +        PII as     │
+│  (50 states)   state:          affected          defined    │
+│                30-90 days      residents         per state  │
+│                typical                                       │
+│                                                              │
+│  PCI DSS       Immediately     Card brands       Payment    │
+│                upon discovery  (via acquirer)     card data  │
+│                                                              │
+│  Contracts     Per contract    Customers,        Per        │
+│  (BAA, DPA,    terms —         partners,         contract   │
+│  MSA)          typically       vendors           terms      │
+│                24-72 hours                                   │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>5.2 Notification Content Requirements</h3>
+
+Every breach notification must include:
+<div class="table-wrap"><table><thead><tr><th>Element</th><th>GDPR (Art. 33)</th><th>HIPAA (§13402)</th><th>SEC (8-K)</th><th></th></tr></thead><tbody><tr><td>Nature of the breach</td><td>Required</td><td>Required</td><td>Material aspects</td><td></td></tr><tr><td>Categories of data</td><td>Required</td><td>Types of PHI</td><td>Types of info</td><td></td></tr><tr><td>Number of records</td><td>Approximate if exact unknown</td><td>Exact if known</td><td>Not specified</td><td></td></tr><tr><td>Consequences</td><td>Likely consequences</td><td>What individuals should do</td><td>Material impact</td><td></td></tr><tr><td>Mitigation steps</td><td>Measures taken/proposed</td><td>Steps to protect themselves</td><td>Remediation actions</td><td></td></tr><tr><td>Contact point</td><td>DPO contact details</td><td>Toll-free number + 90 days</td><td>Investor relations</td><td></td></tr><tr><td>Timeline of events</td><td>Not specified</td><td>Date of breach + discovery</td><td>Date range</td><td></td></tr></tbody></table></div>
+<h3>5.3 Notification Decision Flowchart</h3>
+
+<pre class="code-block"><code>  Incident Detected
+        │
+        ▼
+  Does it involve personal data / PHI / PII?
+        │
+   ┌────┴────┐
+   │         │
+  YES       NO → Log as security incident.
+   │              No breach notification required.
+   ▼              Post-mortem still required.
+  Was data accessed, acquired, or exfiltrated?
+        │
+   ┌────┴────┐
+   │         │
+  YES       UNKNOWN → Presume breach.
+   │         │          Investigate but start
+   │         │          notification prep.
+   ▼         ▼
+  How many records affected?
+        │
+   ┌────┴──────────┐
+   │               │
+  &lt;500            500+
+   │               │
+   ▼               ▼
+  HIPAA: Notify   HIPAA: Notify HHS
+  individuals     immediately + media
+  within 60 days  + individuals
+        │               │
+        └───────┬───────┘
+                ▼
+  EU/EEA residents affected?
+        │
+   ┌────┴────┐
+   │         │
+  YES       NO
+   │         │
+   ▼         ▼
+  GDPR:     Check applicable
+  72h to    state laws and
+  DPA       contracts</code></pre>
+<hr class="section-divider">
+<h2>Phase 6 — Forensic Evidence Collection</h2>
+
+<h3>6.1 Order of Volatility</h3>
+
+Collect evidence in order of how quickly it disappears:
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│           EVIDENCE COLLECTION — ORDER OF VOLATILITY           │
+│                                                              │
+│  Priority  Evidence Type        Tool / Method        TTL     │
+│  ────────  ──────────────────   ──────────────────   ─────── │
+│  1 (NOW)   CPU registers,       Memory dump          Seconds │
+│            running processes,   (LiME, WinPMEM,              │
+│            network connections  SSM Run Command)             │
+│                                                              │
+│  2         System memory         Full memory image    Minutes │
+│            (RAM contents)        to forensic share            │
+│                                                              │
+│  3         Network connections,  netstat, ss,         Minutes │
+│            ARP cache, DNS cache  conntrack, tcpdump           │
+│                                                              │
+│  4         Temporary files,      Disk image (dd,     Hours   │
+│            swap space             FTK Imager) or              │
+│                                   EBS snapshot                │
+│                                                              │
+│  5         Disk / block storage   Full disk image     Days    │
+│            (filesystem, deleted   or EBS/RDS                  │
+│            files, slack space)    snapshot                    │
+│                                                              │
+│  6         Application and        Copy to immutable   Weeks  │
+│            system logs             storage (S3 +              │
+│                                    Object Lock)              │
+│                                                              │
+│  7         Cloud API logs          CloudTrail, VPC    Months  │
+│            (CloudTrail, flow       Flow Logs — verify         │
+│            logs, access logs)      retention config           │
+│                                                              │
+│  8         Backups, archives       Identify and tag    Years  │
+│                                    relevant backups           │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>6.2 Chain of Custody</h3>
+
+Every piece of evidence must have a chain of custody record:
+
+<ul class="skill-list"><li class="checkbox"><input type="checkbox" disabled> Evidence ID (unique identifier)</li>
+<li class="checkbox"><input type="checkbox" disabled> Description (what it is, what system it came from)</li>
+<li class="checkbox"><input type="checkbox" disabled> Date and time of collection (UTC)</li>
+<li class="checkbox"><input type="checkbox" disabled> Collected by (name and role)</li>
+<li class="checkbox"><input type="checkbox" disabled> Hash of evidence at collection (SHA-256)</li>
+<li class="checkbox"><input type="checkbox" disabled> Storage location (physical or logical)</li>
+<li class="checkbox"><input type="checkbox" disabled> Access log (who accessed it and when)</li>
+<li class="checkbox"><input type="checkbox" disabled> Hash verification at each access (confirm integrity)</li>
+
+</ul><h3>6.3 Legal Hold</h3>
+
+When Legal Counsel declares a legal hold:
+
+<ul class="skill-list"><li class="checkbox"><input type="checkbox" disabled> Suspend all automated data deletion (log rotation, backup expiry, record purge jobs)</li>
+<li class="checkbox"><input type="checkbox" disabled> Notify all custodians of affected data in writing</li>
+<li class="checkbox"><input type="checkbox" disabled> Identify all systems, backups, and archives containing relevant data</li>
+<li class="checkbox"><input type="checkbox" disabled> Preserve in place or copy to isolated forensic storage</li>
+<li class="checkbox"><input type="checkbox" disabled> Document the scope and duration of the hold</li>
+<li class="checkbox"><input type="checkbox" disabled> Legal hold remains until explicitly released by Legal Counsel</li>
+</ul><hr class="section-divider">
+<h2>Phase 7 — Communication Plan</h2>
+
+<h3>7.1 Communication Matrix</h3>
+<div class="table-wrap"><table><thead><tr><th>Audience</th><th>When to Notify</th><th>Channel</th><th>Approver</th><th>Template</th><th></th></tr></thead><tbody><tr><td>IR Team</td><td>Immediately on detection</td><td>PagerDuty + Slack #incident</td><td>On-call lead</td><td>Incident declared alert</td><td></td></tr><tr><td>Executive Team</td><td>Within 1 hour (P0-P1), 4 hours (P2)</td><td>Encrypted email + briefing call</td><td>CISO</td><td>Executive situation report</td><td></td></tr><tr><td>Legal Counsel</td><td>Within 1 hour (all confirmed breaches)</td><td>Direct call + encrypted email</td><td>CISO</td><td>Legal briefing template</td><td></td></tr><tr><td>Board of Directors</td><td>Within 24 hours (P0), 72 hours (P1)</td><td>Board communication channel</td><td>CEO</td><td>Board notification template</td><td></td></tr><tr><td>Affected Customers</td><td>Per regulatory timeline</td><td>Email + status page + support</td><td>Legal + Comms</td><td>Customer notification letter</td><td></td></tr><tr><td>Regulators</td><td>Per regulatory timeline (see Phase 5)</td><td>Official filing portal</td><td>Legal Counsel</td><td>Regulatory filing template</td><td></td></tr><tr><td>Media</td><td>Only if asked, or if legally required</td><td>Press statement via Comms Lead</td><td>Legal + CEO</td><td>Press statement template</td><td></td></tr><tr><td>All Employees</td><td>After external notification sent</td><td>Company all-hands or email</td><td>CISO + HR</td><td>Internal awareness notice</td><td></td></tr></tbody></table></div>
+<h3>7.2 Communication Rules</h3>
+
+<ul class="skill-list"><li class="ordered"><strong>Legal reviews all external communications</strong> before they are sent — no exceptions</li>
+<li class="ordered"><strong>Do not speculate</strong> — state only confirmed facts. "We are investigating" is acceptable; "We believe the attacker was..." is not until confirmed</li>
+<li class="ordered"><strong>Single spokesperson</strong> — all media inquiries go to the Communications Lead. No one else speaks to media</li>
+<li class="ordered"><strong>No social media</strong> — do not discuss the incident on social media until the official statement is released</li>
+<li class="ordered"><strong>Preserve attorney-client privilege</strong> — label incident communications as "Privileged and Confidential — Attorney Work Product" when directed by Legal Counsel</li>
+<li class="ordered"><strong>Update regularly</strong> — during active incidents, provide status updates every 2 hours (P0) or 4 hours (P1) to stakeholders</li>
+</ul><hr class="section-divider">
+<h2>Phase 8 — Tabletop Exercises</h2>
+
+<h3>8.1 Exercise Framework</h3>
+
+Tabletop exercises are the only way to know if your plan works before a real incident tests it.
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│               TABLETOP EXERCISE STRUCTURE                     │
+│                                                              │
+│  Duration: 90-120 minutes                                    │
+│  Frequency: Quarterly (minimum)                              │
+│  Participants: Full IR team + relevant business leads         │
+│  Facilitator: CISO or external consultant                    │
+│                                                              │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐    │
+│  │ Scenario │─▶│ Team     │─▶│ Decision │─▶│ Debrief  │    │
+│  │ Present  │  │ Discuss  │  │ Points   │  │ &amp; Score  │    │
+│  │ (15 min) │  │ (30 min) │  │ (30 min) │  │ (30 min) │    │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘    │
+│                                                              │
+│  Inject new information every 15 minutes to simulate the     │
+│  evolving nature of a real incident. Test decision-making    │
+│  under pressure, not just knowledge of the plan.             │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>8.2 Recommended Scenarios</h3>
+<div class="table-wrap"><table><thead><tr><th>#</th><th>Scenario</th><th>Tests</th><th>Severity</th><th></th></tr></thead><tbody><tr><td>1</td><td>Ransomware encrypts production database — attacker demands payment</td><td>Containment, backup recovery, RTO/RPO, law enforcement contact, customer comms</td><td>P0</td><td></td></tr><tr><td>2</td><td>Employee credential phished — attacker accesses customer PII for 3 weeks</td><td>Detection gap analysis, forensic scoping, breach notification timelines</td><td>P1</td><td></td></tr><tr><td>3</td><td>Supply chain compromise — dependency publishes malicious update</td><td>Dependency management, blast radius assessment, eradication of compromised code</td><td>P1</td><td></td></tr><tr><td>4</td><td>Insider threat — departing employee downloads customer database</td><td>Data loss prevention, access revocation, legal hold, HR coordination</td><td>P1</td><td></td></tr><tr><td>5</td><td>Cloud misconfiguration — S3 bucket with PII publicly accessible for unknown duration</td><td>Discovery timeline, exposure assessment, GDPR/state notification obligations</td><td>P1</td><td></td></tr><tr><td>6</td><td>DDoS attack — production unavailable for 4+ hours during business hours</td><td>Business continuity, customer comms, failover, vendor coordination</td><td>P2</td><td></td></tr><tr><td>7</td><td>Third-party vendor breach — your data included in their incident</td><td>Contractual obligations, customer notification, forensic scoping without system access</td><td>P1</td><td></td></tr><tr><td>8</td><td>Zero-day in production framework — exploit published, no patch available</td><td>Compensating controls, risk acceptance, monitoring, war room coordination</td><td>P2</td><td></td></tr></tbody></table></div>
+<h3>8.3 Exercise Evaluation Criteria</h3>
+
+After each tabletop, score the response on these dimensions:
+
+<ul class="skill-list"><li class="checkbox"><input type="checkbox" disabled> <strong>Detection speed</strong> — How quickly was the incident identified? Were alert thresholds adequate?</li>
+<li class="checkbox"><input type="checkbox" disabled> <strong>Escalation accuracy</strong> — Was the correct severity assigned? Was the right team assembled?</li>
+<li class="checkbox"><input type="checkbox" disabled> <strong>Containment effectiveness</strong> — Was the blast radius minimized? Was containment timely?</li>
+<li class="checkbox"><input type="checkbox" disabled> <strong>Evidence preservation</strong> — Was forensic evidence properly collected and secured?</li>
+<li class="checkbox"><input type="checkbox" disabled> <strong>Communication clarity</strong> — Were stakeholders informed accurately and on time?</li>
+<li class="checkbox"><input type="checkbox" disabled> <strong>Notification compliance</strong> — Were regulatory timelines met? Was notification content complete?</li>
+<li class="checkbox"><input type="checkbox" disabled> <strong>Decision authority</strong> — Did the Incident Commander make clear, timely decisions?</li>
+<li class="checkbox"><input type="checkbox" disabled> <strong>Documentation quality</strong> — Was the incident log maintained in real time?</li>
+</ul><hr class="section-divider">
+<h2>Master Incident Response Checklist</h2>
+
+<pre class="code-block"><code>┌──────────────────────────────────────────────────────────────┐
+│            MASTER INCIDENT RESPONSE CHECKLIST                 │
+│                                                              │
+│  DETECTION (minutes 0-15)                                    │
+│  [ ] Alert received and acknowledged                         │
+│  [ ] Detection timestamp recorded (UTC) — this is T-zero     │
+│  [ ] On-call IR lead paged                                   │
+│  [ ] Initial assessment: what, when, where, ongoing?         │
+│  [ ] Severity classified (P0-P4)                             │
+│  [ ] Incident ID assigned (INC-YYYY-NNN)                     │
+│  [ ] Incident channel/war room created                       │
+│  [ ] Scribe assigned and logging                             │
+│                                                              │
+│  CONTAINMENT (minutes 15-60 for P0, &lt;4h for P1)             │
+│  [ ] Compromised credentials revoked                         │
+│  [ ] Affected systems isolated (if needed)                   │
+│  [ ] Malicious IPs/domains blocked                           │
+│  [ ] Enhanced logging enabled on affected systems            │
+│  [ ] System snapshots/images captured before changes         │
+│  [ ] Legal Counsel notified (for confirmed breaches)         │
+│  [ ] Legal hold declared (if applicable)                     │
+│  [ ] Executive team notified (per severity matrix)           │
+│                                                              │
+│  INVESTIGATION (hours 1-24)                                  │
+│  [ ] Forensic evidence collected (order of volatility)       │
+│  [ ] Chain of custody documented for all evidence            │
+│  [ ] Attack vector identified                                │
+│  [ ] Blast radius determined — all affected systems          │
+│  [ ] Data exposure assessed — types, volume, sensitivity     │
+│  [ ] Attacker persistence mechanisms identified              │
+│  [ ] Lateral movement analyzed                               │
+│  [ ] Timeline of attacker activity reconstructed             │
+│                                                              │
+│  ERADICATION (hours 4-48)                                    │
+│  [ ] Root cause patched/remediated                           │
+│  [ ] Attacker artifacts removed (backdoors, accounts)        │
+│  [ ] All potentially compromised credentials rotated         │
+│  [ ] Affected systems rebuilt from known-good images         │
+│  [ ] IOCs added to detection/blocking rules                  │
+│  [ ] Eradication verified — re-scan for remaining IOCs       │
+│                                                              │
+│  RECOVERY (hours 24-72)                                      │
+│  [ ] Systems restored from clean backups                     │
+│  [ ] Data integrity validated                                │
+│  [ ] Services re-enabled in staged manner                    │
+│  [ ] Enhanced monitoring active (30-day watch period)        │
+│  [ ] Business operations confirmed normal                    │
+│                                                              │
+│  NOTIFICATION (per regulatory timelines)                     │
+│  [ ] Regulatory notification obligations identified          │
+│  [ ] Notification content drafted                            │
+│  [ ] Legal review of all notifications completed             │
+│  [ ] Regulatory filings submitted within deadlines           │
+│  [ ] Customer notifications sent                             │
+│  [ ] Support resources deployed (call center, FAQ)           │
+│                                                              │
+│  POST-INCIDENT (days 3-14)                                   │
+│  [ ] Post-mortem written (within 5 business days)            │
+│  [ ] Post-mortem meeting held (blameless)                    │
+│  [ ] Action items assigned with owners and deadlines         │
+│  [ ] IR plan updated based on lessons learned                │
+│  [ ] Detection rules improved                                │
+│  [ ] 30-day action item review scheduled                     │
+│  [ ] 60-day action item review scheduled                     │
+│  [ ] Incident formally closed                                │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+<hr class="section-divider">
+<h2>Tips for Best Results</h2>
+
+<ul class="skill-list"><li class="ordered"><strong>Run this skill before you need it</strong> — building an incident response plan during an active breach is like building a fire escape during a fire. The entire value of this plan is in the preparation.</li>
+
+<li class="ordered"><strong>Customize the team roster to your organization</strong> — a 5-person startup and a 500-person enterprise have different IR structures. Scale the roles to your reality, but never skip the core functions: commander, technical lead, legal, communications.</li>
+
+<li class="ordered"><strong>Test with tabletop exercises quarterly</strong> — a plan that has never been tested is a plan that will fail. Inject realistic scenarios, measure response times, and improve based on findings.</li>
+
+<li class="ordered"><strong>Keep the "First 15 Minutes" card visible</strong> — print it, post it in Slack, include it in on-call runbooks. The first responder's actions determine whether evidence is preserved or destroyed.</li>
+
+<li class="ordered"><strong>Update after every incident AND every exercise</strong> — the plan is a living document. If a tabletop reveals that your escalation path has a gap, fix it that week, not next quarter.</li>
+
+<li class="ordered"><strong>Pre-establish relationships with legal, law enforcement, and cyber insurance</strong> — during an active incident, you do not want to be searching for your insurance policy number or your outside counsel's phone number.</li>
+
+<li class="ordered"><strong>Map your data flows before an incident</strong> — you cannot assess what data was exposed if you do not know where your data lives. Maintain a current data inventory and data flow diagram.</li>
+
+<li class="ordered"><strong>Practice the notification workflow</strong> — draft notification letters for your most likely breach scenarios in advance. When the 72-hour GDPR clock is ticking, you do not want to be wordsmithing from scratch.</li>
+
+<li class="ordered"><strong>Separate the war room from the investigation</strong> — the incident commander needs situational awareness and decision-making space. Forensic analysts need quiet focus. Use separate channels for command-and-control versus technical investigation.</li>
+
+<li class="ordered"><strong>Measure your program</strong> — track mean-time-to-detect, mean-time-to-contain, mean-time-to-recover, and post-mortem action item completion rate. What you measure, you improve.</li></ul>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="hipaa-audit.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">HIPAA Code Audit — Protecting Health Information in Every Line of Code</span></span></a>
+    <a href="infra-harden.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Infrastructure Hardening — Reducing the Attack Surface to Zero</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    94 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>
