@@ -1,6 +1,6 @@
 <p align="center">
-  <img src="https://img.shields.io/badge/Skills-66-06b6d4?style=for-the-badge&labelColor=0f172a" alt="66 Skills">
-  <img src="https://img.shields.io/badge/Packs-8-a855f7?style=for-the-badge&labelColor=0f172a" alt="8 Packs">
+  <img src="https://img.shields.io/badge/Skills-81-06b6d4?style=for-the-badge&labelColor=0f172a" alt="81 Skills">
+  <img src="https://img.shields.io/badge/Packs-9-a855f7?style=for-the-badge&labelColor=0f172a" alt="9 Packs">
   <img src="https://img.shields.io/badge/Works_With-Claude_|_Cursor-10b981?style=for-the-badge&labelColor=0f172a" alt="Claude & Cursor">
   <img src="https://img.shields.io/badge/License-MIT-f59e0b?style=for-the-badge&labelColor=0f172a" alt="MIT License">
 </p>
@@ -8,7 +8,7 @@
 <h1 align="center">Heaptrace Developer Skills</h1>
 
 <p align="center">
-  <strong>66 structured skills for development teams — from planning to release.</strong><br>
+  <strong>81 structured skills for development teams — from planning to release.</strong><br>
   Every skill comes with step-by-step guides, flow diagrams, checklists, templates, and anti-patterns.
 </p>
 
@@ -206,6 +206,28 @@ Requirements, proposals, prioritization, and stakeholder updates.
 | `scope-negotiate` | Negotiate scope and MVP definition |
 | `stakeholder-update` | Write status updates for stakeholders |
 
+### 🔴 Compliance & Security (15 skills)
+
+HIPAA, GDPR, SOC 2, PCI-DSS audits, secrets scanning, and infrastructure hardening.
+
+| Skill | What It Does |
+|-------|-------------|
+| `access-audit` | Audit access controls and least-privilege enforcement |
+| `audit-log` | Review audit logging completeness and retention |
+| `cloud-security` | Assess cloud infrastructure security posture |
+| `compliance-report` | Generate compliance status reports |
+| `dep-vuln` | Scan dependencies for known vulnerabilities |
+| `gdpr-audit` | GDPR compliance audit — consent, data rights, DPIAs |
+| `hipaa-audit` | Deep HIPAA regulatory audit — 7 phases, §164 mapped |
+| `incident-plan` | Build incident response and breach notification plans |
+| `infra-harden` | Harden infrastructure — CIS benchmarks, attack surface |
+| `network-audit` | Audit network segmentation, firewalls, and encryption |
+| `pci-audit` | PCI-DSS compliance audit for payment systems |
+| `privacy-review` | Review data privacy practices and consent flows |
+| `secrets-scan` | Detect hardcoded secrets, keys, and credentials |
+| `secure-hipaa` | Full-stack security (26 gates) + HIPAA regulatory audit (7 phases) in one pass |
+| `soc2-audit` | SOC 2 Type II compliance audit — trust service criteria |
+
 ---
 
 ## Every Skill Includes
@@ -276,6 +298,12 @@ heaptrace-skills/
 │   └── ...
 ├── business/                       ← Business / Product pack
 │   ├── prd-write/SKILL.md
+│   └── ...
+├── compliance/                     ← Compliance & Security pack
+│   ├── hipaa-audit/SKILL.md
+│   ├── secure-hipaa/SKILL.md
+│   ├── gdpr-audit/SKILL.md
+│   ├── soc2-audit/SKILL.md
 │   └── ...
 └── docs/
     ├── index.html                  ← Skills documentation site
