@@ -1,0 +1,107 @@
+# ─────────────────────────────────────────────────────────────
+# Security Gate — On Demand
+# Manually triggered via workflow_dispatch. Lets security/ops
+# teams run a specific tier (or all tiers) at any time — useful
+# for incident response, pre-audit prep, or investigating a
+# suspected leak without waiting for a scheduled run.
+# ─────────────────────────────────────────────────────────────
+name: Security Gate — On Demand
+
+on:
+  workflow_dispatch:
+    inputs:
+      tier:
+        description: 'Tier(s) to run — 1,2,3,4,5 (comma-separated) or "all"'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - '1'
+          - '1,2'
+          - '1,2,3'
+          - '4'
+          - '5'
+          - 'all'
+      environment:
+        description: 'Severity profile to apply'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - PR
+          - staging
+          - production
+      skills-override:
+        description: 'Optional — specific skills only (comma-separated)'
+        required: false
+        type: string
+
+concurrency:
+  group: security-demand-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  map-tier-to-skills:
+    name: Resolve skills for tier
+    runs-on: ubuntu-latest
+    outputs:
+      skills: ${{ steps.map.outputs.skills }}
+    steps:
+      - id: map
+        run: |
+          if [ -n "${{ github.event.inputs.skills-override }}" ]; then
+            echo "skills=${{ github.event.inputs.skills-override }}" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          case "${{ github.event.inputs.tier }}" in
+            "1")       s="secrets-scan,dep-vuln" ;;
+            "1,2")     s="secrets-scan,dep-vuln,sec-audit,privacy-review,access-audit,audit-log" ;;
+            "1,2,3")   s="secrets-scan,dep-vuln,sec-audit,privacy-review,access-audit,audit-log,cloud-security,infra-harden,network-audit" ;;
+            "4")       s="hipaa-audit,gdpr-audit,soc2-audit,pci-audit" ;;
+            "5")       s="compliance-report,incident-plan" ;;
+            "all")     s="secrets-scan,dep-vuln,sec-audit,privacy-review,access-audit,audit-log,cloud-security,infra-harden,network-audit,hipaa-audit,gdpr-audit,soc2-audit,pci-audit,compliance-report,incident-plan" ;;
+            *)         echo "::error::Invalid tier: ${{ github.event.inputs.tier }}" ; exit 1 ;;
+          esac
+          echo "skills=$s" >> $GITHUB_OUTPUT
+
+  run-on-demand:
+    name: On-Demand Scan
+    needs: map-tier-to-skills
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - id: run
+        uses: ./.github/actions/security-tier
+        with:
+          tier: ${{ github.event.inputs.tier }}
+          skills: ${{ needs.map-tier-to-skills.outputs.skills }}
+          environment: ${{ github.event.inputs.environment }}
+          severity-config: '.github/security/severity-matrix.json'
+          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-demand-${{ github.run_id }}
+          path: ${{ steps.run.outputs.report-path }}
+          retention-days: 90
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Security Gate — On Demand" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tier:** ${{ github.event.inputs.tier }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Severity profile:** ${{ github.event.inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Skills:** ${{ needs.map-tier-to-skills.outputs.skills }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Max severity:** ${{ steps.run.outputs.max-severity }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Findings:** ${{ steps.run.outputs.findings-count }}" >> $GITHUB_STEP_SUMMARY

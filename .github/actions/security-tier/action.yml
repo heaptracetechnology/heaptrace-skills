@@ -1,0 +1,84 @@
+# ─────────────────────────────────────────────────────────────
+# Composite Action — security-tier
+# Encapsulates "run one or more Heaptrace compliance skills and
+# report findings". Used by every security-*.yml workflow.
+# Keeps the workflow files short and consistent.
+# ─────────────────────────────────────────────────────────────
+name: 'Heaptrace Security Tier'
+description: 'Run a tier of Heaptrace compliance skills and emit structured findings.'
+
+inputs:
+  tier:
+    description: 'Tier number(s) — 1, 2, 3, 4, 5, or comma-separated'
+    required: true
+  skills:
+    description: 'Comma-separated list of skill names (e.g. secrets-scan,dep-vuln)'
+    required: true
+  environment:
+    description: 'Severity profile to apply — PR, staging, or production'
+    required: true
+    default: 'PR'
+  severity-config:
+    description: 'Path to severity-matrix.json'
+    required: false
+    default: '.github/security/severity-matrix.json'
+  history-days:
+    description: 'How far back to scan git history (0 = current state only)'
+    required: false
+    default: '0'
+  inputs-dir:
+    description: 'Optional directory with prior-tier reports to feed into this tier'
+    required: false
+    default: ''
+  anthropic-api-key:
+    description: 'ANTHROPIC_API_KEY for Claude Code'
+    required: true
+
+outputs:
+  max-severity:
+    description: 'Highest severity found (NONE, INFO, LOW, MEDIUM, HIGH, CRITICAL)'
+    value: ${{ steps.run.outputs.max-severity }}
+  findings-count:
+    description: 'Total number of findings across all skills'
+    value: ${{ steps.run.outputs.findings-count }}
+  report-path:
+    description: 'Path to the generated markdown report'
+    value: ${{ steps.run.outputs.report-path }}
+  blocked:
+    description: 'true if severity exceeds environment threshold (should block merge)'
+    value: ${{ steps.run.outputs.blocked }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Install Claude Code CLI
+      shell: bash
+      run: |
+        if ! command -v claude > /dev/null 2>&1; then
+          npm install -g @anthropic-ai/claude-code
+        fi
+        claude --version
+
+    - name: Install scan tooling
+      shell: bash
+      run: |
+        # gitleaks — secrets
+        curl -sSL https://github.com/gitleaks/gitleaks/releases/download/v8.18.0/gitleaks_8.18.0_linux_x64.tar.gz \
+          | tar -xz -C /tmp && sudo mv /tmp/gitleaks /usr/local/bin/ || true
+        # trivy — container/dep scan (optional)
+        curl -sSL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh \
+          | sudo sh -s -- -b /usr/local/bin latest || true
+
+    - name: Run security tier
+      id: run
+      shell: bash
+      env:
+        ANTHROPIC_API_KEY: ${{ inputs.anthropic-api-key }}
+        TIER: ${{ inputs.tier }}
+        SKILLS: ${{ inputs.skills }}
+        ENVIRONMENT: ${{ inputs.environment }}
+        SEVERITY_CONFIG: ${{ inputs.severity-config }}
+        HISTORY_DAYS: ${{ inputs.history-days }}
+        INPUTS_DIR: ${{ inputs.inputs-dir }}
+      run: |
+        bash $GITHUB_ACTION_PATH/../../../scripts/security/run-tier.sh

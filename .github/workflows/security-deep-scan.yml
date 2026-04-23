@@ -1,0 +1,127 @@
+# ─────────────────────────────────────────────────────────────
+# Security Gate — Deep Scan (scheduled)
+# Runs weekly on Sunday 02:00 UTC. Performs a full-history git
+# scan, all-tier compliance audit, and emails a report to the
+# security team. Can also be triggered manually via
+# workflow_dispatch. Opens GitHub Issues for any new findings.
+# Target duration: 25–35 minutes.
+# ─────────────────────────────────────────────────────────────
+name: Security Gate — Deep Scan
+
+on:
+  schedule:
+    - cron: '0 2 * * 0'   # every Sunday, 02:00 UTC
+  workflow_dispatch:
+    inputs:
+      history-depth:
+        description: 'Git history depth (days)'
+        required: false
+        default: '365'
+        type: string
+
+concurrency:
+  group: security-deep-scan
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  deep-scan:
+    name: Full-History Security Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Tier 1 — deep history secrets scan
+      - name: T1 Deep — full-history secrets scan
+        id: t1
+        uses: ./.github/actions/security-tier
+        with:
+          tier: '1'
+          skills: 'secrets-scan,dep-vuln'
+          environment: 'production'
+          severity-config: '.github/security/severity-matrix.json'
+          history-days: ${{ github.event.inputs.history-depth || '365' }}
+          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      # Tiers 2 + 3 — code & infra
+      - name: T2+T3 — code & infra security
+        id: t23
+        uses: ./.github/actions/security-tier
+        with:
+          tier: '2,3'
+          skills: 'sec-audit,privacy-review,access-audit,audit-log,cloud-security,infra-harden,network-audit'
+          environment: 'production'
+          severity-config: '.github/security/severity-matrix.json'
+          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      # Tier 4 — all four compliance frameworks
+      - name: T4 — compliance frameworks
+        id: t4
+        uses: ./.github/actions/security-tier
+        with:
+          tier: '4'
+          skills: 'hipaa-audit,gdpr-audit,soc2-audit,pci-audit'
+          environment: 'production'
+          severity-config: '.github/security/severity-matrix.json'
+          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      # Tier 5 — aggregated compliance + incident-readiness report
+      - name: T5 — unified compliance report
+        id: t5
+        uses: ./.github/actions/security-tier
+        with:
+          tier: '5'
+          skills: 'compliance-report,incident-plan'
+          environment: 'production'
+          severity-config: '.github/security/severity-matrix.json'
+          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      # Archive with 7-year retention for compliance
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: deep-scan-${{ github.run_id }}
+          path: |
+            ${{ steps.t1.outputs.report-path }}
+            ${{ steps.t23.outputs.report-path }}
+            ${{ steps.t4.outputs.report-path }}
+            ${{ steps.t5.outputs.report-path }}
+          retention-days: 2555
+
+      # Open issues for any new CRITICAL / HIGH findings
+      - name: Open issues for findings
+        if: always()
+        uses: actions/github-script@v7
+        env:
+          MAX_SEV: ${{ steps.t1.outputs.max-severity }}
+        with:
+          script: |
+            const fs = require('fs');
+            if (!['CRITICAL', 'HIGH'].includes(process.env.MAX_SEV)) return;
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `[Security Deep Scan] ${process.env.MAX_SEV} findings on ${new Date().toISOString().split('T')[0]}`,
+              labels: ['security', 'compliance', `severity:${process.env.MAX_SEV.toLowerCase()}`],
+              body: `Weekly deep scan found ${process.env.MAX_SEV} issues.\n\nRun: https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
+            });
+
+      # Email security team the unified report
+      - name: Email security team
+        if: env.SECURITY_EMAIL != ''
+        env:
+          SECURITY_EMAIL: ${{ secrets.SECURITY_EMAIL }}
+        run: |
+          echo "Weekly deep security scan — see ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" | \
+            mail -s "[Security] Weekly Deep Scan Report" "$SECURITY_EMAIL" || true

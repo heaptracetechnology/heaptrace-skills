@@ -1,0 +1,157 @@
+# ─────────────────────────────────────────────────────────────
+# Security Gate — Staging (Tiers 1 + 2, plus Tier 3 conditional)
+# Triggers on PR or push to the staging branch.
+# Runs code security checks. Infrastructure scans run only when
+# infra files changed. Blocks CRITICAL and HIGH findings.
+# Target duration: 7–10 minutes.
+# ─────────────────────────────────────────────────────────────
+name: Security Gate — Staging
+
+on:
+  pull_request:
+    branches: [staging]
+  push:
+    branches: [staging]
+
+concurrency:
+  group: security-staging-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+jobs:
+  # ── Detect which file groups changed to drive conditional tiers ──
+  changed-files:
+    name: Detect changed file groups
+    runs-on: ubuntu-latest
+    outputs:
+      infra: ${{ steps.filter.outputs.infra }}
+      code:  ${{ steps.filter.outputs.code }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            infra:
+              - 'Dockerfile*'
+              - 'docker-compose*.yml'
+              - 'terraform/**'
+              - 'k8s/**'
+              - 'infrastructure/**'
+              - '.github/workflows/**'
+            code:
+              - 'src/**'
+              - 'lib/**'
+              - 'app/**'
+              - 'package.json'
+              - 'tsconfig.json'
+
+  # ── Tier 1 + Tier 2 run together, in parallel ──
+  tier-1-2:
+    name: Tier 1 + 2 — Code Security
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      max-severity: ${{ steps.run.outputs.max-severity }}
+      blocked: ${{ steps.run.outputs.blocked }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run Tier 1 + 2
+        id: run
+        uses: ./.github/actions/security-tier
+        with:
+          tier: '1,2'
+          skills: 'secrets-scan,dep-vuln,sec-audit,privacy-review,access-audit,audit-log'
+          environment: 'staging'
+          severity-config: '.github/security/severity-matrix.json'
+          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-staging-t12-${{ github.sha }}
+          path: ${{ steps.run.outputs.report-path }}
+          retention-days: 90
+
+  # ── Tier 3 runs only if infra files changed ──
+  tier-3-infra:
+    name: Tier 3 — Infrastructure
+    needs: changed-files
+    if: needs.changed-files.outputs.infra == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      max-severity: ${{ steps.run.outputs.max-severity }}
+      blocked: ${{ steps.run.outputs.blocked }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run Tier 3
+        id: run
+        uses: ./.github/actions/security-tier
+        with:
+          tier: '3'
+          skills: 'cloud-security,infra-harden,network-audit'
+          environment: 'staging'
+          severity-config: '.github/security/severity-matrix.json'
+          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-staging-t3-${{ github.sha }}
+          path: ${{ steps.run.outputs.report-path }}
+          retention-days: 90
+
+  # ── Aggregate results, notify, enforce blocking policy ──
+  finalize:
+    name: Finalize & Notify
+    needs: [tier-1-2, tier-3-infra]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Compute highest severity
+        id: agg
+        run: |
+          sev12="${{ needs.tier-1-2.outputs.max-severity }}"
+          sev3="${{ needs.tier-3-infra.outputs.max-severity || 'NONE' }}"
+          order="NONE INFO LOW MEDIUM HIGH CRITICAL"
+          max="NONE"
+          for s in $sev12 $sev3; do
+            # compare positions in severity order
+            p_max=$(echo $order | tr ' ' '\n' | grep -n "^$max$" | cut -d: -f1)
+            p_cur=$(echo $order | tr ' ' '\n' | grep -n "^$s$" | cut -d: -f1)
+            if [ "${p_cur:-0}" -gt "${p_max:-0}" ]; then max="$s"; fi
+          done
+          echo "max-severity=$max" >> $GITHUB_OUTPUT
+          blocked="false"
+          [ "${{ needs.tier-1-2.outputs.blocked }}" = "true" ] && blocked="true"
+          [ "${{ needs.tier-3-infra.outputs.blocked }}" = "true" ] && blocked="true"
+          echo "blocked=$blocked" >> $GITHUB_OUTPUT
+
+      - name: Post to Google Chat
+        if: env.CHAT_WEBHOOK != ''
+        env:
+          CHAT_WEBHOOK: ${{ secrets.CHAT_WEBHOOK }}
+        run: |
+          emoji="✅"
+          [ "${{ steps.agg.outputs.max-severity }}" = "HIGH" ] && emoji="🟠"
+          [ "${{ steps.agg.outputs.max-severity }}" = "CRITICAL" ] && emoji="🔴"
+          curl -s -X POST "$CHAT_WEBHOOK" \
+            -H 'Content-Type: application/json' \
+            -d "{\"text\":\"$emoji *Security Gate (Staging)* — Max severity: ${{ steps.agg.outputs.max-severity }}\\nBranch: ${{ github.ref_name }}\\nCommit: ${{ github.sha }}\\nBlocked: ${{ steps.agg.outputs.blocked }}\"}"
+
+      - name: Enforce policy
+        if: steps.agg.outputs.blocked == 'true'
+        run: |
+          echo "::error::Security gate BLOCKED — severity ${{ steps.agg.outputs.max-severity }} exceeds staging threshold."
+          exit 1

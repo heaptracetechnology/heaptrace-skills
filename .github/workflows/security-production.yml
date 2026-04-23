@@ -1,0 +1,199 @@
+# ─────────────────────────────────────────────────────────────
+# Security Gate — Production (ALL Tiers 1–5)
+# Triggers on PR or push to main. Runs the complete security
+# gateway including HIPAA/GDPR/SOC 2/PCI-DSS framework checks.
+# Requires manual approval via `environment: production`.
+# Blocks on ANY finding at MEDIUM or higher.
+# Target duration: 15–20 minutes (parallelized).
+# ─────────────────────────────────────────────────────────────
+name: Security Gate — Production
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: security-production-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+  id-token: write   # for S3 archive via OIDC (optional)
+
+jobs:
+  # ── T1 + T2 run in parallel (code security) ──
+  tier-1-2:
+    name: T1+T2 — Code Security
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      max-severity: ${{ steps.run.outputs.max-severity }}
+      blocked: ${{ steps.run.outputs.blocked }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - id: run
+        uses: ./.github/actions/security-tier
+        with:
+          tier: '1,2'
+          skills: 'secrets-scan,dep-vuln,sec-audit,privacy-review,access-audit,audit-log'
+          environment: 'production'
+          severity-config: '.github/security/severity-matrix.json'
+          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-prod-t12-${{ github.sha }}
+          path: ${{ steps.run.outputs.report-path }}
+          retention-days: 365
+
+  # ── T3 (infra) ──
+  tier-3:
+    name: T3 — Infrastructure
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      max-severity: ${{ steps.run.outputs.max-severity }}
+      blocked: ${{ steps.run.outputs.blocked }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - id: run
+        uses: ./.github/actions/security-tier
+        with:
+          tier: '3'
+          skills: 'cloud-security,infra-harden,network-audit'
+          environment: 'production'
+          severity-config: '.github/security/severity-matrix.json'
+          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-prod-t3-${{ github.sha }}
+          path: ${{ steps.run.outputs.report-path }}
+          retention-days: 365
+
+  # ── T4 (framework-specific compliance: HIPAA/GDPR/SOC 2/PCI) ──
+  tier-4-frameworks:
+    name: T4 — Compliance Frameworks
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    needs: [tier-1-2]   # don't waste time on framework audits if basic checks fail
+    outputs:
+      max-severity: ${{ steps.run.outputs.max-severity }}
+      blocked: ${{ steps.run.outputs.blocked }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - id: run
+        uses: ./.github/actions/security-tier
+        with:
+          tier: '4'
+          skills: 'hipaa-audit,gdpr-audit,soc2-audit,pci-audit'
+          environment: 'production'
+          severity-config: '.github/security/severity-matrix.json'
+          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-prod-t4-${{ github.sha }}
+          path: ${{ steps.run.outputs.report-path }}
+          retention-days: 2555   # 7 years — HIPAA/SOC 2 retention
+
+  # ── T5 (reporting) runs last, depends on all others ──
+  tier-5-report:
+    name: T5 — Compliance Report
+    needs: [tier-1-2, tier-3, tier-4-frameworks]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Download all tier artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: security-prod-*-${{ github.sha }}
+          path: /tmp/tier-reports
+          merge-multiple: true
+      - name: Aggregate into unified compliance report
+        id: run
+        uses: ./.github/actions/security-tier
+        with:
+          tier: '5'
+          skills: 'compliance-report'
+          environment: 'production'
+          severity-config: '.github/security/severity-matrix.json'
+          inputs-dir: '/tmp/tier-reports'
+          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+      - name: Archive unified report (90-day retention)
+        uses: actions/upload-artifact@v4
+        with:
+          name: compliance-report-${{ github.sha }}
+          path: ${{ steps.run.outputs.report-path }}
+          retention-days: 2555
+
+  # ── Manual approval gate before actual deploy ──
+  production-approval:
+    name: Production Approval
+    needs: [tier-1-2, tier-3, tier-4-frameworks, tier-5-report]
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment: production   # configure reviewers in GitHub repo settings
+    steps:
+      - run: echo "Security gateway passed. Awaiting manual approval for deploy."
+
+  # ── Notify & enforce ──
+  finalize:
+    name: Finalize & Notify
+    needs: [tier-1-2, tier-3, tier-4-frameworks, tier-5-report]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Compute blocked status
+        id: agg
+        run: |
+          blocked="false"
+          for r in "${{ needs.tier-1-2.outputs.blocked }}" "${{ needs.tier-3.outputs.blocked }}" "${{ needs.tier-4-frameworks.outputs.blocked }}"; do
+            [ "$r" = "true" ] && blocked="true"
+          done
+          echo "blocked=$blocked" >> $GITHUB_OUTPUT
+
+      - name: Notify Google Chat
+        if: env.CHAT_WEBHOOK != ''
+        env:
+          CHAT_WEBHOOK: ${{ secrets.CHAT_WEBHOOK }}
+        run: |
+          emoji="✅"
+          [ "${{ steps.agg.outputs.blocked }}" = "true" ] && emoji="🔴"
+          curl -s -X POST "$CHAT_WEBHOOK" \
+            -H 'Content-Type: application/json' \
+            -d "{\"text\":\"$emoji *Security Gate (Production)* — Tiers 1–5 complete\\nCommit: ${{ github.sha }}\\nBlocked: ${{ steps.agg.outputs.blocked }}\\nReport: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}"
+
+      - name: Email security team
+        if: env.SECURITY_EMAIL != ''
+        env:
+          SECURITY_EMAIL: ${{ secrets.SECURITY_EMAIL }}
+        run: |
+          echo "Security report for commit ${{ github.sha }}" | \
+            mail -s "[Security Gate] Production scan complete" "$SECURITY_EMAIL" || true
+
+      - name: Enforce policy
+        if: steps.agg.outputs.blocked == 'true'
+        run: |
+          echo "::error::Production security gate BLOCKED."
+          exit 1

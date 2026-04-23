@@ -1,0 +1,54 @@
+{
+  "_description": "Blocking policy by environment and severity. 'block' fails the pipeline, 'warn' reports but continues, 'info' logs silently.",
+  "_severities": ["NONE", "INFO", "LOW", "MEDIUM", "HIGH", "CRITICAL"],
+
+  "environments": {
+    "PR": {
+      "CRITICAL": "block",
+      "HIGH":     "warn",
+      "MEDIUM":   "info",
+      "LOW":      "info",
+      "INFO":     "info"
+    },
+    "staging": {
+      "CRITICAL": "block",
+      "HIGH":     "block",
+      "MEDIUM":   "warn",
+      "LOW":      "info",
+      "INFO":     "info"
+    },
+    "production": {
+      "CRITICAL": "block",
+      "HIGH":     "block",
+      "MEDIUM":   "block",
+      "LOW":      "warn",
+      "INFO":     "info"
+    }
+  },
+
+  "tier_timeouts_minutes": {
+    "1": 5,
+    "2": 10,
+    "3": 10,
+    "4": 20,
+    "5": 5
+  },
+
+  "skill_weights": {
+    "secrets-scan":      "CRITICAL",
+    "dep-vuln":          "HIGH",
+    "sec-audit":         "HIGH",
+    "privacy-review":    "HIGH",
+    "access-audit":      "HIGH",
+    "audit-log":         "MEDIUM",
+    "cloud-security":    "HIGH",
+    "infra-harden":      "MEDIUM",
+    "network-audit":     "HIGH",
+    "hipaa-audit":       "HIGH",
+    "gdpr-audit":        "HIGH",
+    "soc2-audit":        "HIGH",
+    "pci-audit":         "HIGH",
+    "compliance-report": "INFO",
+    "incident-plan":     "INFO"
+  }
+}

@@ -1,0 +1,88 @@
+# ─────────────────────────────────────────────────────────────
+# Security Gate — PR (Tier 1: Fast Gate)
+# Triggers on every pull request to any branch.
+# Runs only the fastest checks: secrets-scan + dep-vuln.
+# Blocks merge only on CRITICAL findings. Warns on HIGH.
+# Target duration: < 2 minutes.
+# ─────────────────────────────────────────────────────────────
+name: Security Gate — PR
+
+on:
+  pull_request:
+    branches: ['**']
+
+concurrency:
+  group: security-pr-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+jobs:
+  tier-1-fast-gate:
+    name: Tier 1 — Fast Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      max-severity: ${{ steps.run.outputs.max-severity }}
+      findings-count: ${{ steps.run.outputs.findings-count }}
+      report-path: ${{ steps.run.outputs.report-path }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history for secrets-scan
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run Tier 1 security checks
+        id: run
+        uses: ./.github/actions/security-tier
+        with:
+          tier: '1'
+          skills: 'secrets-scan,dep-vuln'
+          environment: 'PR'
+          severity-config: '.github/security/severity-matrix.json'
+          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      - name: Upload report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-pr-report-${{ github.sha }}
+          path: ${{ steps.run.outputs.report-path }}
+          retention-days: 30
+
+      - name: Post findings to PR
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = '${{ steps.run.outputs.report-path }}';
+            if (!fs.existsSync(path)) return;
+            const report = fs.readFileSync(path, 'utf8');
+            const severity = '${{ steps.run.outputs.max-severity }}';
+            const count = '${{ steps.run.outputs.findings-count }}';
+            const emoji = severity === 'CRITICAL' ? '🔴' : severity === 'HIGH' ? '🟠' : severity === 'MEDIUM' ? '🟡' : '✅';
+            const body = `## ${emoji} Security Gate — Tier 1\n\n` +
+                         `**Findings:** ${count} · **Max Severity:** ${severity}\n\n` +
+                         '<details><summary>View full report</summary>\n\n' + report + '\n</details>';
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body
+            });
+
+      - name: Enforce severity policy
+        if: always()
+        run: |
+          if [ "${{ steps.run.outputs.blocked }}" = "true" ]; then
+            echo "::error::Security gate BLOCKED — severity ${{ steps.run.outputs.max-severity }} exceeds PR threshold."
+            exit 1
+          fi
