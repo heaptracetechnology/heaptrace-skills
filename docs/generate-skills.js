@@ -31,7 +31,8 @@ const PACK_MAP = {
 // Root-level skills belong to the developer pack
 const ROOT_SKILLS = [
   'feature-plan', 'feature-work', 'find-fix', 'smart-commit',
-  'suggest', 'code-review', 'test-gen', 'explain', 'sec-audit', 'release-notes'
+  'suggest', 'code-review', 'test-gen', 'explain', 'sec-audit', 'release-notes',
+  'quick-plan', 'quick-work'
 ];
 
 // ── Find all SKILL.md files ────────────────────────────────
@@ -762,7 +763,7 @@ function generateSkillPage(skill, prevSkill, nextSkill) {
 <footer class="skill-footer">
   <p>
     <a href="../index.html">Heaptrace Skills</a> &mdash;
-    94 production-grade skills for development teams.
+    97 production-grade skills for development teams.
     <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
   </p>
 </footer>
