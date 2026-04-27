@@ -1,0 +1,2146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Automation Guide — Heaptrace Skills</title>
+  <meta name="description" content="Two ways to run Heaptrace Skills: local for individuals, CI/CD for teams, both for full coverage. A decision framework — not an installation manual.">
+  <meta name="author" content="Heaptrace Technology">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/styles.css">
+
+  <style>
+    /* ══════════════════════════════════════════
+       AUTOMATION GUIDE — PAGE STYLES
+       Primary accent: EMERALD GREEN (--green)
+       ══════════════════════════════════════════ */
+
+    :root {
+      --accent: var(--green);
+      --accent-light: #34d399;
+      --accent-soft: rgba(16, 185, 129, 0.10);
+      --accent-border: rgba(16, 185, 129, 0.28);
+      --accent-glow: rgba(16, 185, 129, 0.18);
+    }
+
+    body { line-height: 1.7; }
+
+    /* ── Section primitives ── */
+    .ag-section {
+      padding: 100px 0;
+      position: relative;
+    }
+    .ag-section--alt { background: var(--bg-secondary); }
+    .ag-section--narrow { max-width: 880px; margin: 0 auto; padding-left: 24px; padding-right: 24px; }
+
+    .ag-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 0.74rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.14em; color: var(--accent-light);
+      margin-bottom: 18px;
+    }
+    .ag-eyebrow::before {
+      content: ''; width: 24px; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent));
+    }
+    .ag-title {
+      font-size: clamp(1.9rem, 3.2vw, 2.6rem);
+      font-weight: 800; line-height: 1.15; margin-bottom: 18px;
+      letter-spacing: -0.02em;
+    }
+    .ag-lead {
+      font-size: 1.08rem; color: var(--text-secondary);
+      line-height: 1.8; max-width: 760px;
+    }
+    .ag-lead--center { margin: 0 auto; }
+    .ag-section-head { margin-bottom: 56px; }
+    .ag-section-head--center { text-align: center; }
+    .ag-section-head--center .ag-eyebrow { justify-content: center; }
+    .ag-section-head--center .ag-eyebrow::before { display: none; }
+
+    /* ── Hero ── */
+    .ag-hero {
+      padding: calc(var(--nav-height) + 100px) 0 100px;
+      text-align: center; position: relative; overflow: hidden;
+    }
+    .ag-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 40% at 50% 0%, rgba(16, 185, 129, 0.10), transparent 70%),
+        radial-gradient(ellipse 40% 30% at 30% 30%, rgba(6, 182, 212, 0.05), transparent 60%),
+        radial-gradient(ellipse 40% 30% at 70% 20%, rgba(34, 197, 94, 0.05), transparent 60%);
+      pointer-events: none;
+    }
+    .ag-hero::after {
+      content: ''; position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='grid' width='60' height='60' patternUnits='userSpaceOnUse'%3E%3Cpath d='M 60 0 L 0 0 0 60' fill='none' stroke='%231e293b' stroke-width='0.5'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23grid)'/%3E%3C/svg%3E");
+      opacity: 0.3; pointer-events: none;
+    }
+    .ag-hero-content { position: relative; z-index: 1; }
+    .ag-hero-badge {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--accent-soft);
+      border: 1px solid var(--accent-border);
+      color: var(--accent-light); padding: 8px 20px; border-radius: 999px;
+      font-size: 0.78rem; font-weight: 700; margin-bottom: 32px;
+      letter-spacing: 0.14em; text-transform: uppercase;
+    }
+    .ag-hero-badge-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent); box-shadow: 0 0 12px var(--accent);
+      animation: agPulse 2.4s infinite;
+    }
+    @keyframes agPulse {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.45); }
+      50% { opacity: 0.85; box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+    }
+    .ag-hero h1 {
+      font-size: clamp(2.6rem, 5.2vw, 4rem);
+      font-weight: 800; line-height: 1.08; margin-bottom: 24px;
+      letter-spacing: -0.025em;
+      background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-light) 45%, var(--cyan-light) 85%, var(--text-primary) 100%);
+      background-size: 200% auto;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmer 7s ease-in-out infinite;
+    }
+    .ag-hero-subtitle {
+      font-size: 1.18rem; color: var(--text-secondary);
+      max-width: 740px; margin: 0 auto 56px; line-height: 1.75;
+    }
+    .ag-hero-stats {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px;
+      max-width: 880px; margin: 0 auto;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg-card);
+      padding: 32px 24px;
+    }
+    .ag-hero-stat { text-align: center; position: relative; }
+    .ag-hero-stat + .ag-hero-stat::before {
+      content: ''; position: absolute; left: -12px; top: 20%; bottom: 20%;
+      width: 1px; background: var(--border);
+    }
+    .ag-hero-stat-value {
+      font-size: 2.2rem; font-weight: 800; line-height: 1;
+      background: linear-gradient(135deg, var(--accent-light), var(--cyan-light));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.02em;
+    }
+    .ag-hero-stat-label {
+      font-size: 0.74rem; color: var(--text-muted); margin-top: 8px;
+      font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+    }
+    @media (max-width: 768px) {
+      .ag-hero-stats { grid-template-columns: repeat(2, 1fr); gap: 28px; }
+      .ag-hero-stat + .ag-hero-stat::before { display: none; }
+      .ag-hero-stat-value { font-size: 1.7rem; }
+    }
+
+    /* ── Decision flow (Section 2) ── */
+    .ag-flow {
+      max-width: 920px; margin: 0 auto;
+      padding: 40px 24px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+    .ag-flow-top {
+      max-width: 520px; margin: 0 auto 28px;
+      padding: 18px 24px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--accent-border);
+      border-radius: var(--radius-md);
+      text-align: center;
+      font-weight: 700; color: var(--accent-light);
+      font-size: 0.95rem;
+    }
+    .ag-flow-branches {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 24px; position: relative;
+    }
+    .ag-flow-branch { display: flex; flex-direction: column; align-items: center; }
+    .ag-flow-bubble {
+      width: 100%; max-width: 220px;
+      padding: 18px 16px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-hover);
+      border-radius: var(--radius-md);
+      text-align: center;
+      font-weight: 600; font-size: 0.92rem;
+      margin-bottom: 12px;
+    }
+    .ag-flow-arrow {
+      width: 1px; height: 28px;
+      background: linear-gradient(180deg, var(--border-hover), var(--accent));
+      position: relative;
+    }
+    .ag-flow-arrow::after {
+      content: ''; position: absolute; bottom: -1px; left: 50%; transform: translateX(-50%);
+      width: 0; height: 0;
+      border-left: 5px solid transparent; border-right: 5px solid transparent;
+      border-top: 6px solid var(--accent);
+    }
+    .ag-flow-result {
+      width: 100%; max-width: 220px;
+      padding: 20px 16px;
+      background: linear-gradient(180deg, var(--accent-soft), var(--bg-card));
+      border: 1px solid var(--accent-border);
+      border-radius: var(--radius-md);
+      text-align: center;
+    }
+    .ag-flow-result-title {
+      font-weight: 700; font-size: 1rem; color: var(--accent-light);
+      margin-bottom: 4px;
+    }
+    .ag-flow-result-sub {
+      font-size: 0.78rem; color: var(--text-muted);
+      letter-spacing: 0.04em;
+    }
+    @media (max-width: 768px) {
+      .ag-flow-branches { grid-template-columns: 1fr; gap: 36px; }
+    }
+
+    /* ── Tables ── */
+    .ag-table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg-card);
+    }
+    .ag-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+    .ag-table thead th {
+      background: var(--bg-elevated);
+      text-align: left;
+      padding: 16px 20px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border-hover);
+      position: sticky; top: 0;
+    }
+    .ag-table tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: var(--transition-fast);
+    }
+    .ag-table tbody tr:nth-child(even) { background: rgba(255,255,255,0.015); }
+    .ag-table tbody tr:hover { background: rgba(16, 185, 129, 0.04); }
+    .ag-table tbody tr:last-child { border-bottom: none; }
+    .ag-table td {
+      padding: 16px 20px;
+      vertical-align: top;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    .ag-table td:first-child {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+    .ag-table td strong { color: var(--text-primary); font-weight: 600; }
+    .ag-table .ag-cell-accent { color: var(--accent-light); font-weight: 600; }
+
+    /* ── Generic card grid (benefits, tool cards, etc.) ── */
+    .ag-grid {
+      display: grid;
+      gap: 20px;
+    }
+    .ag-grid--2 { grid-template-columns: repeat(2, 1fr); }
+    .ag-grid--3 { grid-template-columns: repeat(3, 1fr); }
+    .ag-grid--4 { grid-template-columns: repeat(4, 1fr); }
+    @media (max-width: 1024px) {
+      .ag-grid--3, .ag-grid--4 { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 640px) {
+      .ag-grid--2, .ag-grid--3, .ag-grid--4 { grid-template-columns: 1fr; }
+    }
+
+    .ag-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 26px;
+      transition: var(--transition);
+      position: relative;
+    }
+    .ag-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    .ag-card-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      background: var(--accent-soft);
+      color: var(--accent-light);
+      font-weight: 700;
+      font-size: 0.85rem;
+      margin-bottom: 16px;
+      border: 1px solid var(--accent-border);
+    }
+    .ag-card-title {
+      font-size: 1.1rem; font-weight: 700; margin-bottom: 8px;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+    }
+    .ag-card-desc {
+      font-size: 0.92rem; color: var(--text-secondary); line-height: 1.7;
+    }
+    .ag-card-meta {
+      display: flex; flex-wrap: wrap; gap: 6px;
+      margin-top: 14px; padding-top: 14px;
+      border-top: 1px dashed rgba(30, 41, 59, 0.6);
+    }
+    .ag-card-tag {
+      font-size: 0.72rem; font-weight: 600;
+      padding: 3px 10px; border-radius: 999px;
+      background: rgba(255,255,255,0.03);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+    .ag-card-tag--accent {
+      background: var(--accent-soft);
+      color: var(--accent-light);
+      border-color: var(--accent-border);
+    }
+
+    /* Tool comparison cards (4 across with detailed body) */
+    .ag-tool-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      display: flex; flex-direction: column;
+    }
+    .ag-tool-card-head {
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 16px;
+    }
+    .ag-tool-card-icon {
+      width: 44px; height: 44px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--accent-soft); border: 1px solid var(--accent-border);
+      color: var(--accent-light);
+      font-weight: 700; font-size: 1rem;
+    }
+    .ag-tool-card-name {
+      font-weight: 700; font-size: 1.05rem; color: var(--text-primary);
+      letter-spacing: -0.01em;
+    }
+    .ag-tool-card-sub {
+      font-size: 0.78rem; color: var(--text-muted);
+      font-weight: 500;
+    }
+    .ag-tool-card-rows {
+      display: flex; flex-direction: column; gap: 10px;
+      margin-top: 12px;
+    }
+    .ag-tool-card-row {
+      display: grid; grid-template-columns: 90px 1fr; gap: 10px;
+      font-size: 0.86rem; line-height: 1.6;
+    }
+    .ag-tool-card-label {
+      font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--text-muted);
+      padding-top: 2px;
+    }
+    .ag-tool-card-val { color: var(--text-secondary); }
+
+    /* ── Skill list (Section 6) ── */
+    .ag-skill-group {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+    }
+    .ag-skill-group-title {
+      display: flex; align-items: center; gap: 10px;
+      font-weight: 700; font-size: 0.78rem; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--accent-light);
+      margin-bottom: 18px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .ag-skill-list { display: flex; flex-direction: column; gap: 10px; }
+    .ag-skill-item {
+      display: grid; grid-template-columns: 180px 1fr; gap: 16px;
+      align-items: baseline;
+      padding: 8px 0;
+      border-bottom: 1px dashed rgba(30, 41, 59, 0.5);
+    }
+    .ag-skill-item:last-child { border-bottom: none; }
+    .ag-skill-item-name {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.86rem; font-weight: 600;
+      color: var(--accent-light);
+    }
+    .ag-skill-item-desc {
+      font-size: 0.9rem; color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    @media (max-width: 640px) {
+      .ag-skill-item { grid-template-columns: 1fr; gap: 4px; }
+    }
+
+    /* ── Two-pattern cards (Section 5) ── */
+    .ag-pattern-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px;
+      display: flex; flex-direction: column;
+    }
+    .ag-pattern-tag {
+      display: inline-flex; align-self: flex-start;
+      padding: 4px 12px; border-radius: 999px;
+      font-size: 0.7rem; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      background: var(--accent-soft); color: var(--accent-light);
+      border: 1px solid var(--accent-border);
+      margin-bottom: 14px;
+    }
+    .ag-pattern-title {
+      font-size: 1.4rem; font-weight: 800; margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .ag-pattern-desc {
+      font-size: 0.95rem; color: var(--text-secondary); line-height: 1.7;
+      margin-bottom: 20px;
+    }
+    .ag-pattern-bullets {
+      list-style: none; padding: 0; margin: 0;
+      display: flex; flex-direction: column; gap: 10px;
+      padding-top: 16px; border-top: 1px solid var(--border);
+    }
+    .ag-pattern-bullets li {
+      display: flex; gap: 12px;
+      font-size: 0.88rem; color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    .ag-pattern-bullets li::before {
+      content: '→'; color: var(--accent); font-weight: 700;
+      flex-shrink: 0;
+    }
+    .ag-pattern-bullets code {
+      font-size: 0.82rem;
+      color: var(--accent-light);
+      background: rgba(16, 185, 129, 0.06);
+      padding: 1px 6px; border-radius: 4px;
+    }
+
+    /* ── Sample Chat Output (Section 7) ── */
+    .ag-output-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      line-height: 1.75;
+      color: var(--text-secondary);
+      white-space: pre-wrap;
+      overflow-x: auto;
+      margin-top: 32px;
+    }
+    .ag-output-caption {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 14px;
+      font-style: italic;
+      text-align: center;
+    }
+
+    /* ── Highlight callout / summary card (Section 11) ── */
+    .ag-callout {
+      background: linear-gradient(180deg, var(--accent-soft) 0%, var(--bg-card) 80%);
+      border: 1px solid var(--accent-border);
+      border-radius: var(--radius);
+      padding: 36px;
+      margin-bottom: 32px;
+    }
+    .ag-callout-title {
+      font-size: 1.2rem; font-weight: 800;
+      color: var(--accent-light);
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .ag-callout-body {
+      color: var(--text-secondary);
+      line-height: 1.75;
+      font-size: 0.96rem;
+    }
+    .ag-callout-body p { margin-bottom: 14px; }
+    .ag-callout-body p:last-child { margin-bottom: 0; }
+    .ag-callout-body ul {
+      list-style: none; padding: 0;
+      margin: 8px 0 14px;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .ag-callout-body li {
+      padding-left: 22px; position: relative;
+      font-size: 0.92rem;
+    }
+    .ag-callout-body li::before {
+      content: '✓'; position: absolute; left: 0;
+      color: var(--accent); font-weight: 700;
+    }
+    .ag-callout-cta {
+      display: flex; gap: 14px; flex-wrap: wrap;
+      margin-top: 20px;
+    }
+    .ag-btn-primary {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: linear-gradient(135deg, var(--accent), #059669);
+      color: white; padding: 12px 22px; border-radius: var(--radius-md);
+      font-size: 0.88rem; font-weight: 600;
+      transition: var(--transition);
+      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.25);
+    }
+    .ag-btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.35);
+    }
+    .ag-btn-secondary {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--bg-elevated); border: 1px solid var(--border-hover);
+      color: var(--text-primary); padding: 12px 22px; border-radius: var(--radius-md);
+      font-size: 0.88rem; font-weight: 600;
+      transition: var(--transition);
+    }
+    .ag-btn-secondary:hover {
+      border-color: var(--accent);
+      background: var(--bg-card-hover);
+    }
+
+    /* ── Phased rollout timeline (Section 13) ── */
+    .ag-timeline {
+      position: relative;
+      max-width: 920px; margin: 0 auto;
+      padding-left: 60px;
+    }
+    .ag-timeline::before {
+      content: ''; position: absolute;
+      top: 24px; bottom: 24px; left: 24px;
+      width: 2px;
+      background: linear-gradient(180deg, var(--accent), var(--cyan), var(--purple));
+      border-radius: 1px;
+    }
+    .ag-phase {
+      position: relative;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      margin-bottom: 24px;
+      transition: var(--transition);
+    }
+    .ag-phase:hover {
+      border-color: var(--accent-border);
+      transform: translateX(4px);
+      box-shadow: var(--shadow-md);
+    }
+    .ag-phase::before {
+      content: ''; position: absolute;
+      left: -45px; top: 32px;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 4px var(--bg-primary), 0 0 0 6px var(--accent-border);
+    }
+    .ag-phase--1::before { background: var(--accent); box-shadow: 0 0 0 4px var(--bg-primary), 0 0 0 6px var(--accent-border); }
+    .ag-phase--2::before { background: var(--cyan); box-shadow: 0 0 0 4px var(--bg-primary), 0 0 0 6px rgba(6, 182, 212, 0.28); }
+    .ag-phase--3::before { background: var(--purple); box-shadow: 0 0 0 4px var(--bg-primary), 0 0 0 6px rgba(168, 85, 247, 0.28); }
+    .ag-phase-eyebrow {
+      font-size: 0.74rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--accent-light);
+      margin-bottom: 6px;
+    }
+    .ag-phase--2 .ag-phase-eyebrow { color: var(--cyan-light); }
+    .ag-phase--3 .ag-phase-eyebrow { color: var(--purple-light); }
+    .ag-phase-title {
+      font-size: 1.3rem; font-weight: 800; margin-bottom: 10px;
+      letter-spacing: -0.01em;
+    }
+    .ag-phase-desc {
+      color: var(--text-secondary); font-size: 0.95rem;
+      line-height: 1.7; margin-bottom: 18px;
+    }
+    .ag-phase-detail {
+      background: var(--bg-elevated);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      margin-bottom: 12px;
+    }
+    .ag-phase-detail-label {
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .ag-phase-detail-val {
+      color: var(--text-secondary); font-size: 0.88rem;
+      line-height: 1.65;
+    }
+    .ag-phase-detail-val code {
+      font-size: 0.8rem;
+      color: var(--accent-light);
+      background: rgba(16, 185, 129, 0.05);
+      padding: 1px 6px; border-radius: 4px;
+    }
+    .ag-phase-ship {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 8px;
+      font-style: italic;
+    }
+    @media (max-width: 640px) {
+      .ag-timeline { padding-left: 40px; }
+      .ag-timeline::before { left: 16px; }
+      .ag-phase::before { left: -29px; }
+    }
+
+    /* ── Resource grid (Section 16) ── */
+    .ag-resource-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 22px;
+      transition: var(--transition);
+      display: flex; flex-direction: column;
+      text-decoration: none;
+      color: inherit;
+    }
+    .ag-resource-card:hover {
+      border-color: var(--accent-border);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+      background: var(--bg-card-hover);
+    }
+    .ag-resource-card-name {
+      font-weight: 700; font-size: 1rem;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+    .ag-resource-card-desc {
+      font-size: 0.85rem; color: var(--text-secondary);
+      line-height: 1.6;
+      flex-grow: 1;
+    }
+    .ag-resource-card-arrow {
+      font-size: 0.82rem; color: var(--accent-light);
+      margin-top: 12px;
+      font-weight: 600;
+    }
+
+    /* ── CTA Banner (Section 17) ── */
+    .ag-cta-banner {
+      background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-elevated) 100%);
+      border: 1px solid var(--accent-border);
+      border-radius: var(--radius);
+      padding: 64px 40px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .ag-cta-banner::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 100% at 50% 100%, rgba(16, 185, 129, 0.08), transparent);
+      pointer-events: none;
+    }
+    .ag-cta-banner h2 {
+      font-size: clamp(1.7rem, 3vw, 2.2rem);
+      font-weight: 800;
+      margin-bottom: 14px;
+      position: relative;
+      letter-spacing: -0.02em;
+    }
+    .ag-cta-banner p {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      max-width: 580px;
+      margin: 0 auto 28px;
+      position: relative;
+    }
+    .ag-cta-banner-buttons {
+      display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;
+      position: relative;
+      margin-bottom: 18px;
+    }
+    .ag-cta-banner-foot {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      position: relative;
+      margin-top: 16px;
+    }
+
+    /* ── Pull-quote / philosophy paragraph ── */
+    .ag-philosophy {
+      background: var(--bg-card);
+      border-left: 3px solid var(--accent);
+      padding: 24px 28px;
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      margin: 32px 0;
+      font-size: 1.02rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .ag-philosophy strong { color: var(--text-primary); }
+
+    /* ── Print styles ── */
+    @media print {
+      .nav, .footer, .ag-cta-banner { display: none; }
+      body { background: white; color: black; }
+      .ag-card, .ag-table-wrap, .ag-flow, .ag-callout, .ag-phase, .ag-skill-group {
+        background: white; border: 1px solid #ccc; color: black;
+      }
+      .ag-hero h1, .ag-title { color: black; -webkit-text-fill-color: black; }
+      .ag-section { padding: 40px 0; }
+    }
+
+    /* ── Container ── */
+    .ag-container {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ── Part divider ── */
+    .ag-part-divider {
+      max-width: 720px; margin: 24px auto;
+      text-align: center;
+      padding: 32px 0;
+      position: relative;
+    }
+    .ag-part-divider::before, .ag-part-divider::after {
+      content: ''; display: inline-block;
+      width: 60px; height: 1px;
+      background: var(--border-hover);
+      vertical-align: middle;
+      margin: 0 16px;
+    }
+    .ag-part-label {
+      display: inline-block;
+      font-size: 0.78rem; font-weight: 700;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 6px 18px;
+      border: 1px solid var(--border-hover);
+      border-radius: 999px;
+      background: var(--bg-card);
+    }
+
+    /* ── Inline link styling ── */
+    .ag-link {
+      color: var(--accent-light);
+      font-weight: 600;
+      transition: var(--transition-fast);
+      border-bottom: 1px dashed rgba(16, 185, 129, 0.3);
+    }
+    .ag-link:hover {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     NAVIGATION
+     ══════════════════════════════════════════ -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo"><div class="nav-logo-icon">H</div><span>Heaptrace Skills</span></a>
+    <div class="nav-links" id="navLinks">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="index.html#packs" class="nav-link">Packs</a>
+      <a href="setup/index.html" class="nav-link">Setup</a>
+      <a href="customize/index.html" class="nav-link">Customize</a>
+      <div class="nav-dropdown">
+        <button class="nav-dropdown-trigger active">Security <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button>
+        <div class="nav-dropdown-menu">
+          <a href="compliance-overview.html" class="nav-dropdown-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>Compliance Overview</a>
+          <a href="ci-cd-security.html" class="nav-dropdown-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>CI/CD Security Gateway</a>
+          <a href="cicd-security-setup.html" class="nav-dropdown-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>Setup Guide</a>
+          <a href="automation-guide.html" class="nav-dropdown-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Automation Guide</a>
+        </div>
+      </div>
+      <a href="rules/index.html" class="nav-link">Rules</a>
+      <a href="mcp/index.html" class="nav-link">MCP Servers</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>GitHub
+    </a>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════
+     SECTION 1 — HERO
+     ══════════════════════════════════════════ -->
+<section class="ag-hero">
+  <div class="ag-container ag-hero-content">
+    <div class="ag-hero-badge">
+      <span class="ag-hero-badge-dot"></span>
+      Automation Guide · No Code, Just Guidelines
+    </div>
+    <h1>Two Ways to Run<br>Heaptrace Skills</h1>
+    <p class="ag-hero-subtitle">
+      Local for individuals. CI/CD for teams. Both for full coverage.
+      This page is your starting point — it explains your options and helps you pick the right setup.
+      For deep implementation details, see the linked guides.
+    </p>
+    <div class="ag-hero-stats">
+      <div class="ag-hero-stat">
+        <div class="ag-hero-stat-value">100</div>
+        <div class="ag-hero-stat-label">Skills</div>
+      </div>
+      <div class="ag-hero-stat">
+        <div class="ag-hero-stat-value">2</div>
+        <div class="ag-hero-stat-label">Setup Paths</div>
+      </div>
+      <div class="ag-hero-stat">
+        <div class="ag-hero-stat-value">3</div>
+        <div class="ag-hero-stat-label">Phase Rollout</div>
+      </div>
+      <div class="ag-hero-stat">
+        <div class="ag-hero-stat-value">10–60</div>
+        <div class="ag-hero-stat-label">Min Setup Time</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SECTION 2 — DECISION TREE
+     ══════════════════════════════════════════ -->
+<section class="ag-section ag-section--alt">
+  <div class="ag-container">
+    <div class="ag-section-head ag-section-head--center">
+      <div class="ag-eyebrow">Section 02 · Choose Your Path</div>
+      <h2 class="ag-title">Which Setup Do You Need?</h2>
+      <p class="ag-lead ag-lead--center">
+        Three paths. The right one depends on whether you're working solo, deploying for a team,
+        or building a mature engineering organization that needs both.
+      </p>
+    </div>
+
+    <div class="ag-flow">
+      <div class="ag-flow-top">Which setup do I need?</div>
+
+      <div class="ag-flow-branches">
+        <div class="ag-flow-branch">
+          <div class="ag-flow-bubble">Just me</div>
+          <div class="ag-flow-arrow"></div>
+          <div class="ag-flow-result">
+            <div class="ag-flow-result-title">Local Setup</div>
+            <div class="ag-flow-result-sub">Part 1</div>
+          </div>
+        </div>
+
+        <div class="ag-flow-branch">
+          <div class="ag-flow-bubble">Whole team</div>
+          <div class="ag-flow-arrow"></div>
+          <div class="ag-flow-result">
+            <div class="ag-flow-result-title">CI/CD Setup</div>
+            <div class="ag-flow-result-sub">Part 2</div>
+          </div>
+        </div>
+
+        <div class="ag-flow-branch">
+          <div class="ag-flow-bubble">Both — full coverage</div>
+          <div class="ag-flow-arrow"></div>
+          <div class="ag-flow-result">
+            <div class="ag-flow-result-title">Phased Rollout</div>
+            <div class="ag-flow-result-sub">Part 3</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="max-width: 920px; margin: 56px auto 0;">
+      <div class="ag-table-wrap">
+        <table class="ag-table">
+          <thead>
+            <tr>
+              <th style="width: 60%;">Question</th>
+              <th style="width: 12%;">Answer</th>
+              <th style="width: 28%;">Setup</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Are you a solo dev or consultant?</td>
+              <td>Yes</td>
+              <td class="ag-cell-accent">Local only</td>
+            </tr>
+            <tr>
+              <td>Do you need PR-blocking gates?</td>
+              <td>Yes</td>
+              <td class="ag-cell-accent">CI/CD required</td>
+            </tr>
+            <tr>
+              <td>Do you want personal daily review of your own PRs?</td>
+              <td>Yes</td>
+              <td class="ag-cell-accent">Local routines</td>
+            </tr>
+            <tr>
+              <td>Are you in a regulated industry (HIPAA, SOC 2)?</td>
+              <td>Yes</td>
+              <td class="ag-cell-accent">CI/CD + audit logs</td>
+            </tr>
+            <tr>
+              <td>Do you want maximum coverage?</td>
+              <td>Yes</td>
+              <td class="ag-cell-accent">Both</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     PART 1 DIVIDER
+     ══════════════════════════════════════════ -->
+<div class="ag-part-divider">
+  <span class="ag-part-label">Part 1 · Local / Internal Setup</span>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 3 — WHY RUN LOCALLY
+     ══════════════════════════════════════════ -->
+<section class="ag-section">
+  <div class="ag-container">
+    <div class="ag-section-head">
+      <div class="ag-eyebrow">Section 03 · Local Setup</div>
+      <h2 class="ag-title">Why Run Locally?</h2>
+      <p class="ag-lead">
+        The local path keeps everything on your machine. Your code stays put.
+        Your AI subscription does the work. There is no cloud quota, no team coordination,
+        no centralized configuration — just you and the skills, available the moment you need them.
+      </p>
+    </div>
+
+    <div class="ag-philosophy">
+      Local-only is the right starting point for solo developers, consultants working under NDAs,
+      and small teams exploring whether agentic workflows are a fit before committing to broader
+      rollout. <strong>Most engineering organizations begin here</strong> — not because they have to,
+      but because it's the lowest-friction way to build trust with the tooling. Once your team feels
+      comfortable, expanding to CI/CD becomes a natural next step rather than a leap of faith.
+    </div>
+
+    <div class="ag-grid ag-grid--4" style="margin-top: 48px;">
+      <div class="ag-card">
+        <div class="ag-card-num">01</div>
+        <div class="ag-card-title">Privacy</div>
+        <div class="ag-card-desc">
+          Code never leaves your machine. No upload, no telemetry, no cloud-side processing.
+          Ideal for regulated codebases and consulting work.
+        </div>
+      </div>
+      <div class="ag-card">
+        <div class="ag-card-num">02</div>
+        <div class="ag-card-title">Cost</div>
+        <div class="ag-card-desc">
+          Uses your existing Claude or Cursor subscription. Zero infrastructure to provision.
+          No CI minutes burned on advisory checks.
+        </div>
+      </div>
+      <div class="ag-card">
+        <div class="ag-card-num">03</div>
+        <div class="ag-card-title">Speed</div>
+        <div class="ag-card-desc">
+          No CI startup delay. Skills run in seconds, not minutes. The feedback loop stays tight
+          enough to keep you in flow.
+        </div>
+      </div>
+      <div class="ag-card">
+        <div class="ag-card-num">04</div>
+        <div class="ag-card-title">Flexibility</div>
+        <div class="ag-card-desc">
+          Configure per developer. Each engineer chooses which routines to run, when, and where to
+          send the output. No team coordination required.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SECTION 4 — TOOLS YOU CAN USE
+     ══════════════════════════════════════════ -->
+<section class="ag-section ag-section--alt">
+  <div class="ag-container">
+    <div class="ag-section-head">
+      <div class="ag-eyebrow">Section 04 · Tooling</div>
+      <h2 class="ag-title">Tools You Can Use</h2>
+      <p class="ag-lead">
+        Heaptrace Skills run inside any agentic AI runtime that supports custom skills.
+        Here are the four most common environments — pick the one that matches how you already work.
+      </p>
+    </div>
+
+    <div class="ag-grid ag-grid--2">
+      <div class="ag-tool-card">
+        <div class="ag-tool-card-head">
+          <div class="ag-tool-card-icon">CC</div>
+          <div>
+            <div class="ag-tool-card-name">Claude Code CLI</div>
+            <div class="ag-tool-card-sub">Terminal-based</div>
+          </div>
+        </div>
+        <div class="ag-tool-card-rows">
+          <div class="ag-tool-card-row">
+            <div class="ag-tool-card-label">Best For</div>
+            <div class="ag-tool-card-val">Power users, automation, cron-based scheduling</div>
+          </div>
+          <div class="ag-tool-card-row">
+            <div class="ag-tool-card-label">Strength</div>
+            <div class="ag-tool-card-val">Scriptable. Runs in any terminal. Integrates with shell pipelines.</div>
+          </div>
+          <div class="ag-tool-card-row">
+            <div class="ag-tool-card-label">Weakness</div>
+            <div class="ag-tool-card-val">Command-line interface — not visual.</div>
+          </div>
+          <div class="ag-tool-card-row">
+            <div class="ag-tool-card-label">Pick When</div>
+            <div class="ag-tool-card-val">You're comfortable in terminal and want to automate.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ag-tool-card">
+        <div class="ag-tool-card-head">
+          <div class="ag-tool-card-icon">CD</div>
+          <div>
+            <div class="ag-tool-card-name">Claude Desktop</div>
+            <div class="ag-tool-card-sub">GUI app</div>
+          </div>
+        </div>
+        <div class="ag-tool-card-rows">
+          <div class="ag-tool-card-row">
+            <div class="ag-tool-card-label">Best For</div>
+            <div class="ag-tool-card-val">Visual interaction, conversational workflows</div>
+          </div>
+          <div class="ag-tool-card-row">
+            <div class="ag-tool-card-label">Strength</div>
+            <div class="ag-tool-card-val">Clean UI. Easy onboarding. Great for exploration and learning.</div>
+          </div>
+          <div class="ag-tool-card-row">
+            <div class="ag-tool-card-label">Weakness</div>
+            <div class="ag-tool-card-val">Less suitable for cron or batch processing.</div>
+          </div>
+          <div class="ag-tool-card-row">
+            <div class="ag-tool-card-label">Pick When</div>
+            <div class="ag-tool-card-val">You prefer GUIs and do mostly interactive work.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ag-tool-card">
+        <div class="ag-tool-card-head">
+          <div class="ag-tool-card-icon">CR</div>
+          <div>
+            <div class="ag-tool-card-name">Cursor IDE</div>
+            <div class="ag-tool-card-sub">Editor-integrated</div>
+          </div>
+        </div>
+        <div class="ag-tool-card-rows">
+          <div class="ag-tool-card-row">
+            <div class="ag-tool-card-label">Best For</div>
+            <div class="ag-tool-card-val">In-editor flow, real-time suggestions</div>
+          </div>
+          <div class="ag-tool-card-row">
+            <div class="ag-tool-card-label">Strength</div>
+            <div class="ag-tool-card-val">Skills accessible while you write code. No context switching.</div>
+          </div>
+          <div class="ag-tool-card-row">
+            <div class="ag-tool-card-label">Weakness</div>
+            <div class="ag-tool-card-val">Tied to one IDE — switching editors means re-configuring.</div>
+          </div>
+          <div class="ag-tool-card-row">
+            <div class="ag-tool-card-label">Pick When</div>
+            <div class="ag-tool-card-val">You live in your editor and want skills as you type.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ag-tool-card">
+        <div class="ag-tool-card-head">
+          <div class="ag-tool-card-icon">GH</div>
+          <div>
+            <div class="ag-tool-card-name">GitHub Copilot</div>
+            <div class="ag-tool-card-sub">With custom instructions</div>
+          </div>
+        </div>
+        <div class="ag-tool-card-rows">
+          <div class="ag-tool-card-row">
+            <div class="ag-tool-card-label">Best For</div>
+            <div class="ag-tool-card-val">Teams already on Copilot, IDE-integrated</div>
+          </div>
+          <div class="ag-tool-card-row">
+            <div class="ag-tool-card-label">Strength</div>
+            <div class="ag-tool-card-val">Works in VS Code, Visual Studio, JetBrains. Minimal new tooling.</div>
+          </div>
+          <div class="ag-tool-card-row">
+            <div class="ag-tool-card-label">Weakness</div>
+            <div class="ag-tool-card-val">Customization more limited than Claude Code.</div>
+          </div>
+          <div class="ag-tool-card-row">
+            <div class="ag-tool-card-label">Pick When</div>
+            <div class="ag-tool-card-val">Your team already pays for Copilot.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ag-philosophy" style="margin-top: 48px;">
+      All four runtimes execute the same skill files — Heaptrace Skills are runtime-agnostic by design.
+      The decision is about ergonomics, not capability.
+      <strong>Most engineering teams standardize on one runtime per developer</strong>, then mix as preferences evolve.
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SECTION 5 — TWO USE PATTERNS
+     ══════════════════════════════════════════ -->
+<section class="ag-section">
+  <div class="ag-container">
+    <div class="ag-section-head">
+      <div class="ag-eyebrow">Section 05 · Use Patterns</div>
+      <h2 class="ag-title">On-Demand vs Scheduled</h2>
+      <p class="ag-lead">
+        There are two ways to use skills locally. Most developers start with on-demand and graduate to
+        scheduled routines once the workflow becomes routine.
+      </p>
+    </div>
+
+    <div class="ag-grid ag-grid--2">
+      <div class="ag-pattern-card">
+        <span class="ag-pattern-tag">Pattern A · On-Demand</span>
+        <h3 class="ag-pattern-title">Run when you need it</h3>
+        <p class="ag-pattern-desc">
+          You invoke the skill manually at the moment you want feedback. No scheduling, no automation —
+          just typing the skill name when it makes sense in your flow. This is the simplest entry point
+          and the right starting place for nearly every developer.
+        </p>
+        <ul class="ag-pattern-bullets">
+          <li>Before starting a small task — <code>/quick-plan</code></li>
+          <li>To execute the plan — <code>/quick-work</code></li>
+          <li>Before committing — <code>/code-standards</code></li>
+          <li>Before opening a PR — <code>/code-review</code></li>
+          <li>When stuck on a bug — <code>/find-fix</code></li>
+        </ul>
+      </div>
+
+      <div class="ag-pattern-card">
+        <span class="ag-pattern-tag">Pattern B · Scheduled</span>
+        <h3 class="ag-pattern-title">Run on a routine</h3>
+        <p class="ag-pattern-desc">
+          A scheduler wakes the runtime at predefined intervals — sleep, wake, run, post results, sleep.
+          Useful for asynchronous review, weekly sweeps, and any work that benefits from a steady cadence
+          rather than human triggering.
+        </p>
+        <ul class="ag-pattern-bullets">
+          <li>Every 4 hours — review your open PRs, post a digest</li>
+          <li>3x per day — check recent commits for quality issues</li>
+          <li>Every Monday — run a security sweep on the codebase</li>
+          <li>Every Sunday night — generate a weekly engineering report</li>
+          <li>Quarterly — produce a compliance evidence package</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SECTION 6 — ON-DEMAND SKILLS
+     ══════════════════════════════════════════ -->
+<section class="ag-section ag-section--alt">
+  <div class="ag-container">
+    <div class="ag-section-head">
+      <div class="ag-eyebrow">Section 06 · On-Demand</div>
+      <h2 class="ag-title">Skills You'll Run Manually</h2>
+      <p class="ag-lead">
+        These are the skills most developers reach for day to day. Each is a single command in your
+        runtime — type the name, hand over the context, get a result. Full skill catalog at
+        <a href="index.html" class="ag-link">index.html</a>.
+      </p>
+    </div>
+
+    <div class="ag-grid ag-grid--2" style="gap: 24px;">
+      <div class="ag-skill-group">
+        <div class="ag-skill-group-title">Planning &amp; Scoping</div>
+        <div class="ag-skill-list">
+          <div class="ag-skill-item">
+            <div class="ag-skill-item-name">/quick-plan</div>
+            <div class="ag-skill-item-desc">Small task plan — scoped, focused, ready to execute.</div>
+          </div>
+          <div class="ag-skill-item">
+            <div class="ag-skill-item-name">/feature-plan</div>
+            <div class="ag-skill-item-desc">Full feature plan with mockups, data flow, and risk assessment.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ag-skill-group">
+        <div class="ag-skill-group-title">Implementation</div>
+        <div class="ag-skill-list">
+          <div class="ag-skill-item">
+            <div class="ag-skill-item-name">/quick-work</div>
+            <div class="ag-skill-item-desc">Execute a small plan end-to-end with verification.</div>
+          </div>
+          <div class="ag-skill-item">
+            <div class="ag-skill-item-name">/feature-work</div>
+            <div class="ag-skill-item-desc">Execute a full feature plan with progressive checkpoints.</div>
+          </div>
+          <div class="ag-skill-item">
+            <div class="ag-skill-item-name">/find-fix</div>
+            <div class="ag-skill-item-desc">Debug a specific issue — root cause first, patch second.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ag-skill-group">
+        <div class="ag-skill-group-title">Quality Gates</div>
+        <div class="ag-skill-list">
+          <div class="ag-skill-item">
+            <div class="ag-skill-item-name">/code-standards</div>
+            <div class="ag-skill-item-desc">Check your code against project conventions and house style.</div>
+          </div>
+          <div class="ag-skill-item">
+            <div class="ag-skill-item-name">/code-review</div>
+            <div class="ag-skill-item-desc">PR-style review on your changes — same depth as a senior reviewer.</div>
+          </div>
+          <div class="ag-skill-item">
+            <div class="ag-skill-item-name">/sec-audit</div>
+            <div class="ag-skill-item-desc">Quick security check — credentials, injection, common OWASP issues.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ag-skill-group">
+        <div class="ag-skill-group-title">Specialized</div>
+        <div class="ag-skill-list">
+          <div class="ag-skill-item">
+            <div class="ag-skill-item-name">/explain</div>
+            <div class="ag-skill-item-desc">Understand unfamiliar code — annotated walkthrough with diagrams.</div>
+          </div>
+          <div class="ag-skill-item">
+            <div class="ag-skill-item-name">/smart-commit</div>
+            <div class="ag-skill-item-desc">Generate a clean, semantic commit message from staged changes.</div>
+          </div>
+          <div class="ag-skill-item">
+            <div class="ag-skill-item-name">/release-notes</div>
+            <div class="ag-skill-item-desc">Generate human-readable release notes from git history.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SECTION 7 — SCHEDULED ROUTINES
+     ══════════════════════════════════════════ -->
+<section class="ag-section">
+  <div class="ag-container">
+    <div class="ag-section-head">
+      <div class="ag-eyebrow">Section 07 · Scheduled Routines</div>
+      <h2 class="ag-title">The 4 Standard Patterns</h2>
+      <p class="ag-lead">
+        These are the four routines most teams adopt. All cadences are configurable. All routines post
+        to Google Chat as plain text by default — but Slack, Teams, email, or local file logs are equally
+        supported.
+      </p>
+    </div>
+
+    <div class="ag-table-wrap">
+      <table class="ag-table">
+        <thead>
+          <tr>
+            <th style="width: 22%;">Routine</th>
+            <th style="width: 18%;">Cadence</th>
+            <th style="width: 30%;">Skills Used</th>
+            <th style="width: 30%;">Output</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>PR Watch</strong></td>
+            <td>Every 4 hours</td>
+            <td><span class="ag-cell-accent">code-review</span> (diff mode)</td>
+            <td>Plain text Chat post — list of new PRs reviewed since last run</td>
+          </tr>
+          <tr>
+            <td><strong>Code Quality Pulse</strong></td>
+            <td>2–3x per day</td>
+            <td><span class="ag-cell-accent">code-standards</span> (DELTA mode)</td>
+            <td>Plain text Chat post — recent quality findings on changed files</td>
+          </tr>
+          <tr>
+            <td><strong>Security Sweep</strong></td>
+            <td>Weekly (Mon 6am)</td>
+            <td><span class="ag-cell-accent">secrets-scan, dep-vuln, sec-audit, privacy-review</span></td>
+            <td>Plain text Chat post — Tier 1+2 security findings summary</td>
+          </tr>
+          <tr>
+            <td><strong>Full Code Review</strong></td>
+            <td>Weekly (Sun 6am)</td>
+            <td><span class="ag-cell-accent">code-review, code-standards, tech-debt-audit</span></td>
+            <td>Plain text Chat post — comprehensive weekly engineering report</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="ag-output-block">[Heaptrace · PR Watch] 2026-04-24 14:00 UTC · acme-platform
+
+3 PRs reviewed since last run (4h ago):
+
+PR #4521 — Add Archive button to projects
+  Skill: code-review
+  Findings: 0 critical, 2 medium, 4 low
+  Recommendation: ready for human review
+  Link: github.com/acme/platform/pull/4521
+
+PR #4522 — Fix billing webhook retry
+  Skills: code-review + sec-audit (critical-path)
+  Findings: 1 high, 3 medium
+  Action: needs human review
+  Link: github.com/acme/platform/pull/4522
+
+Next run: 18:00 UTC</div>
+    <div class="ag-output-caption">Sample plain-text routine output, posted directly to a Google Chat space.</div>
+
+    <div class="ag-philosophy" style="margin-top: 40px;">
+      <strong>Why plain text and not card-formatted messages?</strong> Plain text is readable in any chat
+      client, paste-friendly into incident tickets, searchable in chat history, and survives platform
+      migrations. Card formats break across clients, fragment when forwarded, and obscure the underlying
+      content. We optimize for the format that still works five years from now.
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SECTION 8 — SCHEDULING OPTIONS
+     ══════════════════════════════════════════ -->
+<section class="ag-section ag-section--alt">
+  <div class="ag-container">
+    <div class="ag-section-head">
+      <div class="ag-eyebrow">Section 08 · Schedulers</div>
+      <h2 class="ag-title">Scheduling on Your Machine</h2>
+      <p class="ag-lead">
+        Four ways to wake the runtime on a schedule. Pick by operating system and reliability needs —
+        or skip local scheduling entirely and use a hosted equivalent. This page describes the options
+        at a concept level. For implementation details, see the linked guides.
+      </p>
+    </div>
+
+    <div class="ag-grid ag-grid--2">
+      <div class="ag-card">
+        <div class="ag-card-num">01</div>
+        <div class="ag-card-title">cron — Linux &amp; macOS</div>
+        <div class="ag-card-desc">
+          The Unix standard. A <code style="color: var(--accent-light); font-size: 0.86rem;">crontab</code> file
+          lists when each routine runs. Editable from the terminal. Available on every Linux server and
+          Mac out of the box. Lightweight, well-documented, universally supported.
+        </div>
+        <div class="ag-card-meta">
+          <span class="ag-card-tag">Linux</span>
+          <span class="ag-card-tag">macOS</span>
+          <span class="ag-card-tag ag-card-tag--accent">Best for terminal users</span>
+        </div>
+      </div>
+
+      <div class="ag-card">
+        <div class="ag-card-num">02</div>
+        <div class="ag-card-title">launchd — macOS (recommended)</div>
+        <div class="ag-card-desc">
+          Apple's preferred scheduling system on Mac. Uses XML plist files. Much better than cron for
+          laptop users — handles sleep and wake correctly, so a routine won't be skipped because the
+          laptop was closed at the scheduled time.
+        </div>
+        <div class="ag-card-meta">
+          <span class="ag-card-tag">macOS</span>
+          <span class="ag-card-tag ag-card-tag--accent">Best for laptops</span>
+        </div>
+      </div>
+
+      <div class="ag-card">
+        <div class="ag-card-num">03</div>
+        <div class="ag-card-title">Task Scheduler — Windows</div>
+        <div class="ag-card-desc">
+          The built-in Windows scheduler. GUI-based setup, no terminal required. Handles wake-from-sleep,
+          missed runs, and conditional triggers. Best path for Windows-first developers and teams less
+          comfortable with command-line config.
+        </div>
+        <div class="ag-card-meta">
+          <span class="ag-card-tag">Windows</span>
+          <span class="ag-card-tag ag-card-tag--accent">GUI-driven</span>
+        </div>
+      </div>
+
+      <div class="ag-card">
+        <div class="ag-card-num">04</div>
+        <div class="ag-card-title">Hosted alternatives</div>
+        <div class="ag-card-desc">
+          If you'd rather not run scheduled jobs on your laptop:
+          <strong>GitHub Actions schedule</strong> (free, runs in cloud — covered in Part 2),
+          <strong>Cloudflare Workers Cron Triggers</strong> (free tier, serverless), or
+          <strong>Vercel Cron Jobs</strong> (for teams already on Vercel).
+        </div>
+        <div class="ag-card-meta">
+          <span class="ag-card-tag">Cloud</span>
+          <span class="ag-card-tag ag-card-tag--accent">No local setup</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="ag-philosophy" style="margin-top: 40px;">
+      When you're ready to set this up, the implementation steps live in our
+      <a href="cicd-security-setup.html" class="ag-link">CI/CD Setup Guide</a>
+      (which covers the GitHub Actions schedule path) — or contact us for a white-glove rollout.
+      This page intentionally keeps things at the decision level.
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SECTION 9 — OUTPUT DESTINATIONS
+     ══════════════════════════════════════════ -->
+<section class="ag-section">
+  <div class="ag-container">
+    <div class="ag-section-head">
+      <div class="ag-eyebrow">Section 09 · Output</div>
+      <h2 class="ag-title">Where Output Goes</h2>
+      <p class="ag-lead">
+        Every routine produces a structured report. Where that report lands is your call —
+        we support every common destination, and the routine config is a one-line swap to switch.
+      </p>
+    </div>
+
+    <div class="ag-grid ag-grid--2">
+      <div class="ag-card">
+        <div class="ag-card-num">G</div>
+        <div class="ag-card-title">Google Chat <span style="color: var(--accent-light); font-size: 0.78rem; font-weight: 600;">· recommended default</span></div>
+        <div class="ag-card-desc">
+          Plain text format (not Card v2 — easier to read in chat history, paste-friendly, survives forwards).
+          Set up via incoming webhook URL in your Chat space. The same webhook works for all four routines.
+        </div>
+      </div>
+      <div class="ag-card">
+        <div class="ag-card-num">S</div>
+        <div class="ag-card-title">Slack</div>
+        <div class="ag-card-desc">
+          Plain text via incoming webhook. Same routines work — just swap the webhook URL.
+          No reformatting, no platform-specific output adapters required.
+        </div>
+      </div>
+      <div class="ag-card">
+        <div class="ag-card-num">T</div>
+        <div class="ag-card-title">Microsoft Teams</div>
+        <div class="ag-card-desc">
+          Plain text via Teams connector. Slightly different envelope format (Teams uses MessageCard
+          under the hood), but we keep the inner content plain so it's readable everywhere.
+        </div>
+      </div>
+      <div class="ag-card">
+        <div class="ag-card-num">E</div>
+        <div class="ag-card-title">Email</div>
+        <div class="ag-card-desc">
+          Daily digest format. Best for less-chatty teams that prefer scheduled inbox summaries
+          over real-time chat noise. Works with any SMTP provider.
+        </div>
+      </div>
+      <div class="ag-card">
+        <div class="ag-card-num">F</div>
+        <div class="ag-card-title">File logs</div>
+        <div class="ag-card-desc">
+          No external dependency. Routines write to local log files on disk.
+          Tail, grep, or pipe into your own observability stack. The most private option.
+        </div>
+      </div>
+      <div class="ag-card">
+        <div class="ag-card-num">+</div>
+        <div class="ag-card-title">Custom destination</div>
+        <div class="ag-card-desc">
+          Anywhere a webhook can post — Discord, internal API, PagerDuty, Linear, Jira — works
+          with the same routine. Configure once per destination, reuse across routines.
+        </div>
+      </div>
+    </div>
+
+    <div class="ag-philosophy" style="margin-top: 40px;">
+      All output formats are <strong>plain text by default</strong> — readable, searchable, and
+      copy-pastable. We avoid card-format messages because they break across chat platforms, don't
+      paste cleanly into tickets, and lose meaning when the platform inevitably changes its rendering.
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     PART 2 DIVIDER
+     ══════════════════════════════════════════ -->
+<div class="ag-part-divider">
+  <span class="ag-part-label">Part 2 · External / CI/CD Setup</span>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 10 — WHY RUN IN CI/CD
+     ══════════════════════════════════════════ -->
+<section class="ag-section">
+  <div class="ag-container">
+    <div class="ag-section-head">
+      <div class="ag-eyebrow">Section 10 · CI/CD Setup</div>
+      <h2 class="ag-title">Why Run in CI/CD?</h2>
+      <p class="ag-lead">
+        Local routines protect the developer. CI/CD protects the team. Once your standards exist
+        as workflow files, every PR gets the same treatment — regardless of who opened it,
+        what laptop they're on, or whether they remembered to install anything.
+      </p>
+    </div>
+
+    <div class="ag-philosophy">
+      <strong>The shift from local to CI/CD is the shift from advice to enforcement.</strong>
+      Local skills produce recommendations a developer can choose to act on. CI/CD checks produce
+      gates — bad code physically cannot merge until the issue is addressed. Both have a place;
+      they cover different failure modes. Local catches issues during development. CI/CD catches
+      issues at the merge boundary, where they would otherwise enter the trunk.
+    </div>
+
+    <div class="ag-grid ag-grid--4" style="margin-top: 48px;">
+      <div class="ag-card">
+        <div class="ag-card-num">01</div>
+        <div class="ag-card-title">Consistency</div>
+        <div class="ag-card-desc">
+          Every PR gets the same checks. Standards don't depend on who reviewed the code or
+          whether the developer ran the local routine.
+        </div>
+      </div>
+      <div class="ag-card">
+        <div class="ag-card-num">02</div>
+        <div class="ag-card-title">Blocking</div>
+        <div class="ag-card-desc">
+          Bad code can't merge. Critical findings — exposed secrets, severe vulnerabilities,
+          policy violations — physically gate the merge button.
+        </div>
+      </div>
+      <div class="ag-card">
+        <div class="ag-card-num">03</div>
+        <div class="ag-card-title">Auditability</div>
+        <div class="ag-card-desc">
+          Every run is logged. CI history becomes evidence for compliance audits — when checks
+          ran, what they found, who acknowledged the result.
+        </div>
+      </div>
+      <div class="ag-card">
+        <div class="ag-card-num">04</div>
+        <div class="ag-card-title">Zero local setup</div>
+        <div class="ag-card-desc">
+          New hires don't install anything. The standards travel with the repository — clone,
+          push, get reviewed by the team's standard automation.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SECTION 11 — WHAT'S DOCUMENTED
+     ══════════════════════════════════════════ -->
+<section class="ag-section ag-section--alt">
+  <div class="ag-container">
+    <div class="ag-section-head">
+      <div class="ag-eyebrow">Section 11 · Implementation Reference</div>
+      <h2 class="ag-title">What's Already Documented</h2>
+      <p class="ag-lead">
+        We won't repeat the implementation guide on this page — it lives in two existing documents
+        that already cover every workflow file, secret, and branch protection rule you'll need.
+      </p>
+    </div>
+
+    <div class="ag-callout">
+      <div class="ag-callout-title">The CI/CD path is fully documented.</div>
+      <div class="ag-callout-body">
+        <p>
+          See <a href="ci-cd-security.html" class="ag-link">ci-cd-security.html</a> for the architectural
+          overview — the four-tier severity model, what blocks vs warns, and how the gate decisions are made.
+          See <a href="cicd-security-setup.html" class="ag-link">cicd-security-setup.html</a> for the complete
+          implementation guide with all five GitHub Actions workflows, the composite action, the severity matrix,
+          and the bash helper for parsing skill output.
+        </p>
+        <p><strong>What's covered in the implementation guide:</strong></p>
+        <ul>
+          <li>Tier 1 — fast gate, every PR, under 2 minutes (secrets-scan + dep-vuln)</li>
+          <li>Tier 2 — code security, PR to staging (sec-audit, privacy-review, access-audit, audit-log)</li>
+          <li>Tier 3 — infrastructure (cloud-security, infra-harden, network-audit)</li>
+          <li>Tier 4 — compliance frameworks (HIPAA, GDPR, SOC 2, PCI audits)</li>
+          <li>Weekly deep scan with full git history</li>
+          <li>Manual on-demand workflow for ad-hoc audits</li>
+        </ul>
+        <p><strong>What you'll set up:</strong></p>
+        <ul>
+          <li>Five YAML workflow files in <code style="color: var(--accent-light); font-size: 0.86rem;">.github/workflows/</code></li>
+          <li>Repository secrets — <code style="color: var(--accent-light); font-size: 0.86rem;">ANTHROPIC_API_KEY</code>, optional Chat webhook</li>
+          <li>Branch protection rules tying status checks to merge eligibility</li>
+          <li>A production environment with manual approval gates</li>
+        </ul>
+        <p><strong>Estimated effort:</strong> 1–2 hours for first-time setup. Less if you've stood up GitHub Actions workflows before.</p>
+
+        <div class="ag-callout-cta">
+          <a href="ci-cd-security.html" class="ag-btn-primary">
+            Read CI/CD Overview
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+          </a>
+          <a href="cicd-security-setup.html" class="ag-btn-secondary">
+            Read Full Setup Guide
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     PART 3 DIVIDER
+     ══════════════════════════════════════════ -->
+<div class="ag-part-divider">
+  <span class="ag-part-label">Part 3 · Recommended Path</span>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 12 — COMPARISON
+     ══════════════════════════════════════════ -->
+<section class="ag-section">
+  <div class="ag-container">
+    <div class="ag-section-head">
+      <div class="ag-eyebrow">Section 12 · Comparison</div>
+      <h2 class="ag-title">Local vs CI/CD vs Both</h2>
+      <p class="ag-lead">
+        A side-by-side at the operational level. If you're still deciding which path to take,
+        this is the table to read carefully — it's the question most engineering leaders ask first.
+      </p>
+    </div>
+
+    <div class="ag-table-wrap">
+      <table class="ag-table">
+        <thead>
+          <tr>
+            <th style="width: 18%;">Aspect</th>
+            <th style="width: 27%;">Local Setup</th>
+            <th style="width: 27%;">CI/CD Setup</th>
+            <th style="width: 28%;">Both (Phased)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Who runs it</td>
+            <td>Individual developer</td>
+            <td>Team-wide automation</td>
+            <td>Both</td>
+          </tr>
+          <tr>
+            <td>Cost</td>
+            <td>Your Claude subscription</td>
+            <td>CI minutes (often free tier)</td>
+            <td>Both</td>
+          </tr>
+          <tr>
+            <td>Trigger</td>
+            <td>Cron / launchd / on-demand</td>
+            <td>PR push / schedule</td>
+            <td>Both</td>
+          </tr>
+          <tr>
+            <td>Output</td>
+            <td>Personal Chat / log</td>
+            <td>Team Chat / PR comments</td>
+            <td>Both channels</td>
+          </tr>
+          <tr>
+            <td>Blocking</td>
+            <td>No — advisory only</td>
+            <td><span class="ag-cell-accent">Yes — blocks merge</span></td>
+            <td>CI blocks; local advises</td>
+          </tr>
+          <tr>
+            <td>Setup effort</td>
+            <td>30 min one-time</td>
+            <td>1–2 hours one-time</td>
+            <td>2–3 hours total</td>
+          </tr>
+          <tr>
+            <td>Best for</td>
+            <td>Solo work, exploration</td>
+            <td>Team standards, compliance</td>
+            <td>Mature engineering orgs</td>
+          </tr>
+          <tr>
+            <td>Privacy</td>
+            <td><span class="ag-cell-accent">Maximum (local only)</span></td>
+            <td>Standard (CI logs visible)</td>
+            <td>Mixed</td>
+          </tr>
+          <tr>
+            <td>Audit trail</td>
+            <td>Personal log</td>
+            <td>Full CI history</td>
+            <td>Both</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="ag-philosophy" style="margin-top: 40px;">
+      The honest answer for most teams: <strong>start local, add CI/CD when the team grows past
+      five engineers</strong>. The two paths are complementary, not competing. CI/CD enforces the
+      floor; local routines raise the ceiling. Mature teams run both because each catches different
+      classes of issue at different points in the workflow.
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SECTION 13 — PHASED ROLLOUT
+     ══════════════════════════════════════════ -->
+<section class="ag-section ag-section--alt">
+  <div class="ag-container">
+    <div class="ag-section-head">
+      <div class="ag-eyebrow">Section 13 · Phased Rollout</div>
+      <h2 class="ag-title">Three Phases, Four Weeks</h2>
+      <p class="ag-lead">
+        The rollout pattern most teams converge on. Each phase ships independent value — you can stop
+        after Phase 1 and still get real benefit. The order matters: developers build trust before
+        the gates go up, which means the gates feel like reinforcement rather than imposition.
+      </p>
+    </div>
+
+    <div class="ag-timeline">
+      <div class="ag-phase ag-phase--1">
+        <div class="ag-phase-eyebrow">Phase 1 · Week 1</div>
+        <h3 class="ag-phase-title">Individual Adoption</h3>
+        <p class="ag-phase-desc">
+          Each developer sets up Claude Code locally. Runs <code style="color: var(--accent-light);">/quick-plan</code>
+          and <code style="color: var(--accent-light);">/code-review</code> on their own work. No team
+          coordination required, no infrastructure changes. The goal is familiarity — developers
+          discover where the skills help and where they don't, on their own terms.
+        </p>
+        <div class="ag-phase-detail">
+          <div class="ag-phase-detail-label">Skills used in Phase 1</div>
+          <div class="ag-phase-detail-val">
+            <code>quick-plan</code>, <code>quick-work</code>, <code>find-fix</code>,
+            <code>code-standards</code>, <code>code-review</code>
+          </div>
+        </div>
+        <div class="ag-phase-ship">What you ship: zero new infrastructure. Just installed tooling on each developer's machine.</div>
+      </div>
+
+      <div class="ag-phase ag-phase--2">
+        <div class="ag-phase-eyebrow">Phase 2 · Weeks 2–3</div>
+        <h3 class="ag-phase-title">CI/CD Security Gates</h3>
+        <p class="ag-phase-desc">
+          Lead engineer adds the five GitHub Actions workflows. Team standards become enforced
+          automatically — every PR triggers Tier 1 fast gates, PRs to staging trigger Tier 2 code
+          security, infrastructure changes trigger Tier 3, and release branches trigger Tier 4
+          compliance audits.
+        </p>
+        <div class="ag-phase-detail">
+          <div class="ag-phase-detail-label">Skills wired into CI</div>
+          <div class="ag-phase-detail-val">
+            <strong>Tier 1:</strong> secrets-scan, dep-vuln (every PR)<br>
+            <strong>Tier 2:</strong> sec-audit, privacy-review, access-audit, audit-log (PR to staging)<br>
+            <strong>Tier 3:</strong> cloud-security, infra-harden, network-audit (when infra changes)<br>
+            <strong>Tier 4:</strong> hipaa-audit, gdpr-audit, soc2-audit, pci-audit (release branches)
+          </div>
+        </div>
+        <div class="ag-phase-ship">What you ship: 5 workflow files + branch protection rules tying status checks to merge eligibility.</div>
+      </div>
+
+      <div class="ag-phase ag-phase--3">
+        <div class="ag-phase-eyebrow">Phase 3 · Week 4 and beyond · Optional</div>
+        <h3 class="ag-phase-title">Scheduled Routines</h3>
+        <p class="ag-phase-desc">
+          Add cron-based digest routines for teams that want daily and weekly summaries beyond
+          per-PR gating. This is where CI/CD enforcement becomes a continuous engineering pulse
+          — async review, weekly sweeps, and trend visibility for engineering leadership.
+        </p>
+        <div class="ag-phase-detail">
+          <div class="ag-phase-detail-label">Routines added</div>
+          <div class="ag-phase-detail-val">
+            <strong>PR Watch</strong> — every 4 hours<br>
+            <strong>Code Quality Pulse</strong> — 2–3x per day<br>
+            <strong>Security Sweep</strong> — weekly<br>
+            <strong>Full Code Review</strong> — weekly
+          </div>
+        </div>
+        <div class="ag-phase-ship">What you ship: cron entries, launchd plists, or hosted scheduler config — no new app code.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SECTION 14 — DECISION HELPER BY TEAM TYPE
+     ══════════════════════════════════════════ -->
+<section class="ag-section">
+  <div class="ag-container">
+    <div class="ag-section-head">
+      <div class="ag-eyebrow">Section 14 · Recommendations</div>
+      <h2 class="ag-title">By Team Type</h2>
+      <p class="ag-lead">
+        The phase progression isn't one-size-fits-all. Here's what we recommend based on team size
+        and operating context — calibrated against what we see working in production environments.
+      </p>
+    </div>
+
+    <div class="ag-table-wrap">
+      <table class="ag-table">
+        <thead>
+          <tr>
+            <th style="width: 50%;">Team Type</th>
+            <th style="width: 50%;">Recommended Path</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Solo developer / freelancer</strong></td>
+            <td><span class="ag-cell-accent">Phase 1 only</span> — local routines, no CI infrastructure required</td>
+          </tr>
+          <tr>
+            <td><strong>Small team (2–5 devs)</strong></td>
+            <td><span class="ag-cell-accent">Phase 1 + Phase 2</span> — local for development, CI for the merge gate</td>
+          </tr>
+          <tr>
+            <td><strong>Mid-size team (5–20 devs)</strong></td>
+            <td><span class="ag-cell-accent">All 3 phases</span> — local + CI + scheduled routines for engineering visibility</td>
+          </tr>
+          <tr>
+            <td><strong>Enterprise (20+ devs)</strong></td>
+            <td><span class="ag-cell-accent">All 3 phases + per-team routines</span> — separate digests per squad / domain</td>
+          </tr>
+          <tr>
+            <td><strong>Regulated industry (HIPAA, GDPR, SOC 2)</strong></td>
+            <td><span class="ag-cell-accent">All 3 phases + Compliance Pack scheduled audits</span> — daily, weekly, and quarterly cadences</td>
+          </tr>
+          <tr>
+            <td><strong>Mobile-first team</strong></td>
+            <td><span class="ag-cell-accent">All 3 + mobile-specific routines</span> — mobile-quick-plan in CI, platform-specific verification</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SECTION 15A — MOBILE-SPECIFIC
+     ══════════════════════════════════════════ -->
+<section class="ag-section ag-section--alt">
+  <div class="ag-container">
+    <div class="ag-section-head">
+      <div class="ag-eyebrow">Section 15A · Specialized Track</div>
+      <h2 class="ag-title">Mobile-Specific Automation</h2>
+      <p class="ag-lead">
+        For React Native, Flutter, SwiftUI, or Compose teams. The mobile track follows the same
+        three-phase rollout as the web track — but the skills are platform-aware, and the verification
+        steps include simulator and emulator builds rather than just static checks.
+      </p>
+    </div>
+
+    <div class="ag-grid ag-grid--2">
+      <div class="ag-card">
+        <div class="ag-card-num">M1</div>
+        <div class="ag-card-title">Local mobile skills</div>
+        <div class="ag-card-desc">
+          <code style="color: var(--accent-light); font-size: 0.86rem;">mobile-quick-plan</code> runs
+          locally for small mobile tasks — paired with
+          <code style="color: var(--accent-light); font-size: 0.86rem;">mobile-quick-work</code>
+          for execution. Same flow as the web equivalents, calibrated for mobile context (Expo, native
+          modules, platform parity considerations).
+        </div>
+      </div>
+      <div class="ag-card">
+        <div class="ag-card-num">M2</div>
+        <div class="ag-card-title">CI mobile skills</div>
+        <div class="ag-card-desc">
+          <code style="color: var(--accent-light); font-size: 0.86rem;">mobile-test</code>,
+          <code style="color: var(--accent-light); font-size: 0.86rem;">mobile-perf</code>, and
+          <code style="color: var(--accent-light); font-size: 0.86rem;">app-release</code> wire into
+          your release workflow — appropriate for App Store and Play Store submission gates.
+        </div>
+      </div>
+      <div class="ag-card">
+        <div class="ag-card-num">M3</div>
+        <div class="ag-card-title">Platform verification</div>
+        <div class="ag-card-desc">
+          iOS simulator builds and Android emulator builds run as part of the CI sequence.
+          Skills produce cross-platform parity reports — flagging behavior differences between
+          iOS and Android before they hit users.
+        </div>
+      </div>
+      <div class="ag-card">
+        <div class="ag-card-num">M4</div>
+        <div class="ag-card-title">Per-platform routines</div>
+        <div class="ag-card-desc">
+          Recommended for teams with both iOS and Android engineers — separate scheduled digests
+          per platform so reviewers see only the PRs they own. Reduces noise, sharpens accountability.
+        </div>
+      </div>
+    </div>
+
+    <div class="ag-philosophy" style="margin-top: 40px;">
+      Mobile teams typically follow the same three-phase rollout but with <strong>mobile-*</strong>
+      skill variants. The shape of the rollout is identical; the building blocks are calibrated.
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SECTION 15B — COMPLIANCE
+     ══════════════════════════════════════════ -->
+<section class="ag-section">
+  <div class="ag-container">
+    <div class="ag-section-head">
+      <div class="ag-eyebrow">Section 15B · Specialized Track</div>
+      <h2 class="ag-title">Compliance Team Routines</h2>
+      <p class="ag-lead">
+        For regulated industries — healthcare, finance, government. The compliance track adds
+        scheduled audits aligned to common audit cadences. Output is auditor-ready by default,
+        not a developer log that needs translation later.
+      </p>
+    </div>
+
+    <div class="ag-table-wrap">
+      <table class="ag-table">
+        <thead>
+          <tr>
+            <th style="width: 22%;">Cadence</th>
+            <th style="width: 78%;">What Runs</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Daily</strong></td>
+            <td><span class="ag-cell-accent">secrets-scan</span> deep history scan — catches leaks before they sit overnight in the log stream</td>
+          </tr>
+          <tr>
+            <td><strong>Weekly</strong></td>
+            <td>Full Tier 1+2 sweep with HIPAA / GDPR / SOC 2 spot checks on changed files</td>
+          </tr>
+          <tr>
+            <td><strong>Monthly</strong></td>
+            <td>Full Tier 1–4 audit with <span class="ag-cell-accent">compliance-report</span> evidence package generation</td>
+          </tr>
+          <tr>
+            <td><strong>Quarterly</strong></td>
+            <td><span class="ag-cell-accent">incident-plan</span> tabletop exercise prep + <span class="ag-cell-accent">access-audit</span> review</td>
+          </tr>
+          <tr>
+            <td><strong>Pre-audit (on-demand)</strong></td>
+            <td>Full evidence collection, BAA inventory, control-mapping export — auditor-ready package</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="ag-philosophy" style="margin-top: 40px;">
+      Output: the <strong>compliance-report</strong> skill generates auditor-ready evidence packages.
+      Stored as build artifacts in CI, or as local files in single-developer environments.
+      For more detail on the Compliance Pack itself, see
+      <a href="compliance-overview.html" class="ag-link">compliance-overview.html</a>.
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SECTION 15C — REPORTING CADENCES
+     ══════════════════════════════════════════ -->
+<section class="ag-section ag-section--alt">
+  <div class="ag-container">
+    <div class="ag-section-head">
+      <div class="ag-eyebrow">Section 15C · Reporting</div>
+      <h2 class="ag-title">Reporting Cadences</h2>
+      <p class="ag-lead">
+        Different audiences need different frequencies. Active developers want real-time feedback;
+        engineering leaders want trends; auditors want quarterly evidence packages. Here's how the
+        cadence ladder typically looks.
+      </p>
+    </div>
+
+    <div class="ag-table-wrap">
+      <table class="ag-table">
+        <thead>
+          <tr>
+            <th style="width: 22%;">Cadence</th>
+            <th style="width: 38%;">Format</th>
+            <th style="width: 40%;">Recipients</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Real-time</strong></td>
+            <td>PR comment</td>
+            <td>Authors, reviewers</td>
+          </tr>
+          <tr>
+            <td><strong>Hourly digest</strong></td>
+            <td>Plain text Chat post</td>
+            <td>Engineering channel</td>
+          </tr>
+          <tr>
+            <td><strong>Daily digest</strong></td>
+            <td>Plain text Chat post or email</td>
+            <td>Team leads</td>
+          </tr>
+          <tr>
+            <td><strong>Weekly summary</strong></td>
+            <td>Email + Chat</td>
+            <td>Engineering leadership</td>
+          </tr>
+          <tr>
+            <td><strong>Monthly report</strong></td>
+            <td>Email + dashboard</td>
+            <td>CTO, Compliance Officer</td>
+          </tr>
+          <tr>
+            <td><strong>Quarterly compliance pack</strong></td>
+            <td>PDF / structured docs</td>
+            <td>Auditors, customers</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="ag-philosophy" style="margin-top: 40px;">
+      <strong>Recommended pairings:</strong> per-PR for active development, weekly for trend visibility,
+      monthly for leadership rollups. Most teams over-invest in one cadence and under-invest in another —
+      a balanced ladder beats a comprehensive but rarely-read report every time.
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SECTION 16 — RESOURCES
+     ══════════════════════════════════════════ -->
+<section class="ag-section">
+  <div class="ag-container">
+    <div class="ag-section-head">
+      <div class="ag-eyebrow">Section 16 · Resources</div>
+      <h2 class="ag-title">Where to Go Next</h2>
+      <p class="ag-lead">
+        This page is the map. Here are the deeper documents you'll want once you've decided on a path.
+      </p>
+    </div>
+
+    <div class="ag-grid ag-grid--3">
+      <a href="index.html" class="ag-resource-card">
+        <div class="ag-resource-card-name">Skill Catalog</div>
+        <div class="ag-resource-card-desc">
+          Browse all 100 skills across 10 packs. The home page of the documentation site.
+        </div>
+        <div class="ag-resource-card-arrow">View catalog →</div>
+      </a>
+      <a href="ci-cd-security.html" class="ag-resource-card">
+        <div class="ag-resource-card-name">CI/CD Architecture Overview</div>
+        <div class="ag-resource-card-desc">
+          The four-tier severity model, what blocks vs warns, and how gate decisions are made.
+        </div>
+        <div class="ag-resource-card-arrow">Read overview →</div>
+      </a>
+      <a href="cicd-security-setup.html" class="ag-resource-card">
+        <div class="ag-resource-card-name">CI/CD Full Setup Guide</div>
+        <div class="ag-resource-card-desc">
+          Every workflow file, secret, branch protection rule, and severity matrix you'll need.
+        </div>
+        <div class="ag-resource-card-arrow">Read setup guide →</div>
+      </a>
+      <a href="compliance-overview.html" class="ag-resource-card">
+        <div class="ag-resource-card-name">Compliance Pack Overview</div>
+        <div class="ag-resource-card-desc">
+          HIPAA, GDPR, SOC 2, and PCI audit skills — what they check and how to wire them in.
+        </div>
+        <div class="ag-resource-card-arrow">Read overview →</div>
+      </a>
+      <a href="methodology.html" class="ag-resource-card">
+        <div class="ag-resource-card-name">Methodology / Sales Deck</div>
+        <div class="ag-resource-card-desc">
+          How Heaptrace engineers agentic AI skills as production software. Password-gated.
+        </div>
+        <div class="ag-resource-card-arrow">View deck →</div>
+      </a>
+      <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="ag-resource-card">
+        <div class="ag-resource-card-name">GitHub Repository</div>
+        <div class="ag-resource-card-desc">
+          Source of all 100 skills. MIT licensed. Open source. Star, fork, contribute.
+        </div>
+        <div class="ag-resource-card-arrow">View on GitHub →</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SECTION 17 — CTA BANNER
+     ══════════════════════════════════════════ -->
+<section class="ag-section">
+  <div class="ag-container">
+    <div class="ag-cta-banner">
+      <h2>Ready to Roll Out?</h2>
+      <p>
+        You've picked your path. The implementation guides cover the rest — workflow files,
+        branch protection, scheduling, and webhook configuration.
+      </p>
+      <div class="ag-cta-banner-buttons">
+        <a href="cicd-security-setup.html" class="ag-btn-primary">
+          Read the CI/CD Setup Guide
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+        </a>
+        <a href="index.html" class="ag-btn-secondary">
+          Browse All 100 Skills
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+        </a>
+      </div>
+      <div class="ag-cta-banner-foot">
+        Need a white-glove rollout? Contact your Heaptrace partner.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     FOOTER
+     ══════════════════════════════════════════ -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-links">
+      <a href="index.html" class="footer-link">Home</a>
+      <a href="index.html#packs" class="footer-link">Packs</a>
+      <a href="setup/index.html" class="footer-link">Setup Guide</a>
+      <a href="customize/index.html" class="footer-link">Customize</a>
+      <a href="compliance-overview.html" class="footer-link">Compliance</a>
+      <a href="https://heaptrace.com" class="footer-link" target="_blank" rel="noopener">Heaptrace</a>
+    </div>
+    <div class="footer-copy">
+      MIT License &middot; Built by <a href="https://heaptrace.com" target="_blank" rel="noopener">Heaptrace Technology</a>
+      <br>100 Skills &middot; 10 Packs &middot; Free &amp; Open Source
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
