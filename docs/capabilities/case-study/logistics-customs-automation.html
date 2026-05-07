@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customs Document Automation for Mid-Market Forwarder — Heaptrace AI Case Study</title>
+  <meta name="description" content="How a mid-market freight forwarder cut customs filing cycle time from 4 hours to 12 minutes per shipment across US CBP, EU, and APAC customs systems with full audit trail per declaration.">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Customs Document Automation — Heaptrace AI Case Study">
+  <meta property="og:description" content="Freight forwarder cuts customs filing cycle time 95% across 5 jurisdictions. Greenfield Build, 14 weeks.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../../css/styles.css">
+  <link rel="stylesheet" href="../css/main.css">
+</head>
+<body class="cap-site">
+
+<!-- ═══════════════════════════════════════════════════════════
+     NAVIGATION
+     ═══════════════════════════════════════════════════════════ -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace AI Capabilities</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../capability/index.html" class="nav-link">Capabilities</a>
+      <a href="../industry/index.html" class="nav-link">Industries</a>
+      <a href="../service/index.html" class="nav-link">Services</a>
+      <a href="index.html" class="nav-link active">Case Studies</a>
+      <a href="../team.html" class="nav-link">Team</a>
+      <a href="../../index.html" class="nav-link">Skills</a>
+    </div>
+    <a href="mailto:hello@heaptrace.com?subject=Logistics%20Customs%20Demo" class="nav-cta">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+      Book a Demo
+    </a>
+    <button class="nav-toggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     S1: HERO
+     ═══════════════════════════════════════════════════════════ -->
+<section class="cap-hero">
+  <div class="container cap-hero-content">
+
+    <div class="cap-badge">
+      <span class="cap-badge-dot"></span>
+      Case Study &middot; Logistics
+    </div>
+
+    <h1>Customs Document Automation<br>for Mid-Market Freight Forwarder</h1>
+
+    <p class="cap-hero-subtitle">
+      How a freight forwarder cut customs filing cycle time from 4 hours to 12 minutes per shipment &mdash; across US CBP, EU, and APAC customs systems &mdash; with full audit trail per declaration.
+    </p>
+
+    <div class="cap-hero-ctas">
+      <a href="mailto:hello@heaptrace.com?subject=Logistics%20Customs%20Demo" class="cap-btn-primary">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+        Book a Demo
+      </a>
+      <a href="index.html" class="cap-btn-secondary">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Back to Case Studies
+      </a>
+    </div>
+
+    <div class="cap-stats">
+      <div class="cap-stat">
+        <div class="cap-stat-value">95%</div>
+        <div class="cap-stat-label">Cycle Time Reduction</div>
+      </div>
+      <div class="cap-stat">
+        <div class="cap-stat-value">99.2%</div>
+        <div class="cap-stat-label">First-Pass Accuracy</div>
+      </div>
+      <div class="cap-stat">
+        <div class="cap-stat-value">5</div>
+        <div class="cap-stat-label">Customs Jurisdictions</div>
+      </div>
+      <div class="cap-stat">
+        <div class="cap-stat-value">14 wks</div>
+        <div class="cap-stat-label">To Production</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     S2: THE CLIENT
+     ═══════════════════════════════════════════════════════════ -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <div class="cap-eyebrow">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+        The Client
+      </div>
+      <h2 class="section-title">Mid-Market Freight Forwarder, Asia-Pacific HQ</h2>
+      <p class="section-desc">A regional freight forwarder running global trade lanes &mdash; and bottlenecked by a customs operations team buried in paper.</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; max-width: 1000px; margin: 0 auto;">
+
+      <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 24px 26px;">
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--cap-emerald); letter-spacing: 0.08em; margin-bottom: 8px; text-transform: uppercase;">Industry</div>
+        <div style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.65;">Logistics &mdash; Freight Forwarding</div>
+      </div>
+
+      <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 24px 26px;">
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--cap-emerald); letter-spacing: 0.08em; margin-bottom: 8px; text-transform: uppercase;">Size</div>
+        <div style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.65;">~600 employees, ~$300M revenue</div>
+      </div>
+
+      <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 24px 26px;">
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--cap-emerald); letter-spacing: 0.08em; margin-bottom: 8px; text-transform: uppercase;">Geography</div>
+        <div style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.65;">HQ Singapore, operations across US, EU, China, India, ANZ</div>
+      </div>
+
+      <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 24px 26px;">
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--cap-emerald); letter-spacing: 0.08em; margin-bottom: 8px; text-transform: uppercase;">Volume</div>
+        <div style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.65;">20,000 customs declarations per month across 5 customs jurisdictions</div>
+      </div>
+
+      <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 24px 26px; grid-column: 1 / -1;">
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--cap-emerald); letter-spacing: 0.08em; margin-bottom: 8px; text-transform: uppercase;">Status Quo (Pre-Engagement)</div>
+        <div style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.65;">50-person customs ops team manually processing BOLs, commercial invoices, packing lists, classification, and customs filings. Per-shipment cycle 3&ndash;5 hours. Customer SLA frequently missed during peak season.</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<div class="divider"></div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     S3: THE PROBLEM
+     ═══════════════════════════════════════════════════════════ -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <div class="cap-eyebrow">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01M5 19h14a2 2 0 001.84-2.75L13.74 4a2 2 0 00-3.48 0l-7.1 12.25A2 2 0 005 19z"/></svg>
+        The Problem
+      </div>
+      <h2 class="section-title">Five Customs Jurisdictions. Five Different Schemas. One Stretched Team.</h2>
+    </div>
+
+    <div style="max-width: 820px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px;">
+      <p style="font-size: 1.02rem; color: var(--text-secondary); line-height: 1.8;">
+        The customs ops team was the bottleneck. Each declaration required a human to read 4&ndash;6 documents, cross-check data, classify HTS codes, file with the appropriate authority, and respond to exceptions. Three to five hours per shipment.
+      </p>
+      <p style="font-size: 1.02rem; color: var(--text-secondary); line-height: 1.8;">
+        Different jurisdictions made it worse. CBP wanted ACE filing format with specific tariff classifications. EU wanted CDS format with different validation rules. China wanted Customs Single Window with paper backups. APAC was a patchwork. Reviewers specialized by jurisdiction, which meant capacity imbalances during peak.
+      </p>
+      <p style="font-size: 1.02rem; color: var(--text-secondary); line-height: 1.8;">
+        The customer SLA was 24-hour customs clearance for premium shipments. Pre-engagement, they hit it 78% of the time during normal volume &mdash; and dropped to 50% during peak season. Premium customers were churning to competitors.
+      </p>
+    </div>
+  </div>
+</section>
+
+
+<div class="divider"></div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     S4: THE ENGAGEMENT
+     ═══════════════════════════════════════════════════════════ -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <div class="cap-eyebrow">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+        The Engagement
+      </div>
+      <h2 class="section-title">Greenfield Build &mdash; 14 Weeks, End-to-End Production</h2>
+      <p class="section-desc">A net-new pipeline replacing manual ops. New ingestion, new classification engine, new filing layer, new exception management.</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; max-width: 1000px; margin: 0 auto;">
+
+      <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 24px 26px;">
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--cap-emerald); letter-spacing: 0.08em; margin-bottom: 8px; text-transform: uppercase;">Engagement Model</div>
+        <div style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.65;"><a href="../service/greenfield-build.html" style="color: var(--cap-emerald-light); text-decoration: none; border-bottom: 1px dashed var(--cap-emerald-border);">Greenfield Build</a></div>
+      </div>
+
+      <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 24px 26px;">
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--cap-emerald); letter-spacing: 0.08em; margin-bottom: 8px; text-transform: uppercase;">Duration</div>
+        <div style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.65;">14 weeks, plan to production</div>
+      </div>
+
+      <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 24px 26px; grid-column: 1 / -1;">
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--cap-emerald); letter-spacing: 0.08em; margin-bottom: 8px; text-transform: uppercase;">Heaptrace Team</div>
+        <div style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.65;">Lead AI Architect (logistics background), 2 AI Engineers, 1 Document Intelligence Specialist, 1 Workflow Engineer (Temporal expertise)</div>
+      </div>
+
+      <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 24px 26px; grid-column: 1 / -1;">
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--cap-emerald); letter-spacing: 0.08em; margin-bottom: 8px; text-transform: uppercase;">Why Greenfield</div>
+        <div style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.65;">This was a net-new pipeline replacing manual ops. New ingestion, new classification engine, new filing layer, new exception management.</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<div class="divider"></div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     S5: OUR APPROACH — 4 PILLARS
+     ═══════════════════════════════════════════════════════════ -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <div class="cap-eyebrow">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+        Our Approach
+      </div>
+      <h2 class="section-title">Multi-Format Ingestion + HTS Classification Agent + Multi-Authority Filing</h2>
+      <p class="section-desc">Four pillars carrying a declaration from email attachment to filed customs entry &mdash; with a Temporal workflow keeping exceptions tracked through to resolution.</p>
+    </div>
+
+    <div class="cap-pillars" style="grid-template-columns: repeat(4, 1fr);">
+
+      <div class="cap-pillar">
+        <div class="cap-pillar-num">01</div>
+        <h3>Multi-Format Document Ingestion</h3>
+        <p>BOL, commercial invoice, packing list, certificate of origin, dangerous goods declaration. Layout-aware OCR with format-specific extraction templates.</p>
+      </div>
+
+      <div class="cap-pillar">
+        <div class="cap-pillar-num">02</div>
+        <h3>HTS Classification Agent</h3>
+        <p>Multi-step classification using product description, materials, country of origin, intended use. Confidence-scored with edge cases routed to specialists.</p>
+      </div>
+
+      <div class="cap-pillar">
+        <div class="cap-pillar-num">03</div>
+        <h3>Multi-Authority Filing Layer</h3>
+        <p>Adapters for CBP ACE, EU CDS, China Customs Single Window, India ICEGATE, ANZ ABF. One internal data model, jurisdiction-specific output.</p>
+      </div>
+
+      <div class="cap-pillar">
+        <div class="cap-pillar-num">04</div>
+        <h3>Exception Workflow Orchestration</h3>
+        <p>Temporal-based long-running workflow for exceptions. Customs queries, document re-requests, customer follow-ups all tracked through to resolution.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<div class="divider"></div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     S6: THE OUTCOMES
+     ═══════════════════════════════════════════════════════════ -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <div class="cap-eyebrow">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+        The Outcomes
+      </div>
+      <h2 class="section-title">Measurable Results, 12 Months Post-Launch</h2>
+      <p class="section-desc">The cycle time and accuracy were the engineering wins. The premium-tier churn drop was the business case.</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; max-width: 1000px; margin: 0 auto;">
+
+      <div style="display: flex; gap: 14px; padding: 22px 24px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md);">
+        <svg width="22" height="22" fill="none" stroke="var(--cap-emerald)" stroke-width="2.5" viewBox="0 0 24 24" style="flex-shrink: 0; margin-top: 2px;"><path d="M5 13l4 4L19 7"/></svg>
+        <div>
+          <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 4px; font-size: 0.98rem;">Per-Shipment Cycle</div>
+          <div style="font-size: 0.86rem; color: var(--text-muted); line-height: 1.55;">3&ndash;5 hours &rarr; 12 minutes average (95%+ reduction)</div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 14px; padding: 22px 24px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md);">
+        <svg width="22" height="22" fill="none" stroke="var(--cap-emerald)" stroke-width="2.5" viewBox="0 0 24 24" style="flex-shrink: 0; margin-top: 2px;"><path d="M5 13l4 4L19 7"/></svg>
+        <div>
+          <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 4px; font-size: 0.98rem;">Submission Accuracy</div>
+          <div style="font-size: 0.86rem; color: var(--text-muted); line-height: 1.55;">99.2% first-pass acceptance across all 5 jurisdictions</div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 14px; padding: 22px 24px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md);">
+        <svg width="22" height="22" fill="none" stroke="var(--cap-emerald)" stroke-width="2.5" viewBox="0 0 24 24" style="flex-shrink: 0; margin-top: 2px;"><path d="M5 13l4 4L19 7"/></svg>
+        <div>
+          <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 4px; font-size: 0.98rem;">24-Hour SLA Hit Rate</div>
+          <div style="font-size: 0.86rem; color: var(--text-muted); line-height: 1.55;">78% normal / 50% peak &rarr; 96% normal / 92% peak</div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 14px; padding: 22px 24px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md);">
+        <svg width="22" height="22" fill="none" stroke="var(--cap-emerald)" stroke-width="2.5" viewBox="0 0 24 24" style="flex-shrink: 0; margin-top: 2px;"><path d="M5 13l4 4L19 7"/></svg>
+        <div>
+          <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 4px; font-size: 0.98rem;">Customer Churn (Premium Tier)</div>
+          <div style="font-size: 0.86rem; color: var(--text-muted); line-height: 1.55;">Down 67% in 12 months</div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 14px; padding: 22px 24px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md);">
+        <svg width="22" height="22" fill="none" stroke="var(--cap-emerald)" stroke-width="2.5" viewBox="0 0 24 24" style="flex-shrink: 0; margin-top: 2px;"><path d="M5 13l4 4L19 7"/></svg>
+        <div>
+          <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 4px; font-size: 0.98rem;">Ops Team Reallocation</div>
+          <div style="font-size: 0.86rem; color: var(--text-muted); line-height: 1.55;">50 customs specialists &rarr; 22 (rest moved to higher-value customer service); attrition handled gracefully</div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 14px; padding: 22px 24px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md);">
+        <svg width="22" height="22" fill="none" stroke="var(--cap-emerald)" stroke-width="2.5" viewBox="0 0 24 24" style="flex-shrink: 0; margin-top: 2px;"><path d="M5 13l4 4L19 7"/></svg>
+        <div>
+          <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 4px; font-size: 0.98rem;">Peak-Season Capacity</div>
+          <div style="font-size: 0.86rem; color: var(--text-muted); line-height: 1.55;">4x higher without adding headcount</div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 14px; padding: 22px 24px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); grid-column: 1 / -1;">
+        <svg width="22" height="22" fill="none" stroke="var(--cap-emerald)" stroke-width="2.5" viewBox="0 0 24 24" style="flex-shrink: 0; margin-top: 2px;"><path d="M5 13l4 4L19 7"/></svg>
+        <div>
+          <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 4px; font-size: 0.98rem;">Customer NPS</div>
+          <div style="font-size: 0.86rem; color: var(--text-muted); line-height: 1.55;">+28 points</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<div class="divider"></div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     S7: CAPABILITIES USED + LESSONS
+     ═══════════════════════════════════════════════════════════ -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <div class="cap-eyebrow">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        Capabilities &amp; Lessons
+      </div>
+      <h2 class="section-title">What We Used &mdash; And What We Learned</h2>
+      <p class="section-desc">Four capabilities across the stack, plus the four hard-won lessons that shaped the build.</p>
+    </div>
+
+    <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin: 0 auto 18px; max-width: 1000px; letter-spacing: -0.01em;">Capabilities Used</h3>
+
+    <div class="cap-industries" style="grid-template-columns: repeat(4, 1fr); max-width: 1000px; margin: 0 auto 48px;">
+
+      <a href="../capability/document-intelligence.html" class="cap-industry">
+        <span class="cap-industry-icon">&#x1F4C4;</span>
+        <div class="cap-industry-name">Document Intelligence</div>
+        <div class="cap-industry-tagline">Layout-aware OCR and structured extraction across BOL, invoice, packing list formats.</div>
+      </a>
+
+      <a href="../capability/agentic-automation.html" class="cap-industry">
+        <span class="cap-industry-icon">&#x1F916;</span>
+        <div class="cap-industry-name">Agentic Automation</div>
+        <div class="cap-industry-tagline">Multi-step HTS classification agent with confidence scoring and escalation routing.</div>
+      </a>
+
+      <a href="../capability/vision-ai.html" class="cap-industry">
+        <span class="cap-industry-icon">&#x1F441;&#xFE0F;</span>
+        <div class="cap-industry-name">Vision AI</div>
+        <div class="cap-industry-tagline">Visual layout parsing for document templates that vary by carrier and origin port.</div>
+      </a>
+
+      <a href="../capability/b2b-workflow.html" class="cap-industry">
+        <span class="cap-industry-icon">&#x1F517;</span>
+        <div class="cap-industry-name">B2B Workflow Automation</div>
+        <div class="cap-industry-tagline">Multi-authority filing across CBP, EU CDS, China Single Window, ICEGATE, ANZ ABF.</div>
+      </a>
+
+    </div>
+
+    <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin: 0 auto 18px; max-width: 1000px; letter-spacing: -0.01em;">Lessons Learned</h3>
+
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; max-width: 1000px; margin: 0 auto;">
+
+      <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 24px 26px;">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+          <span style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 8px; background: var(--cap-emerald-bg); color: var(--cap-emerald); font-weight: 800; font-size: 0.85rem;">01</span>
+          <div style="font-weight: 700; color: var(--text-primary); font-size: 1rem;">Per-Jurisdiction Adapters Are the Unsexy 40%</div>
+        </div>
+        <div style="font-size: 0.92rem; color: var(--text-secondary); line-height: 1.7;">
+          Per-jurisdiction adapters were the unsexy 40% of the engagement. Each jurisdiction took 2&ndash;3 weeks of integration. Skipping any meant losing that market.
+        </div>
+      </div>
+
+      <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 24px 26px;">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+          <span style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 8px; background: var(--cap-emerald-bg); color: var(--cap-emerald); font-weight: 800; font-size: 0.85rem;">02</span>
+          <div style="font-weight: 700; color: var(--text-primary); font-size: 1rem;">HTS Classification Needs Confidence Routing</div>
+        </div>
+        <div style="font-size: 0.92rem; color: var(--text-secondary); line-height: 1.7;">
+          HTS classification is a deep specialist skill &mdash; automated 91%, but the 9% edge cases needed human review with confidence-scoring routing.
+        </div>
+      </div>
+
+      <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 24px 26px;">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+          <span style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 8px; background: var(--cap-emerald-bg); color: var(--cap-emerald); font-weight: 800; font-size: 0.85rem;">03</span>
+          <div style="font-weight: 700; color: var(--text-primary); font-size: 1rem;">Long-Running Workflows Are Essential</div>
+        </div>
+        <div style="font-size: 0.92rem; color: var(--text-secondary); line-height: 1.7;">
+          Long-running workflows for exceptions (Temporal) were essential. Exceptions can take days; classic request-response doesn't fit.
+        </div>
+      </div>
+
+      <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 24px 26px;">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+          <span style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 8px; background: var(--cap-emerald-bg); color: var(--cap-emerald); font-weight: 800; font-size: 0.85rem;">04</span>
+          <div style="font-weight: 700; color: var(--text-primary); font-size: 1rem;">Churn Impact Was the Surprise Win</div>
+        </div>
+        <div style="font-size: 0.92rem; color: var(--text-secondary); line-height: 1.7;">
+          Customer churn impact was the surprise &mdash; internal ROI was the cycle time, but the SLA hit rate moved the business case.
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<div class="divider"></div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     S8: CTA + QUOTE
+     ═══════════════════════════════════════════════════════════ -->
+<section class="section">
+  <div class="container">
+
+    <div style="max-width: 820px; margin: 0 auto 48px; padding: 36px 40px; background: linear-gradient(135deg, rgba(16, 185, 129, 0.06), rgba(6, 182, 212, 0.04)); border: 1px solid var(--cap-emerald-border); border-radius: var(--radius); position: relative;">
+      <svg width="38" height="38" viewBox="0 0 24 24" fill="var(--cap-emerald)" style="opacity: 0.4; margin-bottom: 14px;"><path d="M9.983 3v7.391c0 5.704-3.731 9.57-8.983 10.609l-.995-2.151c2.432-.917 3.995-3.638 3.995-5.849h-4v-10h9.983zm14.017 0v7.391c0 5.704-3.748 9.571-9 10.609l-.996-2.151c2.433-.917 3.996-3.638 3.996-5.849h-3.983v-10h9.983z"/></svg>
+      <p style="font-size: 1.18rem; font-style: italic; color: var(--text-primary); line-height: 1.7; margin-bottom: 18px;">
+        We saved on ops headcount, sure. But the real story is that we stopped losing premium customers to faster competitors. The 24-hour SLA was the table stakes we kept missing during peak. Now we hit it consistently. That's worth more than the cost reduction.
+      </p>
+      <div style="font-size: 0.88rem; color: var(--cap-emerald-light); font-family: 'JetBrains Mono', monospace; font-weight: 600; letter-spacing: 0.04em;">
+        &mdash; COO, Mid-Market Freight Forwarder (anonymized)
+      </div>
+    </div>
+
+    <div class="cap-cta">
+      <h2>Have a Customs, BOL, or Shipping Document Bottleneck?</h2>
+      <p>30-minute walkthrough on your declaration flow. We'll show you where automation lands fastest, what stays human, and what a 14-week build looks like in your jurisdictions.</p>
+      <div class="cap-cta-buttons">
+        <a href="mailto:hello@heaptrace.com?subject=Logistics%20Customs%20Demo" class="cap-btn-primary">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          Book a Logistics Demo
+        </a>
+        <a href="index.html" class="cap-btn-secondary">
+          Browse Other Case Studies
+        </a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     FOOTER
+     ═══════════════════════════════════════════════════════════ -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-links">
+      <a href="../index.html" class="footer-link">Home</a>
+      <a href="../capability/index.html" class="footer-link">Capabilities</a>
+      <a href="../industry/index.html" class="footer-link">Industries</a>
+      <a href="../service/index.html" class="footer-link">Services</a>
+      <a href="index.html" class="footer-link">Case Studies</a>
+      <a href="../../index.html" class="footer-link">Skills Library</a>
+      <a href="https://heaptrace.com" class="footer-link" target="_blank" rel="noopener">Heaptrace.com</a>
+    </div>
+    <div class="footer-copy">
+      &copy; Heaptrace Technology Pvt Ltd &middot; <a href="mailto:hello@heaptrace.com">hello@heaptrace.com</a>
+      <br>200+ Engineers &middot; Multi-Country Delivery &middot; Production Agentic AI
+      <br><span style="opacity: 0.6;">Case studies are anonymized representative engagements. Real names available on request after NDA.</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

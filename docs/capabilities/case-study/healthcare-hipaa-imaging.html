@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HIPAA-Grade Diagnostic Imaging Triage — Heaptrace Case Study</title>
+  <meta name="description" content="How a mid-market diagnostic provider running 50K studies/month built a multi-modal triage pipeline with full audit trail — and cut radiologist turnaround by 65% with zero compliance findings.">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="HIPAA-Grade Diagnostic Imaging Triage — Heaptrace Case Study">
+  <meta property="og:description" content="Multi-modal triage pipeline. 65% faster turnaround. Zero HIPAA findings across 4 audits. 18-month embedded engagement.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../../css/styles.css">
+  <link rel="stylesheet" href="../css/main.css">
+</head>
+<body class="cap-site">
+
+<!-- ═══════════════════════════════════════════════════════════
+     NAVIGATION
+     ═══════════════════════════════════════════════════════════ -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace AI Capabilities</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../capability/index.html" class="nav-link">Capabilities</a>
+      <a href="../industry/index.html" class="nav-link">Industries</a>
+      <a href="../service/index.html" class="nav-link">Services</a>
+      <a href="index.html" class="nav-link active">Case Studies</a>
+      <a href="../team.html" class="nav-link">Team</a>
+      <a href="../../index.html" class="nav-link">Skills</a>
+    </div>
+    <a href="mailto:hello@heaptrace.com?subject=Healthcare%20Imaging%20Demo" class="nav-cta">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+      Book a Demo
+    </a>
+    <button class="nav-toggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     S1: HERO
+     ═══════════════════════════════════════════════════════════ -->
+<section class="cap-hero">
+  <div class="container cap-hero-content">
+
+    <div class="cap-badge">
+      <span class="cap-badge-dot"></span>
+      Case Study &middot; Healthcare
+    </div>
+
+    <h1>HIPAA-Grade Diagnostic<br>Imaging Triage</h1>
+
+    <p class="cap-hero-subtitle">
+      How a mid-market diagnostic provider running 50K studies/month built a multi-modal triage pipeline with full audit trail &mdash; and cut radiologist turnaround by 65% with zero compliance findings.
+    </p>
+
+    <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 28px;">
+      <span class="cap-case-tag industry">Industry: Healthcare</span>
+      <span class="cap-case-tag">Capability: Vision AI + Document Intelligence</span>
+      <span class="cap-case-tag">Engagement: Team Retention</span>
+    </div>
+
+    <div class="cap-hero-ctas" style="margin-top: 34px;">
+      <a href="mailto:hello@heaptrace.com?subject=Healthcare%20Imaging%20Demo" class="cap-btn-primary">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+        Book Similar Demo
+      </a>
+      <a href="index.html" class="cap-btn-secondary">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        All Case Studies
+      </a>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     S2: THE CLIENT
+     ═══════════════════════════════════════════════════════════ -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <div class="cap-eyebrow">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+        The Client
+      </div>
+      <h2 class="section-title">Mid-Market Diagnostic Imaging Provider</h2>
+    </div>
+
+    <div style="max-width: 880px; margin: 0 auto; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 32px 36px;">
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px 36px;">
+
+        <div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--cap-emerald); letter-spacing: 0.08em; margin-bottom: 6px; text-transform: uppercase;">Industry</div>
+          <div style="font-size: 0.96rem; color: var(--text-secondary); line-height: 1.6;">Healthcare &mdash; Diagnostic Imaging</div>
+        </div>
+
+        <div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--cap-emerald); letter-spacing: 0.08em; margin-bottom: 6px; text-transform: uppercase;">Size</div>
+          <div style="font-size: 0.96rem; color: var(--text-secondary); line-height: 1.6;">~500 employees, 12 imaging centers</div>
+        </div>
+
+        <div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--cap-emerald); letter-spacing: 0.08em; margin-bottom: 6px; text-transform: uppercase;">Geography</div>
+          <div style="font-size: 0.96rem; color: var(--text-secondary); line-height: 1.6;">US Northeast, multi-state</div>
+        </div>
+
+        <div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--cap-emerald); letter-spacing: 0.08em; margin-bottom: 6px; text-transform: uppercase;">Volume</div>
+          <div style="font-size: 0.96rem; color: var(--text-secondary); line-height: 1.6;">50,000 imaging studies / month (CT, MRI, X-Ray, Ultrasound)</div>
+        </div>
+
+        <div style="grid-column: 1 / -1; padding-top: 18px; border-top: 1px solid var(--border);">
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--cap-emerald); letter-spacing: 0.08em; margin-bottom: 6px; text-transform: uppercase;">Status Quo Before Engagement</div>
+          <div style="font-size: 0.96rem; color: var(--text-secondary); line-height: 1.7;">Radiologist queue managed manually. Urgent findings sometimes flagged late. Compliance audit prep was a 3-week scramble each quarter across the engineering and compliance teams.</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<div class="divider"></div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     S3: THE PROBLEM
+     ═══════════════════════════════════════════════════════════ -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <div class="cap-eyebrow">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01M5 19h14a2 2 0 001.84-2.75L13.74 4a2 2 0 00-3.48 0l-7.1 12.25A2 2 0 005 19z"/></svg>
+        The Problem
+      </div>
+      <h2 class="section-title">Studies Backlogged. Urgent Cases Mixed With Routine. Compliance Anxiety Every Quarter.</h2>
+    </div>
+
+    <div style="max-width: 820px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px;">
+      <p style="font-size: 1.02rem; color: var(--text-secondary); line-height: 1.8;">
+        With 50K studies a month and 14 radiologists, the queue routinely backed up. Urgent findings sat behind routine reads. The triage process was first-in-first-out, which is the wrong default for clinical work &mdash; and everyone in the practice knew it. The medical director had been asking for a better answer for two years.
+      </p>
+      <p style="font-size: 1.02rem; color: var(--text-secondary); line-height: 1.8;">
+        Existing AI vendors offered &ldquo;imaging AI&rdquo; but came with vague compliance posture, no audit trail, and a black-box decision model that the medical director refused to put in front of patients. The vendor demos always looked great. The procurement reviews always fell apart over data residency, BAAs, and the inability to inspect what the model was actually doing on a per-study basis.
+      </p>
+      <p style="font-size: 1.02rem; color: var(--text-secondary); line-height: 1.8;">
+        On top of that, quarterly HIPAA audits were a 3-week scramble across the engineering and compliance teams. Evidence collection lived in shared drives. Audit trails were assembled retrospectively from logs that didn't quite match. The compliance officer had flagged this as an enterprise risk in two consecutive board reviews.
+      </p>
+    </div>
+  </div>
+</section>
+
+
+<div class="divider"></div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     S4: THE ENGAGEMENT
+     ═══════════════════════════════════════════════════════════ -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <div class="cap-eyebrow">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+        The Engagement
+      </div>
+      <h2 class="section-title">Team Retention &mdash; 18-Month Embedded Engagement</h2>
+    </div>
+
+    <div style="max-width: 880px; margin: 0 auto; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 32px 36px;">
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 22px 36px;">
+
+        <div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--cap-emerald); letter-spacing: 0.08em; margin-bottom: 6px; text-transform: uppercase;">Model</div>
+          <div style="font-size: 0.96rem; color: var(--text-secondary); line-height: 1.6;">
+            <a href="../service/team-retention.html" style="color: var(--cap-emerald-light); text-decoration: none; border-bottom: 1px dashed var(--cap-emerald-border);">Team Retention</a>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--cap-emerald); letter-spacing: 0.08em; margin-bottom: 6px; text-transform: uppercase;">Duration</div>
+          <div style="font-size: 0.96rem; color: var(--text-secondary); line-height: 1.6;">18 months (ongoing)</div>
+        </div>
+
+        <div style="grid-column: 1 / -1; padding-top: 18px; border-top: 1px solid var(--border);">
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--cap-emerald); letter-spacing: 0.08em; margin-bottom: 8px; text-transform: uppercase;">Heaptrace Team Composition</div>
+          <ul style="margin: 0; padding-left: 20px; font-size: 0.96rem; color: var(--text-secondary); line-height: 1.85;">
+            <li>Lead AI Architect (medical imaging background)</li>
+            <li>2 AI Engineers</li>
+            <li>1 QA Specialist (HL7 / FHIR experience)</li>
+            <li>1 Compliance Manager (HIPAA experience)</li>
+          </ul>
+        </div>
+
+        <div style="grid-column: 1 / -1; padding-top: 18px; border-top: 1px solid var(--border);">
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--cap-emerald); letter-spacing: 0.08em; margin-bottom: 8px; text-transform: uppercase;">Client Team</div>
+          <ul style="margin: 0; padding-left: 20px; font-size: 0.96rem; color: var(--text-secondary); line-height: 1.85;">
+            <li>Medical Director</li>
+            <li>CTO</li>
+            <li>Compliance Officer</li>
+            <li>2 in-house engineers paired with Heaptrace team</li>
+          </ul>
+        </div>
+
+        <div style="grid-column: 1 / -1; padding-top: 18px; border-top: 1px solid var(--border);">
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--cap-emerald); letter-spacing: 0.08em; margin-bottom: 8px; text-transform: uppercase;">Why This Model</div>
+          <div style="font-size: 0.96rem; color: var(--text-secondary); line-height: 1.7;">
+            Healthcare AI work is never &ldquo;one and done&rdquo; &mdash; model drift, regulatory changes, and evolving clinical workflows all require sustained engineering attention. The client needed a team that would still be there in month 14 when modality coverage expanded, not a vendor handing off a system and disappearing.
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<div class="divider"></div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     S5: OUR APPROACH
+     ═══════════════════════════════════════════════════════════ -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <div class="cap-eyebrow">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+        Our Approach
+      </div>
+      <h2 class="section-title">Multi-Modal Triage with Audit Trail at Every Step</h2>
+      <p class="section-desc">Four phased pillars, designed up-front with the medical director and compliance officer in the room. Nothing went into production without sign-off from both.</p>
+    </div>
+
+    <div class="cap-pillars" style="grid-template-columns: repeat(4, 1fr);">
+
+      <div class="cap-pillar">
+        <div class="cap-pillar-num">01</div>
+        <h3>HIPAA-First Architecture</h3>
+        <p>PHI never leaves the client's VPC. All processing on-prem GPU cluster. PHI redaction at every interface boundary. BAAs in place with all sub-processors before a single study was ingested.</p>
+      </div>
+
+      <div class="cap-pillar">
+        <div class="cap-pillar-num">02</div>
+        <h3>Multi-Model Vision Pipeline</h3>
+        <p>DICOM-native ingestion. Specialized models per modality &mdash; CT, MRI, X-Ray, Ultrasound &mdash; each tuned and validated separately. Confidence scoring with thresholds for urgent escalation.</p>
+      </div>
+
+      <div class="cap-pillar">
+        <div class="cap-pillar-num">03</div>
+        <h3>Document Intelligence for Reports</h3>
+        <p>Prior-report ingestion to give radiologists context the moment they open a study. RAG pipeline with citation back to the source report &mdash; never a paraphrased summary the radiologist has to verify.</p>
+      </div>
+
+      <div class="cap-pillar">
+        <div class="cap-pillar-num">04</div>
+        <h3>Audit-Grade Logging</h3>
+        <p>Every decision logged with model version, input hash, confidence score, and radiologist override (if any). Audit trail maps directly to &sect;164.312 technical safeguards. Inspectable in seconds.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<div class="divider"></div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     S6: THE OUTCOMES
+     ═══════════════════════════════════════════════════════════ -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <div class="cap-eyebrow">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        Outcomes
+      </div>
+      <h2 class="section-title">What Changed in 18 Months</h2>
+      <p class="section-desc">Concrete metrics measured against pre-engagement baselines. Reviewed quarterly with the medical director and CTO.</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; max-width: 1000px; margin: 0 auto;">
+
+      <div style="display: flex; gap: 14px; padding: 22px 24px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md);">
+        <svg width="22" height="22" fill="none" stroke="var(--cap-emerald)" stroke-width="2.5" viewBox="0 0 24 24" style="flex-shrink: 0; margin-top: 2px;"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        <div>
+          <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 4px; font-size: 1rem;">65% faster radiologist turnaround</div>
+          <div style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.6;">On urgent findings: 24-minute average down to 8 minutes.</div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 14px; padding: 22px 24px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md);">
+        <svg width="22" height="22" fill="none" stroke="var(--cap-emerald)" stroke-width="2.5" viewBox="0 0 24 24" style="flex-shrink: 0; margin-top: 2px;"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        <div>
+          <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 4px; font-size: 1rem;">Zero compliance findings</div>
+          <div style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.6;">In four consecutive quarterly HIPAA audits.</div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 14px; padding: 22px 24px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md);">
+        <svg width="22" height="22" fill="none" stroke="var(--cap-emerald)" stroke-width="2.5" viewBox="0 0 24 24" style="flex-shrink: 0; margin-top: 2px;"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 3.077a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.504c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+        <div>
+          <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 4px; font-size: 1rem;">Physician trust score 4.7 / 5</div>
+          <div style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.6;">Across 14 radiologists after the 6-month adoption period.</div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 14px; padding: 22px 24px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md);">
+        <svg width="22" height="22" fill="none" stroke="var(--cap-emerald)" stroke-width="2.5" viewBox="0 0 24 24" style="flex-shrink: 0; margin-top: 2px;"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <div>
+          <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 4px; font-size: 1rem;">Audit prep cycle: 3 weeks &rarr; 2 days</div>
+          <div style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.6;">Compliance-report skill wired into CI generates auditor-ready evidence on demand.</div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 14px; padding: 22px 24px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md);">
+        <svg width="22" height="22" fill="none" stroke="var(--cap-emerald)" stroke-width="2.5" viewBox="0 0 24 24" style="flex-shrink: 0; margin-top: 2px;"><path d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>
+        <div>
+          <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 4px; font-size: 1rem;">900K+ studies processed</div>
+          <div style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.6;">Across the engagement to date. Not a pilot &mdash; production traffic from day 90 onward.</div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 14px; padding: 22px 24px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md);">
+        <svg width="22" height="22" fill="none" stroke="var(--cap-emerald)" stroke-width="2.5" viewBox="0 0 24 24" style="flex-shrink: 0; margin-top: 2px;"><path d="M3 3v18h18M9 17V9m4 8V5m4 12v-6"/></svg>
+        <div>
+          <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 4px; font-size: 1rem;">Misclassification rate &lt;0.3%</div>
+          <div style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.6;">Well below the medical director's acceptance threshold; tracked per modality.</div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 14px; padding: 22px 24px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); grid-column: 1 / -1;">
+        <svg width="22" height="22" fill="none" stroke="var(--cap-emerald)" stroke-width="2.5" viewBox="0 0 24 24" style="flex-shrink: 0; margin-top: 2px;"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+        <div>
+          <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 4px; font-size: 1rem;">Team still embedded</div>
+          <div style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.6;">Actively on next quarter's roadmap &mdash; modality expansion to mammography &mdash; with the same core Heaptrace team in place since month one.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<div class="divider"></div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     S7: CAPABILITIES USED + LESSONS LEARNED
+     ═══════════════════════════════════════════════════════════ -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <div class="cap-eyebrow">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+        Capabilities &amp; Lessons
+      </div>
+      <h2 class="section-title">What This Engagement Taught Us</h2>
+      <p class="section-desc">The capabilities we put to work, and the lessons we now bring to every healthcare AI engagement.</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 36px; max-width: 1100px; margin: 0 auto;">
+
+      <!-- Left: Capabilities Used -->
+      <div>
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--cap-emerald); letter-spacing: 0.08em; margin-bottom: 18px; text-transform: uppercase;">Capabilities Used</div>
+
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+
+          <a href="../capability/vision-ai.html" class="cap-tile" style="display: flex; gap: 14px; align-items: flex-start;">
+            <div class="cap-tile-icon" style="margin-bottom: 0; flex-shrink: 0;">
+              <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+            </div>
+            <div>
+              <div class="cap-tile-name">Vision AI</div>
+              <div class="cap-tile-desc">DICOM-native multi-modal pipeline across CT, MRI, X-Ray, Ultrasound.</div>
+            </div>
+          </a>
+
+          <a href="../capability/document-intelligence.html" class="cap-tile" style="display: flex; gap: 14px; align-items: flex-start;">
+            <div class="cap-tile-icon" style="margin-bottom: 0; flex-shrink: 0;">
+              <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            </div>
+            <div>
+              <div class="cap-tile-name">Document Intelligence</div>
+              <div class="cap-tile-desc">Prior-report ingestion with citation-grounded RAG for radiologist context.</div>
+            </div>
+          </a>
+
+          <a href="../capability/ai-qa-automation.html" class="cap-tile" style="display: flex; gap: 14px; align-items: flex-start;">
+            <div class="cap-tile-icon" style="margin-bottom: 0; flex-shrink: 0;">
+              <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
+            </div>
+            <div>
+              <div class="cap-tile-name">AI QA Automation</div>
+              <div class="cap-tile-desc">Regression eval harness over per-modality golden test sets.</div>
+            </div>
+          </a>
+
+          <a href="../capability/data-engineering.html" class="cap-tile" style="display: flex; gap: 14px; align-items: flex-start;">
+            <div class="cap-tile-icon" style="margin-bottom: 0; flex-shrink: 0;">
+              <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/></svg>
+            </div>
+            <div>
+              <div class="cap-tile-name">Data Engineering</div>
+              <div class="cap-tile-desc">PHI-safe pipelines, on-prem GPU orchestration, audit-grade event log.</div>
+            </div>
+          </a>
+
+        </div>
+      </div>
+
+      <!-- Right: Lessons Learned -->
+      <div>
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--cap-emerald); letter-spacing: 0.08em; margin-bottom: 18px; text-transform: uppercase;">Lessons Learned</div>
+
+        <ol style="margin: 0; padding-left: 0; list-style: none; counter-reset: lesson-counter;">
+
+          <li style="counter-increment: lesson-counter; position: relative; padding: 16px 18px 16px 56px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); margin-bottom: 12px;">
+            <div style="position: absolute; left: 18px; top: 14px; width: 28px; height: 28px; border-radius: 50%; background: var(--cap-emerald-bg); color: var(--cap-emerald); display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.85rem;">1</div>
+            <div style="font-size: 0.94rem; color: var(--text-secondary); line-height: 1.7;">PHI redaction must be engineered into the data flow, not added at the end. Retrofitting redaction is where compliance audits get expensive.</div>
+          </li>
+
+          <li style="counter-increment: lesson-counter; position: relative; padding: 16px 18px 16px 56px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); margin-bottom: 12px;">
+            <div style="position: absolute; left: 18px; top: 14px; width: 28px; height: 28px; border-radius: 50%; background: var(--cap-emerald-bg); color: var(--cap-emerald); display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.85rem;">2</div>
+            <div style="font-size: 0.94rem; color: var(--text-secondary); line-height: 1.7;">Active learning loops with radiologist override feedback improved model accuracy 12% over 12 months. The override signal is the most valuable training data in the system.</div>
+          </li>
+
+          <li style="counter-increment: lesson-counter; position: relative; padding: 16px 18px 16px 56px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); margin-bottom: 12px;">
+            <div style="position: absolute; left: 18px; top: 14px; width: 28px; height: 28px; border-radius: 50%; background: var(--cap-emerald-bg); color: var(--cap-emerald); display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.85rem;">3</div>
+            <div style="font-size: 0.94rem; color: var(--text-secondary); line-height: 1.7;">Quarterly compliance audits are predictable; engineering for them in CI saves 80% of the prep time. Audit evidence should be a build artifact, not a manual collection effort.</div>
+          </li>
+
+          <li style="counter-increment: lesson-counter; position: relative; padding: 16px 18px 16px 56px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); margin-bottom: 12px;">
+            <div style="position: absolute; left: 18px; top: 14px; width: 28px; height: 28px; border-radius: 50%; background: var(--cap-emerald-bg); color: var(--cap-emerald); display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.85rem;">4</div>
+            <div style="font-size: 0.94rem; color: var(--text-secondary); line-height: 1.7;">Multi-modal fusion (combining DICOM imagery + prior reports) outperformed any single-modality approach. The radiologist's mental model is multi-modal &mdash; the system has to be too.</div>
+          </li>
+
+        </ol>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<div class="divider"></div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     S8: CTA + QUOTE
+     ═══════════════════════════════════════════════════════════ -->
+<section class="section">
+  <div class="container">
+
+    <div class="section-header">
+      <div class="cap-eyebrow">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+        Talk to Us
+      </div>
+      <h2 class="section-title">Have a Similar Imaging or HIPAA Workflow Challenge?</h2>
+    </div>
+
+    <!-- Pull quote -->
+    <div style="max-width: 820px; margin: 0 auto 42px; background: var(--bg-card); border: 1px solid var(--border); border-left: 4px solid var(--cap-emerald); border-radius: var(--radius-md); padding: 30px 36px;">
+      <svg width="28" height="28" fill="var(--cap-emerald)" viewBox="0 0 24 24" style="opacity: 0.4; margin-bottom: 10px;"><path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/></svg>
+      <p style="font-size: 1.08rem; color: var(--text-primary); line-height: 1.75; font-style: italic; margin: 0 0 16px;">
+        What I tell other diagnostic providers is that this team didn't just deliver an AI feature &mdash; they delivered our HIPAA posture. Audit prep used to consume the engineering team for weeks. Now it's a button. The triage value is real, but the operational quietness is what made it worth it.
+      </p>
+      <div style="font-size: 0.88rem; color: var(--text-muted); font-weight: 600;">
+        &mdash; Medical Director (anonymized)
+      </div>
+    </div>
+
+    <!-- CTA block -->
+    <div class="cap-cta">
+      <h2>Book a Walkthrough</h2>
+      <p>30-minute walkthrough on your imaging or HIPAA-regulated workflow. We'll show you how this engagement maps to your situation and what we'd change for your domain.</p>
+      <div class="cap-cta-buttons">
+        <a href="mailto:hello@heaptrace.com?subject=Healthcare%20Imaging%20Demo" class="cap-btn-primary">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          Talk to Us
+        </a>
+        <a href="index.html" class="cap-btn-secondary">
+          View Other Case Studies
+        </a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     FOOTER
+     ═══════════════════════════════════════════════════════════ -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-links">
+      <a href="../index.html" class="footer-link">Home</a>
+      <a href="../capability/index.html" class="footer-link">Capabilities</a>
+      <a href="../industry/index.html" class="footer-link">Industries</a>
+      <a href="../service/index.html" class="footer-link">Services</a>
+      <a href="index.html" class="footer-link">Case Studies</a>
+      <a href="../../index.html" class="footer-link">Skills Library</a>
+      <a href="https://heaptrace.com" class="footer-link" target="_blank" rel="noopener">Heaptrace.com</a>
+    </div>
+    <div class="footer-copy">
+      &copy; Heaptrace Technology Pvt Ltd &middot; <a href="mailto:hello@heaptrace.com">hello@heaptrace.com</a>
+      <br>200+ Engineers &middot; Multi-Country Delivery &middot; Production Agentic AI
+      <br><span style="opacity: 0.6;">Anonymized engagement &mdash; representative of real production work. Real names available on request after NDA.</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
