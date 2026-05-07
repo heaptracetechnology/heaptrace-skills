@@ -1,0 +1,12 @@
+# Heaptrace Skills + Heaptrace AI Capabilities
+# https://heaptracetechnology.github.io/heaptrace-skills/
+
+User-agent: *
+Allow: /
+
+# Methodology page is private, password-gated, and not for indexing
+Disallow: /methodology.html
+
+# Sitemaps
+Sitemap: https://heaptracetechnology.github.io/heaptrace-skills/sitemap.xml
+Sitemap: https://heaptracetechnology.github.io/heaptrace-skills/capabilities/sitemap.xml
