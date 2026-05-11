@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI-First Engineering Handbook — Heaptrace</title>
+  <meta name="description" content="How the Heaptrace engineering team operates day-to-day with AI. The standards that make a Software Engineer I and a Software Engineer IV produce the same quality of output.">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="author" content="Heaptrace Technology">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="../css/styles.css">
+
+  <style>
+    /* ══════════════════════════════════════════
+       HANDBOOK HUB — PAGE STYLES
+       Primary accent: GREEN (--green)
+       ══════════════════════════════════════════ */
+
+    :root {
+      --accent: var(--green);
+      --accent-light: #34d399;
+      --accent-soft: rgba(16, 185, 129, 0.10);
+      --accent-border: rgba(16, 185, 129, 0.28);
+      --accent-glow: rgba(16, 185, 129, 0.20);
+    }
+
+    body { line-height: 1.7; }
+
+    /* ── Password Gate ── */
+    #password-gate {
+      position: fixed; inset: 0; z-index: 9999;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--bg-primary);
+      background-image:
+        radial-gradient(ellipse 60% 40% at 50% 20%, rgba(16, 185, 129, 0.08), transparent 70%),
+        radial-gradient(ellipse 40% 30% at 50% 80%, rgba(6, 182, 212, 0.05), transparent 60%);
+    }
+    #gate-input:focus {
+      border-color: var(--accent) !important;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.18);
+    }
+    #gate-submit:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 30px rgba(16, 185, 129, 0.35);
+    }
+
+    /* ── Override nav active state for handbook (green) ── */
+    .nav-link.active { color: var(--green); background: rgba(16, 185, 129, 0.08); }
+
+    /* ── Section primitives ── */
+    .hb-section {
+      padding: 100px 0;
+      position: relative;
+    }
+    .hb-section-narrow { max-width: 880px; margin: 0 auto; padding: 0 24px; }
+    .hb-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 0.78rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.12em; color: var(--accent-light);
+      margin-bottom: 14px;
+    }
+    .hb-eyebrow::before {
+      content: ''; width: 24px; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent));
+    }
+    .hb-title {
+      font-size: clamp(1.9rem, 3.2vw, 2.5rem);
+      font-weight: 800; line-height: 1.18; margin-bottom: 18px;
+      letter-spacing: -0.02em;
+    }
+    .hb-lead {
+      font-size: 1.05rem; color: var(--text-secondary);
+      line-height: 1.8; max-width: 720px;
+    }
+
+    /* ── Hero ── */
+    .hb-hero {
+      padding: calc(var(--nav-height) + 110px) 0 90px;
+      text-align: center; position: relative; overflow: hidden;
+    }
+    .hb-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 40% at 50% 0%, rgba(16, 185, 129, 0.10), transparent 70%),
+        radial-gradient(ellipse 40% 30% at 30% 30%, rgba(6, 182, 212, 0.05), transparent 60%),
+        radial-gradient(ellipse 40% 30% at 70% 20%, rgba(16, 185, 129, 0.05), transparent 60%);
+      pointer-events: none;
+    }
+    .hb-hero::after {
+      content: ''; position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='grid' width='60' height='60' patternUnits='userSpaceOnUse'%3E%3Cpath d='M 60 0 L 0 0 0 60' fill='none' stroke='%231e293b' stroke-width='0.5'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23grid)'/%3E%3C/svg%3E");
+      opacity: 0.3; pointer-events: none;
+    }
+    .hb-hero-content { position: relative; z-index: 1; }
+    .hb-hero-badge {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--accent-soft);
+      border: 1px solid var(--accent-border);
+      color: var(--accent-light); padding: 8px 20px; border-radius: 999px;
+      font-size: 0.78rem; font-weight: 700; margin-bottom: 32px;
+      letter-spacing: 0.12em; text-transform: uppercase;
+    }
+    .hb-hero-badge-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent); box-shadow: 0 0 12px var(--accent);
+      animation: pulseGreen 2.4s infinite;
+    }
+    @keyframes pulseGreen {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.45); }
+      50% { opacity: 0.85; box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+    }
+    .hb-hero h1 {
+      font-size: clamp(2.5rem, 5vw, 3.9rem);
+      font-weight: 800; line-height: 1.08; margin-bottom: 24px;
+      letter-spacing: -0.025em;
+      background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-light) 45%, var(--cyan-light) 85%, var(--text-primary) 100%);
+      background-size: 200% auto;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmer 7s ease-in-out infinite;
+    }
+    .hb-hero-subtitle {
+      font-size: 1.15rem; color: var(--text-secondary);
+      max-width: 720px; margin: 0 auto 40px; line-height: 1.75;
+    }
+    .hb-hero-stats {
+      display: inline-flex; align-items: center; gap: 0;
+      margin: 0 auto 48px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--bg-card);
+      padding: 14px 8px;
+    }
+    .hb-hero-stat {
+      padding: 0 24px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      position: relative;
+    }
+    .hb-hero-stat strong {
+      color: var(--accent-light);
+      font-weight: 800;
+      margin-right: 6px;
+    }
+    .hb-hero-stat + .hb-hero-stat::before {
+      content: '·'; position: absolute; left: -3px; top: 50%; transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+    .hb-hero-ctas {
+      display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+    }
+    .hb-btn-primary {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: linear-gradient(135deg, var(--green), var(--cyan));
+      color: white; padding: 14px 28px; border-radius: var(--radius-md);
+      font-size: 0.95rem; font-weight: 600; border: none; cursor: pointer;
+      transition: var(--transition);
+      box-shadow: 0 4px 20px rgba(16, 185, 129, 0.30);
+    }
+    .hb-btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(16, 185, 129, 0.40);
+    }
+    .hb-btn-secondary {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--bg-card); border: 1px solid var(--border-hover);
+      color: var(--text-primary); padding: 14px 28px; border-radius: var(--radius-md);
+      font-size: 0.95rem; font-weight: 600; cursor: pointer;
+      transition: var(--transition);
+    }
+    .hb-btn-secondary:hover {
+      border-color: var(--accent);
+      background: var(--bg-card-hover);
+      transform: translateY(-2px);
+      color: var(--accent-light);
+    }
+    @media (max-width: 768px) {
+      .hb-hero-stats { flex-wrap: wrap; border-radius: 16px; padding: 16px 12px; }
+      .hb-hero-stat { padding: 6px 14px; }
+      .hb-hero-stat + .hb-hero-stat::before { display: none; }
+    }
+
+    /* ── Opening statement (CTO anchor quote + 3 paras) ── */
+    .hb-anchor-quote {
+      position: relative;
+      background: linear-gradient(180deg, var(--accent-soft) 0%, transparent 100%);
+      border: 1px solid var(--accent-border);
+      border-radius: var(--radius);
+      padding: 48px 44px;
+      margin-bottom: 56px;
+      text-align: center;
+    }
+    .hb-anchor-quote::before {
+      content: '“';
+      position: absolute; top: 6px; left: 24px;
+      font-size: 5rem; line-height: 1; color: var(--accent);
+      font-family: Georgia, serif; opacity: 0.45;
+    }
+    .hb-anchor-quote p {
+      font-size: clamp(1.15rem, 2vw, 1.45rem);
+      font-weight: 600; font-style: italic;
+      line-height: 1.5;
+      color: var(--text-primary);
+      max-width: 720px; margin: 0 auto;
+      letter-spacing: -0.005em;
+    }
+    .hb-anchor-supporting {
+      display: grid; grid-template-columns: 1fr; gap: 32px;
+    }
+    .hb-anchor-block {
+      padding-left: 20px;
+      border-left: 2px solid var(--accent);
+    }
+    .hb-anchor-block h3 {
+      font-size: 1.1rem; font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 10px;
+      letter-spacing: -0.01em;
+    }
+    .hb-anchor-block p {
+      font-size: 1rem; color: var(--text-secondary);
+      line-height: 1.75;
+    }
+
+    /* ── TOC: the 7-doc grid (the centerpiece) ── */
+    .hb-toc-wrap {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-top: 56px;
+    }
+    .hb-toc-card {
+      display: grid;
+      grid-template-columns: 80px 1fr auto;
+      gap: 28px;
+      align-items: center;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 28px 32px;
+      transition: var(--transition);
+      text-decoration: none;
+      color: inherit;
+      position: relative;
+      overflow: hidden;
+    }
+    .hb-toc-card.has-link { cursor: pointer; }
+    .hb-toc-card.has-link:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent-border);
+      box-shadow: 0 10px 30px rgba(16, 185, 129, 0.10);
+    }
+    .hb-toc-card.is-current {
+      border-color: var(--accent);
+      background: linear-gradient(180deg, var(--accent-soft) 0%, var(--bg-card) 100%);
+    }
+    .hb-toc-card.is-current::before {
+      content: '';
+      position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+      background: linear-gradient(180deg, var(--green), var(--cyan));
+    }
+    .hb-toc-card.is-coming {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+    .hb-toc-num {
+      font-size: 2.4rem;
+      font-weight: 800;
+      color: var(--accent-light);
+      letter-spacing: -0.04em;
+      line-height: 1;
+      font-family: 'JetBrains Mono', monospace;
+      text-align: center;
+    }
+    .hb-toc-card.is-coming .hb-toc-num { color: var(--text-muted); }
+    .hb-toc-body {
+      min-width: 0;
+    }
+    .hb-toc-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+    }
+    .hb-toc-sub {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .hb-toc-status {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 0.7rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      padding: 6px 12px; border-radius: 999px;
+      white-space: nowrap;
+    }
+    .hb-toc-status-current {
+      background: var(--accent-soft);
+      color: var(--accent-light);
+      border: 1px solid var(--accent-border);
+    }
+    .hb-toc-status-read {
+      background: rgba(6, 182, 212, 0.10);
+      color: var(--cyan-light);
+      border: 1px solid rgba(6, 182, 212, 0.25);
+    }
+    .hb-toc-status-soon {
+      background: rgba(100, 116, 139, 0.08);
+      color: var(--text-muted);
+      border: 1px solid rgba(100, 116, 139, 0.22);
+    }
+    .hb-toc-status-public {
+      background: rgba(168, 85, 247, 0.10);
+      color: var(--purple-light);
+      border: 1px solid rgba(168, 85, 247, 0.25);
+    }
+    .hb-toc-arrow {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--bg-elevated);
+      color: var(--text-muted);
+      transition: var(--transition-fast);
+      flex-shrink: 0;
+    }
+    .hb-toc-card.has-link:hover .hb-toc-arrow {
+      background: var(--accent);
+      color: white;
+      transform: translateX(2px);
+    }
+    @media (max-width: 720px) {
+      .hb-toc-card {
+        grid-template-columns: 56px 1fr;
+        gap: 16px; padding: 20px;
+      }
+      .hb-toc-num { font-size: 1.8rem; }
+      .hb-toc-status, .hb-toc-arrow { grid-column: 1 / -1; justify-self: start; margin-top: 6px; }
+    }
+
+    /* ── CTO Statements 2x2 grid ── */
+    .hb-cto-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      margin-top: 48px;
+    }
+    .hb-cto-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius-md);
+      padding: 32px 30px;
+      position: relative;
+      transition: var(--transition);
+    }
+    .hb-cto-card:hover {
+      border-color: var(--border-hover);
+      border-left-color: var(--accent);
+      transform: translateY(-2px);
+    }
+    .hb-cto-card::before {
+      content: '';
+      position: absolute; top: 18px; right: 22px;
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--accent);
+      opacity: 0.4;
+    }
+    .hb-cto-num {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--accent-light);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .hb-cto-quote {
+      font-size: 1.08rem;
+      font-style: italic;
+      font-weight: 500;
+      line-height: 1.65;
+      color: var(--text-primary);
+      letter-spacing: -0.005em;
+    }
+    @media (max-width: 768px) {
+      .hb-cto-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── Who this is for: styled rows ── */
+    .hb-reader-list {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0;
+      margin-top: 40px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background: var(--bg-card);
+    }
+    .hb-reader-row {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 32px;
+      padding: 22px 28px;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s ease;
+    }
+    .hb-reader-row:last-child { border-bottom: none; }
+    .hb-reader-row:hover { background: var(--bg-card-hover); }
+    .hb-reader-who {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.005em;
+    }
+    .hb-reader-who small {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-top: 3px;
+      letter-spacing: 0;
+    }
+    .hb-reader-path {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    .hb-reader-path code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      background: var(--bg-elevated);
+      color: var(--accent-light);
+      padding: 2px 8px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+    @media (max-width: 720px) {
+      .hb-reader-row { grid-template-columns: 1fr; gap: 8px; padding: 18px 20px; }
+    }
+
+    /* ── Versioning card ── */
+    .hb-version-card {
+      max-width: 720px;
+      margin: 0 auto;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 28px 32px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px 32px;
+    }
+    .hb-version-row {
+      display: flex; flex-direction: column;
+      gap: 2px;
+    }
+    .hb-version-label {
+      font-size: 0.7rem; font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .hb-version-val {
+      font-size: 0.95rem;
+      color: var(--text-primary);
+      font-weight: 600;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: -0.005em;
+    }
+    @media (max-width: 540px) {
+      .hb-version-card { grid-template-columns: 1fr; }
+    }
+
+    /* ── Final CTA ── */
+    .hb-final-cta {
+      padding: 80px 0 60px;
+      text-align: center;
+      position: relative;
+    }
+    .hb-final-cta::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 50% 60% at 50% 50%, rgba(16, 185, 129, 0.08), transparent 70%);
+      pointer-events: none;
+    }
+    .hb-final-cta-inner {
+      position: relative; z-index: 1;
+    }
+    .hb-final-cta a {
+      display: inline-flex; align-items: center; gap: 12px;
+      background: linear-gradient(135deg, var(--green), var(--cyan));
+      color: white;
+      padding: 18px 38px;
+      border-radius: var(--radius-md);
+      font-size: 1.05rem;
+      font-weight: 700;
+      box-shadow: 0 8px 30px rgba(16, 185, 129, 0.35);
+      transition: var(--transition);
+      letter-spacing: -0.005em;
+    }
+    .hb-final-cta a:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(16, 185, 129, 0.45);
+    }
+    .hb-final-cta-sub {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-top: 20px;
+    }
+
+    /* ── Section divider ── */
+    .hb-divider {
+      max-width: var(--max-width); margin: 0 auto;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border-hover) 20%, var(--border-hover) 80%, transparent);
+    }
+
+    /* ── Print ── */
+    @media print {
+      #password-gate { display: none !important; }
+      #main-content { display: block !important; }
+      body { overflow: auto !important; background: white; color: #111; }
+      .nav, .footer, .hb-final-cta, .nav-cta { display: none !important; }
+      .hb-hero, .hb-section { padding: 40px 0 !important; page-break-inside: avoid; }
+      .hb-hero::before, .hb-hero::after { display: none; }
+      .hb-toc-card, .hb-cto-card, .hb-anchor-quote, .hb-version-card, .hb-reader-list {
+        background: white !important;
+        color: #111 !important;
+        border-color: #ccc !important;
+        box-shadow: none !important;
+        page-break-inside: avoid;
+      }
+      .hb-title, .hb-toc-title, .hb-anchor-block h3, .hb-cto-quote, .hb-reader-who {
+        color: #111 !important;
+        -webkit-text-fill-color: #111 !important;
+        background: none !important;
+      }
+      .hb-hero h1 {
+        color: #111 !important;
+        -webkit-text-fill-color: #111 !important;
+        background: none !important;
+        animation: none !important;
+      }
+      .hb-lead, .hb-toc-sub, .hb-reader-path, .hb-anchor-block p {
+        color: #333 !important;
+      }
+      .hb-eyebrow, .hb-hero-badge, .hb-toc-num, .hb-cto-num, .hb-toc-status, .hb-version-val {
+        color: #047857 !important;
+        background: #d1fae5 !important;
+        border-color: #6ee7b7 !important;
+        -webkit-text-fill-color: #047857 !important;
+      }
+      a { color: #047857 !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ══════════════════════════════════════════
+       PASSWORD GATE (renders first, must pass to see content)
+       ══════════════════════════════════════════ -->
+  <div id="password-gate" style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:var(--bg-primary);">
+    <div style="max-width:420px;width:90%;text-align:center;">
+      <div style="width:64px;height:64px;margin:0 auto 24px;border-radius:16px;background:linear-gradient(135deg,var(--green),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:white;box-shadow:0 0 40px rgba(16,185,129,0.3);">H</div>
+      <h1 style="font-size:1.5rem;font-weight:700;margin-bottom:8px;">Heaptrace Handbook</h1>
+      <p style="color:var(--text-secondary);margin-bottom:32px;font-size:0.95rem;">Enter access code to continue</p>
+      <input type="password" id="gate-input" placeholder="Access code" autocomplete="off" style="width:100%;padding:14px 18px;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;color:var(--text-primary);font-size:1rem;font-family:'JetBrains Mono',monospace;margin-bottom:16px;outline:none;transition:all 0.2s;">
+      <button id="gate-submit" style="width:100%;padding:14px;background:linear-gradient(135deg,var(--green),var(--cyan));border:none;border-radius:12px;color:white;font-weight:600;font-size:0.95rem;cursor:pointer;transition:all 0.2s;">Unlock</button>
+      <p id="gate-error" style="color:var(--red);margin-top:16px;font-size:0.85rem;min-height:1.2em;"></p>
+      <p style="color:var(--text-muted);margin-top:40px;font-size:0.8rem;">Private engineering handbook · Heaptrace Technology</p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       MAIN CONTENT (hidden until unlock)
+       ══════════════════════════════════════════ -->
+  <div id="main-content">
+
+    <!-- NAV -->
+    <nav class="nav">
+      <div class="nav-inner">
+        <a href="../index.html" class="nav-logo"><div class="nav-logo-icon">H</div><span>Heaptrace Skills</span></a>
+        <div class="nav-links" id="navLinks">
+          <a href="../index.html" class="nav-link">Home</a>
+          <a href="../index.html#packs" class="nav-link">Packs</a>
+          <a href="../setup/index.html" class="nav-link">Setup</a>
+          <a href="../customize/index.html" class="nav-link">Customize</a>
+          <a href="index.html" class="nav-link active">Handbook</a>
+          <div class="nav-dropdown">
+            <button class="nav-dropdown-trigger">Security <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button>
+            <div class="nav-dropdown-menu">
+              <a href="../compliance-overview.html" class="nav-dropdown-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>Compliance Overview</a>
+              <a href="../ci-cd-security.html" class="nav-dropdown-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>CI/CD Security Gateway</a>
+              <a href="../cicd-security-setup.html" class="nav-dropdown-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>Setup Guide</a>
+            </div>
+          </div>
+          <a href="../rules/index.html" class="nav-link">Rules</a>
+          <a href="../mcp/index.html" class="nav-link">MCP Servers</a>
+        </div>
+        <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>GitHub
+        </a>
+      </div>
+    </nav>
+
+    <!-- ══════════════════════════════════════════
+         SECTION 1 — HERO
+         ══════════════════════════════════════════ -->
+    <section class="hb-hero">
+      <div class="container hb-hero-content">
+        <div class="hb-hero-badge">
+          <span class="hb-hero-badge-dot"></span>
+          Handbook · Engineering Playbook
+        </div>
+        <h1>AI-First Engineering Handbook<br>at Heaptrace</h1>
+        <p class="hb-hero-subtitle">
+          How our engineering team operates day-to-day with AI. The standards that make a Software Engineer I and a Software Engineer IV produce the same quality of output.
+        </p>
+        <div class="hb-hero-stats">
+          <div class="hb-hero-stat"><strong>7</strong>Docs</div>
+          <div class="hb-hero-stat"><strong>101</strong>Skills</div>
+          <div class="hb-hero-stat"><strong>30</strong>Anti-Patterns</div>
+          <div class="hb-hero-stat"><strong>1</strong>Standard</div>
+        </div>
+        <div class="hb-hero-ctas">
+          <a href="principles.html" class="hb-btn-primary">
+            Read the Principles
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+          <a href="skills-playbook.html" class="hb-btn-secondary">
+            Skills Playbook
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <div class="hb-divider"></div>
+
+    <!-- ══════════════════════════════════════════
+         SECTION 2 — OPENING STATEMENT (CTO VOICE)
+         ══════════════════════════════════════════ -->
+    <section class="hb-section">
+      <div class="hb-section-narrow">
+        <div class="hb-eyebrow">Why this handbook exists</div>
+        <h2 class="hb-title">Variance is the failure mode.</h2>
+        <p class="hb-lead" style="margin-bottom: 56px;">
+          Most engineering organizations adopt AI by handing every developer a license and hoping for the best. We don't. The handbook below is the reason.
+        </p>
+
+        <div class="hb-anchor-quote">
+          <p>AI is not a productivity multiplier unless you remove the variance between developers. This handbook removes the variance.</p>
+        </div>
+
+        <div class="hb-anchor-supporting">
+          <div class="hb-anchor-block">
+            <h3>Variance is the real risk.</h3>
+            <p>
+              The bad scenario isn't AI producing bad code. The bad scenario is five developers using AI in five different ways, producing five different qualities of code — and all of it shipping. One developer writes tests; another doesn't. One runs <code style="font-family:'JetBrains Mono',monospace;font-size:0.85em;background:var(--bg-elevated);padding:1px 6px;border-radius:4px;color:var(--accent-light);">/code-review</code> before every PR; another never has. The team's worst output becomes the team's average. Variance is the failure mode, not capability. The handbook eliminates it.
+            </p>
+          </div>
+          <div class="hb-anchor-block">
+            <h3>Skills are the operating system. The handbook is the user manual.</h3>
+            <p>
+              Our 101 skills define how a single piece of work should be done — how to plan a feature, run a code review, write a migration, ship a release. The handbook defines <em>when</em> each skill applies, <em>who</em> runs which one at which seniority, and what the team agrees <em>not</em> to do. Without the handbook, skills get used differently per developer, and we're back to variance. With it, the skills become the team's shared muscle memory.
+            </p>
+          </div>
+          <div class="hb-anchor-block">
+            <h3>This is shareable with clients.</h3>
+            <p>
+              Most engineering playbooks are internal — locked behind SSO, written for insiders, full of inside jokes and tribal knowledge. Ours is public by design. Clients should see exactly how we operate before they sign. Process transparency is itself a credibility signal. If we do something internally that we wouldn't tell a client about, it isn't worth doing.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="hb-divider"></div>
+
+    <!-- ══════════════════════════════════════════
+         SECTION 3 — THE 7-DOC TABLE OF CONTENTS
+         ══════════════════════════════════════════ -->
+    <section class="hb-section">
+      <div class="container">
+        <div style="max-width: 880px; margin: 0 auto;">
+          <div class="hb-eyebrow">The Suite</div>
+          <h2 class="hb-title">Seven documents. One operating standard.</h2>
+          <p class="hb-lead">
+            The handbook is split into seven sub-documents — each one short enough to read in a sitting, focused enough that you actually finish it. Start with the Principles. Everything else builds on them.
+          </p>
+
+          <div class="hb-toc-wrap">
+
+            <!-- 1. Hub (current) -->
+            <div class="hb-toc-card is-current">
+              <div class="hb-toc-num">01</div>
+              <div class="hb-toc-body">
+                <div class="hb-toc-title">AI-First Engineering Handbook</div>
+                <div class="hb-toc-sub">Hub · Entry point to everything. The doc you're reading.</div>
+              </div>
+              <span class="hb-toc-status hb-toc-status-current">You are here</span>
+            </div>
+
+            <!-- 2. Principles (active link, "read first") -->
+            <a href="principles.html" class="hb-toc-card has-link">
+              <div class="hb-toc-num">02</div>
+              <div class="hb-toc-body">
+                <div class="hb-toc-title">The Principles</div>
+                <div class="hb-toc-sub">Seven core principles of AI-first engineering at Heaptrace. Read this first — everything else assumes it.</div>
+              </div>
+              <span class="hb-toc-status hb-toc-status-read">Read first</span>
+            </a>
+
+            <!-- 3. How We Work by Role -->
+            <div class="hb-toc-card is-coming">
+              <div class="hb-toc-num">03</div>
+              <div class="hb-toc-body">
+                <div class="hb-toc-title">How We Work — by Role</div>
+                <div class="hb-toc-sub">Day-in-the-life for Software Engineer I, II, III, and IV. What each role does with AI, and what they don't.</div>
+              </div>
+              <span class="hb-toc-status hb-toc-status-soon">Coming soon</span>
+            </div>
+
+            <!-- 4. Skills Playbook -->
+            <div class="hb-toc-card is-coming">
+              <div class="hb-toc-num">04</div>
+              <div class="hb-toc-body">
+                <div class="hb-toc-title">The Skills Playbook</div>
+                <div class="hb-toc-sub">Which skill, when, paired with what. The decision tree for picking the right tool at the right moment.</div>
+              </div>
+              <span class="hb-toc-status hb-toc-status-soon">Coming soon</span>
+            </div>
+
+            <!-- 5. Anti-Patterns -->
+            <div class="hb-toc-card is-coming">
+              <div class="hb-toc-num">05</div>
+              <div class="hb-toc-body">
+                <div class="hb-toc-title">Anti-Patterns</div>
+                <div class="hb-toc-sub">Thirty things we don't do — and the specific reason each one was banned. The shortest doc. The most enforced.</div>
+              </div>
+              <span class="hb-toc-status hb-toc-status-soon">Coming soon</span>
+            </div>
+
+            <!-- 6. Quality Gates -->
+            <div class="hb-toc-card is-coming">
+              <div class="hb-toc-num">06</div>
+              <div class="hb-toc-body">
+                <div class="hb-toc-title">Quality Gates</div>
+                <div class="hb-toc-sub">What every pull request must pass before it gets merged. No exceptions, no override, no "this one's urgent."</div>
+              </div>
+              <span class="hb-toc-status hb-toc-status-soon">Coming soon</span>
+            </div>
+
+            <!-- 7. Client Edition -->
+            <div class="hb-toc-card is-coming">
+              <div class="hb-toc-num">07</div>
+              <div class="hb-toc-body">
+                <div class="hb-toc-title">How Heaptrace Engineering Works <em style="font-style:normal;color:var(--text-muted);font-weight:400;">— Client Edition</em></div>
+                <div class="hb-toc-sub">The polished, shareable version. Same content, written for clients and prospects evaluating us.</div>
+              </div>
+              <span class="hb-toc-status hb-toc-status-public">Public</span>
+            </div>
+
+          </div>
+
+          <p style="margin-top: 28px; font-size: 0.88rem; color: var(--text-muted); text-align: center;">
+            Documents 03–07 are in active drafting. Estimated availability: Q2 2026.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <div class="hb-divider"></div>
+
+    <!-- ══════════════════════════════════════════
+         SECTION 4 — THE 4 CTO STATEMENTS
+         ══════════════════════════════════════════ -->
+    <section class="hb-section">
+      <div class="container">
+        <div style="max-width: 980px; margin: 0 auto;">
+          <div style="text-align: center; margin-bottom: 16px;">
+            <div class="hb-eyebrow" style="margin-bottom: 12px;">Cornerstone</div>
+          </div>
+          <h2 class="hb-title" style="text-align: center;">Four statements the handbook is built on.</h2>
+          <p class="hb-lead" style="text-align: center; margin: 0 auto;">
+            Every page that follows is downstream of these. If a policy ever conflicts with one of them, the policy loses.
+          </p>
+
+          <div class="hb-cto-grid">
+
+            <div class="hb-cto-card">
+              <div class="hb-cto-num">Statement 01</div>
+              <p class="hb-cto-quote">"AI is not a productivity multiplier unless you remove the variance between developers."</p>
+            </div>
+
+            <div class="hb-cto-card">
+              <div class="hb-cto-num">Statement 02</div>
+              <p class="hb-cto-quote">"A Software Engineer I with skills produces SE III-grade output. A Software Engineer IV without skills produces SE II-grade output. Tooling has flattened the curve — that's our advantage."</p>
+            </div>
+
+            <div class="hb-cto-card">
+              <div class="hb-cto-num">Statement 03</div>
+              <p class="hb-cto-quote">"We measure AI adoption by output consistency, not by speed."</p>
+            </div>
+
+            <div class="hb-cto-card">
+              <div class="hb-cto-num">Statement 04</div>
+              <p class="hb-cto-quote">"Our team produces the same quality regardless of who runs the keyboard. That's the standard. Everything else is process to get there."</p>
+            </div>
+
+          </div>
+
+          <p style="margin-top: 40px; text-align: center; color: var(--text-muted); font-size: 0.92rem; max-width: 700px; margin-left: auto; margin-right: auto; line-height: 1.7;">
+            We don't use AI for novel architecture decisions — hallucination risk exceeds productivity gain. We don't accept SE I pull requests without <code style="font-family:'JetBrains Mono',monospace;font-size:0.85em;background:var(--bg-elevated);padding:1px 6px;border-radius:4px;color:var(--accent-light);">/code-review</code> output attached; they're rejected at first review. The statements above are not aspirations. They are descriptions of the current floor.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <div class="hb-divider"></div>
+
+    <!-- ══════════════════════════════════════════
+         SECTION 5 — WHO THIS IS FOR
+         ══════════════════════════════════════════ -->
+    <section class="hb-section">
+      <div class="hb-section-narrow">
+        <div class="hb-eyebrow">Reader's Guide</div>
+        <h2 class="hb-title">Where to start, based on who you are.</h2>
+        <p class="hb-lead">
+          The handbook is read top-to-bottom, but most readers don't need the whole thing on day one. Pick your starting point below.
+        </p>
+
+        <div class="hb-reader-list">
+
+          <div class="hb-reader-row">
+            <div class="hb-reader-who">
+              Software Engineer I
+              <small>New to Heaptrace · First 90 days</small>
+            </div>
+            <div class="hb-reader-path">
+              Read <code>Principles</code> → <code>How We Work § SE I</code> → <code>Anti-Patterns</code>. In that order. The Anti-Patterns doc is the one your first code review will reference.
+            </div>
+          </div>
+
+          <div class="hb-reader-row">
+            <div class="hb-reader-who">
+              Software Engineer II
+              <small>Productive contributor · Building features end-to-end</small>
+            </div>
+            <div class="hb-reader-path">
+              Read <code>Principles</code> → <code>How We Work § SE II</code> → <code>Skills Playbook</code>. The Playbook is where the daily wins are.
+            </div>
+          </div>
+
+          <div class="hb-reader-row">
+            <div class="hb-reader-who">
+              Software Engineer III / IV
+              <small>Senior / Staff · Reviews, leads design, owns systems</small>
+            </div>
+            <div class="hb-reader-path">
+              Read <code>Principles</code> → <code>How We Work § SE III/IV</code> → <code>Quality Gates</code>. Quality Gates is the doc you enforce on everyone else.
+            </div>
+          </div>
+
+          <div class="hb-reader-row">
+            <div class="hb-reader-who">
+              Tech Lead / Engineering Manager
+              <small>Steward of the standard</small>
+            </div>
+            <div class="hb-reader-path">
+              All seven docs. You don't just follow the handbook — you're the reason it stays current. Quarterly review is on you.
+            </div>
+          </div>
+
+          <div class="hb-reader-row">
+            <div class="hb-reader-who">
+              Client / Prospect
+              <small>Evaluating how Heaptrace operates</small>
+            </div>
+            <div class="hb-reader-path">
+              Start with the <code>Client Edition</code> (Doc 07). It's the same content as the internal handbook, written for someone outside the team. No password required.
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <div class="hb-divider"></div>
+
+    <!-- ══════════════════════════════════════════
+         SECTION 6 — VERSIONING / EFFECTIVE DATE
+         ══════════════════════════════════════════ -->
+    <section class="hb-section" style="padding: 80px 0;">
+      <div class="container">
+        <div style="text-align: center; margin-bottom: 36px;">
+          <div class="hb-eyebrow">Document Control</div>
+          <h2 class="hb-title" style="font-size: clamp(1.4rem, 2.4vw, 1.8rem);">This handbook is versioned. It changes.</h2>
+        </div>
+        <div class="hb-version-card">
+          <div class="hb-version-row">
+            <span class="hb-version-label">Effective</span>
+            <span class="hb-version-val">April 2026</span>
+          </div>
+          <div class="hb-version-row">
+            <span class="hb-version-label">Version</span>
+            <span class="hb-version-val">1.0 — Initial Release</span>
+          </div>
+          <div class="hb-version-row">
+            <span class="hb-version-label">Maintained by</span>
+            <span class="hb-version-val">Heaptrace Engineering Leadership</span>
+          </div>
+          <div class="hb-version-row">
+            <span class="hb-version-label">Last review</span>
+            <span class="hb-version-val">April 2026</span>
+          </div>
+        </div>
+        <p style="text-align: center; max-width: 640px; margin: 28px auto 0; color: var(--text-muted); font-size: 0.9rem; line-height: 1.7;">
+          The handbook is reviewed quarterly. When a section changes, the version increments and the prior version is preserved in the git history of this repository. Disagreements with the current version are filed as pull requests, not as private complaints.
+        </p>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         SECTION 7 — FINAL CTA
+         ══════════════════════════════════════════ -->
+    <section class="hb-final-cta">
+      <div class="container hb-final-cta-inner">
+        <a href="principles.html">
+          Start with <strong>The Principles</strong>
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+        <p class="hb-final-cta-sub">
+          ~12 minute read · Required reading for every engineer at Heaptrace
+        </p>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="footer-inner">
+        <div class="footer-links">
+          <a href="../index.html" class="footer-link">Home</a>
+          <a href="../index.html#packs" class="footer-link">Packs</a>
+          <a href="../setup/index.html" class="footer-link">Setup Guide</a>
+          <a href="../customize/index.html" class="footer-link">Customize</a>
+          <a href="index.html" class="footer-link">Handbook</a>
+          <a href="https://heaptrace.com" class="footer-link" target="_blank" rel="noopener">Heaptrace</a>
+        </div>
+        <div class="footer-copy">
+          MIT License &middot; Built by <a href="https://heaptrace.com" target="_blank" rel="noopener">Heaptrace Technology</a>
+          <br>101 Skills &middot; 10 Packs &middot; Free &amp; Open Source
+        </div>
+      </div>
+    </footer>
+
+  </div><!-- /#main-content -->
+
+  <!-- ══════════════════════════════════════════
+       PASSWORD GATE SCRIPT
+       ══════════════════════════════════════════ -->
+  <script>
+    (function() {
+      const STORED_HASH = '5866f0f6f885b943472fd7572b9c783e6b1a29958a34bd9f18e1f1e17b9a57a6';
+      const STORAGE_KEY = 'htms-handbook-access';
+      const EXPIRY_DAYS = 30;
+      const gate = document.getElementById('password-gate');
+      const content = document.getElementById('main-content');
+      const input = document.getElementById('gate-input');
+      const submit = document.getElementById('gate-submit');
+      const error = document.getElementById('gate-error');
+
+      function unlock() {
+        gate.style.display = 'none';
+        content.style.display = 'block';
+        document.body.style.overflow = 'auto';
+      }
+
+      function checkStored() {
+        try {
+          const stored = localStorage.getItem(STORAGE_KEY);
+          if (!stored) return false;
+          const { hash, expiry } = JSON.parse(stored);
+          if (hash !== STORED_HASH) return false;
+          if (Date.now() > expiry) { localStorage.removeItem(STORAGE_KEY); return false; }
+          return true;
+        } catch { return false; }
+      }
+
+      async function sha256(str) {
+        const buf = new TextEncoder().encode(str);
+        const hashBuf = await crypto.subtle.digest('SHA-256', buf);
+        return Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
+      }
+
+      async function tryUnlock() {
+        error.textContent = '';
+        const val = input.value.trim();
+        if (!val) return;
+        const hash = await sha256(val);
+        if (hash === STORED_HASH) {
+          const expiry = Date.now() + EXPIRY_DAYS * 24 * 60 * 60 * 1000;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({ hash, expiry }));
+          unlock();
+        } else {
+          error.textContent = 'Incorrect code. Contact your Heaptrace contact.';
+          input.value = '';
+          input.focus();
+        }
+      }
+
+      content.style.display = 'none';
+      document.body.style.overflow = 'hidden';
+
+      if (checkStored()) {
+        unlock();
+      } else {
+        submit.addEventListener('click', tryUnlock);
+        input.addEventListener('keyup', (e) => { if (e.key === 'Enter') tryUnlock(); });
+        setTimeout(() => input.focus(), 100);
+      }
+    })();
+  </script>
+
+</body>
+</html>

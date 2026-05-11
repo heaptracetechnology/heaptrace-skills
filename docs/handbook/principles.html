@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The 7 Principles — Heaptrace Engineering Handbook</title>
+  <meta name="description" content="The 7 non-negotiable principles of AI-first engineering at Heaptrace. Doc 2 of 7 in the Engineering Handbook.">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="author" content="Heaptrace Technology">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="../css/styles.css">
+
+  <style>
+    /* ═════════════════════════════════════════════
+       PRINCIPLES — PAGE STYLES
+       Primary accent: GREEN (--green)
+       ═════════════════════════════════════════════ */
+
+    :root {
+      --accent: var(--green);
+      --accent-light: #34d399;
+      --accent-soft: rgba(16, 185, 129, 0.10);
+      --accent-border: rgba(16, 185, 129, 0.28);
+      --accent-glow: rgba(16, 185, 129, 0.18);
+    }
+
+    body { line-height: 1.7; }
+
+    /* ── Active nav (green override) ── */
+    .nav-link.active {
+      color: var(--green);
+      background: rgba(16, 185, 129, 0.08);
+    }
+
+    /* ── Password Gate ── */
+    #password-gate {
+      position: fixed; inset: 0; z-index: 9999;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--bg-primary);
+      background-image:
+        radial-gradient(ellipse 60% 40% at 50% 20%, rgba(16, 185, 129, 0.08), transparent 70%),
+        radial-gradient(ellipse 40% 30% at 50% 80%, rgba(6, 182, 212, 0.05), transparent 60%);
+    }
+    #gate-input:focus {
+      border-color: var(--accent) !important;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+    }
+    #gate-submit:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 30px rgba(16, 185, 129, 0.35);
+    }
+
+    /* ── Section eyebrow ── */
+    .pr-eyebrow {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 0.78rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.12em; color: var(--accent-light);
+      margin-bottom: 14px;
+    }
+    .pr-eyebrow::before {
+      content: ''; width: 24px; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent));
+    }
+    .pr-title {
+      font-size: clamp(1.9rem, 3.2vw, 2.6rem);
+      font-weight: 800; line-height: 1.15; margin-bottom: 16px;
+      letter-spacing: -0.02em;
+    }
+    .pr-lead {
+      font-size: 1.08rem; color: var(--text-secondary);
+      line-height: 1.75; max-width: 720px;
+    }
+    .pr-section {
+      padding: 100px 0;
+      position: relative;
+    }
+    .pr-section-narrow { max-width: 900px; margin: 0 auto; }
+
+    /* ── Hero ── */
+    .pr-hero {
+      padding: calc(var(--nav-height) + 100px) 0 90px;
+      text-align: center; position: relative; overflow: hidden;
+    }
+    .pr-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 40% at 50% 0%, rgba(16, 185, 129, 0.10), transparent 70%),
+        radial-gradient(ellipse 40% 30% at 30% 30%, rgba(6, 182, 212, 0.05), transparent 60%),
+        radial-gradient(ellipse 40% 30% at 70% 20%, rgba(52, 211, 153, 0.05), transparent 60%);
+      pointer-events: none;
+    }
+    .pr-hero::after {
+      content: ''; position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='grid' width='60' height='60' patternUnits='userSpaceOnUse'%3E%3Cpath d='M 60 0 L 0 0 0 60' fill='none' stroke='%231e293b' stroke-width='0.5'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23grid)'/%3E%3C/svg%3E");
+      opacity: 0.3; pointer-events: none;
+    }
+    .pr-hero-content { position: relative; z-index: 1; }
+    .pr-hero-badge {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--accent-soft);
+      border: 1px solid var(--accent-border);
+      color: var(--accent-light); padding: 8px 20px; border-radius: 999px;
+      font-size: 0.78rem; font-weight: 700; margin-bottom: 32px;
+      letter-spacing: 0.12em; text-transform: uppercase;
+    }
+    .pr-hero-badge-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent); box-shadow: 0 0 12px var(--accent);
+      animation: pulseGreen 2.4s infinite;
+    }
+    @keyframes pulseGreen {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.45); }
+      50% { opacity: 0.85; box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+    }
+    .pr-hero h1 {
+      font-size: clamp(2.6rem, 5.2vw, 4rem);
+      font-weight: 800; line-height: 1.08; margin-bottom: 24px;
+      letter-spacing: -0.025em;
+      background: linear-gradient(135deg, var(--text-primary) 0%, #34d399 45%, var(--cyan-light) 85%, var(--text-primary) 100%);
+      background-size: 200% auto;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmer 7s ease-in-out infinite;
+    }
+    @keyframes shimmer {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+    .pr-hero-subtitle {
+      font-size: 1.18rem; color: var(--text-secondary);
+      max-width: 740px; margin: 0 auto 48px; line-height: 1.75;
+    }
+    .pr-hero-cta {
+      display: inline-flex; align-items: center; gap: 14px;
+      margin-top: 8px; flex-wrap: wrap; justify-content: center;
+    }
+    .pr-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 14px 26px; border-radius: var(--radius-md);
+      font-weight: 600; font-size: 0.95rem; letter-spacing: 0.005em;
+      transition: var(--transition); border: 1px solid transparent;
+    }
+    .pr-btn-primary {
+      background: linear-gradient(135deg, var(--green), var(--cyan));
+      color: white;
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.25);
+    }
+    .pr-btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 32px rgba(16, 185, 129, 0.4);
+    }
+    .pr-btn-secondary {
+      background: transparent;
+      color: var(--text-primary);
+      border-color: var(--border-hover);
+    }
+    .pr-btn-secondary:hover {
+      border-color: var(--accent);
+      color: var(--accent-light);
+      background: var(--accent-soft);
+    }
+
+    /* ── Setup section (3 paragraphs) ── */
+    .pr-setup {
+      background:
+        radial-gradient(ellipse 80% 50% at 50% 0%, rgba(16, 185, 129, 0.04), transparent 70%);
+    }
+    .pr-setup-block {
+      padding: 28px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .pr-setup-block:last-child { border-bottom: none; }
+    .pr-setup-heading {
+      font-size: 1.35rem; font-weight: 700;
+      margin-bottom: 14px;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+    }
+    .pr-setup-heading::before {
+      content: '"'; color: var(--accent);
+      font-family: 'JetBrains Mono', monospace;
+      margin-right: 6px; opacity: 0.6;
+    }
+    .pr-setup-heading::after {
+      content: '"'; color: var(--accent);
+      font-family: 'JetBrains Mono', monospace;
+      margin-left: 4px; opacity: 0.6;
+    }
+    .pr-setup-body {
+      color: var(--text-secondary);
+      font-size: 1.02rem;
+      line-height: 1.8;
+    }
+
+    /* ── Principle Cards (the core of the doc) ── */
+    .pr-principles {
+      background:
+        radial-gradient(ellipse 60% 30% at 50% 50%, rgba(16, 185, 129, 0.025), transparent 70%);
+    }
+    .pr-principles-intro {
+      max-width: 720px; margin: 0 auto 80px; text-align: center;
+    }
+    .pr-principle {
+      max-width: 920px; margin: 0 auto 64px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 56px 56px 48px;
+      position: relative;
+      overflow: hidden;
+      transition: var(--transition);
+    }
+    .pr-principle:hover {
+      border-color: rgba(16, 185, 129, 0.25);
+    }
+    .pr-principle::before {
+      content: ''; position: absolute; top: 0; left: 0;
+      width: 4px; height: 100%;
+      background: linear-gradient(180deg, var(--green) 0%, var(--cyan) 100%);
+    }
+    .pr-principle-header {
+      display: flex; align-items: flex-start; gap: 28px;
+      margin-bottom: 36px;
+      padding-bottom: 28px;
+      border-bottom: 1px solid var(--border);
+    }
+    .pr-principle-number {
+      font-size: 4.2rem;
+      font-weight: 800;
+      line-height: 0.9;
+      background: linear-gradient(135deg, var(--green), var(--cyan));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.04em;
+      flex-shrink: 0;
+      min-width: 80px;
+    }
+    .pr-principle-tagline {
+      font-size: 0.72rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.14em;
+      color: var(--accent-light);
+      margin-bottom: 10px;
+    }
+    .pr-principle-statement {
+      font-size: 1.45rem;
+      font-weight: 700;
+      line-height: 1.35;
+      letter-spacing: -0.015em;
+      color: var(--text-primary);
+    }
+
+    /* Each labeled subsection inside a principle */
+    .pr-block {
+      margin-bottom: 28px;
+    }
+    .pr-block:last-child { margin-bottom: 0; }
+    .pr-block-label {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 0.72rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.12em;
+      margin-bottom: 14px;
+    }
+    .pr-block-label-icon {
+      width: 18px; height: 18px;
+      display: inline-flex; align-items: center; justify-content: center;
+      border-radius: 4px;
+      font-size: 0.7rem; font-weight: 800;
+    }
+
+    /* "We do" — green */
+    .pr-do .pr-block-label { color: var(--accent-light); }
+    .pr-do .pr-block-label-icon {
+      background: var(--accent-soft);
+      color: var(--accent-light);
+      border: 1px solid var(--accent-border);
+    }
+
+    /* "We don't" — red */
+    .pr-dont .pr-block-label { color: #fca5a5; }
+    .pr-dont .pr-block-label-icon {
+      background: rgba(239, 68, 68, 0.10);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.28);
+    }
+
+    /* "Consequence" — amber */
+    .pr-cons .pr-block-label { color: #fbbf24; }
+    .pr-cons .pr-block-label-icon {
+      background: rgba(245, 158, 11, 0.10);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.28);
+    }
+
+    /* "Learn more" — cyan */
+    .pr-learn .pr-block-label { color: var(--cyan-light); }
+    .pr-learn .pr-block-label-icon {
+      background: rgba(6, 182, 212, 0.10);
+      color: var(--cyan-light);
+      border: 1px solid rgba(6, 182, 212, 0.28);
+    }
+
+    .pr-list {
+      list-style: none; padding: 0;
+    }
+    .pr-list li {
+      position: relative;
+      padding: 10px 0 10px 28px;
+      color: var(--text-secondary);
+      font-size: 1rem;
+      line-height: 1.65;
+      border-bottom: 1px solid rgba(30, 41, 59, 0.5);
+    }
+    .pr-list li:last-child { border-bottom: none; }
+    .pr-list li::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 18px;
+      width: 14px; height: 2px;
+      border-radius: 2px;
+    }
+    .pr-do .pr-list li::before {
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent-glow);
+    }
+    .pr-dont .pr-list li::before {
+      background: #ef4444;
+      box-shadow: 0 0 8px rgba(239, 68, 68, 0.3);
+    }
+    .pr-list li strong { color: var(--text-primary); font-weight: 600; }
+    .pr-list li code {
+      background: var(--bg-code);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.88em;
+      color: var(--accent-light);
+      border: 1px solid var(--border);
+    }
+
+    /* Consequence callout */
+    .pr-consequence {
+      background: rgba(245, 158, 11, 0.04);
+      border: 1px solid rgba(245, 158, 11, 0.18);
+      border-left: 3px solid var(--amber);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      font-style: italic;
+      color: var(--text-secondary);
+      font-size: 1.02rem;
+      line-height: 1.7;
+    }
+    .pr-consequence strong { color: #fbbf24; font-style: normal; }
+
+    /* Learn more callout */
+    .pr-learn-link {
+      display: inline-flex; align-items: center; gap: 8px;
+      color: var(--cyan-light);
+      font-size: 0.95rem;
+      font-weight: 500;
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      background: rgba(6, 182, 212, 0.06);
+      border: 1px solid rgba(6, 182, 212, 0.18);
+      transition: var(--transition-fast);
+    }
+    .pr-learn-link:hover {
+      background: rgba(6, 182, 212, 0.10);
+      border-color: rgba(6, 182, 212, 0.4);
+      color: var(--cyan);
+    }
+    .pr-learn-link code {
+      background: transparent;
+      border: none;
+      padding: 0;
+      color: inherit;
+      font-weight: 600;
+    }
+
+    /* ── Recap card ── */
+    .pr-recap {
+      background:
+        radial-gradient(ellipse 80% 50% at 50% 50%, rgba(16, 185, 129, 0.06), transparent 70%);
+    }
+    .pr-recap-card {
+      max-width: 780px; margin: 0 auto;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 56px 56px 48px;
+      position: relative;
+      overflow: hidden;
+    }
+    .pr-recap-card::before {
+      content: ''; position: absolute;
+      top: -50%; left: -50%;
+      width: 200%; height: 200%;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(16, 185, 129, 0.06), transparent 50%),
+        radial-gradient(circle at 70% 70%, rgba(6, 182, 212, 0.04), transparent 50%);
+      pointer-events: none;
+    }
+    .pr-recap-header {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent-light);
+      margin-bottom: 32px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+      z-index: 1;
+    }
+    .pr-recap-list {
+      list-style: none;
+      padding: 0;
+      counter-reset: principle;
+      position: relative;
+      z-index: 1;
+    }
+    .pr-recap-list li {
+      counter-increment: principle;
+      display: flex; align-items: flex-start; gap: 20px;
+      padding: 18px 0;
+      border-bottom: 1px dashed var(--border);
+      font-size: 1.05rem;
+      color: var(--text-primary);
+      font-weight: 500;
+      line-height: 1.5;
+    }
+    .pr-recap-list li:last-child { border-bottom: none; }
+    .pr-recap-list li::before {
+      content: counter(principle, decimal-leading-zero);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--accent-light);
+      flex-shrink: 0;
+      padding-top: 3px;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── Next steps ── */
+    .pr-next {
+      background:
+        radial-gradient(ellipse 60% 40% at 50% 100%, rgba(16, 185, 129, 0.04), transparent 70%);
+    }
+    .pr-next-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      max-width: 1080px; margin: 48px auto 0;
+    }
+    .pr-next-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px 28px;
+      transition: var(--transition);
+      display: flex; flex-direction: column; gap: 14px;
+      min-height: 220px;
+      position: relative;
+    }
+    .pr-next-card.is-disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+    .pr-next-card:not(.is-disabled):hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(16, 185, 129, 0.10);
+    }
+    .pr-next-card-label {
+      font-size: 0.72rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.12em;
+      color: var(--text-muted);
+    }
+    .pr-next-card-title {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+      line-height: 1.3;
+    }
+    .pr-next-card-body {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      line-height: 1.65;
+      flex-grow: 1;
+    }
+    .pr-next-card-cta {
+      display: inline-flex; align-items: center; gap: 6px;
+      color: var(--accent-light);
+      font-size: 0.9rem; font-weight: 600;
+      margin-top: auto;
+    }
+    .pr-next-card.is-disabled .pr-next-card-cta {
+      color: var(--text-muted);
+    }
+    .pr-next-card-badge {
+      position: absolute;
+      top: 16px; right: 16px;
+      font-size: 0.65rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 4px 8px;
+      border-radius: 4px;
+      background: rgba(245, 158, 11, 0.10);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.25);
+    }
+
+    /* ── Effective footer ── */
+    .pr-effective {
+      max-width: 720px; margin: 80px auto 0;
+      padding: 32px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 2;
+    }
+    .pr-effective-divider {
+      color: var(--border-hover);
+      letter-spacing: 0.1em;
+    }
+    .pr-effective strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .pr-section { padding: 70px 0; }
+      .pr-principle { padding: 36px 28px 32px; }
+      .pr-principle-header {
+        flex-direction: column;
+        gap: 12px;
+      }
+      .pr-principle-number { font-size: 3.4rem; min-width: 0; }
+      .pr-principle-statement { font-size: 1.2rem; }
+      .pr-recap-card { padding: 36px 28px 32px; }
+      .pr-next-grid { grid-template-columns: 1fr; }
+      .pr-hero { padding-top: calc(var(--nav-height) + 60px); padding-bottom: 60px; }
+    }
+
+    /* ── Print ── */
+    @media print {
+      #password-gate, .nav, .footer, .pr-hero-cta { display: none !important; }
+      body, .pr-hero, .pr-section, .pr-principles, .pr-recap, .pr-next, .pr-setup {
+        background: white !important;
+        color: #0a0f1a !important;
+      }
+      .pr-principle, .pr-recap-card, .pr-effective, .pr-next-card {
+        background: white !important;
+        border: 1px solid #cbd5e1 !important;
+        page-break-inside: avoid;
+        box-shadow: none !important;
+      }
+      .pr-principle-number, .pr-hero h1, .pr-principle-tagline, .pr-recap-header {
+        -webkit-text-fill-color: #0f766e !important;
+        color: #0f766e !important;
+        background: none !important;
+      }
+      .pr-list li, .pr-setup-body, .pr-next-card-body, .pr-recap-list li {
+        color: #334155 !important;
+      }
+      .pr-consequence {
+        background: #fffbeb !important;
+        color: #78350f !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ════════════════════════════════════════════
+       PASSWORD GATE
+       ════════════════════════════════════════════ -->
+  <div id="password-gate" style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:var(--bg-primary);">
+    <div style="max-width:420px;width:90%;text-align:center;">
+      <div style="width:64px;height:64px;margin:0 auto 24px;border-radius:16px;background:linear-gradient(135deg,var(--green),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:white;box-shadow:0 0 40px rgba(16,185,129,0.3);">H</div>
+      <h1 style="font-size:1.5rem;font-weight:700;margin-bottom:8px;">Heaptrace Handbook</h1>
+      <p style="color:var(--text-secondary);margin-bottom:32px;font-size:0.95rem;">Enter access code to continue</p>
+      <input type="password" id="gate-input" placeholder="Access code" autocomplete="off" style="width:100%;padding:14px 18px;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;color:var(--text-primary);font-size:1rem;font-family:'JetBrains Mono',monospace;margin-bottom:16px;outline:none;transition:all 0.2s;">
+      <button id="gate-submit" style="width:100%;padding:14px;background:linear-gradient(135deg,var(--green),var(--cyan));border:none;border-radius:12px;color:white;font-weight:600;font-size:0.95rem;cursor:pointer;transition:all 0.2s;">Unlock</button>
+      <p id="gate-error" style="color:var(--red);margin-top:16px;font-size:0.85rem;min-height:1.2em;"></p>
+      <p style="color:var(--text-muted);margin-top:40px;font-size:0.8rem;">Private engineering handbook · Heaptrace Technology</p>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       MAIN CONTENT (hidden until unlock)
+       ════════════════════════════════════════════ -->
+  <div id="main-content">
+
+    <!-- NAV -->
+    <nav class="nav">
+      <div class="nav-inner">
+        <a href="../index.html" class="nav-logo"><div class="nav-logo-icon">H</div><span>Heaptrace Skills</span></a>
+        <div class="nav-links" id="navLinks">
+          <a href="../index.html" class="nav-link">Home</a>
+          <a href="../index.html#packs" class="nav-link">Packs</a>
+          <a href="../setup/index.html" class="nav-link">Setup</a>
+          <a href="../customize/index.html" class="nav-link">Customize</a>
+          <a href="index.html" class="nav-link active">Handbook</a>
+          <div class="nav-dropdown">
+            <button class="nav-dropdown-trigger">Security <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button>
+            <div class="nav-dropdown-menu">
+              <a href="../compliance-overview.html" class="nav-dropdown-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>Compliance Overview</a>
+              <a href="../ci-cd-security.html" class="nav-dropdown-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>CI/CD Security Gateway</a>
+              <a href="../cicd-security-setup.html" class="nav-dropdown-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>Setup Guide</a>
+            </div>
+          </div>
+          <a href="../rules/index.html" class="nav-link">Rules</a>
+          <a href="../mcp/index.html" class="nav-link">MCP Servers</a>
+        </div>
+        <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>GitHub
+        </a>
+      </div>
+    </nav>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 1 — HERO
+         ════════════════════════════════════════════ -->
+    <section class="pr-hero">
+      <div class="container pr-hero-content">
+        <div class="pr-hero-badge">
+          <span class="pr-hero-badge-dot"></span>
+          Doc 2 of 7 · Principles
+        </div>
+        <h1>The 7 Principles<br>of AI-First Engineering</h1>
+        <p class="pr-hero-subtitle">
+          The non-negotiables. These are the only opinions our team has to share.
+          Everything else is up for discussion.
+        </p>
+        <div class="pr-hero-cta">
+          <a href="index.html" class="pr-btn pr-btn-secondary">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            Back to Handbook
+          </a>
+          <a href="skills-playbook.html" class="pr-btn pr-btn-primary">
+            Skills Playbook
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 2 — WHY THESE 7 (SETUP)
+         ════════════════════════════════════════════ -->
+    <section class="pr-section pr-setup">
+      <div class="container pr-section-narrow">
+        <div class="pr-eyebrow">Why these seven</div>
+        <h2 class="pr-title">Not aspirations. Operating instructions.</h2>
+        <p class="pr-lead">
+          A handbook is only worth the behavior it changes. Read these once,
+          then go work. Refer back when something feels off.
+        </p>
+
+        <div style="margin-top: 56px;">
+          <div class="pr-setup-block">
+            <div class="pr-setup-heading">Not aspirations. Operating instructions.</div>
+            <p class="pr-setup-body">
+              A principle that doesn't change a developer's daily behavior isn't a
+              principle — it's marketing. These seven change behavior. Each one names
+              what we do, what we don't do, and what the consequence is when the
+              principle is broken. If you finish reading and your Monday morning
+              looks identical to last Monday, we've failed to write a principle.
+            </p>
+          </div>
+
+          <div class="pr-setup-block">
+            <div class="pr-setup-heading">Two readers in mind.</div>
+            <p class="pr-setup-body">
+              We wrote these for two readers at the same time: a Software Engineer I
+              joining their first day at Heaptrace, and a client evaluating whether
+              to extend their engagement. The principles read the same to both. If
+              they didn't, we wouldn't believe them. Internal honesty and external
+              clarity are the same standard here, written in the same words.
+            </p>
+          </div>
+
+          <div class="pr-setup-block">
+            <div class="pr-setup-heading">Read once. Reference forever.</div>
+            <p class="pr-setup-body">
+              Each principle is intentionally short. No essay. No nuance dump. The
+              team should be able to recite all seven from memory. The clarification
+              belongs in the supporting docs — How We Work by Role, the Skills
+              Playbook, Anti-Patterns, Quality Gates. This page is the spine. The
+              rest is the body.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 3 — THE 7 PRINCIPLES
+         ════════════════════════════════════════════ -->
+    <section class="pr-section pr-principles">
+      <div class="container">
+        <div class="pr-principles-intro">
+          <div class="pr-eyebrow" style="justify-content:center;">The seven</div>
+          <h2 class="pr-title" style="margin: 0 auto 16px;">One opinion per principle.</h2>
+          <p class="pr-lead" style="margin: 0 auto;">
+            No "it depends." No hedging. Each principle below is what we do, full stop —
+            with the anti-pattern and the consequence named in plain language.
+          </p>
+        </div>
+
+        <!-- ─────────────────────────────────────────
+             PRINCIPLE 1
+             ───────────────────────────────────────── -->
+        <article class="pr-principle">
+          <header class="pr-principle-header">
+            <div class="pr-principle-number">01</div>
+            <div>
+              <div class="pr-principle-tagline">Principle One</div>
+              <h3 class="pr-principle-statement">
+                Plan before code, even for small tasks. The plan determines the skill.
+                The skill determines the rigor.
+              </h3>
+            </div>
+          </header>
+
+          <div class="pr-block pr-do">
+            <div class="pr-block-label">
+              <span class="pr-block-label-icon">+</span>
+              What this looks like in practice
+            </div>
+            <ul class="pr-list">
+              <li><strong>Small task (under one day)</strong> — run <code>/quick-plan</code>, then <code>/quick-work</code>. Two skills, four minutes of upfront thinking, scope locked.</li>
+              <li><strong>Larger feature</strong> — run <code>/feature-plan</code>, then <code>/feature-work</code>. Full mockups, data flow, risk register, acceptance criteria — all before the first line of code.</li>
+              <li><strong>Bug</strong> — run <code>/find-fix</code> first to diagnose, then <code>/quick-plan</code> or <code>/feature-plan</code> based on the scope the diagnosis reveals.</li>
+              <li>The plan is reviewed by the developer (and a teammate, if multi-day) in 30 seconds before coding starts. Plans that take longer than 30 seconds to read are rewritten.</li>
+            </ul>
+          </div>
+
+          <div class="pr-block pr-dont">
+            <div class="pr-block-label">
+              <span class="pr-block-label-icon">−</span>
+              What we don't do
+            </div>
+            <ul class="pr-list">
+              <li>Open an editor and start typing on anything bigger than a typo or a copy change.</li>
+              <li>Use <code>/feature-plan</code> for one-line changes — that's token waste and ceremony waste, and it makes the team cynical about the skill.</li>
+              <li>Use <code>/quick-plan</code> for work that spans multiple sessions or multiple developers. If two people are touching it, it's a feature.</li>
+              <li>Skip planning because "I already know what to do." That's the moment to write it down — fast plans for known work are still plans.</li>
+            </ul>
+          </div>
+
+          <div class="pr-block pr-cons">
+            <div class="pr-block-label">
+              <span class="pr-block-label-icon">!</span>
+              Consequence when broken
+            </div>
+            <div class="pr-consequence">
+              <strong>PRs without an upfront plan exceed scope roughly eight out of ten times</strong>
+              in our internal review data. The pattern is identical every time: the developer
+              starts coding, hits a fork, picks the more interesting path, and ships work that
+              wasn't asked for. Plans aren't optional — they're the cheapest cost-reduction
+              mechanism we have.
+            </div>
+          </div>
+
+          <div class="pr-block pr-learn">
+            <div class="pr-block-label">
+              <span class="pr-block-label-icon">→</span>
+              Learn more
+            </div>
+            <a href="skills-playbook.html" class="pr-learn-link">
+              See <code>/quick-plan</code> and <code>/feature-plan</code> in the Skills Playbook
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+          </div>
+        </article>
+
+        <!-- ─────────────────────────────────────────
+             PRINCIPLE 2
+             ───────────────────────────────────────── -->
+        <article class="pr-principle">
+          <header class="pr-principle-header">
+            <div class="pr-principle-number">02</div>
+            <div>
+              <div class="pr-principle-tagline">Principle Two</div>
+              <h3 class="pr-principle-statement">
+                The skill is the operating system, not the suggestion. If a skill exists
+                for the task, the skill is run — not "consulted."
+              </h3>
+            </div>
+          </header>
+
+          <div class="pr-block pr-do">
+            <div class="pr-block-label">
+              <span class="pr-block-label-icon">+</span>
+              What this looks like in practice
+            </div>
+            <ul class="pr-list">
+              <li>Every PR that touches <strong>auth, payments, or PII</strong> runs <code>/sec-audit</code> before review — without exception, regardless of how trivial the change looks.</li>
+              <li>Every PR that <strong>adds dependencies</strong> runs <code>/dep-vuln</code>. New libraries don't enter the codebase without a vulnerability scan in the PR.</li>
+              <li>Every PR description includes the output (or a one-line summary) of any skill that was run, so the reviewer can verify it was actually run and not skipped.</li>
+              <li>New patterns we discover get codified as skills, not as Slack messages. If something is worth telling the team once, it's worth turning into a skill that runs forever.</li>
+            </ul>
+          </div>
+
+          <div class="pr-block pr-dont">
+            <div class="pr-block-label">
+              <span class="pr-block-label-icon">−</span>
+              What we don't do
+            </div>
+            <ul class="pr-list">
+              <li>Use raw ChatGPT or Cursor autocomplete on regulated code (auth, billing, PII, healthcare data, financial calculations).</li>
+              <li>"Glance at" a skill's output and ignore it. Either you resolve every finding or you explicitly accept it in writing in the PR description.</li>
+              <li>Ship a skill's warning unaddressed. Warnings either get fixed or get a documented exemption signed by a Tech Lead.</li>
+              <li>Add new conventions verbally in standup. A convention that isn't a skill rule doesn't exist on this team.</li>
+            </ul>
+          </div>
+
+          <div class="pr-block pr-cons">
+            <div class="pr-block-label">
+              <span class="pr-block-label-icon">!</span>
+              Consequence when broken
+            </div>
+            <div class="pr-consequence">
+              <strong>Skills are reviewed by three or more domain experts before they ship.</strong>
+              Skipping the skill means trusting one developer's judgment over the codified
+              expertise of three. That trade is rarely worth it — and the times it appears to
+              be worth it are the times we've shipped the bug.
+            </div>
+          </div>
+
+          <div class="pr-block pr-learn">
+            <div class="pr-block-label">
+              <span class="pr-block-label-icon">→</span>
+              Learn more
+            </div>
+            <a href="skills-playbook.html" class="pr-learn-link">
+              See the Skills Playbook (Doc 4) for the full inventory
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+          </div>
+        </article>
+
+        <!-- ─────────────────────────────────────────
+             PRINCIPLE 3
+             ───────────────────────────────────────── -->
+        <article class="pr-principle">
+          <header class="pr-principle-header">
+            <div class="pr-principle-number">03</div>
+            <div>
+              <div class="pr-principle-tagline">Principle Three</div>
+              <h3 class="pr-principle-statement">
+                A Software Engineer I with skills outranks a Software Engineer III without them.
+                Skills flatten the experience curve.
+              </h3>
+            </div>
+          </header>
+
+          <div class="pr-block pr-do">
+            <div class="pr-block-label">
+              <span class="pr-block-label-icon">+</span>
+              What this looks like in practice
+            </div>
+            <ul class="pr-list">
+              <li>SE I developers receive senior-level scaffolding from <code>/feature-plan</code>, <code>/quick-plan</code>, <code>/code-review</code>, and <code>/sec-audit</code> — the same scaffolding a SE IV would use, no watered-down version.</li>
+              <li>A SE I PR backed by skill outputs reads at a SE III level in code review. We've measured this against blinded reviewer scoring.</li>
+              <li>Tech Leads spend their time on <strong>judgment calls and architecture</strong>, not catching basic mistakes — the skills catch those before the PR opens.</li>
+              <li>We promote on <strong>judgment, decisions, and ownership</strong> — not on syntactic ability. The skills cover syntax; we hire and grow people for taste.</li>
+            </ul>
+          </div>
+
+          <div class="pr-block pr-dont">
+            <div class="pr-block-label">
+              <span class="pr-block-label-icon">−</span>
+              What we don't do
+            </div>
+            <ul class="pr-list">
+              <li>Assume seniority means a developer doesn't need skills. Often it's the opposite: seniors miss domain-specific anti-patterns that the skill was specifically built to catch.</li>
+              <li>Romanticize "10x engineers" who refuse tooling. On this team that's not a 10x engineer; that's a 0.5x liability dressed up as folklore.</li>
+              <li>Block SE I developers from doing work that skills would let them do. If the skill makes the work safe at SE I, we let SE I do the work — and we don't gate it on years of experience.</li>
+            </ul>
+          </div>
+
+          <div class="pr-block pr-cons">
+            <div class="pr-block-label">
+              <span class="pr-block-label-icon">!</span>
+              Consequence when broken
+            </div>
+            <div class="pr-consequence">
+              <strong>We've measured a 3x velocity gap</strong> between teams that adopted this
+              principle and teams that resisted it. The teams that resisted ended up with their
+              seniors gatekeeping work and their juniors stuck on tickets that should have been
+              theirs. Skills aren't a crutch — they're the curriculum.
+            </div>
+          </div>
+
+          <div class="pr-block pr-learn">
+            <div class="pr-block-label">
+              <span class="pr-block-label-icon">→</span>
+              Learn more
+            </div>
+            <a href="how-we-work.html" class="pr-learn-link">
+              See How We Work by Role for SE I through SE IV expectations
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+          </div>
+        </article>
+
+        <!-- ─────────────────────────────────────────
+             PRINCIPLE 4
+             ───────────────────────────────────────── -->
+        <article class="pr-principle">
+          <header class="pr-principle-header">
+            <div class="pr-principle-number">04</div>
+            <div>
+              <div class="pr-principle-tagline">Principle Four</div>
+              <h3 class="pr-principle-statement">
+                Output consistency is the real metric. Same input, same quality output —
+                regardless of which developer is at the keyboard.
+              </h3>
+            </div>
+          </header>
+
+          <div class="pr-block pr-do">
+            <div class="pr-block-label">
+              <span class="pr-block-label-icon">+</span>
+              What this looks like in practice
+            </div>
+            <ul class="pr-list">
+              <li>We measure: <strong>PR review iterations, defect rate, audit pass rate, time-to-merge variance</strong>. Four numbers, reviewed monthly.</li>
+              <li>Five developers given the same ticket should produce indistinguishable PRs — in structure, in rigor, in test coverage — even if implementation details vary. Cross-developer consistency is reviewed quarterly.</li>
+              <li>When variance shows up between developers, we fix the skill (or write a new one), not the developer. The developer is the symptom; the gap in the skill is the cause.</li>
+              <li>Client deliverables follow the same standard PR structure. The PR is the same shape whether it's internal or going to a Fortune 500 client.</li>
+            </ul>
+          </div>
+
+          <div class="pr-block pr-dont">
+            <div class="pr-block-label">
+              <span class="pr-block-label-icon">−</span>
+              What we don't do
+            </div>
+            <ul class="pr-list">
+              <li>Reward developers who ship 10x more code. We've watched that culture eat teams alive — and the cleanup work always falls on the people who weren't being rewarded.</li>
+              <li>Penalize developers who ship 0.5x as much code but with zero defects and clear plans. That's frequently the highest-leverage developer on the team.</li>
+              <li>Use AI adoption as a metric ("did Sarah use Claude Code today?"). That's input, not output. We measure the result, not the tool.</li>
+              <li>Run "lines of code" or "commits per day" reports. We don't, and we won't.</li>
+            </ul>
+          </div>
+
+          <div class="pr-block pr-cons">
+            <div class="pr-block-label">
+              <span class="pr-block-label-icon">!</span>
+              Consequence when broken
+            </div>
+            <div class="pr-consequence">
+              <strong>Inconsistency in PRs is the single best predictor of post-merge bugs</strong>
+              in our internal data — better than complexity, better than file count, better than
+              developer tenure. Teams with low variance ship cleaner. Period. The metrics we use
+              are the metrics that predicted the outcome.
+            </div>
+          </div>
+
+          <div class="pr-block pr-learn">
+            <div class="pr-block-label">
+              <span class="pr-block-label-icon">→</span>
+              Learn more
+            </div>
+            <a href="quality-gates.html" class="pr-learn-link">
+              See Quality Gates (Doc 6) for the actual metrics and review process
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+          </div>
+        </article>
+
+        <!-- ─────────────────────────────────────────
+             PRINCIPLE 5
+             ───────────────────────────────────────── -->
+        <article class="pr-principle">
+          <header class="pr-principle-header">
+            <div class="pr-principle-number">05</div>
+            <div>
+              <div class="pr-principle-tagline">Principle Five</div>
+              <h3 class="pr-principle-statement">
+                Verify before you trust the AI. The model hallucinates. Skills minimize it.
+                Verification eliminates the rest. Both are non-negotiable.
+              </h3>
+            </div>
+          </header>
+
+          <div class="pr-block pr-do">
+            <div class="pr-block-label">
+              <span class="pr-block-label-icon">+</span>
+              What this looks like in practice
+            </div>
+            <ul class="pr-list">
+              <li>Every skill output includes <strong>acceptance criteria</strong> — and we verify those criteria before merging. The skill is not the proof; the verification is the proof.</li>
+              <li>When a skill says "I checked X," we <strong>sample-check it on the first three PRs by a new developer</strong>, until we trust the pattern in their hands.</li>
+              <li>Hallucinations are reported back into the skill (issue or PR) so they get fixed at the source. A hallucination caught and not reported is a hallucination that will catch the next developer.</li>
+              <li>We run the tests. We click the button. We check the database. We don't assume.</li>
+            </ul>
+          </div>
+
+          <div class="pr-block pr-dont">
+            <div class="pr-block-label">
+              <span class="pr-block-label-icon">−</span>
+              What we don't do
+            </div>
+            <ul class="pr-list">
+              <li>Merge AI-generated code without running it. Ever. No exceptions, including "it's just a config change."</li>
+              <li>Trust an AI-written summary of "what changed" — read the diff yourself. The summary is a starting point, not the truth.</li>
+              <li>Accept AI-written tests at face value. <strong>The test must actually fail when the bug is present.</strong> A passing test that doesn't fail under failure conditions is theatre, not coverage.</li>
+              <li>Use AI as a fact source for things we can verify — docs, APIs, schemas, library versions. Look it up. It's faster than fixing the wrong code.</li>
+            </ul>
+          </div>
+
+          <div class="pr-block pr-cons">
+            <div class="pr-block-label">
+              <span class="pr-block-label-icon">!</span>
+              Consequence when broken
+            </div>
+            <div class="pr-consequence">
+              <strong>The one production incident attributable to AI in the past twelve months</strong>
+              was a missed verification step on a generated database migration. It wasn't the
+              model's fault. It was the developer's. Verification is the developer's job, every
+              time, and "I read it and it looked right" is not verification.
+            </div>
+          </div>
+
+          <div class="pr-block pr-learn">
+            <div class="pr-block-label">
+              <span class="pr-block-label-icon">→</span>
+              Learn more
+            </div>
+            <a href="anti-patterns.html" class="pr-learn-link">
+              See Anti-Patterns (Doc 5) for the full list of "don't trust this" patterns
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+          </div>
+        </article>
+
+        <!-- ─────────────────────────────────────────
+             PRINCIPLE 6
+             ───────────────────────────────────────── -->
+        <article class="pr-principle">
+          <header class="pr-principle-header">
+            <div class="pr-principle-number">06</div>
+            <div>
+              <div class="pr-principle-tagline">Principle Six</div>
+              <h3 class="pr-principle-statement">
+                Communication is engineering. The PR description, the Slack update, the
+                client email — these are engineering, and they're held to the same standard.
+              </h3>
+            </div>
+          </header>
+
+          <div class="pr-block pr-do">
+            <div class="pr-block-label">
+              <span class="pr-block-label-icon">+</span>
+              What this looks like in practice
+            </div>
+            <ul class="pr-list">
+              <li>Every PR description includes: <strong>what changed, why, how to verify, any skill outputs.</strong> Four sections, every time. No prose paragraphs.</li>
+              <li>Every client-facing message goes through <code>/message-craft</code> on the first draft. The skill catches premature apology, hedging, and scope creep before it leaves your outbox.</li>
+              <li>Incident updates follow NTSB form: <strong>facts first, no premature blame, named recovery owner, time-bound next update.</strong> If the next update isn't scheduled, the message isn't sent.</li>
+              <li>Status updates use the standard format: Done · In Progress · Blockers · Next. Four labels. No paragraphs. Everyone reads it the same way.</li>
+            </ul>
+          </div>
+
+          <div class="pr-block pr-dont">
+            <div class="pr-block-label">
+              <span class="pr-block-label-icon">−</span>
+              What we don't do
+            </div>
+            <ul class="pr-list">
+              <li>Write "fixes bug" as a PR description. That gets bounced at first review — not rewritten by the reviewer.</li>
+              <li>Send a client email without a 30-second review for premature apology, hedging, or scope creep in commitments. "I'll get back to you with X by Friday" is a contract; treat it like one.</li>
+              <li>Over-apologize, accept blame before diagnosis, or hedge with "I think" in incident communications. Each of those is a credibility leak that compounds over months.</li>
+              <li>Write client-facing prose in casual register. The standard is calm, precise, factual — the same register as a flight crew reading an emergency checklist.</li>
+            </ul>
+          </div>
+
+          <div class="pr-block pr-cons">
+            <div class="pr-block-label">
+              <span class="pr-block-label-icon">!</span>
+              Consequence when broken
+            </div>
+            <div class="pr-consequence">
+              <strong>Client trust correlates more with incident communication quality than with
+              actual time-to-recovery</strong> — we have the survey data to prove it. Same outage,
+              two different messages, completely different client perceptions. Communication
+              isn't downstream of engineering; it's part of engineering, and the message that
+              ships is part of the deliverable.
+            </div>
+          </div>
+
+          <div class="pr-block pr-learn">
+            <div class="pr-block-label">
+              <span class="pr-block-label-icon">→</span>
+              Learn more
+            </div>
+            <a href="skills-playbook.html" class="pr-learn-link">
+              See <code>/message-craft</code> in the Skills Playbook for the anti-pattern library
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+          </div>
+        </article>
+
+        <!-- ─────────────────────────────────────────
+             PRINCIPLE 7
+             ───────────────────────────────────────── -->
+        <article class="pr-principle">
+          <header class="pr-principle-header">
+            <div class="pr-principle-number">07</div>
+            <div>
+              <div class="pr-principle-tagline">Principle Seven</div>
+              <h3 class="pr-principle-statement">
+                Standards have teeth, or they have none. A standard without a consequence
+                is a suggestion. Suggestions don't change behavior. We enforce.
+              </h3>
+            </div>
+          </header>
+
+          <div class="pr-block pr-do">
+            <div class="pr-block-label">
+              <span class="pr-block-label-icon">+</span>
+              What this looks like in practice
+            </div>
+            <ul class="pr-list">
+              <li>PRs without <code>/code-review</code> output are <strong>rejected at first review</strong> — re-submit after running it. The reviewer doesn't run the skill on your behalf.</li>
+              <li>PRs missing the standard description sections are <strong>sent back, not rewritten by the reviewer.</strong> The author writes the description.</li>
+              <li>Skill outputs that warned and were ignored <strong>block merge</strong> until explicitly accepted in writing in the PR description, with the reason.</li>
+              <li>New team members who consistently bypass skills get a 1:1 with their Tech Lead within 30 days — not punitive, but firm. We name the pattern early so it doesn't become a habit.</li>
+            </ul>
+          </div>
+
+          <div class="pr-block pr-dont">
+            <div class="pr-block-label">
+              <span class="pr-block-label-icon">−</span>
+              What we don't do
+            </div>
+            <ul class="pr-list">
+              <li>"Let it slide just this once." That phrase is how every broken standard starts. The exception becomes the precedent within two weeks.</li>
+              <li>Rewrite junior PRs to fix structure. They don't learn that way; they learn from bouncing. Reviewing is teaching, not cleaning up.</li>
+              <li>Tolerate process exceptions without an <strong>explicit, written exemption from a Tech Lead</strong> — and exemptions are logged, not whispered.</li>
+              <li>Apologize for the standards in client conversations. The standards are why the client is hiring us. Don't soften them in the room.</li>
+            </ul>
+          </div>
+
+          <div class="pr-block pr-cons">
+            <div class="pr-block-label">
+              <span class="pr-block-label-icon">!</span>
+              Consequence when broken
+            </div>
+            <div class="pr-consequence">
+              <strong>The team that lets standards slide has standards that don't exist.</strong>
+              We've watched this play out — at our own clients and in our own past. Once an
+              exception is granted casually, the next request becomes harder to deny. The third
+              one is impossible. Standards are protected by being unbendable; the moment they
+              bend, they break.
+            </div>
+          </div>
+
+          <div class="pr-block pr-learn">
+            <div class="pr-block-label">
+              <span class="pr-block-label-icon">→</span>
+              Learn more
+            </div>
+            <a href="quality-gates.html" class="pr-learn-link">
+              See Quality Gates (Doc 6) for the merge-blocking rules
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 4 — THE PRINCIPLES AT A GLANCE
+         ════════════════════════════════════════════ -->
+    <section class="pr-section pr-recap">
+      <div class="container">
+        <div class="text-center" style="max-width: 720px; margin: 0 auto 56px;">
+          <div class="pr-eyebrow" style="justify-content:center;">Recap</div>
+          <h2 class="pr-title" style="margin: 0 auto 16px;">The seven, at a glance.</h2>
+          <p class="pr-lead" style="margin: 0 auto;">
+            Screenshot it. Print it. Pin it in your Slack channel. If you can't recite it
+            from memory by your second month, the handbook hasn't done its job.
+          </p>
+        </div>
+
+        <div class="pr-recap-card">
+          <div class="pr-recap-header">The 7 Principles · AI-First Engineering at Heaptrace</div>
+          <ol class="pr-recap-list">
+            <li>Plan before code, even for small tasks.</li>
+            <li>The skill is the operating system, not the suggestion.</li>
+            <li>A Software Engineer I with skills outranks a SE III without them.</li>
+            <li>Output consistency is the real metric.</li>
+            <li>Verify before you trust the AI.</li>
+            <li>Communication is engineering.</li>
+            <li>Standards have teeth, or they have none.</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 5 — WHERE TO GO NEXT
+         ════════════════════════════════════════════ -->
+    <section class="pr-section pr-next">
+      <div class="container">
+        <div class="text-center" style="max-width: 720px; margin: 0 auto;">
+          <div class="pr-eyebrow" style="justify-content:center;">Where to next</div>
+          <h2 class="pr-title" style="margin: 0 auto 16px;">Pick your next read.</h2>
+          <p class="pr-lead" style="margin: 0 auto;">
+            The principles are the spine. These three docs are the body — the day-to-day
+            operating detail for your role, your work, and the patterns to avoid.
+          </p>
+        </div>
+
+        <div class="pr-next-grid">
+          <div class="pr-next-card is-disabled">
+            <span class="pr-next-card-badge">Coming soon</span>
+            <div class="pr-next-card-label">Doc 3 · For your role</div>
+            <div class="pr-next-card-title">How We Work by Role</div>
+            <div class="pr-next-card-body">
+              SE I through SE IV expectations, Tech Lead responsibilities, what
+              "judgment" looks like at each level, and what gets you promoted.
+            </div>
+            <span class="pr-next-card-cta">
+              Available shortly
+            </span>
+          </div>
+
+          <div class="pr-next-card is-disabled">
+            <span class="pr-next-card-badge">Coming soon</span>
+            <div class="pr-next-card-label">Doc 4 · For your day-to-day</div>
+            <div class="pr-next-card-title">Skills Playbook</div>
+            <div class="pr-next-card-body">
+              The full inventory of skills, when to use each one, and what the
+              output of every skill should look like in a clean PR.
+            </div>
+            <span class="pr-next-card-cta">
+              Available shortly
+            </span>
+          </div>
+
+          <div class="pr-next-card is-disabled">
+            <span class="pr-next-card-badge">Coming soon</span>
+            <div class="pr-next-card-label">Doc 5 · For what NOT to do</div>
+            <div class="pr-next-card-title">Anti-Patterns</div>
+            <div class="pr-next-card-body">
+              The patterns we've watched break teams — AI hallucination traps,
+              skill bypasses, communication failures — and how to spot each one early.
+            </div>
+            <span class="pr-next-card-cta">
+              Available shortly
+            </span>
+          </div>
+        </div>
+
+        <!-- Effective footer card -->
+        <div class="pr-effective">
+          <div class="pr-effective-divider">─────────────────────────────────────────────────────────</div>
+          <div><strong>Effective:</strong> April 2026</div>
+          <div><strong>Version:</strong> 1.0 (Initial Release)</div>
+          <div><strong>Maintained by:</strong> Heaptrace Engineering Leadership</div>
+          <div class="pr-effective-divider">─────────────────────────────────────────────────────────</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         FOOTER
+         ════════════════════════════════════════════ -->
+    <footer class="footer">
+      <div class="footer-inner">
+        <div class="footer-links">
+          <a href="../index.html" class="footer-link">Home</a>
+          <a href="../index.html#packs" class="footer-link">Packs</a>
+          <a href="../setup/index.html" class="footer-link">Setup Guide</a>
+          <a href="../customize/index.html" class="footer-link">Customize</a>
+          <a href="index.html" class="footer-link">Handbook</a>
+          <a href="https://heaptrace.com" class="footer-link" target="_blank" rel="noopener">Heaptrace</a>
+        </div>
+        <div class="footer-copy">
+          MIT License &middot; Built by <a href="https://heaptrace.com" target="_blank" rel="noopener">Heaptrace Technology</a>
+          <br>101 Skills &middot; 10 Packs &middot; Free &amp; Open Source
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       PASSWORD GATE SCRIPT
+       ════════════════════════════════════════════ -->
+  <script>
+    (function() {
+      const STORED_HASH = '5866f0f6f885b943472fd7572b9c783e6b1a29958a34bd9f18e1f1e17b9a57a6';
+      const STORAGE_KEY = 'htms-handbook-access';
+      const EXPIRY_DAYS = 30;
+      const gate = document.getElementById('password-gate');
+      const content = document.getElementById('main-content');
+      const input = document.getElementById('gate-input');
+      const submit = document.getElementById('gate-submit');
+      const error = document.getElementById('gate-error');
+
+      function unlock() {
+        gate.style.display = 'none';
+        content.style.display = 'block';
+        document.body.style.overflow = 'auto';
+      }
+
+      function checkStored() {
+        try {
+          const stored = localStorage.getItem(STORAGE_KEY);
+          if (!stored) return false;
+          const { hash, expiry } = JSON.parse(stored);
+          if (hash !== STORED_HASH) return false;
+          if (Date.now() > expiry) { localStorage.removeItem(STORAGE_KEY); return false; }
+          return true;
+        } catch { return false; }
+      }
+
+      async function sha256(str) {
+        const buf = new TextEncoder().encode(str);
+        const hashBuf = await crypto.subtle.digest('SHA-256', buf);
+        return Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
+      }
+
+      async function tryUnlock() {
+        error.textContent = '';
+        const val = input.value.trim();
+        if (!val) return;
+        const hash = await sha256(val);
+        if (hash === STORED_HASH) {
+          const expiry = Date.now() + EXPIRY_DAYS * 24 * 60 * 60 * 1000;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({ hash, expiry }));
+          unlock();
+        } else {
+          error.textContent = 'Incorrect code. Contact your Heaptrace contact.';
+          input.value = '';
+          input.focus();
+        }
+      }
+
+      content.style.display = 'none';
+      document.body.style.overflow = 'hidden';
+
+      if (checkStored()) {
+        unlock();
+      } else {
+        submit.addEventListener('click', tryUnlock);
+        input.addEventListener('keyup', (e) => { if (e.key === 'Enter') tryUnlock(); });
+        setTimeout(() => input.focus(), 100);
+      }
+    })();
+  </script>
+
+</body>
+</html>
