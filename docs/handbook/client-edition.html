@@ -1,0 +1,1910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Client Edition — Heaptrace Engineering Handbook</title>
+  <meta name="description" content="How Heaptrace Engineering works — the operating model that ships your project consistently, predictably, and ready for audit. Doc 7 of 7.">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="author" content="Heaptrace Technology">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="../css/styles.css">
+
+  <style>
+    /* ═════════════════════════════════════════════
+       CLIENT EDITION — PAGE STYLES
+       Primary accent: GREEN (--green)
+       ═════════════════════════════════════════════ */
+
+    :root {
+      --accent: var(--green);
+      --accent-light: #34d399;
+      --accent-soft: rgba(16, 185, 129, 0.10);
+      --accent-border: rgba(16, 185, 129, 0.28);
+      --accent-glow: rgba(16, 185, 129, 0.18);
+    }
+
+    body { line-height: 1.75; }
+
+    /* ── Active nav (green override) ── */
+    .nav-link.active {
+      color: var(--green);
+      background: rgba(16, 185, 129, 0.08);
+    }
+
+    /* ── Password Gate ── */
+    #password-gate {
+      position: fixed; inset: 0; z-index: 9999;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--bg-primary);
+      background-image:
+        radial-gradient(ellipse 60% 40% at 50% 20%, rgba(16, 185, 129, 0.08), transparent 70%),
+        radial-gradient(ellipse 40% 30% at 50% 80%, rgba(6, 182, 212, 0.05), transparent 60%);
+    }
+    #gate-input:focus {
+      border-color: var(--accent) !important;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+    }
+    #gate-submit:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 30px rgba(16, 185, 129, 0.35);
+    }
+
+    /* ── Section primitives ── */
+    .ce-section {
+      padding: 110px 0;
+      position: relative;
+    }
+    .ce-section-narrow { max-width: 920px; margin: 0 auto; }
+    .ce-section-medium { max-width: 1040px; margin: 0 auto; }
+
+    .ce-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 0.78rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.14em; color: var(--accent-light);
+      margin-bottom: 16px;
+    }
+    .ce-eyebrow::before {
+      content: ''; width: 28px; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent));
+    }
+    .ce-title {
+      font-size: clamp(2rem, 3.4vw, 2.8rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 22px;
+      letter-spacing: -0.022em;
+    }
+    .ce-lead {
+      font-size: 1.12rem; color: var(--text-secondary);
+      line-height: 1.85; max-width: 760px;
+    }
+
+    /* ── Hero ── */
+    .ce-hero {
+      padding: calc(var(--nav-height) + 110px) 0 100px;
+      text-align: center; position: relative; overflow: hidden;
+    }
+    .ce-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 40% at 50% 0%, rgba(16, 185, 129, 0.10), transparent 70%),
+        radial-gradient(ellipse 40% 30% at 30% 30%, rgba(6, 182, 212, 0.05), transparent 60%),
+        radial-gradient(ellipse 40% 30% at 70% 20%, rgba(52, 211, 153, 0.05), transparent 60%);
+      pointer-events: none;
+    }
+    .ce-hero::after {
+      content: ''; position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='grid' width='60' height='60' patternUnits='userSpaceOnUse'%3E%3Cpath d='M 60 0 L 0 0 0 60' fill='none' stroke='%231e293b' stroke-width='0.5'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23grid)'/%3E%3C/svg%3E");
+      opacity: 0.3; pointer-events: none;
+    }
+    .ce-hero-content { position: relative; z-index: 1; }
+    .ce-hero-badge {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--accent-soft);
+      border: 1px solid var(--accent-border);
+      color: var(--accent-light); padding: 8px 22px; border-radius: 999px;
+      font-size: 0.78rem; font-weight: 700; margin-bottom: 36px;
+      letter-spacing: 0.14em; text-transform: uppercase;
+    }
+    .ce-hero-badge-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent); box-shadow: 0 0 12px var(--accent);
+      animation: pulseGreen 2.4s infinite;
+    }
+    @keyframes pulseGreen {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.45); }
+      50% { opacity: 0.85; box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+    }
+    .ce-hero h1 {
+      font-size: clamp(2.8rem, 5.4vw, 4.2rem);
+      font-weight: 800; line-height: 1.06; margin-bottom: 28px;
+      letter-spacing: -0.028em;
+      background: linear-gradient(135deg, var(--text-primary) 0%, #34d399 45%, var(--cyan-light) 85%, var(--text-primary) 100%);
+      background-size: 200% auto;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmer 8s ease-in-out infinite;
+    }
+    @keyframes shimmer {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+    .ce-hero-subtitle {
+      font-size: 1.2rem; color: var(--text-secondary);
+      max-width: 780px; margin: 0 auto 48px; line-height: 1.8;
+    }
+    .ce-hero-cta {
+      display: inline-flex; align-items: center; gap: 16px;
+      flex-wrap: wrap; justify-content: center;
+    }
+    .ce-btn {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 15px 30px; border-radius: var(--radius-md);
+      font-weight: 600; font-size: 0.98rem; letter-spacing: 0.005em;
+      transition: var(--transition); border: 1px solid transparent;
+    }
+    .ce-btn-primary {
+      background: linear-gradient(135deg, var(--green), var(--cyan));
+      color: white;
+      box-shadow: 0 8px 28px rgba(16, 185, 129, 0.28);
+    }
+    .ce-btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 36px rgba(16, 185, 129, 0.4);
+    }
+    .ce-btn-secondary {
+      background: transparent;
+      color: var(--text-primary);
+      border-color: var(--border-hover);
+    }
+    .ce-btn-secondary:hover {
+      border-color: var(--accent);
+      color: var(--accent-light);
+      background: var(--accent-soft);
+    }
+    .ce-hero-note {
+      margin-top: 36px;
+      font-style: italic;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      letter-spacing: 0.005em;
+    }
+
+    /* ── Pull Quote ── */
+    .ce-pullquote {
+      max-width: 880px; margin: 0 auto 64px;
+      background:
+        linear-gradient(135deg, rgba(16, 185, 129, 0.06), rgba(6, 182, 212, 0.03));
+      border: 1px solid var(--accent-border);
+      border-left: 4px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 48px 56px;
+      position: relative;
+    }
+    .ce-pullquote::before {
+      content: '"';
+      position: absolute;
+      top: 8px; left: 28px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 5rem;
+      color: var(--accent);
+      opacity: 0.35;
+      line-height: 1;
+    }
+    .ce-pullquote-text {
+      font-size: 1.45rem;
+      font-weight: 600;
+      line-height: 1.55;
+      letter-spacing: -0.012em;
+      color: var(--text-primary);
+      font-style: italic;
+      padding-left: 20px;
+    }
+    .ce-pullquote-text strong {
+      color: var(--accent-light);
+      font-weight: 700;
+    }
+
+    /* ── Opening setup blocks ── */
+    .ce-opening {
+      background:
+        radial-gradient(ellipse 80% 50% at 50% 0%, rgba(16, 185, 129, 0.04), transparent 70%);
+    }
+    .ce-opening-block {
+      padding: 32px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .ce-opening-block:last-child { border-bottom: none; }
+    .ce-opening-heading {
+      font-size: 1.4rem; font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+      letter-spacing: -0.012em;
+    }
+    .ce-opening-heading::before {
+      content: '"'; color: var(--accent);
+      font-family: 'JetBrains Mono', monospace;
+      margin-right: 6px; opacity: 0.6;
+    }
+    .ce-opening-heading::after {
+      content: '"'; color: var(--accent);
+      font-family: 'JetBrains Mono', monospace;
+      margin-left: 4px; opacity: 0.6;
+    }
+    .ce-opening-body {
+      color: var(--text-secondary);
+      font-size: 1.06rem;
+      line-height: 1.85;
+    }
+
+    /* ── Commitments (the centerpiece) ── */
+    .ce-commitments {
+      background:
+        radial-gradient(ellipse 60% 30% at 50% 50%, rgba(16, 185, 129, 0.028), transparent 70%);
+    }
+    .ce-commitments-intro {
+      max-width: 760px; margin: 0 auto 80px; text-align: center;
+    }
+    .ce-commitment {
+      max-width: 960px; margin: 0 auto 56px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 56px 60px 52px;
+      position: relative;
+      overflow: hidden;
+      transition: var(--transition);
+    }
+    .ce-commitment:hover {
+      border-color: rgba(16, 185, 129, 0.28);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 36px rgba(16, 185, 129, 0.06);
+    }
+    .ce-commitment::before {
+      content: ''; position: absolute; top: 0; left: 0;
+      width: 4px; height: 100%;
+      background: linear-gradient(180deg, var(--green) 0%, var(--cyan) 100%);
+    }
+    .ce-commitment-header {
+      display: flex; align-items: flex-start; gap: 32px;
+      margin-bottom: 36px;
+      padding-bottom: 30px;
+      border-bottom: 1px solid var(--border);
+    }
+    .ce-commitment-number {
+      font-size: 4.4rem;
+      font-weight: 800;
+      line-height: 0.9;
+      background: linear-gradient(135deg, var(--green), var(--cyan));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.045em;
+      flex-shrink: 0;
+      min-width: 90px;
+    }
+    .ce-commitment-tagline {
+      font-size: 0.72rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.14em;
+      color: var(--accent-light);
+      margin-bottom: 12px;
+    }
+    .ce-commitment-name {
+      font-size: 1.55rem;
+      font-weight: 700;
+      line-height: 1.32;
+      letter-spacing: -0.018em;
+      color: var(--text-primary);
+    }
+
+    .ce-promise {
+      background: rgba(16, 185, 129, 0.04);
+      border: 1px solid var(--accent-border);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius-sm);
+      padding: 22px 26px;
+      margin-bottom: 32px;
+    }
+    .ce-promise-label {
+      font-size: 0.72rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.14em;
+      color: var(--accent-light);
+      margin-bottom: 8px;
+    }
+    .ce-promise-text {
+      color: var(--text-primary);
+      font-size: 1.08rem;
+      line-height: 1.6;
+      font-weight: 500;
+    }
+
+    .ce-block {
+      margin-bottom: 28px;
+    }
+    .ce-block:last-child { margin-bottom: 0; }
+    .ce-block-label {
+      display: inline-flex; align-items: center; gap: 10px;
+      font-size: 0.74rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.14em;
+      color: var(--text-muted);
+      margin-bottom: 18px;
+    }
+    .ce-block-label::before {
+      content: ''; width: 16px; height: 1px;
+      background: var(--border-hover);
+    }
+
+    .ce-list {
+      list-style: none; padding: 0;
+    }
+    .ce-list li {
+      position: relative;
+      padding: 12px 0 12px 28px;
+      color: var(--text-secondary);
+      font-size: 1.02rem;
+      line-height: 1.7;
+      border-bottom: 1px solid rgba(30, 41, 59, 0.4);
+    }
+    .ce-list li:last-child { border-bottom: none; }
+    .ce-list li::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 22px;
+      width: 14px; height: 2px;
+      border-radius: 2px;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent-glow);
+    }
+    .ce-list li strong { color: var(--text-primary); font-weight: 600; }
+
+    .ce-metric {
+      background: rgba(6, 182, 212, 0.04);
+      border: 1px solid rgba(6, 182, 212, 0.18);
+      border-radius: var(--radius-sm);
+      padding: 18px 24px;
+      margin-top: 8px;
+    }
+    .ce-metric-label {
+      font-size: 0.72rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.14em;
+      color: var(--cyan-light);
+      margin-bottom: 6px;
+    }
+    .ce-metric-text {
+      color: var(--text-primary);
+      font-size: 1rem;
+      line-height: 1.55;
+    }
+    .ce-metric-text strong {
+      color: var(--cyan-light);
+      font-weight: 700;
+    }
+
+    /* ── Day in the Life ── */
+    .ce-day {
+      background:
+        radial-gradient(ellipse 80% 40% at 50% 50%, rgba(16, 185, 129, 0.03), transparent 70%);
+    }
+    .ce-day-card {
+      max-width: 880px; margin: 0 auto;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 56px 56px 52px;
+      position: relative;
+    }
+    .ce-day-timeline {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .ce-day-timeline li {
+      display: flex;
+      align-items: flex-start;
+      gap: 24px;
+      padding: 22px 0;
+      border-bottom: 1px dashed var(--border);
+      position: relative;
+    }
+    .ce-day-timeline li:last-child { border-bottom: none; }
+    .ce-day-time {
+      flex-shrink: 0;
+      width: 90px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--accent-light);
+      letter-spacing: 0.04em;
+      padding-top: 2px;
+    }
+    .ce-day-text {
+      color: var(--text-secondary);
+      font-size: 1.02rem;
+      line-height: 1.75;
+      flex: 1;
+    }
+    .ce-day-text strong { color: var(--text-primary); font-weight: 600; }
+    .ce-day-closer {
+      margin-top: 36px;
+      padding-top: 28px;
+      border-top: 1px solid var(--border);
+      font-style: italic;
+      color: var(--text-primary);
+      font-size: 1.08rem;
+      line-height: 1.7;
+      text-align: center;
+    }
+
+    /* ── Engineers grid ── */
+    .ce-engineers {
+      background:
+        radial-gradient(ellipse 60% 30% at 50% 100%, rgba(16, 185, 129, 0.03), transparent 70%);
+    }
+    .ce-engineers-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 28px;
+      max-width: 1040px;
+      margin: 56px auto 0;
+    }
+    .ce-engineer-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 36px 36px 32px;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    .ce-engineer-card:hover {
+      border-color: rgba(16, 185, 129, 0.25);
+      transform: translateY(-2px);
+    }
+    .ce-engineer-card::before {
+      content: ''; position: absolute; top: 0; left: 0;
+      width: 100%; height: 2px;
+      background: linear-gradient(90deg, var(--green), var(--cyan));
+      opacity: 0.5;
+    }
+    .ce-engineer-level {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      color: var(--accent-light);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .ce-engineer-role {
+      font-size: 1.28rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.012em;
+      margin-bottom: 16px;
+    }
+    .ce-engineer-body {
+      color: var(--text-secondary);
+      font-size: 0.98rem;
+      line-height: 1.75;
+    }
+
+    /* ── Audit section (3 paragraphs) ── */
+    .ce-audit-block {
+      padding: 32px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .ce-audit-block:last-child { border-bottom: none; }
+    .ce-audit-heading {
+      display: flex; align-items: center; gap: 14px;
+      font-size: 1.32rem; font-weight: 700;
+      margin-bottom: 14px;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+    }
+    .ce-audit-heading::before {
+      content: '';
+      width: 8px; height: 8px;
+      background: var(--accent);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+    .ce-audit-body {
+      color: var(--text-secondary);
+      font-size: 1.04rem;
+      line-height: 1.85;
+      padding-left: 22px;
+    }
+
+    /* ── Numbers table ── */
+    .ce-numbers {
+      background:
+        radial-gradient(ellipse 80% 40% at 50% 50%, rgba(6, 182, 212, 0.03), transparent 70%);
+    }
+    .ce-table-wrap {
+      max-width: 880px; margin: 0 auto;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .ce-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .ce-table thead th {
+      background: var(--bg-elevated);
+      padding: 22px 32px;
+      text-align: left;
+      font-size: 0.74rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--accent-light);
+      border-bottom: 1px solid var(--border);
+    }
+    .ce-table thead th:last-child { text-align: right; }
+    .ce-table tbody td {
+      padding: 22px 32px;
+      border-bottom: 1px solid rgba(30, 41, 59, 0.5);
+      font-size: 1.02rem;
+      line-height: 1.55;
+    }
+    .ce-table tbody td:first-child {
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+    .ce-table tbody td:last-child {
+      text-align: right;
+      color: var(--text-primary);
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.98rem;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+    .ce-table tbody tr:last-child td { border-bottom: none; }
+    .ce-table tbody tr:hover td {
+      background: rgba(16, 185, 129, 0.03);
+    }
+    .ce-table-footnote {
+      max-width: 880px; margin: 28px auto 0;
+      font-style: italic;
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      text-align: center;
+      line-height: 1.7;
+    }
+
+    /* ── FAQ ── */
+    .ce-faq {
+      background:
+        radial-gradient(ellipse 60% 30% at 50% 50%, rgba(16, 185, 129, 0.025), transparent 70%);
+    }
+    .ce-faq-list {
+      max-width: 880px; margin: 48px auto 0;
+    }
+    .ce-faq-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 16px;
+      overflow: hidden;
+      transition: var(--transition-fast);
+    }
+    .ce-faq-item[open] {
+      border-color: var(--accent-border);
+      background: rgba(16, 185, 129, 0.02);
+    }
+    .ce-faq-item summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 26px 30px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      font-size: 1.06rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.45;
+      transition: color 0.15s ease;
+    }
+    .ce-faq-item summary::-webkit-details-marker { display: none; }
+    .ce-faq-item summary:hover { color: var(--accent-light); }
+    .ce-faq-chevron {
+      flex-shrink: 0;
+      width: 22px; height: 22px;
+      display: inline-flex; align-items: center; justify-content: center;
+      color: var(--accent-light);
+      transition: transform 0.25s ease;
+    }
+    .ce-faq-item[open] .ce-faq-chevron {
+      transform: rotate(180deg);
+    }
+    .ce-faq-q-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--accent-light);
+      letter-spacing: 0.06em;
+      flex-shrink: 0;
+      padding-top: 2px;
+    }
+    .ce-faq-content {
+      padding: 0 30px 30px 30px;
+      color: var(--text-secondary);
+      font-size: 1.02rem;
+      line-height: 1.85;
+      border-top: 1px solid var(--border);
+      padding-top: 22px;
+    }
+    .ce-faq-content strong { color: var(--text-primary); font-weight: 600; }
+
+    /* ── Engage section ── */
+    .ce-engage {
+      background:
+        radial-gradient(ellipse 60% 40% at 50% 100%, rgba(16, 185, 129, 0.05), transparent 70%);
+    }
+    .ce-engage-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 28px;
+      max-width: 1080px; margin: 56px auto 0;
+    }
+    .ce-engage-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 40px 36px 36px;
+      transition: var(--transition);
+      display: flex; flex-direction: column; gap: 16px;
+      min-height: 320px;
+      position: relative;
+      overflow: hidden;
+    }
+    .ce-engage-card::before {
+      content: ''; position: absolute; top: 0; left: 0;
+      width: 100%; height: 3px;
+      background: linear-gradient(90deg, var(--green), var(--cyan));
+    }
+    .ce-engage-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-3px);
+      box-shadow: 0 14px 38px rgba(16, 185, 129, 0.12);
+    }
+    .ce-engage-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.74rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.14em;
+      color: var(--accent-light);
+    }
+    .ce-engage-title {
+      font-size: 1.32rem; font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.012em;
+      line-height: 1.3;
+    }
+    .ce-engage-duration {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .ce-engage-body {
+      color: var(--text-secondary);
+      font-size: 0.98rem;
+      line-height: 1.7;
+      flex-grow: 1;
+    }
+    .ce-engage-cta {
+      display: inline-flex; align-items: center; gap: 8px;
+      color: var(--accent-light);
+      font-size: 0.95rem; font-weight: 600;
+      margin-top: 12px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      transition: color 0.15s ease;
+    }
+    .ce-engage-card:hover .ce-engage-cta {
+      color: var(--accent);
+    }
+
+    /* ── Closing ── */
+    .ce-closing {
+      background:
+        radial-gradient(ellipse 80% 50% at 50% 50%, rgba(16, 185, 129, 0.06), transparent 70%);
+    }
+    .ce-closing-statement {
+      max-width: 820px; margin: 56px auto 0;
+      text-align: center;
+      font-size: 1.18rem;
+      line-height: 1.75;
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+    .ce-closing-statement strong {
+      color: var(--accent-light);
+      font-weight: 700;
+    }
+
+    /* ── Effective footer card ── */
+    .ce-effective {
+      max-width: 720px; margin: 80px auto 0;
+      padding: 36px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 2.1;
+    }
+    .ce-effective-divider {
+      color: var(--border-hover);
+      letter-spacing: 0.1em;
+    }
+    .ce-effective strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .ce-section { padding: 72px 0; }
+      .ce-commitment { padding: 36px 28px 32px; }
+      .ce-commitment-header {
+        flex-direction: column;
+        gap: 14px;
+      }
+      .ce-commitment-number { font-size: 3.4rem; min-width: 0; }
+      .ce-commitment-name { font-size: 1.25rem; }
+      .ce-day-card { padding: 36px 28px 32px; }
+      .ce-day-timeline li { flex-direction: column; gap: 6px; }
+      .ce-day-time { width: auto; }
+      .ce-engineers-grid { grid-template-columns: 1fr; }
+      .ce-engage-grid { grid-template-columns: 1fr; }
+      .ce-engage-card { min-height: auto; }
+      .ce-pullquote { padding: 32px 28px; }
+      .ce-pullquote::before { font-size: 3.5rem; top: 4px; left: 14px; }
+      .ce-pullquote-text { font-size: 1.18rem; padding-left: 6px; }
+      .ce-hero { padding-top: calc(var(--nav-height) + 64px); padding-bottom: 64px; }
+      .ce-table thead th, .ce-table tbody td { padding: 16px 18px; }
+      .ce-table tbody td:last-child { font-size: 0.88rem; }
+      .ce-faq-item summary { padding: 20px 22px; font-size: 0.98rem; }
+      .ce-faq-content { padding: 20px 22px 24px; }
+      .ce-audit-body { padding-left: 0; }
+    }
+
+    /* ── Print ── */
+    @media print {
+      #password-gate, .nav, .footer, .ce-hero-cta, .ce-engage-cta { display: none !important; }
+      body, .ce-hero, .ce-section, .ce-commitments, .ce-day, .ce-engineers,
+      .ce-audit, .ce-numbers, .ce-faq, .ce-engage, .ce-closing, .ce-opening {
+        background: white !important;
+        color: #0a0f1a !important;
+      }
+      .ce-commitment, .ce-day-card, .ce-engineer-card, .ce-engage-card,
+      .ce-effective, .ce-faq-item, .ce-pullquote, .ce-table-wrap {
+        background: white !important;
+        border: 1px solid #cbd5e1 !important;
+        page-break-inside: avoid;
+        box-shadow: none !important;
+      }
+      .ce-commitment-number, .ce-hero h1, .ce-commitment-tagline,
+      .ce-engineer-level, .ce-engage-label, .ce-day-time, .ce-faq-q-num,
+      .ce-promise-label, .ce-pullquote-text strong, .ce-closing-statement strong {
+        -webkit-text-fill-color: #0f766e !important;
+        color: #0f766e !important;
+        background: none !important;
+      }
+      .ce-list li, .ce-opening-body, .ce-engineer-body, .ce-day-text,
+      .ce-engage-body, .ce-audit-body, .ce-faq-content, .ce-closing-statement {
+        color: #334155 !important;
+      }
+      .ce-promise, .ce-pullquote {
+        background: #ecfdf5 !important;
+        color: #064e3b !important;
+      }
+      .ce-metric {
+        background: #ecfeff !important;
+        color: #164e63 !important;
+      }
+      .ce-faq-item[open] {
+        background: white !important;
+      }
+      .ce-table thead th {
+        background: #f8fafc !important;
+        color: #0f766e !important;
+      }
+      .ce-table tbody td:last-child {
+        color: #0f766e !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ════════════════════════════════════════════
+       PASSWORD GATE
+       ════════════════════════════════════════════ -->
+  <div id="password-gate" style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:var(--bg-primary);">
+    <div style="max-width:420px;width:90%;text-align:center;">
+      <div style="width:64px;height:64px;margin:0 auto 24px;border-radius:16px;background:linear-gradient(135deg,var(--green),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:white;box-shadow:0 0 40px rgba(16,185,129,0.3);">H</div>
+      <h1 style="font-size:1.5rem;font-weight:700;margin-bottom:8px;">Heaptrace Handbook</h1>
+      <p style="color:var(--text-secondary);margin-bottom:32px;font-size:0.95rem;">Enter access code to continue</p>
+      <input type="password" id="gate-input" placeholder="Access code" autocomplete="off" style="width:100%;padding:14px 18px;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;color:var(--text-primary);font-size:1rem;font-family:'JetBrains Mono',monospace;margin-bottom:16px;outline:none;transition:all 0.2s;">
+      <button id="gate-submit" style="width:100%;padding:14px;background:linear-gradient(135deg,var(--green),var(--cyan));border:none;border-radius:12px;color:white;font-weight:600;font-size:0.95rem;cursor:pointer;transition:all 0.2s;">Unlock</button>
+      <p id="gate-error" style="color:var(--red);margin-top:16px;font-size:0.85rem;min-height:1.2em;"></p>
+      <p style="color:var(--text-muted);margin-top:40px;font-size:0.8rem;">Private engineering handbook · Heaptrace Technology</p>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       MAIN CONTENT (hidden until unlock)
+       ════════════════════════════════════════════ -->
+  <div id="main-content">
+
+    <!-- NAV -->
+    <nav class="nav">
+      <div class="nav-inner">
+        <a href="../index.html" class="nav-logo"><div class="nav-logo-icon">H</div><span>Heaptrace Skills</span></a>
+        <div class="nav-links" id="navLinks">
+          <a href="../index.html" class="nav-link">Home</a>
+          <a href="../index.html#packs" class="nav-link">Packs</a>
+          <a href="../setup/index.html" class="nav-link">Setup</a>
+          <a href="../customize/index.html" class="nav-link">Customize</a>
+          <a href="index.html" class="nav-link active">Handbook</a>
+          <div class="nav-dropdown">
+            <button class="nav-dropdown-trigger">Security <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button>
+            <div class="nav-dropdown-menu">
+              <a href="../compliance-overview.html" class="nav-dropdown-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>Compliance Overview</a>
+              <a href="../ci-cd-security.html" class="nav-dropdown-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>CI/CD Security Gateway</a>
+              <a href="../cicd-security-setup.html" class="nav-dropdown-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>Setup Guide</a>
+            </div>
+          </div>
+          <a href="../rules/index.html" class="nav-link">Rules</a>
+          <a href="../mcp/index.html" class="nav-link">MCP Servers</a>
+        </div>
+        <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>GitHub
+        </a>
+      </div>
+    </nav>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 1 — HERO
+         ════════════════════════════════════════════ -->
+    <section class="ce-hero">
+      <div class="container ce-hero-content">
+        <div class="ce-hero-badge">
+          <span class="ce-hero-badge-dot"></span>
+          Doc 7 of 7 · Client Edition
+        </div>
+        <h1>How Heaptrace<br>Engineering Works</h1>
+        <p class="ce-hero-subtitle">
+          A 15-minute read on the engineering operating model that ships your project
+          consistently, predictably, and ready for audit. The handbook our developers
+          follow — condensed for the people who hire us.
+        </p>
+        <div class="ce-hero-cta">
+          <a href="mailto:hello@heaptrace.com?subject=Capability%20Demo%20Request" class="ce-btn ce-btn-primary">
+            Book a Capability Demo
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+          <a href="index.html" class="ce-btn ce-btn-secondary">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            Back to Handbook
+          </a>
+        </div>
+        <div class="ce-hero-note">
+          Same handbook our internal team uses. Same standards. Same skills.
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 2 — OPENING STATEMENT
+         ════════════════════════════════════════════ -->
+    <section class="ce-section ce-opening">
+      <div class="container ce-section-narrow">
+
+        <div class="ce-pullquote">
+          <div class="ce-pullquote-text">
+            You hired Heaptrace for outcomes. <strong>This document explains how we get
+            there</strong> — consistently, regardless of which engineer is on your project.
+          </div>
+        </div>
+
+        <div style="margin-top: 64px;">
+          <div class="ce-opening-block">
+            <div class="ce-opening-heading">The variance problem in modern engineering.</div>
+            <p class="ce-opening-body">
+              Most software teams produce wildly inconsistent output depending on who's
+              at the keyboard that day. AI tooling has amplified this: a senior engineer
+              with the right skills produces clean, reviewable code; the same prompt run
+              by a junior produces a 400-line pull request that takes a week to review.
+              We solved this problem by making the operating model explicit, codified,
+              and enforceable — for every engineer at Heaptrace, on every project, every
+              day.
+            </p>
+          </div>
+
+          <div class="ce-opening-block">
+            <div class="ce-opening-heading">Process you can audit. Output you can predict.</div>
+            <p class="ce-opening-body">
+              Every engineer on your project follows the same workflow: plan before
+              code, run skills before review, verify before merge, communicate before
+              sending. The result is predictable: pull requests that read the same
+              regardless of author, defect rates that don't depend on who reviewed last
+              week, and compliance evidence that's already collected when an audit
+              lands. You stop hiring engineers and start hiring an operating model.
+            </p>
+          </div>
+
+          <div class="ce-opening-block">
+            <div class="ce-opening-heading">Five things you'll see on your project.</div>
+            <p class="ce-opening-body">
+              This document covers five concrete commitments — what your project gets
+              when you work with Heaptrace. Each one names a promise, explains what it
+              means for your project in plain English, and shows the metric we use to
+              measure ourselves against it. Read these once and you'll know what to
+              expect on Monday morning, every Monday, for the duration of the
+              engagement.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 3 — THE 5 COMMITMENTS
+         ════════════════════════════════════════════ -->
+    <section class="ce-section ce-commitments">
+      <div class="container">
+
+        <div class="ce-commitments-intro">
+          <div class="ce-eyebrow">The 5 Commitments</div>
+          <h2 class="ce-title">What your project gets, every day.</h2>
+          <p class="ce-lead" style="margin: 0 auto;">
+            Five operational commitments that hold across every engineer, every pull
+            request, every sprint. Each commitment is measurable, observable, and
+            audited monthly.
+          </p>
+        </div>
+
+        <!-- ━━━━━━━━━━ Commitment 1 ━━━━━━━━━━ -->
+        <article class="ce-commitment">
+          <div class="ce-commitment-header">
+            <div class="ce-commitment-number">01</div>
+            <div>
+              <div class="ce-commitment-tagline">Plan First</div>
+              <div class="ce-commitment-name">
+                Every change is planned before it's coded.
+              </div>
+            </div>
+          </div>
+
+          <div class="ce-promise">
+            <div class="ce-promise-label">The Promise</div>
+            <div class="ce-promise-text">
+              No work begins on your project without an explicit plan reviewed by the
+              engineer.
+            </div>
+          </div>
+
+          <div class="ce-block">
+            <div class="ce-block-label">What this means for your project</div>
+            <ul class="ce-list">
+              <li>
+                For small tasks (under one session), engineers run a <strong>lightweight
+                plan</strong> that names the files touched, the steps required, the
+                acceptance criteria, and the risks. It takes 30 seconds and prevents
+                hours of rework.
+              </li>
+              <li>
+                For larger features, engineers produce a <strong>full plan</strong> —
+                with UI mockups, data flow, dependencies, and integration risks —
+                reviewed and approved before coding starts.
+              </li>
+              <li>
+                Plans are <strong>linked from every pull request</strong>, so you can
+                trace what was intended vs. what was built. There are no surprises at
+                review time.
+              </li>
+              <li>
+                Scope creep is caught at planning, not at review — which is why our
+                pull requests typically land at the first review pass, not the third.
+              </li>
+            </ul>
+          </div>
+
+          <div class="ce-metric">
+            <div class="ce-metric-label">How we measure it</div>
+            <div class="ce-metric-text">
+              PR first-review pass rate <strong>greater than 85%</strong>. When
+              planning is real, reviewers catch architecture issues — not basic
+              mistakes that planning would have surfaced.
+            </div>
+          </div>
+        </article>
+
+        <!-- ━━━━━━━━━━ Commitment 2 ━━━━━━━━━━ -->
+        <article class="ce-commitment">
+          <div class="ce-commitment-header">
+            <div class="ce-commitment-number">02</div>
+            <div>
+              <div class="ce-commitment-tagline">Three Senior Reviews Before A Human</div>
+              <div class="ce-commitment-name">
+                Every PR is reviewed by three senior engineers before a human looks
+                at it.
+              </div>
+            </div>
+          </div>
+
+          <div class="ce-promise">
+            <div class="ce-promise-label">The Promise</div>
+            <div class="ce-promise-text">
+              Our skills function as automated senior reviewers, catching issues no
+              human can match for speed or coverage.
+            </div>
+          </div>
+
+          <div class="ce-block">
+            <div class="ce-block-label">What this means for your project</div>
+            <ul class="ce-list">
+              <li>
+                A <strong>code-review skill</strong> runs on every pull request before
+                a reviewer is assigned — flagging code quality issues, missing tests,
+                inconsistent error handling, and pattern violations against your
+                project's conventions.
+              </li>
+              <li>
+                A <strong>security-audit skill</strong> runs automatically on any pull
+                request touching authentication, payment processing, or personal
+                data — catching the issues most often missed in human review.
+              </li>
+              <li>
+                A <strong>dependency-vulnerability scan</strong> runs on any pull
+                request adding or updating packages, blocking merges when a known
+                CVE (Common Vulnerability and Exposures) is detected in a new
+                dependency.
+              </li>
+              <li>
+                All three skill outputs are <strong>attached to the pull request</strong>
+                before a human reviewer is assigned — so reviewer time goes to
+                architecture and judgment, not catching basic mistakes.
+              </li>
+            </ul>
+          </div>
+
+          <div class="ce-metric">
+            <div class="ce-metric-label">How we measure it</div>
+            <div class="ce-metric-text">
+              Pull requests typically <strong>merge within 4 hours</strong> of opening
+              for small tasks, <strong>within 2 days</strong> for larger features.
+              No reviewer surprises. No three-day review threads.
+            </div>
+          </div>
+        </article>
+
+        <!-- ━━━━━━━━━━ Commitment 3 ━━━━━━━━━━ -->
+        <article class="ce-commitment">
+          <div class="ce-commitment-header">
+            <div class="ce-commitment-number">03</div>
+            <div>
+              <div class="ce-commitment-tagline">Compliance In The Workflow</div>
+              <div class="ce-commitment-name">
+                Regulated code gets regulated review — at merge time, not audit time.
+              </div>
+            </div>
+          </div>
+
+          <div class="ce-promise">
+            <div class="ce-promise-label">The Promise</div>
+            <div class="ce-promise-text">
+              Any code in your project touching HIPAA, GDPR, SOC 2, or PCI-DSS scope
+              gets framework-specific audit before merge — never bolted on retroactively.
+            </div>
+          </div>
+
+          <div class="ce-block">
+            <div class="ce-block-label">What this means for your project</div>
+            <ul class="ce-list">
+              <li>
+                We have <strong>specialized skills for HIPAA, GDPR, SOC 2, PCI-DSS,
+                and ISO 27001</strong> — each codifies the relevant regulation into
+                automated checks that run against the pull request before merge.
+              </li>
+              <li>
+                Findings are <strong>mapped to specific control IDs</strong> — §164
+                sections for HIPAA, Articles for GDPR, Common Criteria (CC) for SOC 2,
+                Requirements for PCI-DSS. Your audit team gets evidence in the format
+                they actually need.
+              </li>
+              <li>
+                <strong>Compliance evidence is collected continuously</strong>, not
+                assembled before an audit. Every relevant pull request leaves an
+                evidence trail that auditors can read directly.
+              </li>
+              <li>
+                Your audit preparation time goes from <strong>weeks to days</strong>.
+                The evidence package is already 90% ready when the audit window opens.
+              </li>
+            </ul>
+          </div>
+
+          <div class="ce-metric">
+            <div class="ce-metric-label">How we measure it</div>
+            <div class="ce-metric-text">
+              Last 4 quarterly compliance reviews on existing client projects:
+              <strong>zero findings</strong>. Continuous evidence collection beats
+              retroactive scrambling every time.
+            </div>
+          </div>
+        </article>
+
+        <!-- ━━━━━━━━━━ Commitment 4 ━━━━━━━━━━ -->
+        <article class="ce-commitment">
+          <div class="ce-commitment-header">
+            <div class="ce-commitment-number">04</div>
+            <div>
+              <div class="ce-commitment-tagline">Communication As Engineering</div>
+              <div class="ce-commitment-name">
+                Communication is engineering, not an afterthought.
+              </div>
+            </div>
+          </div>
+
+          <div class="ce-promise">
+            <div class="ce-promise-label">The Promise</div>
+            <div class="ce-promise-text">
+              Every status update, every incident message, every client-facing email
+              is reviewed for clarity, accuracy, and tone before it reaches you.
+            </div>
+          </div>
+
+          <div class="ce-block">
+            <div class="ce-block-label">What this means for your project</div>
+            <ul class="ce-list">
+              <li>
+                Engineers use a <strong>message-crafting skill</strong> that catches
+                over-apology, hedging language, and buried headlines before messages
+                send. The headline is the first sentence — always.
+              </li>
+              <li>
+                Incident updates follow a <strong>strict format</strong>: facts only,
+                named recovery action, time-bounded next update. Never premature
+                blame. Never speculation while the incident is open.
+              </li>
+              <li>
+                Status updates come in a <strong>standard structure</strong> — what's
+                done, what's in progress, what's blocked, what's next. Skimmable in
+                30 seconds. The same shape every week.
+              </li>
+              <li>
+                We measure <strong>communication quality the same way we measure code
+                quality</strong>. Both are engineering disciplines. Neither is
+                "soft skills."
+              </li>
+            </ul>
+          </div>
+
+          <div class="ce-metric">
+            <div class="ce-metric-label">How we measure it</div>
+            <div class="ce-metric-text">
+              Client trust scores correlate more strongly with our
+              <strong>incident-communication quality</strong> than with
+              mean-time-to-resolution. We treat both as engineering investments.
+            </div>
+          </div>
+        </article>
+
+        <!-- ━━━━━━━━━━ Commitment 5 ━━━━━━━━━━ -->
+        <article class="ce-commitment">
+          <div class="ce-commitment-header">
+            <div class="ce-commitment-number">05</div>
+            <div>
+              <div class="ce-commitment-tagline">Standards With Teeth</div>
+              <div class="ce-commitment-name">
+                Standards are enforced, not suggested.
+              </div>
+            </div>
+          </div>
+
+          <div class="ce-promise">
+            <div class="ce-promise-label">The Promise</div>
+            <div class="ce-promise-text">
+              Our quality gates run automatically on every pull request. They cannot be
+              bypassed casually. Exemptions require written engineering-lead approval.
+            </div>
+          </div>
+
+          <div class="ce-block">
+            <div class="ce-block-label">What this means for your project</div>
+            <ul class="ce-list">
+              <li>
+                Five gates run on every pull request: <strong>Plan, Review, Security,
+                Verification, Commit</strong> — implemented as automated continuous
+                integration checks, not human reminders.
+              </li>
+              <li>
+                Gates are <strong>tiered by branch sensitivity</strong>: every PR runs
+                Tier 1 (fast, under 2 minutes); staging branches run Tier 2 (deeper
+                checks); production branches run Tier 3 (full compliance audit).
+              </li>
+              <li>
+                <strong>Failed gates block merge</strong> until resolved. Exemptions
+                are possible but recorded — every exemption shows up in the monthly
+                engineering review.
+              </li>
+              <li>
+                Standards are <strong>reviewed monthly</strong> and adjusted based on
+                what they catch. A gate that never fires gets retired. A gate catching
+                the same issue repeatedly gets upgraded.
+              </li>
+            </ul>
+          </div>
+
+          <div class="ce-metric">
+            <div class="ce-metric-label">How we measure it</div>
+            <div class="ce-metric-text">
+              Production defect rate per merged pull request <strong>less than 1%</strong>.
+              Gates are the reason. We trust the process because we built the process.
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 4 — A DAY IN THE LIFE
+         ════════════════════════════════════════════ -->
+    <section class="ce-section ce-day">
+      <div class="container ce-section-narrow">
+        <div style="text-align: center; margin-bottom: 56px;">
+          <div class="ce-eyebrow" style="justify-content: center;">A day in the life</div>
+          <h2 class="ce-title">What a typical day looks like<br>for an engineer on your project.</h2>
+          <p class="ce-lead" style="margin: 0 auto;">
+            This isn't aspirational. This is Tuesday. Same workflow, different engineer,
+            same quality of output.
+          </p>
+        </div>
+
+        <div class="ce-day-card">
+          <ul class="ce-day-timeline">
+            <li>
+              <div class="ce-day-time">9:00 AM</div>
+              <div class="ce-day-text">
+                <strong>Maya logs into your project's repository.</strong> Her assigned
+                tasks for the morning: a UI bug fix and a copy update. Two tickets,
+                both estimated under two hours each.
+              </div>
+            </li>
+            <li>
+              <div class="ce-day-time">9:05 AM</div>
+              <div class="ce-day-text">
+                Before writing a single line of code, she <strong>runs a planning
+                skill</strong> against the bug ticket. The skill generates a structured
+                plan: files to touch, steps required, acceptance criteria, risks.
+                It takes 30 seconds. The plan is committed to the ticket.
+              </div>
+            </li>
+            <li>
+              <div class="ce-day-time">9:15 AM</div>
+              <div class="ce-day-text">
+                <strong>Daily standup.</strong> Maya shares status using the standard
+                team format — what's done, what's in progress, what's blocked.
+                No essays. No surprises for the project manager. Eight minutes total
+                across the whole team.
+              </div>
+            </li>
+            <li>
+              <div class="ce-day-time">9:30 AM</div>
+              <div class="ce-day-text">
+                Back to the bug. She implements the fix using a <strong>guided
+                implementation skill</strong> that respects the plan. The skill makes
+                the change, runs the relevant tests, and verifies acceptance criteria
+                before declaring the work done.
+              </div>
+            </li>
+            <li>
+              <div class="ce-day-time">10:00 AM</div>
+              <div class="ce-day-text">
+                Before opening a pull request, she runs a <strong>code-review skill</strong>.
+                It catches one issue: a missing accessibility label on the UI element
+                she touched. She fixes it before the PR is opened.
+              </div>
+            </li>
+            <li>
+              <div class="ce-day-time">10:15 AM</div>
+              <div class="ce-day-text">
+                She <strong>opens the pull request</strong>. The description includes
+                the plan she generated, the skill outputs, the verification checklist,
+                and a screenshot of the fix. The reviewer has everything needed to
+                approve in 15 minutes or less.
+              </div>
+            </li>
+            <li>
+              <div class="ce-day-time">11:00 AM</div>
+              <div class="ce-day-text">
+                <strong>A senior engineer reviews the PR.</strong> Total reviewer
+                time: 15 minutes (most issues already caught by the skills).
+                Approved. Merged. The fix is in staging by lunch.
+              </div>
+            </li>
+            <li>
+              <div class="ce-day-time">11:30 AM</div>
+              <div class="ce-day-text">
+                <strong>On to the next ticket.</strong> The whole cycle — plan,
+                implement, review, merge — took 90 minutes for the bug fix. The next
+                90 minutes will follow the same pattern.
+              </div>
+            </li>
+          </ul>
+
+          <div class="ce-day-closer">
+            This is what your project looks like every day. Same workflow.
+            Different engineer. Same quality of output.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 5 — THE ENGINEERS ON YOUR PROJECT
+         ════════════════════════════════════════════ -->
+    <section class="ce-section ce-engineers">
+      <div class="container">
+        <div style="text-align: center; max-width: 760px; margin: 0 auto;">
+          <div class="ce-eyebrow" style="justify-content: center;">The team</div>
+          <h2 class="ce-title">The engineers on your project.</h2>
+          <p class="ce-lead" style="margin: 0 auto;">
+            Four engineering levels, one operating model. Each level has a defined
+            scope, defined deliverables, and defined judgment authority — so you
+            always know what you're getting from whom.
+          </p>
+        </div>
+
+        <div class="ce-engineers-grid">
+
+          <div class="ce-engineer-card">
+            <div class="ce-engineer-level">SE I & II · Feature Engineers</div>
+            <div class="ce-engineer-role">The Engineers Who Ship Your Features</div>
+            <div class="ce-engineer-body">
+              Implement features and fixes following the operating model. Their pull
+              requests land at first review because the skills catch issues before
+              they're escalated to senior reviewers. Your project sees the same
+              caliber of work from a Software Engineer I as from a senior engineer —
+              because the skills carry the domain expertise. This isn't theory;
+              it's what we measure quarterly.
+            </div>
+          </div>
+
+          <div class="ce-engineer-card">
+            <div class="ce-engineer-level">SE III · Senior Engineers</div>
+            <div class="ce-engineer-role">The Engineers Who Set The Patterns</div>
+            <div class="ce-engineer-body">
+              Define patterns within their domain — frontend, backend, mobile, data.
+              Mentor feature engineers. Author new skills when they recognize a
+              recurring pattern. Drive architectural decisions for major features.
+              Your project's senior engineers decide <em>how</em> a feature should
+              be built; the feature engineers ship it. That separation is by design.
+            </div>
+          </div>
+
+          <div class="ce-engineer-card">
+            <div class="ce-engineer-level">SE IV · Staff Engineers</div>
+            <div class="ce-engineer-role">The Engineers Above The Features</div>
+            <div class="ce-engineer-body">
+              Operate above individual features. Design systems. Set technical
+              direction. Own the org-wide standards in this handbook. On your
+              project, staff engineers come in for system-level decisions —
+              architecture reviews, integration plans, scalability assessments —
+              not for routine reviews. Their time is spent where their judgment
+              matters most.
+            </div>
+          </div>
+
+          <div class="ce-engineer-card">
+            <div class="ce-engineer-level">Engineering Lead</div>
+            <div class="ce-engineer-role">The Single Point of Accountability</div>
+            <div class="ce-engineer-body">
+              Owns the standards for your project specifically. Configures the
+              operating model to fit your stack, your conventions, your compliance
+              scope. Ensures the team is calibrated quarterly. Your single point of
+              accountability for engineering quality — and the person you call when
+              something needs a decision faster than the standard process allows.
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 6 — WHAT GETS AUDITED
+         ════════════════════════════════════════════ -->
+    <section class="ce-section ce-audit">
+      <div class="container ce-section-narrow">
+        <div class="ce-eyebrow">What gets audited</div>
+        <h2 class="ce-title">Open. Auditable. By design.</h2>
+        <p class="ce-lead">
+          The most common question we get from technical evaluators is also the most
+          reasonable one: <em>"How do I know your team actually follows this?"</em>
+          Three answers — each one verifiable, none of them a marketing claim.
+        </p>
+
+        <div style="margin-top: 56px;">
+
+          <div class="ce-audit-block">
+            <div class="ce-audit-heading">Process artifacts are public.</div>
+            <p class="ce-audit-body">
+              Every skill our team uses is <strong>open-source and MIT-licensed</strong>.
+              The full skill inventory (101 skills across 10 packs) is published on
+              our public site. You can read exactly what our engineers are running
+              on your code — the same skill files our internal team uses, version
+              for version. Nothing is private. Nothing is "trade secret." The
+              transparency itself is the differentiator.
+            </p>
+          </div>
+
+          <div class="ce-audit-block">
+            <div class="ce-audit-heading">Every pull request includes its receipts.</div>
+            <p class="ce-audit-body">
+              Pull requests on your project include the <strong>plan</strong> that
+              scoped the change, the <strong>skill outputs</strong> that validated it,
+              the <strong>acceptance criteria</strong> that were verified, and the
+              <strong>conventional commit</strong> that landed it. A reviewer with no
+              prior context can audit any merged change in minutes — not days. Pull
+              this for any merge, any time period, on any project we run.
+            </p>
+          </div>
+
+          <div class="ce-audit-block">
+            <div class="ce-audit-heading">Compliance evidence is continuous.</div>
+            <p class="ce-audit-body">
+              For regulated work — HIPAA, GDPR, SOC 2, PCI-DSS — audit evidence is
+              collected <strong>automatically as engineers ship features</strong>,
+              not assembled in a rush before an audit window. When your audit lands,
+              the evidence package is already 90% ready. The remaining 10% is the
+              context only your team can add. We've never had a quarterly compliance
+              review with a finding. That's because the evidence has been there the
+              whole time.
+            </p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 7 — THE NUMBERS
+         ════════════════════════════════════════════ -->
+    <section class="ce-section ce-numbers">
+      <div class="container">
+        <div style="text-align: center; max-width: 760px; margin: 0 auto 56px;">
+          <div class="ce-eyebrow" style="justify-content: center;">Quantified outcomes</div>
+          <h2 class="ce-title">The numbers.</h2>
+          <p class="ce-lead" style="margin: 0 auto;">
+            Measured outcomes from our Q2 2026 cohort, aggregated across more than
+            twenty production projects. Updated quarterly. Available on request with
+            the underlying data.
+          </p>
+        </div>
+
+        <div class="ce-table-wrap">
+          <table class="ce-table">
+            <thead>
+              <tr>
+                <th>What we measure</th>
+                <th>Result</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>PR first-review pass rate</td>
+                <td>&gt; 85%</td>
+              </tr>
+              <tr>
+                <td>Time from PR open to merge (small task)</td>
+                <td>&lt; 4 hours</td>
+              </tr>
+              <tr>
+                <td>Hallucinated scope creep in AI-assisted PRs</td>
+                <td>&lt; 2%</td>
+              </tr>
+              <tr>
+                <td>Compliance findings caught pre-audit</td>
+                <td>&gt; 90%</td>
+              </tr>
+              <tr>
+                <td>Audit preparation time</td>
+                <td>2 days</td>
+              </tr>
+              <tr>
+                <td>Industry standard audit prep (for comparison)</td>
+                <td>2–3 weeks</td>
+              </tr>
+              <tr>
+                <td>Skill / pattern reusability across projects</td>
+                <td>~ 95%</td>
+              </tr>
+              <tr>
+                <td>Developer onboarding time to new domain</td>
+                <td>2–3 days</td>
+              </tr>
+              <tr>
+                <td>Production defect rate per merged PR</td>
+                <td>&lt; 1%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p class="ce-table-footnote">
+          Metrics are aggregated across 20+ production projects where this operating
+          model has been deployed. Updated quarterly. Underlying data available on
+          request under standard NDA.
+        </p>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 8 — FREQUENTLY ASKED
+         ════════════════════════════════════════════ -->
+    <section class="ce-section ce-faq">
+      <div class="container ce-section-narrow">
+        <div style="text-align: center;">
+          <div class="ce-eyebrow" style="justify-content: center;">For procurement, legal, engineering leaders</div>
+          <h2 class="ce-title">Frequently asked.</h2>
+          <p class="ce-lead" style="margin: 0 auto;">
+            The questions every serious technical evaluator raises. Honest answers,
+            including where the trade-offs lie.
+          </p>
+        </div>
+
+        <div class="ce-faq-list">
+
+          <details class="ce-faq-item">
+            <summary>
+              <span class="ce-faq-q-num">Q1</span>
+              <span style="flex: 1;">Is this just a fancy way of saying "we use Claude Code"?</span>
+              <span class="ce-faq-chevron"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></span>
+            </summary>
+            <div class="ce-faq-content">
+              The tooling is part of it. The operating model is the bigger part. Our
+              team uses Claude Code, Cursor, and other AI assistants — but always
+              <strong>through our skills</strong>, which are structured, reviewed,
+              versioned domain expertise. Without the skills, the team would use AI
+              inconsistently. With them, every engineer produces the same caliber
+              of output. The honest answer: the AI tooling is the engine; the
+              operating model is the steering, the brakes, and the road.
+            </div>
+          </details>
+
+          <details class="ce-faq-item">
+            <summary>
+              <span class="ce-faq-q-num">Q2</span>
+              <span style="flex: 1;">What if your engineers don't follow this handbook?</span>
+              <span class="ce-faq-chevron"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></span>
+            </summary>
+            <div class="ce-faq-content">
+              Standards have teeth. Pull requests that bypass the operating model are
+              rejected at first review or blocked by automated continuous integration
+              gates. The handbook isn't aspirational; it's <strong>enforced through
+              the pipeline</strong>. Our team can produce, on request, a list of merged
+              pull requests with their associated plans, skill outputs, and
+              verification artifacts — for any project, any time period. The audit
+              trail isn't something we assemble for you; it's the way we work.
+            </div>
+          </details>
+
+          <details class="ce-faq-item">
+            <summary>
+              <span class="ce-faq-q-num">Q3</span>
+              <span style="flex: 1;">Who is accountable when something goes wrong?</span>
+              <span class="ce-faq-chevron"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></span>
+            </summary>
+            <div class="ce-faq-content">
+              Heaptrace Technology Pvt Ltd. The skills are open-source under MIT
+              license, fully auditable, and signed off by named engineering
+              leadership. The team is accountable contractually. When an incident
+              happens on your project, you get a <strong>structured incident
+              response</strong> (NTSB-format communications, time-bounded updates,
+              post-mortem with named action items) — not finger-pointing, not
+              speculation, not silence while the team scrambles internally.
+            </div>
+          </details>
+
+          <details class="ce-faq-item">
+            <summary>
+              <span class="ce-faq-q-num">Q4</span>
+              <span style="flex: 1;">Can we audit your engineers' compliance with this handbook?</span>
+              <span class="ce-faq-chevron"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></span>
+            </summary>
+            <div class="ce-faq-content">
+              Yes. Every pull request is <strong>artifact-rich</strong> — plan, skill
+              outputs, verification checklist, conventional commit message. We can
+              produce compliance evidence on demand for any merged change, on any
+              project. For regulated work, the evidence package is continuously
+              assembled, not retroactive. Your audit team gets evidence in the format
+              they actually need (control IDs, dates, file references, named
+              engineers), not a generic report.
+            </div>
+          </details>
+
+          <details class="ce-faq-item">
+            <summary>
+              <span class="ce-faq-q-num">Q5</span>
+              <span style="flex: 1;">What about your engineers' AI usage with our proprietary code?</span>
+              <span class="ce-faq-chevron"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></span>
+            </summary>
+            <div class="ce-faq-content">
+              We use AI assistants that <strong>respect data privacy contracts</strong> —
+              Claude Code with enterprise privacy terms, on-premises Cursor
+              deployments, and similar — configured per-client based on your
+              data-handling requirements. For air-gapped or sovereign environments,
+              we have engineers trained to operate without external AI. The operating
+              model applies regardless of the tooling: the principles, the skills
+              (executed locally where required), the gates, and the artifacts remain
+              the same.
+            </div>
+          </details>
+
+          <details class="ce-faq-item">
+            <summary>
+              <span class="ce-faq-q-num">Q6</span>
+              <span style="flex: 1;">Does this scale to projects with hundreds of engineers?</span>
+              <span class="ce-faq-chevron"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></span>
+            </summary>
+            <div class="ce-faq-content">
+              The operating model was <strong>designed for it</strong>. Skills are
+              versioned (you can pin a specific skill version to your project),
+              the handbook is org-wide (every engineer reads the same documents,
+              calibrates against the same principles), and quality gates are
+              automated (they scale with the continuous integration infrastructure,
+              not with team headcount). Adding a hundredth engineer doesn't slow
+              the team down — it follows the same checklist as the tenth.
+            </div>
+          </details>
+
+          <details class="ce-faq-item">
+            <summary>
+              <span class="ce-faq-q-num">Q7</span>
+              <span style="flex: 1;">What's the onboarding time for a new engineer joining our project?</span>
+              <span class="ce-faq-chevron"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></span>
+            </summary>
+            <div class="ce-faq-content">
+              <strong>2–3 days</strong> to be productive on the operating model
+              itself; <strong>1–2 weeks</strong> to be fully productive on your
+              specific stack. Most of the onboarding is your project's domain, not
+              our process — because the process is the same across all our projects.
+              An engineer rotating in mid-engagement reads the project's planning
+              docs and is shipping within the week. An engineer rotating out doesn't
+              leave a knowledge gap, because the operating model encoded the
+              knowledge, not the individual.
+            </div>
+          </details>
+
+          <details class="ce-faq-item">
+            <summary>
+              <span class="ce-faq-q-num">Q8</span>
+              <span style="flex: 1;">Can we customize the operating model for our project?</span>
+              <span class="ce-faq-chevron"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></span>
+            </summary>
+            <div class="ce-faq-content">
+              Yes. The Engineering Lead on your project <strong>configures the
+              operating model</strong> to fit your conventions, your stack, your
+              compliance scope, and your reporting cadence. The principles stay the
+              same; the operational details adapt. Your handbook is a living
+              document for the duration of the engagement — and at the end of the
+              engagement, you keep it. Including any skills we wrote specifically
+              for your stack.
+            </div>
+          </details>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 9 — HOW TO ENGAGE
+         ════════════════════════════════════════════ -->
+    <section class="ce-section ce-engage">
+      <div class="container">
+        <div style="text-align: center; max-width: 760px; margin: 0 auto;">
+          <div class="ce-eyebrow" style="justify-content: center;">How to engage</div>
+          <h2 class="ce-title">Three paths forward.</h2>
+          <p class="ce-lead" style="margin: 0 auto;">
+            We don't try to win you over in a deck. We invite you to see the
+            operating model in action — first in a demo, then in a pilot, then
+            in a full engagement. Each step earns the next.
+          </p>
+        </div>
+
+        <div class="ce-engage-grid">
+
+          <a href="mailto:hello@heaptrace.com?subject=Capability%20Demo%20Request" class="ce-engage-card">
+            <div class="ce-engage-label">Path 1</div>
+            <div class="ce-engage-title">Capability Demo</div>
+            <div class="ce-engage-duration">30 minutes · No commitment</div>
+            <div class="ce-engage-body">
+              Live walkthrough of the operating model on a sample codebase, with your
+              engineering leaders in the room. We show the skills running, the gates
+              enforcing, and the artifacts being collected — in real time. No deck.
+              No theater. Just the operating model doing the thing.
+            </div>
+            <div class="ce-engage-cta">
+              Book a Demo
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+          </a>
+
+          <a href="mailto:hello@heaptrace.com?subject=Pilot%20Engagement%20Request" class="ce-engage-card">
+            <div class="ce-engage-label">Path 2</div>
+            <div class="ce-engage-title">Pilot Engagement</div>
+            <div class="ce-engage-duration">4–6 weeks · Scoped fee</div>
+            <div class="ce-engage-body">
+              A scoped pilot on a real feature in your project — typically one module
+              or a defined scope of work. Our engineers operate under the handbook
+              end-to-end. You see the artifacts, measure the outcomes, and evaluate
+              the fit before any larger commitment. Most pilots convert; some don't.
+              Both outcomes are fine.
+            </div>
+            <div class="ce-engage-cta">
+              Discuss a Pilot
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+          </a>
+
+          <a href="mailto:hello@heaptrace.com?subject=Engagement%20Discussion" class="ce-engage-card">
+            <div class="ce-engage-label">Path 3</div>
+            <div class="ce-engage-title">Full Engagement</div>
+            <div class="ce-engage-duration">Quarterly cadence · Custom team</div>
+            <div class="ce-engage-body">
+              Once the operating model is validated for your project, we scale to a
+              full engagement — team composition, sprint cadence, compliance scope,
+              reporting structure, all tailored. The handbook stays the same. The
+              team grows or shrinks around it. You always know what you're getting.
+            </div>
+            <div class="ce-engage-cta">
+              Talk to Engineering Leadership
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+          </a>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 10 — CLOSING STATEMENT
+         ════════════════════════════════════════════ -->
+    <section class="ce-section ce-closing">
+      <div class="container ce-section-narrow">
+
+        <div class="ce-pullquote">
+          <div class="ce-pullquote-text">
+            Every project gets the same operating model. Every engineer follows the
+            same handbook. Every pull request carries the same artifacts.
+            <strong>That's not a process commitment — that's an engineering
+            commitment.</strong>
+          </div>
+        </div>
+
+        <div class="ce-closing-statement">
+          Your project doesn't deserve <em>our best engineers</em>. It deserves
+          <strong>our operating model</strong> — applied by every engineer, every
+          pull request, every day.<br><br>
+          That's the difference. That's what this handbook delivers.
+        </div>
+
+        <!-- Effective footer card -->
+        <div class="ce-effective">
+          <div class="ce-effective-divider">─────────────────────────────────────────────────────────</div>
+          <div><strong>Effective:</strong> April 2026</div>
+          <div><strong>Version:</strong> 1.0 (Client Edition)</div>
+          <div><strong>Maintained by:</strong> Heaptrace Engineering Leadership</div>
+          <div><strong>Companion to:</strong> Internal Handbook Docs 1–6</div>
+          <div class="ce-effective-divider">─────────────────────────────────────────────────────────</div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         FOOTER
+         ════════════════════════════════════════════ -->
+    <footer class="footer">
+      <div class="footer-inner">
+        <div class="footer-links">
+          <a href="../index.html" class="footer-link">Home</a>
+          <a href="../index.html#packs" class="footer-link">Packs</a>
+          <a href="../setup/index.html" class="footer-link">Setup Guide</a>
+          <a href="../customize/index.html" class="footer-link">Customize</a>
+          <a href="index.html" class="footer-link">Handbook</a>
+          <a href="https://heaptrace.com" class="footer-link" target="_blank" rel="noopener">Heaptrace</a>
+        </div>
+        <div class="footer-copy">
+          MIT License &middot; Built by <a href="https://heaptrace.com" target="_blank" rel="noopener">Heaptrace Technology</a>
+          <br>101 Skills &middot; 10 Packs &middot; Free &amp; Open Source
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       PASSWORD GATE SCRIPT
+       ════════════════════════════════════════════ -->
+  <script>
+    (function() {
+      const STORED_HASH = '5866f0f6f885b943472fd7572b9c783e6b1a29958a34bd9f18e1f1e17b9a57a6';
+      const STORAGE_KEY = 'htms-handbook-access';
+      const EXPIRY_DAYS = 30;
+      const gate = document.getElementById('password-gate');
+      const content = document.getElementById('main-content');
+      const input = document.getElementById('gate-input');
+      const submit = document.getElementById('gate-submit');
+      const error = document.getElementById('gate-error');
+
+      function unlock() {
+        gate.style.display = 'none';
+        content.style.display = 'block';
+        document.body.style.overflow = 'auto';
+      }
+
+      function checkStored() {
+        try {
+          const stored = localStorage.getItem(STORAGE_KEY);
+          if (!stored) return false;
+          const { hash, expiry } = JSON.parse(stored);
+          if (hash !== STORED_HASH) return false;
+          if (Date.now() > expiry) { localStorage.removeItem(STORAGE_KEY); return false; }
+          return true;
+        } catch { return false; }
+      }
+
+      async function sha256(str) {
+        const buf = new TextEncoder().encode(str);
+        const hashBuf = await crypto.subtle.digest('SHA-256', buf);
+        return Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
+      }
+
+      async function tryUnlock() {
+        error.textContent = '';
+        const val = input.value.trim();
+        if (!val) return;
+        const hash = await sha256(val);
+        if (hash === STORED_HASH) {
+          const expiry = Date.now() + EXPIRY_DAYS * 24 * 60 * 60 * 1000;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({ hash, expiry }));
+          unlock();
+        } else {
+          error.textContent = 'Incorrect code. Contact your Heaptrace contact.';
+          input.value = '';
+          input.focus();
+        }
+      }
+
+      content.style.display = 'none';
+      document.body.style.overflow = 'hidden';
+
+      if (checkStored()) {
+        unlock();
+      } else {
+        submit.addEventListener('click', tryUnlock);
+        input.addEventListener('keyup', (e) => { if (e.key === 'Enter') tryUnlock(); });
+        setTimeout(() => input.focus(), 100);
+      }
+    })();
+  </script>
+
+</body>
+</html>
