@@ -1,0 +1,2224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quality Gates — Heaptrace Engineering Handbook</title>
+  <meta name="description" content="The five non-negotiable merge gates every PR must pass. Doc 6 of 7 in the Heaptrace Engineering Handbook.">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="author" content="Heaptrace Technology">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="../css/styles.css">
+
+  <style>
+    /* ═════════════════════════════════════════════
+       QUALITY GATES — PAGE STYLES
+       Primary accent: GREEN (--green)
+       Warning accent: AMBER (--amber)
+       Blocking accent: RED (--red)
+       ═════════════════════════════════════════════ */
+
+    :root {
+      --accent: var(--green);
+      --accent-light: #34d399;
+      --accent-soft: rgba(16, 185, 129, 0.10);
+      --accent-border: rgba(16, 185, 129, 0.28);
+      --accent-glow: rgba(16, 185, 129, 0.18);
+
+      --warn: #f59e0b;
+      --warn-light: #fbbf24;
+      --warn-soft: rgba(245, 158, 11, 0.10);
+      --warn-border: rgba(245, 158, 11, 0.28);
+
+      --block: #ef4444;
+      --block-light: #fca5a5;
+      --block-soft: rgba(239, 68, 68, 0.10);
+      --block-border: rgba(239, 68, 68, 0.28);
+    }
+
+    body { line-height: 1.7; }
+
+    /* ── Active nav (green override) ── */
+    .nav-link.active {
+      color: var(--green);
+      background: rgba(16, 185, 129, 0.08);
+    }
+
+    /* ── Password Gate ── */
+    #password-gate {
+      position: fixed; inset: 0; z-index: 9999;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--bg-primary);
+      background-image:
+        radial-gradient(ellipse 60% 40% at 50% 20%, rgba(16, 185, 129, 0.08), transparent 70%),
+        radial-gradient(ellipse 40% 30% at 50% 80%, rgba(6, 182, 212, 0.05), transparent 60%);
+    }
+    #gate-input:focus {
+      border-color: var(--accent) !important;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+    }
+    #gate-submit:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 30px rgba(16, 185, 129, 0.35);
+    }
+
+    /* ── Shared section primitives ── */
+    .qg-eyebrow {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 0.78rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.12em; color: var(--accent-light);
+      margin-bottom: 14px;
+    }
+    .qg-eyebrow::before {
+      content: ''; width: 24px; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent));
+    }
+    .qg-title {
+      font-size: clamp(1.9rem, 3.2vw, 2.6rem);
+      font-weight: 800; line-height: 1.15; margin-bottom: 16px;
+      letter-spacing: -0.02em;
+    }
+    .qg-lead {
+      font-size: 1.08rem; color: var(--text-secondary);
+      line-height: 1.75; max-width: 720px;
+    }
+    .qg-section {
+      padding: 100px 0;
+      position: relative;
+    }
+    .qg-section-narrow { max-width: 900px; margin: 0 auto; }
+
+    /* ── Hero ── */
+    .qg-hero {
+      padding: calc(var(--nav-height) + 100px) 0 90px;
+      text-align: center; position: relative; overflow: hidden;
+    }
+    .qg-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 40% at 50% 0%, rgba(16, 185, 129, 0.10), transparent 70%),
+        radial-gradient(ellipse 40% 30% at 30% 30%, rgba(6, 182, 212, 0.05), transparent 60%),
+        radial-gradient(ellipse 40% 30% at 70% 20%, rgba(52, 211, 153, 0.05), transparent 60%);
+      pointer-events: none;
+    }
+    .qg-hero::after {
+      content: ''; position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='grid' width='60' height='60' patternUnits='userSpaceOnUse'%3E%3Cpath d='M 60 0 L 0 0 0 60' fill='none' stroke='%231e293b' stroke-width='0.5'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23grid)'/%3E%3C/svg%3E");
+      opacity: 0.3; pointer-events: none;
+    }
+    .qg-hero-content { position: relative; z-index: 1; }
+    .qg-hero-badge {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--accent-soft);
+      border: 1px solid var(--accent-border);
+      color: var(--accent-light); padding: 8px 20px; border-radius: 999px;
+      font-size: 0.78rem; font-weight: 700; margin-bottom: 32px;
+      letter-spacing: 0.12em; text-transform: uppercase;
+    }
+    .qg-hero-badge-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent); box-shadow: 0 0 12px var(--accent);
+      animation: pulseGreen 2.4s infinite;
+    }
+    @keyframes pulseGreen {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.45); }
+      50% { opacity: 0.85; box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+    }
+    .qg-hero h1 {
+      font-size: clamp(2.6rem, 5.2vw, 4rem);
+      font-weight: 800; line-height: 1.08; margin-bottom: 24px;
+      letter-spacing: -0.025em;
+      background: linear-gradient(135deg, var(--text-primary) 0%, #34d399 45%, var(--cyan-light) 85%, var(--text-primary) 100%);
+      background-size: 200% auto;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmer 7s ease-in-out infinite;
+    }
+    @keyframes shimmer {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+    .qg-hero-subtitle {
+      font-size: 1.18rem; color: var(--text-secondary);
+      max-width: 740px; margin: 0 auto 48px; line-height: 1.75;
+    }
+    .qg-hero-cta {
+      display: inline-flex; align-items: center; gap: 14px;
+      margin-top: 8px; flex-wrap: wrap; justify-content: center;
+    }
+    .qg-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 14px 26px; border-radius: var(--radius-md);
+      font-weight: 600; font-size: 0.95rem; letter-spacing: 0.005em;
+      transition: var(--transition); border: 1px solid transparent;
+    }
+    .qg-btn-primary {
+      background: linear-gradient(135deg, var(--green), var(--cyan));
+      color: white;
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.25);
+    }
+    .qg-btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 32px rgba(16, 185, 129, 0.4);
+    }
+    .qg-btn-primary.is-disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+    .qg-btn-secondary {
+      background: transparent;
+      color: var(--text-primary);
+      border-color: var(--border-hover);
+    }
+    .qg-btn-secondary:hover {
+      border-color: var(--accent);
+      color: var(--accent-light);
+      background: var(--accent-soft);
+    }
+
+    /* ── Setup section (3 paragraphs) ── */
+    .qg-setup {
+      background:
+        radial-gradient(ellipse 80% 50% at 50% 0%, rgba(16, 185, 129, 0.04), transparent 70%);
+    }
+    .qg-setup-block {
+      padding: 28px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .qg-setup-block:last-child { border-bottom: none; }
+    .qg-setup-heading {
+      font-size: 1.35rem; font-weight: 700;
+      margin-bottom: 14px;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+    }
+    .qg-setup-heading::before {
+      content: '"'; color: var(--accent);
+      font-family: 'JetBrains Mono', monospace;
+      margin-right: 6px; opacity: 0.6;
+    }
+    .qg-setup-heading::after {
+      content: '"'; color: var(--accent);
+      font-family: 'JetBrains Mono', monospace;
+      margin-left: 4px; opacity: 0.6;
+    }
+    .qg-setup-body {
+      color: var(--text-secondary);
+      font-size: 1.02rem;
+      line-height: 1.8;
+    }
+    .qg-setup-body a {
+      color: var(--accent-light);
+      text-decoration: underline;
+      text-decoration-color: rgba(16, 185, 129, 0.4);
+      text-underline-offset: 3px;
+    }
+    .qg-setup-body a:hover { color: var(--accent); }
+
+    /* ── GATES (the heart of the doc) ── */
+    .qg-gates {
+      background:
+        radial-gradient(ellipse 60% 30% at 50% 50%, rgba(16, 185, 129, 0.025), transparent 70%);
+    }
+    .qg-gates-intro {
+      max-width: 760px; margin: 0 auto 80px; text-align: center;
+    }
+
+    .qg-gate {
+      max-width: 960px; margin: 0 auto 64px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0;
+      position: relative;
+      overflow: hidden;
+      transition: var(--transition);
+    }
+    .qg-gate:hover {
+      border-color: rgba(16, 185, 129, 0.25);
+    }
+    .qg-gate::before {
+      content: ''; position: absolute; top: 0; left: 0;
+      width: 4px; height: 100%;
+      background: linear-gradient(180deg, var(--green) 0%, var(--cyan) 100%);
+    }
+
+    /* Gate header */
+    .qg-gate-header {
+      padding: 40px 48px 32px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      gap: 28px;
+    }
+    .qg-gate-number {
+      font-size: 4rem;
+      font-weight: 800;
+      line-height: 0.9;
+      background: linear-gradient(135deg, var(--green), var(--cyan));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.04em;
+      flex-shrink: 0;
+      min-width: 110px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .qg-gate-headtext { flex: 1; }
+    .qg-gate-eyebrow {
+      font-size: 0.72rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.14em;
+      color: var(--accent-light);
+      margin-bottom: 10px;
+    }
+    .qg-gate-name {
+      font-size: 1.7rem;
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+      margin-bottom: 14px;
+    }
+    .qg-gate-tagline {
+      font-size: 1.02rem;
+      color: var(--text-secondary);
+      line-height: 1.65;
+    }
+
+    /* Gate meta strip (trigger / enforced / blocks) */
+    .qg-gate-meta {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .qg-gate-meta-cell {
+      padding: 22px 28px;
+      border-right: 1px solid var(--border);
+    }
+    .qg-gate-meta-cell:last-child { border-right: none; }
+    .qg-gate-meta-label {
+      font-size: 0.68rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.14em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .qg-gate-meta-label .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+    }
+    .qg-gate-meta-label.is-trigger .dot { background: var(--cyan); }
+    .qg-gate-meta-label.is-enforced .dot { background: var(--green); }
+    .qg-gate-meta-label.is-blocks .dot { background: var(--block); }
+    .qg-gate-meta-value {
+      font-size: 0.93rem;
+      color: var(--text-primary);
+      line-height: 1.55;
+      font-weight: 500;
+    }
+
+    /* Gate body */
+    .qg-gate-body {
+      padding: 36px 48px 40px;
+    }
+
+    .qg-block {
+      margin-bottom: 32px;
+    }
+    .qg-block:last-child { margin-bottom: 0; }
+
+    .qg-block-label {
+      display: inline-flex; align-items: center; gap: 10px;
+      font-size: 0.72rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.12em;
+      margin-bottom: 16px;
+    }
+    .qg-block-label-icon {
+      width: 22px; height: 22px;
+      display: inline-flex; align-items: center; justify-content: center;
+      border-radius: 5px;
+      font-size: 0.78rem; font-weight: 800;
+    }
+
+    /* Checks — green */
+    .qg-checks .qg-block-label { color: var(--accent-light); }
+    .qg-checks .qg-block-label-icon {
+      background: var(--accent-soft);
+      color: var(--accent-light);
+      border: 1px solid var(--accent-border);
+    }
+
+    /* Blocks — red */
+    .qg-blocks .qg-block-label { color: var(--block-light); }
+    .qg-blocks .qg-block-label-icon {
+      background: var(--block-soft);
+      color: var(--block-light);
+      border: 1px solid var(--block-border);
+    }
+
+    /* Override — amber */
+    .qg-override .qg-block-label { color: var(--warn-light); }
+    .qg-override .qg-block-label-icon {
+      background: var(--warn-soft);
+      color: var(--warn-light);
+      border: 1px solid var(--warn-border);
+    }
+
+    /* Backing — cyan */
+    .qg-backing .qg-block-label { color: var(--cyan-light); }
+    .qg-backing .qg-block-label-icon {
+      background: rgba(6, 182, 212, 0.10);
+      color: var(--cyan-light);
+      border: 1px solid rgba(6, 182, 212, 0.28);
+    }
+
+    .qg-list {
+      list-style: none; padding: 0;
+    }
+    .qg-list li {
+      position: relative;
+      padding: 11px 0 11px 28px;
+      color: var(--text-secondary);
+      font-size: 0.98rem;
+      line-height: 1.65;
+      border-bottom: 1px solid rgba(30, 41, 59, 0.5);
+    }
+    .qg-list li:last-child { border-bottom: none; }
+    .qg-list li::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 19px;
+      width: 14px; height: 2px;
+      border-radius: 2px;
+    }
+    .qg-checks .qg-list li::before {
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent-glow);
+    }
+    .qg-blocks .qg-list li::before {
+      background: var(--block);
+      box-shadow: 0 0 8px rgba(239, 68, 68, 0.3);
+    }
+    .qg-list li strong { color: var(--text-primary); font-weight: 600; }
+    .qg-list li code,
+    .qg-list li .skill {
+      background: var(--bg-code);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.88em;
+      color: var(--accent-light);
+      border: 1px solid var(--border);
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 500;
+    }
+
+    /* Override callout */
+    .qg-override-box {
+      background: var(--warn-soft);
+      border: 1px solid var(--warn-border);
+      border-left: 3px solid var(--warn);
+      border-radius: var(--radius-sm);
+      padding: 18px 22px;
+      color: var(--text-secondary);
+      font-size: 0.98rem;
+      line-height: 1.7;
+    }
+    .qg-override-box strong { color: var(--warn-light); }
+
+    /* Backing skills row */
+    .qg-backing-row {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      margin-bottom: 18px;
+    }
+    .qg-backing-chip {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      color: var(--cyan-light);
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 500;
+      transition: var(--transition-fast);
+    }
+    .qg-backing-chip:hover {
+      border-color: rgba(6, 182, 212, 0.4);
+      background: rgba(6, 182, 212, 0.05);
+    }
+    .qg-backing-prevents {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      line-height: 1.65;
+    }
+    .qg-backing-prevents strong {
+      color: var(--block-light);
+      font-weight: 600;
+    }
+
+    /* Tier table inside Gate 3 */
+    .qg-tier-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+      background: var(--bg-secondary);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .qg-tier-table th,
+    .qg-tier-table td {
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 0.92rem;
+      line-height: 1.5;
+      border-bottom: 1px solid var(--border);
+    }
+    .qg-tier-table th {
+      background: rgba(16, 185, 129, 0.06);
+      color: var(--accent-light);
+      font-weight: 700;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    .qg-tier-table tr:last-child td { border-bottom: none; }
+    .qg-tier-table td:first-child {
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+    }
+    .qg-tier-table td code {
+      background: var(--bg-code);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 0.85em;
+      color: var(--cyan-light);
+      border: 1px solid var(--border);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .qg-cross-ref {
+      margin-top: 22px;
+      padding: 14px 18px;
+      background: rgba(6, 182, 212, 0.05);
+      border: 1px solid rgba(6, 182, 212, 0.18);
+      border-radius: var(--radius-sm);
+      font-size: 0.93rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    .qg-cross-ref strong { color: var(--cyan-light); }
+    .qg-cross-ref a {
+      color: var(--cyan-light);
+      font-weight: 600;
+      text-decoration: underline;
+      text-decoration-color: rgba(6, 182, 212, 0.4);
+      text-underline-offset: 3px;
+    }
+    .qg-cross-ref a:hover { color: var(--cyan); }
+
+    /* ── PR description template ── */
+    .qg-template {
+      background:
+        radial-gradient(ellipse 70% 40% at 50% 50%, rgba(16, 185, 129, 0.04), transparent 70%);
+    }
+    .qg-template-wrap {
+      max-width: 920px;
+      margin: 56px auto 0;
+    }
+    .qg-template-frame {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.18);
+    }
+    .qg-template-bar {
+      display: flex; align-items: center; gap: 10px;
+      padding: 14px 20px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+    }
+    .qg-template-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+    }
+    .qg-template-dot.r { background: #ef4444; }
+    .qg-template-dot.y { background: #f59e0b; }
+    .qg-template-dot.g { background: #10b981; }
+    .qg-template-filename {
+      margin-left: 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      letter-spacing: 0.02em;
+    }
+    .qg-template-pre {
+      margin: 0;
+      padding: 28px 32px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.88rem;
+      line-height: 1.75;
+      color: var(--text-primary);
+      background: var(--bg-card);
+      overflow-x: auto;
+      white-space: pre;
+    }
+    .qg-template-pre .h { color: var(--accent-light); font-weight: 700; }
+    .qg-template-pre .c { color: var(--text-muted); font-style: italic; }
+    .qg-template-pre .k { color: var(--cyan-light); }
+    .qg-template-pre .s { color: var(--warn-light); }
+
+    .qg-template-note {
+      margin-top: 28px;
+      padding: 18px 24px;
+      background: var(--accent-soft);
+      border: 1px solid var(--accent-border);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius-sm);
+      font-size: 0.97rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+    .qg-template-note strong { color: var(--accent-light); }
+    .qg-template-note code {
+      background: var(--bg-code);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 0.88em;
+      color: var(--accent-light);
+      border: 1px solid var(--border);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ── Gate Failure Flow ── */
+    .qg-flow {
+      background:
+        radial-gradient(ellipse 60% 40% at 50% 100%, rgba(245, 158, 11, 0.04), transparent 70%);
+    }
+    .qg-flow-wrap {
+      max-width: 920px;
+      margin: 0 auto;
+    }
+    .qg-flow-diagram {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px;
+      overflow-x: auto;
+      margin-bottom: 40px;
+    }
+    .qg-flow-diagram pre {
+      margin: 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      color: var(--text-primary);
+      white-space: pre;
+    }
+    .qg-flow-steps {
+      counter-reset: flowstep;
+      list-style: none;
+      padding: 0;
+    }
+    .qg-flow-steps li {
+      counter-increment: flowstep;
+      position: relative;
+      padding: 18px 0 18px 56px;
+      color: var(--text-secondary);
+      font-size: 1rem;
+      line-height: 1.7;
+      border-bottom: 1px solid var(--border);
+    }
+    .qg-flow-steps li:last-child { border-bottom: none; }
+    .qg-flow-steps li::before {
+      content: counter(flowstep, decimal-leading-zero);
+      position: absolute;
+      left: 0; top: 18px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--warn-light);
+      background: var(--warn-soft);
+      border: 1px solid var(--warn-border);
+      width: 38px; height: 28px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 5px;
+      letter-spacing: 0.05em;
+    }
+    .qg-flow-steps li strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    /* ── Exemption Process ── */
+    .qg-exempt {
+      background:
+        radial-gradient(ellipse 70% 40% at 50% 0%, rgba(245, 158, 11, 0.04), transparent 70%);
+    }
+    .qg-exempt-wrap {
+      max-width: 920px;
+      margin: 0 auto;
+    }
+    .qg-exempt-step {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--warn);
+      border-radius: var(--radius-sm);
+      padding: 28px 32px;
+      margin-bottom: 20px;
+      position: relative;
+    }
+    .qg-exempt-step-num {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 0.72rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.14em;
+      color: var(--warn-light);
+      margin-bottom: 12px;
+    }
+    .qg-exempt-step-num-badge {
+      background: var(--warn-soft);
+      border: 1px solid var(--warn-border);
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0.1em;
+    }
+    .qg-exempt-step-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 14px;
+      letter-spacing: -0.01em;
+    }
+    .qg-exempt-step-body {
+      color: var(--text-secondary);
+      font-size: 0.98rem;
+      line-height: 1.7;
+    }
+    .qg-exempt-code {
+      margin-top: 16px;
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 18px 22px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.88rem;
+      line-height: 1.7;
+      color: var(--text-primary);
+      white-space: pre;
+      overflow-x: auto;
+    }
+    .qg-exempt-code .k { color: var(--accent-light); font-weight: 600; }
+    .qg-exempt-code .c { color: var(--text-muted); font-style: italic; }
+
+    /* ── Metrics table ── */
+    .qg-metrics {
+      background:
+        radial-gradient(ellipse 60% 40% at 50% 50%, rgba(16, 185, 129, 0.04), transparent 70%);
+    }
+    .qg-metrics-wrap {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    .qg-metrics-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.12);
+    }
+    .qg-metrics-table th,
+    .qg-metrics-table td {
+      padding: 18px 22px;
+      text-align: left;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      border-bottom: 1px solid var(--border);
+    }
+    .qg-metrics-table th {
+      background: rgba(16, 185, 129, 0.07);
+      color: var(--accent-light);
+      font-weight: 700;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      border-bottom: 1px solid var(--accent-border);
+    }
+    .qg-metrics-table tr:last-child td { border-bottom: none; }
+    .qg-metrics-table td {
+      color: var(--text-secondary);
+    }
+    .qg-metrics-table td:first-child {
+      font-weight: 600;
+      color: var(--text-primary);
+      width: 32%;
+    }
+    .qg-metrics-table td.target {
+      width: 22%;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      color: var(--accent-light);
+      background: rgba(16, 185, 129, 0.04);
+      font-weight: 600;
+    }
+    .qg-metrics-footer {
+      max-width: 760px;
+      margin: 36px auto 0;
+      text-align: center;
+      font-style: italic;
+      color: var(--text-muted);
+      font-size: 1rem;
+      line-height: 1.75;
+      padding: 0 20px;
+    }
+
+    /* ── Cross-reference callout (full section) ── */
+    .qg-pipeline {
+      background:
+        radial-gradient(ellipse 70% 40% at 50% 50%, rgba(6, 182, 212, 0.05), transparent 70%);
+    }
+    .qg-pipeline-callout {
+      max-width: 880px;
+      margin: 0 auto;
+      background: var(--bg-card);
+      border: 1px solid rgba(6, 182, 212, 0.25);
+      border-radius: var(--radius);
+      padding: 48px 48px 44px;
+      position: relative;
+      overflow: hidden;
+    }
+    .qg-pipeline-callout::before {
+      content: ''; position: absolute; top: 0; left: 0;
+      width: 100%; height: 3px;
+      background: linear-gradient(90deg, var(--cyan), var(--green), var(--cyan));
+    }
+    .qg-pipeline-eyebrow {
+      font-size: 0.72rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.14em;
+      color: var(--cyan-light);
+      margin-bottom: 12px;
+    }
+    .qg-pipeline-headline {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 24px;
+      letter-spacing: -0.015em;
+      line-height: 1.4;
+    }
+    .qg-pipeline-tiers {
+      list-style: none; padding: 0;
+      margin: 0 0 28px;
+    }
+    .qg-pipeline-tiers li {
+      padding: 14px 0;
+      border-bottom: 1px dashed var(--border);
+      color: var(--text-secondary);
+      font-size: 0.98rem;
+      line-height: 1.65;
+      display: flex; align-items: flex-start; gap: 12px;
+    }
+    .qg-pipeline-tiers li:last-child { border-bottom: none; }
+    .qg-pipeline-tiers li strong {
+      color: var(--cyan-light);
+      font-weight: 700;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      min-width: 160px;
+      padding-top: 2px;
+    }
+    .qg-pipeline-tiers li code {
+      background: var(--bg-code);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 0.88em;
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .qg-pipeline-cta {
+      display: inline-flex; align-items: center; gap: 8px;
+      color: var(--cyan-light);
+      font-size: 0.95rem; font-weight: 600;
+      padding: 10px 18px;
+      border-radius: var(--radius-sm);
+      background: rgba(6, 182, 212, 0.08);
+      border: 1px solid rgba(6, 182, 212, 0.28);
+      transition: var(--transition-fast);
+    }
+    .qg-pipeline-cta:hover {
+      background: rgba(6, 182, 212, 0.14);
+      border-color: rgba(6, 182, 212, 0.5);
+      color: var(--cyan);
+    }
+
+    /* ── Next steps ── */
+    .qg-next {
+      background:
+        radial-gradient(ellipse 60% 40% at 50% 100%, rgba(16, 185, 129, 0.04), transparent 70%);
+    }
+    .qg-next-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      max-width: 1080px; margin: 48px auto 0;
+    }
+    .qg-next-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px 28px;
+      transition: var(--transition);
+      display: flex; flex-direction: column; gap: 14px;
+      min-height: 220px;
+      position: relative;
+    }
+    .qg-next-card.is-disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+    .qg-next-card:not(.is-disabled):hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(16, 185, 129, 0.10);
+    }
+    .qg-next-card-label {
+      font-size: 0.72rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.12em;
+      color: var(--text-muted);
+    }
+    .qg-next-card-title {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+      line-height: 1.3;
+    }
+    .qg-next-card-body {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      line-height: 1.65;
+      flex-grow: 1;
+    }
+    .qg-next-card-cta {
+      display: inline-flex; align-items: center; gap: 6px;
+      color: var(--accent-light);
+      font-size: 0.9rem; font-weight: 600;
+      margin-top: auto;
+    }
+    .qg-next-card.is-disabled .qg-next-card-cta {
+      color: var(--text-muted);
+    }
+    .qg-next-card-badge {
+      position: absolute;
+      top: 16px; right: 16px;
+      font-size: 0.65rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 4px 8px;
+      border-radius: 4px;
+      background: rgba(245, 158, 11, 0.10);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.25);
+    }
+
+    /* ── Effective footer ── */
+    .qg-effective {
+      max-width: 720px; margin: 80px auto 0;
+      padding: 32px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 2;
+    }
+    .qg-effective-divider {
+      color: var(--border-hover);
+      letter-spacing: 0.1em;
+    }
+    .qg-effective strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .qg-section { padding: 70px 0; }
+      .qg-gate-header {
+        flex-direction: column;
+        gap: 12px;
+        padding: 28px 24px 24px;
+      }
+      .qg-gate-number { font-size: 3.4rem; min-width: 0; }
+      .qg-gate-name { font-size: 1.4rem; }
+      .qg-gate-meta { grid-template-columns: 1fr; }
+      .qg-gate-meta-cell {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+      }
+      .qg-gate-meta-cell:last-child { border-bottom: none; }
+      .qg-gate-body { padding: 28px 24px; }
+      .qg-pipeline-callout { padding: 32px 24px; }
+      .qg-pipeline-tiers li { flex-direction: column; gap: 4px; }
+      .qg-pipeline-tiers li strong { min-width: 0; }
+      .qg-next-grid { grid-template-columns: 1fr; }
+      .qg-hero { padding-top: calc(var(--nav-height) + 60px); padding-bottom: 60px; }
+      .qg-template-pre { font-size: 0.78rem; padding: 20px 20px; }
+      .qg-metrics-table th,
+      .qg-metrics-table td { padding: 12px 14px; font-size: 0.88rem; }
+      .qg-flow-diagram pre { font-size: 0.72rem; }
+      .qg-tier-table th,
+      .qg-tier-table td { padding: 10px 12px; font-size: 0.86rem; }
+    }
+
+    /* ── Print ── */
+    @media print {
+      #password-gate, .nav, .footer, .qg-hero-cta { display: none !important; }
+      body, .qg-hero, .qg-section, .qg-gates, .qg-template, .qg-flow, .qg-exempt, .qg-metrics, .qg-pipeline, .qg-next, .qg-setup {
+        background: white !important;
+        color: #0a0f1a !important;
+      }
+      .qg-gate, .qg-template-frame, .qg-flow-diagram, .qg-exempt-step, .qg-metrics-table, .qg-pipeline-callout, .qg-effective, .qg-next-card {
+        background: white !important;
+        border: 1px solid #cbd5e1 !important;
+        page-break-inside: avoid;
+        box-shadow: none !important;
+      }
+      .qg-gate-number, .qg-hero h1, .qg-gate-eyebrow, .qg-pipeline-eyebrow {
+        -webkit-text-fill-color: #0f766e !important;
+        color: #0f766e !important;
+        background: none !important;
+      }
+      .qg-list li, .qg-setup-body, .qg-next-card-body, .qg-gate-tagline, .qg-metrics-table td, .qg-flow-steps li, .qg-exempt-step-body {
+        color: #334155 !important;
+      }
+      .qg-override-box {
+        background: #fffbeb !important;
+        color: #78350f !important;
+      }
+      .qg-template-pre, .qg-exempt-code, .qg-flow-diagram pre {
+        background: #f8fafc !important;
+        color: #0f172a !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ════════════════════════════════════════════
+       PASSWORD GATE
+       ════════════════════════════════════════════ -->
+  <div id="password-gate" style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:var(--bg-primary);">
+    <div style="max-width:420px;width:90%;text-align:center;">
+      <div style="width:64px;height:64px;margin:0 auto 24px;border-radius:16px;background:linear-gradient(135deg,var(--green),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:white;box-shadow:0 0 40px rgba(16,185,129,0.3);">H</div>
+      <h1 style="font-size:1.5rem;font-weight:700;margin-bottom:8px;">Heaptrace Handbook</h1>
+      <p style="color:var(--text-secondary);margin-bottom:32px;font-size:0.95rem;">Enter access code to continue</p>
+      <input type="password" id="gate-input" placeholder="Access code" autocomplete="off" style="width:100%;padding:14px 18px;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;color:var(--text-primary);font-size:1rem;font-family:'JetBrains Mono',monospace;margin-bottom:16px;outline:none;transition:all 0.2s;">
+      <button id="gate-submit" style="width:100%;padding:14px;background:linear-gradient(135deg,var(--green),var(--cyan));border:none;border-radius:12px;color:white;font-weight:600;font-size:0.95rem;cursor:pointer;transition:all 0.2s;">Unlock</button>
+      <p id="gate-error" style="color:var(--red);margin-top:16px;font-size:0.85rem;min-height:1.2em;"></p>
+      <p style="color:var(--text-muted);margin-top:40px;font-size:0.8rem;">Private engineering handbook · Heaptrace Technology</p>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       MAIN CONTENT (hidden until unlock)
+       ════════════════════════════════════════════ -->
+  <div id="main-content">
+
+    <!-- NAV -->
+    <nav class="nav">
+      <div class="nav-inner">
+        <a href="../index.html" class="nav-logo"><div class="nav-logo-icon">H</div><span>Heaptrace Skills</span></a>
+        <div class="nav-links" id="navLinks">
+          <a href="../index.html" class="nav-link">Home</a>
+          <a href="../index.html#packs" class="nav-link">Packs</a>
+          <a href="../setup/index.html" class="nav-link">Setup</a>
+          <a href="../customize/index.html" class="nav-link">Customize</a>
+          <a href="index.html" class="nav-link active">Handbook</a>
+          <div class="nav-dropdown">
+            <button class="nav-dropdown-trigger">Security <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button>
+            <div class="nav-dropdown-menu">
+              <a href="../compliance-overview.html" class="nav-dropdown-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>Compliance Overview</a>
+              <a href="../ci-cd-security.html" class="nav-dropdown-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>CI/CD Security Gateway</a>
+              <a href="../cicd-security-setup.html" class="nav-dropdown-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>Setup Guide</a>
+            </div>
+          </div>
+          <a href="../rules/index.html" class="nav-link">Rules</a>
+          <a href="../mcp/index.html" class="nav-link">MCP Servers</a>
+        </div>
+        <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>GitHub
+        </a>
+      </div>
+    </nav>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 1 — HERO
+         ════════════════════════════════════════════ -->
+    <section class="qg-hero">
+      <div class="container qg-hero-content">
+        <div class="qg-hero-badge">
+          <span class="qg-hero-badge-dot"></span>
+          Doc 6 of 7 · Quality Gates
+        </div>
+        <h1>Quality Gates<br>What Every PR Must Pass</h1>
+        <p class="qg-hero-subtitle">
+          Five gates. No exceptions. No "this one is urgent." If a PR can't pass these,
+          it can't merge. If it can, the team can rely on it shipping clean.
+        </p>
+        <div class="qg-hero-cta">
+          <a href="anti-patterns.html" class="qg-btn qg-btn-secondary">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            Back to Anti-Patterns
+          </a>
+          <a href="client-edition.html" class="qg-btn qg-btn-primary is-disabled" aria-disabled="true">
+            Client Edition
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 2 — HOW THESE GATES WORK
+         ════════════════════════════════════════════ -->
+    <section class="qg-section qg-setup">
+      <div class="container qg-section-narrow">
+        <div class="qg-eyebrow">How these gates work</div>
+        <h2 class="qg-title">Gates pass or fail. There is no third option.</h2>
+        <p class="qg-lead">
+          Five gates govern every PR that lands on this codebase. Each one has a specific,
+          testable criterion. Each one names the blocking action when it fails. None of
+          them are negotiable based on urgency, seniority, or "just this once."
+        </p>
+
+        <div style="margin-top: 56px;">
+          <div class="qg-setup-block">
+            <div class="qg-setup-heading">Gates, not guidelines.</div>
+            <p class="qg-setup-body">
+              A guideline is a suggestion. A gate is enforced. The five gates below are
+              non-negotiable for every PR — from a one-line CSS change to a quarter-long
+              initiative. The skill you use scales with the work; the gates do not. We
+              learned this the hard way: every time the team softened a gate to keep a
+              deadline, we paid for it in the next sprint. Gates that bend, break. We
+              don't bend them.
+            </p>
+          </div>
+
+          <div class="qg-setup-block">
+            <div class="qg-setup-heading">Gates layer with severity.</div>
+            <p class="qg-setup-body">
+              PR-level gates run on every pull request (Tier 1). Staging-level gates run
+              when a PR targets staging (Tier 2). Production-level gates run on the path
+              to production (Tier 3+). A PR can pass Tier 1 but get blocked at Tier 2 —
+              that's working as designed. The cost of a finding rises sharply the closer
+              you get to production; the gates rise with it. The same PR that's "fine for
+              dev" can be "absolutely not for staging," and that's a feature, not a bug
+              in the process.
+            </p>
+          </div>
+
+          <div class="qg-setup-block">
+            <div class="qg-setup-heading">The CI pipeline enforces what the team writes.</div>
+            <p class="qg-setup-body">
+              We have 5 GitHub Actions workflows that implement these gates as automated
+              checks. The gates are not vague — they are testable, automated, and
+              consistently applied. A reviewer who is in a hurry, who skipped lunch,
+              who is biased toward a teammate, who is short on sleep — none of them
+              get a vote on whether the gate passes. The CI does. Cross-reference the
+              <a href="../cicd-security-setup.html">CI/CD Setup Guide</a> for the
+              workflow implementations.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 3 — THE 5 GATES (Heart of the doc)
+         ════════════════════════════════════════════ -->
+    <section class="qg-section qg-gates">
+      <div class="container">
+        <div class="qg-gates-intro">
+          <div class="qg-eyebrow" style="justify-content:center;">The five</div>
+          <h2 class="qg-title" style="margin: 0 auto 16px;">Every PR. Every time. Every gate.</h2>
+          <p class="qg-lead" style="margin: 0 auto;">
+            Each gate below names what it checks, what blocks the PR, who can override
+            (almost no one), and the skill that backs it. If you can't tick all five,
+            the PR doesn't merge.
+          </p>
+        </div>
+
+        <!-- ─────────────────────────────────────────
+             GATE 1 — PLAN
+             ───────────────────────────────────────── -->
+        <article class="qg-gate">
+          <header class="qg-gate-header">
+            <div class="qg-gate-number">01</div>
+            <div class="qg-gate-headtext">
+              <div class="qg-gate-eyebrow">Gate One</div>
+              <h3 class="qg-gate-name">The Plan Gate</h3>
+              <p class="qg-gate-tagline">
+                Every PR starts with a plan in writing. The plan determines the skill;
+                the skill determines the rigor. If the diff exceeds what the plan named,
+                the plan is rewritten — not the diff stretched.
+              </p>
+            </div>
+          </header>
+
+          <div class="qg-gate-meta">
+            <div class="qg-gate-meta-cell">
+              <div class="qg-gate-meta-label is-trigger"><span class="dot"></span>Trigger</div>
+              <div class="qg-gate-meta-value">Opens before code is written</div>
+            </div>
+            <div class="qg-gate-meta-cell">
+              <div class="qg-gate-meta-label is-enforced"><span class="dot"></span>Enforced by</div>
+              <div class="qg-gate-meta-value">Developer running /quick-plan or /feature-plan</div>
+            </div>
+            <div class="qg-gate-meta-cell">
+              <div class="qg-gate-meta-label is-blocks"><span class="dot"></span>Blocks if</div>
+              <div class="qg-gate-meta-value">PR description has no plan reference</div>
+            </div>
+          </div>
+
+          <div class="qg-gate-body">
+
+            <div class="qg-block qg-checks">
+              <div class="qg-block-label">
+                <span class="qg-block-label-icon">✓</span>
+                What this gate checks
+              </div>
+              <ul class="qg-list">
+                <li>For <strong>S/M tasks</strong>: <span class="skill">/quick-plan</span> output is in the PR description (or linked via a <code>.heaptrace/</code> task file).</li>
+                <li>For <strong>L/XL tasks</strong>: <span class="skill">/feature-plan</span> output is in the PR description (or linked to <code>/tasks/backlog/</code>).</li>
+                <li>For <strong>bug fixes</strong>: <span class="skill">/find-fix</span> output precedes the plan — diagnosis first, then scope decision.</li>
+                <li>The diff doesn't exceed what the plan named — both file count and stated intent. A 3-file plan that ships a 12-file diff is a plan failure, not an "I found more."</li>
+                <li>The plan is dated and named. Anonymous plans pasted into a PR after the fact don't count.</li>
+              </ul>
+            </div>
+
+            <div class="qg-block qg-blocks">
+              <div class="qg-block-label">
+                <span class="qg-block-label-icon">✕</span>
+                What blocks the merge
+              </div>
+              <ul class="qg-list">
+                <li>PR description has no plan reference → <strong>reviewer rejects on sight</strong>, no second pass.</li>
+                <li>Diff touches files the plan didn't list → <strong>reviewer asks for a re-plan or a scope explanation</strong> in writing.</li>
+                <li>Plan claimed S, diff is clearly L → <strong>reviewer asks for /feature-plan replan.</strong> "I underestimated" is not a substitute for a real plan.</li>
+                <li>Plan references a stale ticket that's since changed scope → <strong>plan must be re-run</strong> against the current acceptance criteria.</li>
+              </ul>
+            </div>
+
+            <div class="qg-block qg-override">
+              <div class="qg-block-label">
+                <span class="qg-block-label-icon">!</span>
+                Who can override
+              </div>
+              <div class="qg-override-box">
+                <strong>No one.</strong> Even trivial PRs reference a 30-second plan.
+                The cost of running <span style="font-family:'JetBrains Mono',monospace;color:var(--accent-light);">/quick-plan</span>
+                on a typo fix is roughly four seconds; the cost of the team
+                normalizing "I'll skip the plan this time" is months of decay. We pay
+                the four seconds.
+              </div>
+            </div>
+
+            <div class="qg-block qg-backing">
+              <div class="qg-block-label">
+                <span class="qg-block-label-icon">→</span>
+                Backing skills
+              </div>
+              <div class="qg-backing-row">
+                <span class="qg-backing-chip">/quick-plan</span>
+                <span class="qg-backing-chip">/feature-plan</span>
+                <span class="qg-backing-chip">/find-fix</span>
+              </div>
+              <div class="qg-backing-prevents">
+                <strong>Anti-patterns this gate prevents:</strong> #01 (no plan), #03 (wrong-size plan),
+                #04 (diverge from plan). See <a href="anti-patterns.html" style="color:var(--cyan-light);font-weight:600;">Anti-Patterns</a>
+                for the full pattern descriptions.
+              </div>
+            </div>
+
+          </div>
+        </article>
+
+        <!-- ─────────────────────────────────────────
+             GATE 2 — REVIEW
+             ───────────────────────────────────────── -->
+        <article class="qg-gate">
+          <header class="qg-gate-header">
+            <div class="qg-gate-number">02</div>
+            <div class="qg-gate-headtext">
+              <div class="qg-gate-eyebrow">Gate Two</div>
+              <h3 class="qg-gate-name">The Review Gate</h3>
+              <p class="qg-gate-tagline">
+                The diff runs through <span class="skill" style="background:var(--bg-code);padding:2px 8px;border-radius:4px;font-size:0.88em;color:var(--accent-light);border:1px solid var(--border);font-family:'JetBrains Mono',monospace;">/code-review</span>
+                before a human looks at it. Warnings are resolved or accepted in writing.
+                There is no "the reviewer will catch it."
+              </p>
+            </div>
+          </header>
+
+          <div class="qg-gate-meta">
+            <div class="qg-gate-meta-cell">
+              <div class="qg-gate-meta-label is-trigger"><span class="dot"></span>Trigger</div>
+              <div class="qg-gate-meta-value">Before PR is opened for human review</div>
+            </div>
+            <div class="qg-gate-meta-cell">
+              <div class="qg-gate-meta-label is-enforced"><span class="dot"></span>Enforced by</div>
+              <div class="qg-gate-meta-value">/code-review skill + reviewer attention</div>
+            </div>
+            <div class="qg-gate-meta-cell">
+              <div class="qg-gate-meta-label is-blocks"><span class="dot"></span>Blocks if</div>
+              <div class="qg-gate-meta-value">Missing /code-review output or unresolved warnings</div>
+            </div>
+          </div>
+
+          <div class="qg-gate-body">
+
+            <div class="qg-block qg-checks">
+              <div class="qg-block-label">
+                <span class="qg-block-label-icon">✓</span>
+                What this gate checks
+              </div>
+              <ul class="qg-list">
+                <li><span class="skill">/code-review</span> has been run on the diff — not on yesterday's version, on this diff.</li>
+                <li>Output is in the PR description, not pasted as a comment after review starts.</li>
+                <li>All warnings are either fixed or <strong>explicitly accepted</strong>, with the reason written in the PR description.</li>
+                <li>Test coverage is named for the change — which tests exist, which were added, which were updated. "Tests pass" is not test coverage.</li>
+                <li>Reviewer is not the author. Self-reviewed PRs don't pass this gate.</li>
+              </ul>
+            </div>
+
+            <div class="qg-block qg-blocks">
+              <div class="qg-block-label">
+                <span class="qg-block-label-icon">✕</span>
+                What blocks the merge
+              </div>
+              <ul class="qg-list">
+                <li>PR description missing <span class="skill">/code-review</span> output → <strong>returned at first review</strong> — the reviewer doesn't run the skill on the author's behalf.</li>
+                <li><span class="skill">/code-review</span> flagged blocking issues that are not addressed → <strong>blocked</strong> until each finding is either fixed or accepted in writing.</li>
+                <li>Warnings stacked as "fix later" with no Tech Lead exemption → <strong>blocked.</strong> "Fix later" is how a codebase rots; we don't allow it on the rails.</li>
+                <li>Author added new test coverage but the tests don't fail when the code is broken → <strong>blocked.</strong> Coverage that doesn't fail is theatre.</li>
+              </ul>
+            </div>
+
+            <div class="qg-block qg-override">
+              <div class="qg-block-label">
+                <span class="qg-block-label-icon">!</span>
+                Who can override
+              </div>
+              <div class="qg-override-box">
+                <strong>Tech Lead in writing</strong>, for a specific waiver, with a documented
+                reason in the PR description, on a per-finding basis. Blanket waivers ("we
+                accept all warnings on this PR") are not granted. Every accepted warning gets
+                its own one-line justification — if you can't write one, you can't accept it.
+              </div>
+            </div>
+
+            <div class="qg-block qg-backing">
+              <div class="qg-block-label">
+                <span class="qg-block-label-icon">→</span>
+                Backing skills
+              </div>
+              <div class="qg-backing-row">
+                <span class="qg-backing-chip">/code-review</span>
+                <span class="qg-backing-chip">/test-gen</span>
+                <span class="qg-backing-chip">/test-coverage</span>
+                <span class="qg-backing-chip">/code-standards</span>
+              </div>
+              <div class="qg-backing-prevents">
+                <strong>Anti-patterns this gate prevents:</strong> #11 (no /code-review),
+                #12 ("fix later"), #14 (poor description), #27 (rubber-stamp review).
+                See <a href="anti-patterns.html" style="color:var(--cyan-light);font-weight:600;">Anti-Patterns</a>
+                for the patterns.
+              </div>
+            </div>
+
+          </div>
+        </article>
+
+        <!-- ─────────────────────────────────────────
+             GATE 3 — SECURITY
+             ───────────────────────────────────────── -->
+        <article class="qg-gate">
+          <header class="qg-gate-header">
+            <div class="qg-gate-number">03</div>
+            <div class="qg-gate-headtext">
+              <div class="qg-gate-eyebrow">Gate Three</div>
+              <h3 class="qg-gate-name">The Security Gate</h3>
+              <p class="qg-gate-tagline">
+                Code paths that touch auth, payments, PII, or infra trigger an audit skill.
+                The audit runs in the PR, not after. HIGH or CRITICAL findings block the
+                merge until resolved or accepted by Compliance.
+              </p>
+            </div>
+          </header>
+
+          <div class="qg-gate-meta">
+            <div class="qg-gate-meta-cell">
+              <div class="qg-gate-meta-label is-trigger"><span class="dot"></span>Trigger</div>
+              <div class="qg-gate-meta-value">Auto-detected based on which files the PR touches</div>
+            </div>
+            <div class="qg-gate-meta-cell">
+              <div class="qg-gate-meta-label is-enforced"><span class="dot"></span>Enforced by</div>
+              <div class="qg-gate-meta-value">CI workflow + skill outputs + reviewer</div>
+            </div>
+            <div class="qg-gate-meta-cell">
+              <div class="qg-gate-meta-label is-blocks"><span class="dot"></span>Blocks if</div>
+              <div class="qg-gate-meta-value">Required audit output missing OR HIGH/CRITICAL unresolved</div>
+            </div>
+          </div>
+
+          <div class="qg-gate-body">
+
+            <div class="qg-block qg-checks">
+              <div class="qg-block-label">
+                <span class="qg-block-label-icon">✓</span>
+                What this gate checks (tiered by code area)
+              </div>
+
+              <table class="qg-tier-table">
+                <thead>
+                  <tr>
+                    <th>Code area</th>
+                    <th>Required output</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Auth / Login / Session</td>
+                    <td><code>/sec-audit</code></td>
+                  </tr>
+                  <tr>
+                    <td>Payments / Billing</td>
+                    <td><code>/sec-audit</code> + <code>/pci-audit</code> (if processing card data)</td>
+                  </tr>
+                  <tr>
+                    <td>PII / User Data</td>
+                    <td><code>/sec-audit</code> + <code>/privacy-review</code></td>
+                  </tr>
+                  <tr>
+                    <td>New Dependencies</td>
+                    <td><code>/dep-vuln</code></td>
+                  </tr>
+                  <tr>
+                    <td>Cloud infra changes</td>
+                    <td><code>/cloud-security</code> + <code>/infra-harden</code></td>
+                  </tr>
+                  <tr>
+                    <td>Network / firewall changes</td>
+                    <td><code>/network-audit</code></td>
+                  </tr>
+                  <tr>
+                    <td>HIPAA-scoped data</td>
+                    <td><code>/hipaa-audit</code></td>
+                  </tr>
+                  <tr>
+                    <td>GDPR-scoped data</td>
+                    <td><code>/gdpr-audit</code></td>
+                  </tr>
+                  <tr>
+                    <td>SOC 2 compliance</td>
+                    <td><code>/soc2-audit</code></td>
+                  </tr>
+                  <tr>
+                    <td>Secrets / keys handling</td>
+                    <td><code>/secrets-scan</code></td>
+                  </tr>
+                  <tr>
+                    <td>Container changes</td>
+                    <td><code>/infra-harden</code></td>
+                  </tr>
+                  <tr>
+                    <td>Access control / RBAC</td>
+                    <td><code>/access-audit</code></td>
+                  </tr>
+                  <tr>
+                    <td>Audit logging / immutable trails</td>
+                    <td><code>/audit-log</code></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="qg-block qg-blocks">
+              <div class="qg-block-label">
+                <span class="qg-block-label-icon">✕</span>
+                What blocks the merge
+              </div>
+              <ul class="qg-list">
+                <li>File path matches a regulated category <strong>AND</strong> the required skill output is missing → <strong>CI Tier 2 blocks the merge.</strong> The CI is non-negotiable on this; there is no manual override at the runner level.</li>
+                <li>Skill flagged <strong>HIGH or CRITICAL severity</strong> AND the finding is not explicitly resolved or accepted with a Compliance sign-off → <strong>blocked.</strong></li>
+                <li>Dependency added with a known CVE at HIGH or above → <strong>blocked</strong> until the dependency is replaced, pinned to a patched version, or the CVE is documented as not applicable to our usage.</li>
+                <li>Secrets detected in the diff by <span class="skill">/secrets-scan</span> → <strong>blocked, the PR cannot merge until the secret is rotated</strong> (not just removed from the diff).</li>
+              </ul>
+            </div>
+
+            <div class="qg-block qg-override">
+              <div class="qg-block-label">
+                <span class="qg-block-label-icon">!</span>
+                Who can override
+              </div>
+              <div class="qg-override-box">
+                <strong>Only with explicit Compliance Manager sign-off, documented in the PR.</strong>
+                Sign-off is per-finding, not per-PR. The Compliance Manager writes the reason,
+                the date, and their name. The override is logged for quarterly review. Tech
+                Lead cannot override the Security Gate. Engineering Manager cannot override
+                the Security Gate. Only Compliance, in writing.
+              </div>
+            </div>
+
+            <div class="qg-block qg-backing">
+              <div class="qg-block-label">
+                <span class="qg-block-label-icon">→</span>
+                Backing skills
+              </div>
+              <div class="qg-backing-row">
+                <span class="qg-backing-chip">/sec-audit</span>
+                <span class="qg-backing-chip">/hipaa-audit</span>
+                <span class="qg-backing-chip">/gdpr-audit</span>
+                <span class="qg-backing-chip">/soc2-audit</span>
+                <span class="qg-backing-chip">/pci-audit</span>
+                <span class="qg-backing-chip">/cloud-security</span>
+                <span class="qg-backing-chip">/infra-harden</span>
+                <span class="qg-backing-chip">/network-audit</span>
+                <span class="qg-backing-chip">/secrets-scan</span>
+                <span class="qg-backing-chip">/dep-vuln</span>
+                <span class="qg-backing-chip">/privacy-review</span>
+                <span class="qg-backing-chip">/access-audit</span>
+                <span class="qg-backing-chip">/audit-log</span>
+                <span class="qg-backing-chip">/compliance-report</span>
+              </div>
+              <div class="qg-backing-prevents">
+                <strong>Anti-patterns this gate prevents:</strong> #15 (no /sec-audit),
+                #21 (no /dep-vuln), #23 (unresolved findings), #24 (hardcoded secrets).
+                See <a href="anti-patterns.html" style="color:var(--cyan-light);font-weight:600;">Anti-Patterns</a>
+                for the patterns.
+              </div>
+            </div>
+
+            <div class="qg-cross-ref">
+              <strong>Cross-reference.</strong> This gate is implemented via the
+              <a href="../cicd-security-setup.html">Tiered CI/CD Security Pipeline</a> —
+              workflows <code style="background:var(--bg-code);padding:2px 7px;border-radius:4px;font-size:0.9em;color:var(--cyan-light);border:1px solid var(--border);font-family:'JetBrains Mono',monospace;">security-pr.yml</code>,
+              <code style="background:var(--bg-code);padding:2px 7px;border-radius:4px;font-size:0.9em;color:var(--cyan-light);border:1px solid var(--border);font-family:'JetBrains Mono',monospace;">security-staging.yml</code>,
+              and <code style="background:var(--bg-code);padding:2px 7px;border-radius:4px;font-size:0.9em;color:var(--cyan-light);border:1px solid var(--border);font-family:'JetBrains Mono',monospace;">security-production.yml</code>.
+              The severity matrix is in <code style="background:var(--bg-code);padding:2px 7px;border-radius:4px;font-size:0.9em;color:var(--cyan-light);border:1px solid var(--border);font-family:'JetBrains Mono',monospace;">.github/security/severity-matrix.json</code>.
+            </div>
+
+          </div>
+        </article>
+
+        <!-- ─────────────────────────────────────────
+             GATE 4 — VERIFICATION
+             ───────────────────────────────────────── -->
+        <article class="qg-gate">
+          <header class="qg-gate-header">
+            <div class="qg-gate-number">04</div>
+            <div class="qg-gate-headtext">
+              <div class="qg-gate-eyebrow">Gate Four</div>
+              <h3 class="qg-gate-name">The Verification Gate</h3>
+              <p class="qg-gate-tagline">
+                Acceptance criteria from the plan are verified before the PR is marked
+                "Ready for Review." Each criterion gets a method of verification — not
+                "I trust the AI." Verification is the developer's job, every time.
+              </p>
+            </div>
+          </header>
+
+          <div class="qg-gate-meta">
+            <div class="qg-gate-meta-cell">
+              <div class="qg-gate-meta-label is-trigger"><span class="dot"></span>Trigger</div>
+              <div class="qg-gate-meta-value">Before PR is marked "Ready for Review"</div>
+            </div>
+            <div class="qg-gate-meta-cell">
+              <div class="qg-gate-meta-label is-enforced"><span class="dot"></span>Enforced by</div>
+              <div class="qg-gate-meta-value">Developer + reviewer</div>
+            </div>
+            <div class="qg-gate-meta-cell">
+              <div class="qg-gate-meta-label is-blocks"><span class="dot"></span>Blocks if</div>
+              <div class="qg-gate-meta-value">Acceptance criteria not verified or method missing</div>
+            </div>
+          </div>
+
+          <div class="qg-gate-body">
+
+            <div class="qg-block qg-checks">
+              <div class="qg-block-label">
+                <span class="qg-block-label-icon">✓</span>
+                What this gate checks
+              </div>
+              <ul class="qg-list">
+                <li>Every acceptance criterion in the plan has been <strong>verified</strong> — and the method of verification is named.</li>
+                <li>For <strong>UI changes</strong>: visually confirmed in browser/simulator/device. Screenshots in the PR if the change is user-visible.</li>
+                <li>For <strong>DB changes</strong>: schema applied locally, no destructive operations (DROP, TRUNCATE, ALTER without backfill) without an explicit review note.</li>
+                <li>For <strong>API changes</strong>: contract tests pass, request/response shapes match the plan, breaking changes are flagged in the PR title.</li>
+                <li>For <strong>bug fixes</strong>: the test <strong>fails on the broken code</strong> and <strong>passes on the fix.</strong> Both directions verified — "the test passes now" is half a verification.</li>
+                <li>For <strong>migrations</strong>: rollback plan documented in the PR. If a rollback would be impossible, that's stated explicitly.</li>
+              </ul>
+            </div>
+
+            <div class="qg-block qg-blocks">
+              <div class="qg-block-label">
+                <span class="qg-block-label-icon">✕</span>
+                What blocks the merge
+              </div>
+              <ul class="qg-list">
+                <li>Plan's acceptance criteria checkboxes unchecked → <strong>returned.</strong> Unchecked boxes mean the criterion wasn't met, not that it was forgotten.</li>
+                <li>PR description doesn't say <strong>HOW</strong> each criterion was verified → <strong>returned.</strong> "Verified" alone isn't a verification.</li>
+                <li>Bug fix without a test that fails-on-broken-code-passes-on-fix → <strong>returned.</strong> No exceptions, including "I tested it manually" — manual testing is verification, not regression protection.</li>
+                <li>UI change with no screenshot when the user is the verifier → <strong>returned.</strong> The reviewer should not have to re-run the app to see what changed.</li>
+              </ul>
+            </div>
+
+            <div class="qg-block qg-override">
+              <div class="qg-block-label">
+                <span class="qg-block-label-icon">!</span>
+                Who can override
+              </div>
+              <div class="qg-override-box">
+                <strong>No one.</strong> Verification is the developer's job. If you can't
+                verify the change works, you don't ship the change — you ship the
+                investigation. We have shipped exactly one production incident attributable
+                to AI in the last twelve months, and it was a missed verification step on a
+                generated migration. The model wasn't at fault. We were.
+              </div>
+            </div>
+
+            <div class="qg-block qg-backing">
+              <div class="qg-block-label">
+                <span class="qg-block-label-icon">→</span>
+                Backing skills
+              </div>
+              <div class="qg-backing-row">
+                <span class="qg-backing-chip">/test-gen</span>
+                <span class="qg-backing-chip">/e2e-test</span>
+                <span class="qg-backing-chip">/api-test</span>
+                <span class="qg-backing-chip">/regression-check</span>
+              </div>
+              <div class="qg-backing-prevents">
+                <strong>Anti-patterns this gate prevents:</strong> #07 (trust without verify),
+                #08 (fake tests), #10 (unread migrations).
+                See <a href="anti-patterns.html" style="color:var(--cyan-light);font-weight:600;">Anti-Patterns</a>
+                for the patterns.
+              </div>
+            </div>
+
+          </div>
+        </article>
+
+        <!-- ─────────────────────────────────────────
+             GATE 5 — COMMIT
+             ───────────────────────────────────────── -->
+        <article class="qg-gate">
+          <header class="qg-gate-header">
+            <div class="qg-gate-number">05</div>
+            <div class="qg-gate-headtext">
+              <div class="qg-gate-eyebrow">Gate Five</div>
+              <h3 class="qg-gate-name">The Commit Gate</h3>
+              <p class="qg-gate-tagline">
+                Commit messages follow conventional commits. One commit per logical unit
+                of change. The squash commit on merge follows the same rules. "Fix bug"
+                doesn't ship; we know what changed because we read the message.
+              </p>
+            </div>
+          </header>
+
+          <div class="qg-gate-meta">
+            <div class="qg-gate-meta-cell">
+              <div class="qg-gate-meta-label is-trigger"><span class="dot"></span>Trigger</div>
+              <div class="qg-gate-meta-value">Before pushing the final commit</div>
+            </div>
+            <div class="qg-gate-meta-cell">
+              <div class="qg-gate-meta-label is-enforced"><span class="dot"></span>Enforced by</div>
+              <div class="qg-gate-meta-value">/smart-commit + Tech Lead at merge</div>
+            </div>
+            <div class="qg-gate-meta-cell">
+              <div class="qg-gate-meta-label is-blocks"><span class="dot"></span>Blocks if</div>
+              <div class="qg-gate-meta-value">Poor commit messages or mixed-purpose commits</div>
+            </div>
+          </div>
+
+          <div class="qg-gate-body">
+
+            <div class="qg-block qg-checks">
+              <div class="qg-block-label">
+                <span class="qg-block-label-icon">✓</span>
+                What this gate checks
+              </div>
+              <ul class="qg-list">
+                <li>Commit message follows <strong>conventional commits</strong>: <code>feat:</code>, <code>fix:</code>, <code>chore:</code>, <code>docs:</code>, <code>refactor:</code>, <code>perf:</code>, <code>test:</code>.</li>
+                <li>Commit <strong>scope</strong> matches the file area changed — <code>feat(auth):</code>, <code>fix(billing):</code>, <code>refactor(api):</code>.</li>
+                <li>Commit message describes <strong>WHAT changed and WHY</strong>, not just "fix bug" or "address review."</li>
+                <li><strong>Single commit per logical unit of change.</strong> No "WIP" or "checkpoint" commits merged into main.</li>
+                <li>Co-authored attribution is included if pairing — <code>Co-Authored-By:</code> trailer with email.</li>
+                <li>The squash commit on merge follows the same rules — the original branch history doesn't excuse a sloppy squash message.</li>
+              </ul>
+            </div>
+
+            <div class="qg-block qg-blocks">
+              <div class="qg-block-label">
+                <span class="qg-block-label-icon">✕</span>
+                What blocks the merge
+              </div>
+              <ul class="qg-list">
+                <li>Generic commit messages ("fix bug," "wip," "stuff") → <strong>Tech Lead asks for /smart-commit re-run before merge.</strong></li>
+                <li>Multiple unrelated changes in one commit → <strong>squash or split.</strong> "Refactored while I was in there" is not a commit message; it's an anti-pattern.</li>
+                <li>Conventional commit type doesn't match the change ("feat:" on a bug fix, "fix:" on a refactor) → <strong>corrected before merge.</strong></li>
+                <li>Co-author missing when pairing was clearly involved (per the plan or PR description) → <strong>corrected before merge.</strong> Credit is engineering, not generosity.</li>
+              </ul>
+            </div>
+
+            <div class="qg-block qg-override">
+              <div class="qg-block-label">
+                <span class="qg-block-label-icon">!</span>
+                Who can override
+              </div>
+              <div class="qg-override-box">
+                <strong>Squash-on-merge is the project policy.</strong> The squash commit
+                message must still be clean — generated by <span style="font-family:'JetBrains Mono',monospace;color:var(--accent-light);">/smart-commit</span>,
+                reviewed by the merger. There is no override for "good enough" commit
+                messages. The git log is the long-term documentation; sloppy messages are
+                technical debt we pay for at every blame.
+              </div>
+            </div>
+
+            <div class="qg-block qg-backing">
+              <div class="qg-block-label">
+                <span class="qg-block-label-icon">→</span>
+                Backing skills
+              </div>
+              <div class="qg-backing-row">
+                <span class="qg-backing-chip">/smart-commit</span>
+                <span class="qg-backing-chip">/release-notes</span>
+              </div>
+              <div class="qg-backing-prevents">
+                <strong>Anti-patterns this gate prevents:</strong> #04 (diverge from plan),
+                #13 (adjacent refactor), #14 ("fixes bug").
+                See <a href="anti-patterns.html" style="color:var(--cyan-light);font-weight:600;">Anti-Patterns</a>
+                for the patterns.
+              </div>
+            </div>
+
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 4 — THE PR DESCRIPTION TEMPLATE
+         ════════════════════════════════════════════ -->
+    <section class="qg-section qg-template">
+      <div class="container">
+        <div class="text-center" style="max-width: 760px; margin: 0 auto;">
+          <div class="qg-eyebrow" style="justify-content:center;">The template</div>
+          <h2 class="qg-title" style="margin: 0 auto 16px;">Every PR description follows this shape.</h2>
+          <p class="qg-lead" style="margin: 0 auto;">
+            Copy it. Paste it. Fill it in. The template is pinned in the repo as
+            <code style="background:var(--bg-code);padding:2px 8px;border-radius:4px;font-size:0.88em;color:var(--accent-light);border:1px solid var(--border);font-family:'JetBrains Mono',monospace;">.github/PULL_REQUEST_TEMPLATE.md</code>.
+            If your PR doesn't have these sections, it doesn't pass the Review Gate.
+          </p>
+        </div>
+
+        <div class="qg-template-wrap">
+          <div class="qg-template-frame">
+            <div class="qg-template-bar">
+              <span class="qg-template-dot r"></span>
+              <span class="qg-template-dot y"></span>
+              <span class="qg-template-dot g"></span>
+              <span class="qg-template-filename">.github/PULL_REQUEST_TEMPLATE.md</span>
+            </div>
+<pre class="qg-template-pre"><span class="h">## Summary</span>
+<span class="c">&lt;2-3 sentence overview of what this PR does and why&gt;</span>
+
+<span class="h">## Plan</span>
+- Plan source: <span class="k">/quick-plan</span> <span class="c">(or /feature-plan for L/XL work)</span>
+- Plan output: <span class="c">&lt;paste plan or link to /tasks/backlog/TASK-NNN.md&gt;</span>
+
+<span class="h">## Changes</span>
+- <span class="s">`path/to/file1.ts`</span> — &lt;what changed&gt;
+- <span class="s">`path/to/file2.tsx`</span> — &lt;what changed&gt;
+
+<span class="h">## Verification</span>
+- [ ] Acceptance criterion 1 — verified by &lt;how&gt;
+- [ ] Acceptance criterion 2 — verified by &lt;how&gt;
+- [ ] Tests pass: <span class="s">&lt;command/output&gt;</span>
+
+<span class="h">## Skill Outputs</span>
+- <span class="k">/code-review</span>: &lt;pass / warnings addressed / link to output&gt;
+- <span class="k">/sec-audit</span>: &lt;required? if so, output included&gt;
+- <span class="k">/dep-vuln</span>: &lt;if dependencies changed&gt;
+
+<span class="h">## Notes for Reviewer</span>
+<span class="c">&lt;anything reviewer should focus on, surprises, decisions made&gt;</span>
+</pre>
+          </div>
+
+          <div class="qg-template-note">
+            <strong>Why these five sections.</strong> Summary anchors the reviewer on
+            <em>why</em>. Plan proves you ran Gate 1. Changes lets a reviewer scan the
+            diff with intent. Verification proves you ran Gate 4. Skill Outputs prove
+            you ran Gates 2 and 3. Notes for Reviewer is where you do
+            <em>Principle 6 — Communication is engineering.</em> Every section maps to
+            a gate. No section is decorative.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 5 — GATE FAILURE WORKFLOW
+         ════════════════════════════════════════════ -->
+    <section class="qg-section qg-flow">
+      <div class="container">
+        <div class="text-center" style="max-width: 760px; margin: 0 auto 56px;">
+          <div class="qg-eyebrow" style="justify-content:center;">When a gate fails</div>
+          <h2 class="qg-title" style="margin: 0 auto 16px;">Failure is feedback, not punishment.</h2>
+          <p class="qg-lead" style="margin: 0 auto;">
+            A gate failure names the specific gap. The developer fixes the gap and
+            re-submits on the same PR. There is no shame in a gate catch — the catch
+            is the gate doing its job.
+          </p>
+        </div>
+
+        <div class="qg-flow-wrap">
+          <div class="qg-flow-diagram">
+<pre>┌────────────────────────────────────────────────────────────┐
+│                   GATE FAILURE FLOW                        │
+│                                                            │
+│  PR fails Gate                                             │
+│      │                                                     │
+│      ▼                                                     │
+│  Reviewer/CI flags the specific gate failure               │
+│      │                                                     │
+│      ▼                                                     │
+│  Developer addresses (skill re-run, code change, etc.)     │
+│      │                                                     │
+│      ▼                                                     │
+│  Developer re-submits with documented fix                  │
+│      │                                                     │
+│      ▼                                                     │
+│  Re-review on the SAME PR (no new PR needed)               │
+│      │                                                     │
+│      ▼                                                     │
+│  Pass → merge.   Fail → repeat from "address."             │
+└────────────────────────────────────────────────────────────┘</pre>
+          </div>
+
+          <ol class="qg-flow-steps">
+            <li>
+              <strong>The gate identifies the specific failure.</strong>
+              Not "your PR is bad" but "Gate 3: <span style="font-family:'JetBrains Mono',monospace;color:var(--accent-light);">/sec-audit</span>
+              missing for auth flow." Specificity is the point. A gate that says
+              "something is wrong" without naming what is broken is a gate that bends.
+              We don't ship those gates.
+            </li>
+            <li>
+              <strong>Developer addresses the gap.</strong>
+              Runs the skill, fixes the code, adds the verification step, or requests
+              an exemption with a documented reason. The developer doesn't argue with
+              the gate — gates aren't political. They argue with the
+              <em>application</em> of the gate, in writing, if they think the gate is
+              wrong for this case.
+            </li>
+            <li>
+              <strong>Re-submit on the SAME PR.</strong>
+              No new PR. No rebase wars. No closing-and-reopening. Push the fix to the
+              same branch and request re-review. The PR's history captures the gate
+              failure and the resolution — both are useful when we read the log later.
+            </li>
+            <li>
+              <strong>Re-review on changes only.</strong>
+              The Tech Lead doesn't re-review the whole PR. They review the gap fix.
+              If the fix is solid and no other gates failed, the PR merges. If a
+              second gate failed during the fix, the flow restarts on that gate — but
+              not on the gates that already passed.
+            </li>
+            <li>
+              <strong>Pass → merge. Fail → repeat.</strong>
+              There is no third state. We don't merge "with reservations." We don't
+              merge "and we'll fix it after." We merge clean or we don't merge.
+            </li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 6 — EXEMPTION PROCESS
+         ════════════════════════════════════════════ -->
+    <section class="qg-section qg-exempt">
+      <div class="container">
+        <div class="text-center" style="max-width: 760px; margin: 0 auto 56px;">
+          <div class="qg-eyebrow" style="justify-content:center;">Exemptions</div>
+          <h2 class="qg-title" style="margin: 0 auto 16px;">Gates can be exempted. Rarely. With paperwork.</h2>
+          <p class="qg-lead" style="margin: 0 auto;">
+            Sometimes a gate genuinely doesn't apply — a copy-only change touches no
+            security paths, an experimental spike doesn't need a full plan. Here's how
+            the exemption flow works, and why it has to be visible.
+          </p>
+        </div>
+
+        <div class="qg-exempt-wrap">
+
+          <div class="qg-exempt-step">
+            <div class="qg-exempt-step-num">
+              <span class="qg-exempt-step-num-badge">STEP 1</span>
+              Document the exemption in the PR description
+            </div>
+            <div class="qg-exempt-step-title">Write it down where everyone sees it.</div>
+            <div class="qg-exempt-step-body">
+              The exemption goes in the PR description, in its own section, with the
+              specific gate, the reason, the approver, and the date. No Slack DMs.
+              No verbal approvals in standup. If it's not in the PR description,
+              the exemption didn't happen.
+              <div class="qg-exempt-code"><span class="c">## Gate Exemption</span>
+- <span class="k">Gate:</span> 3 (Security)
+- <span class="k">Exemption:</span> /sec-audit not run
+- <span class="k">Reason:</span> This PR only changes copy in a marketing
+  component; no auth, payment, or PII paths touched.
+- <span class="k">Approved by:</span> @tech-lead-handle
+- <span class="k">Date:</span> 2026-04-24</div>
+            </div>
+          </div>
+
+          <div class="qg-exempt-step">
+            <div class="qg-exempt-step-num">
+              <span class="qg-exempt-step-num-badge">STEP 2</span>
+              Tech Lead approves in the PR thread
+            </div>
+            <div class="qg-exempt-step-title">Approval lives in the PR, not in chat.</div>
+            <div class="qg-exempt-step-body">
+              The Tech Lead posts a comment confirming the exemption in writing, in the
+              PR thread. The comment is short, factual, and reasoned. Example:
+              <em>"Approving exemption: copy-only change confirmed; no security path
+              touched. — Tech Lead"</em> The audit trail starts in the PR and ends in
+              the PR. If the exemption requires Compliance sign-off (Gate 3), that
+              comment comes from Compliance, not from the Tech Lead.
+            </div>
+          </div>
+
+          <div class="qg-exempt-step">
+            <div class="qg-exempt-step-num">
+              <span class="qg-exempt-step-num-badge">STEP 3</span>
+              Exemption is logged and reviewed quarterly
+            </div>
+            <div class="qg-exempt-step-title">Patterns of exemption point to broken gates.</div>
+            <div class="qg-exempt-step-body">
+              Every quarter, Engineering Leadership reviews the list of granted
+              exemptions. If a gate is being exempted <strong>more than 20% of the
+              time</strong>, the gate is wrong, not the team. We rewrite the gate. If
+              a single developer is requesting exemptions at <strong>twice the team
+              average</strong>, that's a 1:1 conversation — usually about whether the
+              developer has access to the right skills, not about discipline. The
+              quarterly review is what keeps the gates honest.
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 7 — QUALITY METRICS
+         ════════════════════════════════════════════ -->
+    <section class="qg-section qg-metrics">
+      <div class="container">
+        <div class="text-center" style="max-width: 760px; margin: 0 auto 56px;">
+          <div class="qg-eyebrow" style="justify-content:center;">Metrics</div>
+          <h2 class="qg-title" style="margin: 0 auto 16px;">What we measure to know the gates are working.</h2>
+          <p class="qg-lead" style="margin: 0 auto;">
+            Six metrics. Reviewed monthly. The gates exist to move these numbers — if
+            they don't move the numbers, the gates change. Outcomes are the proof,
+            not effort.
+          </p>
+        </div>
+
+        <div class="qg-metrics-wrap">
+          <table class="qg-metrics-table">
+            <thead>
+              <tr>
+                <th>Metric</th>
+                <th>Target</th>
+                <th>Why we measure it</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>PR first-review pass rate</td>
+                <td class="target">&gt; 85%</td>
+                <td>Indicates skills are catching issues before human review. A drop here means the team isn't running the skills, or the skills don't catch what we need.</td>
+              </tr>
+              <tr>
+                <td>Mean time from PR open to merge</td>
+                <td class="target">&lt; 4h (S/M), &lt; 2d (L/XL)</td>
+                <td>Indicates gates aren't bottlenecks. Gates that delay merges past these targets are gates that the team will route around — we'd rather fix the gate than watch it get bypassed.</td>
+              </tr>
+              <tr>
+                <td>Gate failure rate</td>
+                <td class="target">&lt; 15% per gate</td>
+                <td>If a gate fails too often, the team isn't running the skill that prevents the failure. We fix the skill, the training, or the gate — never the developer.</td>
+              </tr>
+              <tr>
+                <td>Exemption rate</td>
+                <td class="target">&lt; 5% of PRs</td>
+                <td>High exemption rate means the gate is wrong or being abused. Either way, it's a leadership signal — the gate gets rewritten or the abuse gets addressed.</td>
+              </tr>
+              <tr>
+                <td>Production defect rate (per merged PR)</td>
+                <td class="target">&lt; 1%</td>
+                <td>The ultimate measure of gate effectiveness. If gates are working, defects are rare. If defects rise, a gate is missing or being bypassed — we audit and add or repair.</td>
+              </tr>
+              <tr>
+                <td>Time from defect detected to root-cause known</td>
+                <td class="target">&lt; 30 min</td>
+                <td>Indicates <span style="font-family:'JetBrains Mono',monospace;color:var(--accent-light);">/find-fix</span> + audit logs are working. Long root-cause times mean we lack the diagnostic skills or our logging is insufficient.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <p class="qg-metrics-footer">
+            <em>Metrics are reviewed monthly by Engineering Leadership. Gates that fail to
+            improve metrics get changed. Gates aren't sacred — outcomes are.</em>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 8 — CROSS-REFERENCE TO CI/CD PIPELINE
+         ════════════════════════════════════════════ -->
+    <section class="qg-section qg-pipeline">
+      <div class="container">
+        <div class="qg-pipeline-callout">
+          <div class="qg-pipeline-eyebrow">Cross-reference · CI/CD implementation</div>
+          <h3 class="qg-pipeline-headline">
+            The gates above are implemented as automated CI checks.
+          </h3>
+
+          <ul class="qg-pipeline-tiers">
+            <li>
+              <strong>Tier 1 · Every PR</strong>
+              <div>
+                <code>security-pr.yml</code> — Gates 1, 2, 5 + <span style="font-family:'JetBrains Mono',monospace;color:var(--accent-light);">/sec-audit</span>
+                and <span style="font-family:'JetBrains Mono',monospace;color:var(--accent-light);">/dep-vuln</span>
+                on relevant paths. Runs in under 2 minutes. Designed to be fast enough that no developer waits on it.
+              </div>
+            </li>
+            <li>
+              <strong>Tier 2 · Staging</strong>
+              <div>
+                <code>security-staging.yml</code> — adds <span style="font-family:'JetBrains Mono',monospace;color:var(--accent-light);">/cloud-security</span>,
+                <span style="font-family:'JetBrains Mono',monospace;color:var(--accent-light);">/infra-harden</span>,
+                and <span style="font-family:'JetBrains Mono',monospace;color:var(--accent-light);">/network-audit</span>
+                on infra-touching PRs. Roughly 7 minutes. Runs on the path from main → staging.
+              </div>
+            </li>
+            <li>
+              <strong>Tier 3 · Production</strong>
+              <div>
+                <code>security-production.yml</code> — adds <span style="font-family:'JetBrains Mono',monospace;color:var(--accent-light);">/hipaa-audit</span>,
+                <span style="font-family:'JetBrains Mono',monospace;color:var(--accent-light);">/gdpr-audit</span>,
+                <span style="font-family:'JetBrains Mono',monospace;color:var(--accent-light);">/soc2-audit</span>,
+                <span style="font-family:'JetBrains Mono',monospace;color:var(--accent-light);">/pci-audit</span>,
+                and <span style="font-family:'JetBrains Mono',monospace;color:var(--accent-light);">/compliance-report</span>.
+                Roughly 20 minutes. Runs on the path from staging → production.
+              </div>
+            </li>
+            <li>
+              <strong>Scheduled · Weekly</strong>
+              <div>
+                <code>security-deep-scan.yml</code> — runs the full audit suite against
+                the main branch on a weekly cadence. Catches drift between PR-time and
+                ambient-state findings.
+              </div>
+            </li>
+            <li>
+              <strong>On-Demand · Manual</strong>
+              <div>
+                <code>security-demand.yml</code> — manually triggered for ad-hoc audits,
+                pre-release sweeps, or incident response. Same skills, different cadence.
+              </div>
+            </li>
+          </ul>
+
+          <a href="../cicd-security-setup.html" class="qg-pipeline-cta">
+            Read the CI/CD Security Setup Guide
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 9 — WHERE TO GO NEXT
+         ════════════════════════════════════════════ -->
+    <section class="qg-section qg-next">
+      <div class="container">
+        <div class="text-center" style="max-width: 720px; margin: 0 auto;">
+          <div class="qg-eyebrow" style="justify-content:center;">Where to next</div>
+          <h2 class="qg-title" style="margin: 0 auto 16px;">Pick your next read.</h2>
+          <p class="qg-lead" style="margin: 0 auto;">
+            The gates are the contract. These three docs are the context — the principles
+            behind the gates, the skills that power them, and the client-facing version
+            for engagement conversations.
+          </p>
+        </div>
+
+        <div class="qg-next-grid">
+          <div class="qg-next-card is-disabled">
+            <span class="qg-next-card-badge">Coming soon</span>
+            <div class="qg-next-card-label">Doc 7 · For clients</div>
+            <div class="qg-next-card-title">Client Edition</div>
+            <div class="qg-next-card-body">
+              A shareable version of the handbook for clients evaluating Heaptrace
+              engagements. Same principles, same gates — phrased for an external
+              reader.
+            </div>
+            <span class="qg-next-card-cta">
+              Available shortly
+            </span>
+          </div>
+
+          <a href="skills-playbook.html" class="qg-next-card">
+            <div class="qg-next-card-label">Doc 4 · The skills behind the gates</div>
+            <div class="qg-next-card-title">Skills Playbook</div>
+            <div class="qg-next-card-body">
+              The full inventory of the 101 skills that power the gates. When to use
+              each one. What the output looks like. The skills are what make the
+              gates affordable.
+            </div>
+            <span class="qg-next-card-cta">
+              Read now →
+            </span>
+          </a>
+
+          <a href="principles.html" class="qg-next-card">
+            <div class="qg-next-card-label">Doc 2 · Why these gates exist</div>
+            <div class="qg-next-card-title">The 7 Principles</div>
+            <div class="qg-next-card-body">
+              The non-negotiables that the gates protect. Read the principles to
+              understand <em>why</em> the gates are shaped the way they are — and
+              why we refuse to bend them.
+            </div>
+            <span class="qg-next-card-cta">
+              Read now →
+            </span>
+          </a>
+        </div>
+
+        <!-- Effective footer card -->
+        <div class="qg-effective">
+          <div class="qg-effective-divider">─────────────────────────────────────────────────────────</div>
+          <div><strong>Effective:</strong> April 2026</div>
+          <div><strong>Version:</strong> 1.0 (Initial Release)</div>
+          <div><strong>Maintained by:</strong> Heaptrace Engineering Leadership</div>
+          <div class="qg-effective-divider">─────────────────────────────────────────────────────────</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         FOOTER
+         ════════════════════════════════════════════ -->
+    <footer class="footer">
+      <div class="footer-inner">
+        <div class="footer-links">
+          <a href="../index.html" class="footer-link">Home</a>
+          <a href="../index.html#packs" class="footer-link">Packs</a>
+          <a href="../setup/index.html" class="footer-link">Setup Guide</a>
+          <a href="../customize/index.html" class="footer-link">Customize</a>
+          <a href="index.html" class="footer-link">Handbook</a>
+          <a href="https://heaptrace.com" class="footer-link" target="_blank" rel="noopener">Heaptrace</a>
+        </div>
+        <div class="footer-copy">
+          MIT License &middot; Built by <a href="https://heaptrace.com" target="_blank" rel="noopener">Heaptrace Technology</a>
+          <br>101 Skills &middot; 10 Packs &middot; Free &amp; Open Source
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       PASSWORD GATE SCRIPT
+       ════════════════════════════════════════════ -->
+  <script>
+    (function() {
+      const STORED_HASH = '5866f0f6f885b943472fd7572b9c783e6b1a29958a34bd9f18e1f1e17b9a57a6';
+      const STORAGE_KEY = 'htms-handbook-access';
+      const EXPIRY_DAYS = 30;
+      const gate = document.getElementById('password-gate');
+      const content = document.getElementById('main-content');
+      const input = document.getElementById('gate-input');
+      const submit = document.getElementById('gate-submit');
+      const error = document.getElementById('gate-error');
+
+      function unlock() {
+        gate.style.display = 'none';
+        content.style.display = 'block';
+        document.body.style.overflow = 'auto';
+      }
+
+      function checkStored() {
+        try {
+          const stored = localStorage.getItem(STORAGE_KEY);
+          if (!stored) return false;
+          const { hash, expiry } = JSON.parse(stored);
+          if (hash !== STORED_HASH) return false;
+          if (Date.now() > expiry) { localStorage.removeItem(STORAGE_KEY); return false; }
+          return true;
+        } catch { return false; }
+      }
+
+      async function sha256(str) {
+        const buf = new TextEncoder().encode(str);
+        const hashBuf = await crypto.subtle.digest('SHA-256', buf);
+        return Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
+      }
+
+      async function tryUnlock() {
+        error.textContent = '';
+        const val = input.value.trim();
+        if (!val) return;
+        const hash = await sha256(val);
+        if (hash === STORED_HASH) {
+          const expiry = Date.now() + EXPIRY_DAYS * 24 * 60 * 60 * 1000;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({ hash, expiry }));
+          unlock();
+        } else {
+          error.textContent = 'Incorrect code. Contact your Heaptrace contact.';
+          input.value = '';
+          input.focus();
+        }
+      }
+
+      content.style.display = 'none';
+      document.body.style.overflow = 'hidden';
+
+      if (checkStored()) {
+        unlock();
+      } else {
+        submit.addEventListener('click', tryUnlock);
+        input.addEventListener('keyup', (e) => { if (e.key === 'Enter') tryUnlock(); });
+        setTimeout(() => input.focus(), 100);
+      }
+    })();
+  </script>
+
+</body>
+</html>

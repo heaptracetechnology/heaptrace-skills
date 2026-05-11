@@ -1,0 +1,3398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anti-Patterns — Heaptrace Engineering Handbook</title>
+  <meta name="description" content="Thirty things we don't do. The patterns that break teams and ship defects — and the skills that prevent them. Doc 5 of 7 in the Engineering Handbook.">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="author" content="Heaptrace Technology">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="../css/styles.css">
+
+  <style>
+    /* ═════════════════════════════════════════════
+       ANTI-PATTERNS — PAGE STYLES
+       Primary accent: GREEN (--green) — handbook consistency
+       Anti-pattern markers: RED (#ef4444)
+       Consequence callouts: AMBER (#f59e0b)
+       ═════════════════════════════════════════════ */
+
+    :root {
+      --accent: var(--green);
+      --accent-light: #34d399;
+      --accent-soft: rgba(16, 185, 129, 0.10);
+      --accent-border: rgba(16, 185, 129, 0.28);
+      --accent-glow: rgba(16, 185, 129, 0.18);
+      --ap-red: #ef4444;
+      --ap-red-light: #fca5a5;
+      --ap-red-soft: rgba(239, 68, 68, 0.08);
+      --ap-red-border: rgba(239, 68, 68, 0.28);
+      --ap-red-glow: rgba(239, 68, 68, 0.18);
+      --ap-amber: #f59e0b;
+      --ap-amber-light: #fbbf24;
+      --ap-amber-soft: rgba(245, 158, 11, 0.07);
+      --ap-amber-border: rgba(245, 158, 11, 0.25);
+    }
+
+    body { line-height: 1.7; }
+
+    /* ── Active nav (green override) ── */
+    .nav-link.active {
+      color: var(--green);
+      background: rgba(16, 185, 129, 0.08);
+    }
+
+    /* ── Password Gate ── */
+    #password-gate {
+      position: fixed; inset: 0; z-index: 9999;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--bg-primary);
+      background-image:
+        radial-gradient(ellipse 60% 40% at 50% 20%, rgba(16, 185, 129, 0.08), transparent 70%),
+        radial-gradient(ellipse 40% 30% at 50% 80%, rgba(6, 182, 212, 0.05), transparent 60%);
+    }
+    #gate-input:focus {
+      border-color: var(--accent) !important;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+    }
+    #gate-submit:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 30px rgba(16, 185, 129, 0.35);
+    }
+
+    /* ── Eyebrows & section titles ── */
+    .ap-eyebrow {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 0.78rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.12em; color: var(--accent-light);
+      margin-bottom: 14px;
+    }
+    .ap-eyebrow::before {
+      content: ''; width: 24px; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent));
+    }
+    .ap-title {
+      font-size: clamp(1.9rem, 3.2vw, 2.6rem);
+      font-weight: 800; line-height: 1.15; margin-bottom: 16px;
+      letter-spacing: -0.02em;
+    }
+    .ap-lead {
+      font-size: 1.08rem; color: var(--text-secondary);
+      line-height: 1.75; max-width: 720px;
+    }
+    .ap-section {
+      padding: 100px 0;
+      position: relative;
+    }
+    .ap-section-narrow { max-width: 900px; margin: 0 auto; }
+
+    /* ── Hero ── */
+    .ap-hero {
+      padding: calc(var(--nav-height) + 100px) 0 90px;
+      text-align: center; position: relative; overflow: hidden;
+    }
+    .ap-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 40% at 50% 0%, rgba(239, 68, 68, 0.08), transparent 70%),
+        radial-gradient(ellipse 40% 30% at 30% 30%, rgba(245, 158, 11, 0.05), transparent 60%),
+        radial-gradient(ellipse 40% 30% at 70% 20%, rgba(16, 185, 129, 0.05), transparent 60%);
+      pointer-events: none;
+    }
+    .ap-hero::after {
+      content: ''; position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='grid' width='60' height='60' patternUnits='userSpaceOnUse'%3E%3Cpath d='M 60 0 L 0 0 0 60' fill='none' stroke='%231e293b' stroke-width='0.5'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23grid)'/%3E%3C/svg%3E");
+      opacity: 0.3; pointer-events: none;
+    }
+    .ap-hero-content { position: relative; z-index: 1; }
+    .ap-hero-badge {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--accent-soft);
+      border: 1px solid var(--accent-border);
+      color: var(--accent-light); padding: 8px 20px; border-radius: 999px;
+      font-size: 0.78rem; font-weight: 700; margin-bottom: 32px;
+      letter-spacing: 0.12em; text-transform: uppercase;
+    }
+    .ap-hero-badge-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent); box-shadow: 0 0 12px var(--accent);
+      animation: pulseGreen 2.4s infinite;
+    }
+    @keyframes pulseGreen {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.45); }
+      50% { opacity: 0.85; box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+    }
+    .ap-hero h1 {
+      font-size: clamp(2.6rem, 5.2vw, 4rem);
+      font-weight: 800; line-height: 1.08; margin-bottom: 24px;
+      letter-spacing: -0.025em;
+      background: linear-gradient(135deg, var(--text-primary) 0%, #fca5a5 35%, #fbbf24 65%, var(--text-primary) 100%);
+      background-size: 200% auto;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmer 7s ease-in-out infinite;
+    }
+    @keyframes shimmer {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+    .ap-hero-subtitle {
+      font-size: 1.18rem; color: var(--text-secondary);
+      max-width: 760px; margin: 0 auto 48px; line-height: 1.75;
+    }
+    .ap-hero-cta {
+      display: inline-flex; align-items: center; gap: 14px;
+      margin-top: 8px; flex-wrap: wrap; justify-content: center;
+    }
+    .ap-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 14px 26px; border-radius: var(--radius-md);
+      font-weight: 600; font-size: 0.95rem; letter-spacing: 0.005em;
+      transition: var(--transition); border: 1px solid transparent;
+    }
+    .ap-btn-primary {
+      background: linear-gradient(135deg, var(--green), var(--cyan));
+      color: white;
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.25);
+    }
+    .ap-btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 32px rgba(16, 185, 129, 0.4);
+    }
+    .ap-btn-secondary {
+      background: transparent;
+      color: var(--text-primary);
+      border-color: var(--border-hover);
+    }
+    .ap-btn-secondary:hover {
+      border-color: var(--accent);
+      color: var(--accent-light);
+      background: var(--accent-soft);
+    }
+
+    /* ── Intro section (3 paragraphs) ── */
+    .ap-intro {
+      background:
+        radial-gradient(ellipse 80% 50% at 50% 0%, rgba(239, 68, 68, 0.035), transparent 70%);
+    }
+    .ap-intro-block {
+      padding: 28px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .ap-intro-block:last-child { border-bottom: none; }
+    .ap-intro-heading {
+      font-size: 1.35rem; font-weight: 700;
+      margin-bottom: 14px;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+    }
+    .ap-intro-heading::before {
+      content: '"'; color: var(--ap-red);
+      font-family: 'JetBrains Mono', monospace;
+      margin-right: 6px; opacity: 0.6;
+    }
+    .ap-intro-heading::after {
+      content: '"'; color: var(--ap-red);
+      font-family: 'JetBrains Mono', monospace;
+      margin-left: 4px; opacity: 0.6;
+    }
+    .ap-intro-body {
+      color: var(--text-secondary);
+      font-size: 1.02rem;
+      line-height: 1.8;
+    }
+
+    /* ── Categorical Index Grid ── */
+    .ap-index {
+      background:
+        radial-gradient(ellipse 60% 40% at 50% 50%, rgba(16, 185, 129, 0.025), transparent 70%);
+    }
+    .ap-index-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 18px;
+      max-width: 1120px;
+      margin: 48px auto 0;
+    }
+    .ap-index-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 24px 22px;
+      display: flex; flex-direction: column; gap: 10px;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    .ap-index-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(16, 185, 129, 0.10);
+    }
+    .ap-index-card::before {
+      content: ''; position: absolute; top: 0; left: 0;
+      width: 100%; height: 3px;
+      background: linear-gradient(90deg, var(--ap-red), var(--ap-amber));
+    }
+    .ap-index-card-icon {
+      font-size: 1.5rem;
+      line-height: 1;
+      margin-top: 6px;
+    }
+    .ap-index-card-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.005em;
+    }
+    .ap-index-card-count {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      letter-spacing: 0.06em;
+    }
+    .ap-index-card-arrow {
+      align-self: flex-end;
+      color: var(--accent-light);
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    /* ── Category divider ── */
+    .ap-category {
+      max-width: 980px; margin: 0 auto;
+      padding: 70px 0 40px;
+      scroll-margin-top: 100px;
+    }
+    .ap-category-header {
+      display: flex; align-items: center; gap: 18px;
+      padding-bottom: 24px;
+      margin-bottom: 48px;
+      border-bottom: 1px solid var(--border);
+    }
+    .ap-category-icon {
+      font-size: 2rem;
+      line-height: 1;
+      width: 56px; height: 56px;
+      display: inline-flex; align-items: center; justify-content: center;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      flex-shrink: 0;
+    }
+    .ap-category-meta {
+      flex: 1;
+    }
+    .ap-category-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem; font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--ap-red-light);
+      margin-bottom: 8px;
+    }
+    .ap-category-title {
+      font-size: 1.6rem; font-weight: 800;
+      letter-spacing: -0.015em;
+      line-height: 1.2;
+      color: var(--text-primary);
+    }
+    .ap-category-count {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+      padding: 6px 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      flex-shrink: 0;
+    }
+
+    /* ── Anti-Pattern Cards ── */
+    .ap-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 44px 48px 40px;
+      margin-bottom: 28px;
+      position: relative;
+      overflow: hidden;
+      transition: var(--transition);
+    }
+    .ap-card:hover {
+      border-color: var(--ap-red-border);
+    }
+    .ap-card::before {
+      content: ''; position: absolute; top: 0; left: 0;
+      width: 4px; height: 100%;
+      background: linear-gradient(180deg, var(--ap-red) 0%, var(--ap-amber) 100%);
+    }
+    .ap-card-header {
+      display: flex; align-items: flex-start; gap: 22px;
+      margin-bottom: 28px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .ap-card-number {
+      font-size: 2.4rem;
+      font-weight: 800;
+      line-height: 0.9;
+      background: linear-gradient(135deg, var(--ap-red), var(--ap-amber));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.04em;
+      flex-shrink: 0;
+      min-width: 64px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .ap-card-x {
+      position: absolute;
+      top: 18px; right: 22px;
+      font-size: 1.6rem;
+      color: var(--ap-red);
+      opacity: 0.4;
+      font-weight: 800;
+      line-height: 1;
+      transition: var(--transition-fast);
+    }
+    .ap-card:hover .ap-card-x {
+      opacity: 0.8;
+      transform: rotate(-5deg);
+    }
+    .ap-card-tagrow {
+      flex: 1;
+    }
+    .ap-card-cat {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 0.7rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.14em;
+      color: var(--ap-red-light);
+      margin-bottom: 12px;
+      padding: 4px 10px;
+      background: var(--ap-red-soft);
+      border: 1px solid var(--ap-red-border);
+      border-radius: 999px;
+    }
+    .ap-card-statement {
+      font-size: 1.32rem;
+      font-weight: 700;
+      line-height: 1.35;
+      letter-spacing: -0.015em;
+      color: var(--text-primary);
+      font-style: italic;
+    }
+    .ap-card-statement::before {
+      content: '"'; color: var(--ap-red);
+      margin-right: 2px; opacity: 0.6;
+      font-family: 'JetBrains Mono', monospace;
+      font-style: normal;
+    }
+    .ap-card-statement::after {
+      content: '"'; color: var(--ap-red);
+      margin-left: 2px; opacity: 0.6;
+      font-family: 'JetBrains Mono', monospace;
+      font-style: normal;
+    }
+
+    /* Block inside card */
+    .ap-block {
+      margin-bottom: 22px;
+    }
+    .ap-block:last-of-type {
+      margin-bottom: 22px;
+    }
+    .ap-block-label {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 0.72rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.13em;
+      margin-bottom: 10px;
+    }
+    .ap-block-label-icon {
+      width: 18px; height: 18px;
+      display: inline-flex; align-items: center; justify-content: center;
+      border-radius: 4px;
+      font-size: 0.7rem; font-weight: 800;
+    }
+    .ap-block-body {
+      color: var(--text-secondary);
+      font-size: 1rem;
+      line-height: 1.7;
+    }
+    .ap-block-body strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+    .ap-block-body code {
+      background: var(--bg-code);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.88em;
+      color: var(--accent-light);
+      border: 1px solid var(--border);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* "The Signal" — red */
+    .ap-signal .ap-block-label { color: var(--ap-red-light); }
+    .ap-signal .ap-block-label-icon {
+      background: var(--ap-red-soft);
+      color: var(--ap-red-light);
+      border: 1px solid var(--ap-red-border);
+    }
+
+    /* "Why It's Wrong" — amber */
+    .ap-why .ap-block-label { color: var(--ap-amber-light); }
+    .ap-why .ap-block-label-icon {
+      background: var(--ap-amber-soft);
+      color: var(--ap-amber-light);
+      border: 1px solid var(--ap-amber-border);
+    }
+
+    /* "What We Do Instead" — green */
+    .ap-instead .ap-block-label { color: var(--accent-light); }
+    .ap-instead .ap-block-label-icon {
+      background: var(--accent-soft);
+      color: var(--accent-light);
+      border: 1px solid var(--accent-border);
+    }
+
+    /* Consequence callout — amber-heavy */
+    .ap-consequence {
+      background: rgba(245, 158, 11, 0.04);
+      border: 1px solid rgba(245, 158, 11, 0.18);
+      border-left: 3px solid var(--ap-amber);
+      border-radius: var(--radius-sm);
+      padding: 18px 22px;
+      color: var(--text-secondary);
+      font-size: 0.98rem;
+      line-height: 1.65;
+      margin-top: 4px;
+    }
+    .ap-consequence-label {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem; font-weight: 700;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      color: var(--ap-amber-light);
+      margin-bottom: 8px;
+    }
+    .ap-consequence-label::before {
+      content: '⚠'; font-family: inherit;
+    }
+    .ap-consequence-body {
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+    .ap-consequence-body strong {
+      color: var(--ap-amber-light);
+      font-style: normal;
+    }
+
+    /* Footer of card: principle + skill */
+    .ap-card-meta {
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px dashed var(--border);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 24px;
+      font-size: 0.85rem;
+    }
+    .ap-card-meta-item {
+      display: inline-flex; align-items: center; gap: 8px;
+      color: var(--text-muted);
+    }
+    .ap-card-meta-item strong {
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+    .ap-card-meta-pill {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 9px;
+      background: var(--accent-soft);
+      border: 1px solid var(--accent-border);
+      border-radius: 999px;
+      color: var(--accent-light);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+    .ap-card-meta-pill-principle {
+      background: rgba(6, 182, 212, 0.07);
+      border-color: rgba(6, 182, 212, 0.25);
+      color: var(--cyan-light);
+    }
+
+    /* ── Top 5 Callout (Warning Sign) ── */
+    .ap-top5 {
+      background:
+        radial-gradient(ellipse 80% 50% at 50% 50%, rgba(239, 68, 68, 0.05), transparent 70%);
+    }
+    .ap-top5-card {
+      max-width: 920px; margin: 0 auto;
+      background:
+        linear-gradient(135deg, rgba(239, 68, 68, 0.04) 0%, rgba(245, 158, 11, 0.04) 100%),
+        var(--bg-card);
+      border: 1px solid var(--ap-red-border);
+      border-radius: var(--radius);
+      padding: 52px 52px 44px;
+      position: relative;
+      overflow: hidden;
+    }
+    .ap-top5-card::before {
+      content: ''; position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 4px;
+      background: repeating-linear-gradient(
+        45deg,
+        var(--ap-red),
+        var(--ap-red) 12px,
+        var(--ap-amber) 12px,
+        var(--ap-amber) 24px
+      );
+    }
+    .ap-top5-header {
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .ap-top5-sign {
+      width: 48px; height: 48px;
+      display: inline-flex; align-items: center; justify-content: center;
+      background: var(--ap-red-soft);
+      border: 2px solid var(--ap-red-border);
+      border-radius: 50%;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+    .ap-top5-title {
+      font-size: 1.45rem; font-weight: 800;
+      letter-spacing: -0.015em;
+      color: var(--text-primary);
+    }
+    .ap-top5-subtitle {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    .ap-top5-list {
+      list-style: none; padding: 0;
+      counter-reset: top5;
+    }
+    .ap-top5-list li {
+      counter-increment: top5;
+      padding: 16px 0;
+      border-bottom: 1px dashed var(--border);
+      display: flex; align-items: flex-start; gap: 20px;
+    }
+    .ap-top5-list li:last-child { border-bottom: none; }
+    .ap-top5-list li::before {
+      content: counter(top5);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--ap-red-light);
+      flex-shrink: 0;
+      min-width: 28px;
+      padding-top: 2px;
+    }
+    .ap-top5-list-body {
+      flex: 1;
+    }
+    .ap-top5-list-headline {
+      font-size: 1.02rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+      letter-spacing: -0.005em;
+    }
+    .ap-top5-list-headline code {
+      background: var(--bg-code);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 0.84em;
+      color: var(--ap-red-light);
+      border: 1px solid var(--border);
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+    }
+    .ap-top5-list-note {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    .ap-top5-footer {
+      margin-top: 28px;
+      padding-top: 22px;
+      border-top: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-size: 0.98rem;
+      line-height: 1.7;
+      font-style: italic;
+    }
+    .ap-top5-footer strong {
+      color: var(--ap-red-light);
+      font-style: normal;
+    }
+
+    /* ── Cheatsheet ── */
+    .ap-cheatsheet {
+      background:
+        radial-gradient(ellipse 60% 30% at 50% 50%, rgba(16, 185, 129, 0.03), transparent 70%);
+    }
+    .ap-cheatsheet-intro {
+      max-width: 700px; margin: 0 auto 40px; text-align: center;
+    }
+    .ap-cheatsheet-card {
+      max-width: 1000px; margin: 0 auto;
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 40px 44px;
+      position: relative;
+      overflow: hidden;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .ap-cheatsheet-card::before {
+      content: ''; position: absolute;
+      top: 0; left: 0; right: 0; height: 32px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+    }
+    .ap-cheatsheet-dots {
+      position: absolute;
+      top: 11px; left: 16px;
+      display: flex; gap: 6px;
+    }
+    .ap-cheatsheet-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+    }
+    .ap-cheatsheet-dot:nth-child(1) { background: #ef4444; }
+    .ap-cheatsheet-dot:nth-child(2) { background: #f59e0b; }
+    .ap-cheatsheet-dot:nth-child(3) { background: #10b981; }
+    .ap-cheatsheet-label {
+      position: absolute;
+      top: 8px; left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .ap-cheatsheet-content {
+      margin-top: 24px;
+      font-size: 0.85rem;
+      line-height: 1.85;
+      color: var(--text-secondary);
+    }
+    .ap-cheatsheet-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .ap-cheatsheet-subtitle {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      letter-spacing: 0.06em;
+      margin-bottom: 28px;
+      padding-bottom: 16px;
+      border-bottom: 1px dashed var(--border);
+    }
+    .ap-cheatsheet-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 28px 32px;
+    }
+    .ap-cheatsheet-col h4 {
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--ap-amber-light);
+      margin-bottom: 12px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border);
+    }
+    .ap-cheatsheet-col ol {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      counter-reset: cs;
+    }
+    .ap-cheatsheet-col ol li {
+      padding: 4px 0;
+      counter-increment: cs;
+      display: flex; gap: 10px;
+      align-items: flex-start;
+      color: var(--text-secondary);
+    }
+    .ap-cheatsheet-col ol li::before {
+      content: counter(cs, decimal-leading-zero);
+      color: var(--ap-red-light);
+      font-weight: 600;
+      flex-shrink: 0;
+      min-width: 22px;
+      font-size: 0.78rem;
+    }
+    .ap-cheatsheet-col ol li.cs-start { counter-reset: cs; }
+
+    /* ── Next-steps ── */
+    .ap-next {
+      background:
+        radial-gradient(ellipse 60% 40% at 50% 100%, rgba(16, 185, 129, 0.04), transparent 70%);
+    }
+    .ap-next-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      max-width: 1080px; margin: 48px auto 0;
+    }
+    .ap-next-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px 28px;
+      transition: var(--transition);
+      display: flex; flex-direction: column; gap: 14px;
+      min-height: 220px;
+      position: relative;
+    }
+    .ap-next-card.is-disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+    .ap-next-card:not(.is-disabled):hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(16, 185, 129, 0.10);
+    }
+    .ap-next-card-label {
+      font-size: 0.72rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.12em;
+      color: var(--text-muted);
+    }
+    .ap-next-card-title {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+      line-height: 1.3;
+    }
+    .ap-next-card-body {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      line-height: 1.65;
+      flex-grow: 1;
+    }
+    .ap-next-card-cta {
+      display: inline-flex; align-items: center; gap: 6px;
+      color: var(--accent-light);
+      font-size: 0.9rem; font-weight: 600;
+      margin-top: auto;
+    }
+    .ap-next-card.is-disabled .ap-next-card-cta {
+      color: var(--text-muted);
+    }
+    .ap-next-card-badge {
+      position: absolute;
+      top: 16px; right: 16px;
+      font-size: 0.65rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 4px 8px;
+      border-radius: 4px;
+      background: rgba(245, 158, 11, 0.10);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.25);
+    }
+
+    /* ── Effective footer ── */
+    .ap-effective {
+      max-width: 720px; margin: 80px auto 0;
+      padding: 32px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 2;
+    }
+    .ap-effective-divider {
+      color: var(--border-hover);
+      letter-spacing: 0.1em;
+    }
+    .ap-effective strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .ap-section { padding: 70px 0; }
+      .ap-card { padding: 32px 26px 28px; }
+      .ap-card-header {
+        flex-direction: column;
+        gap: 14px;
+      }
+      .ap-card-number { font-size: 2rem; min-width: 0; }
+      .ap-card-statement { font-size: 1.1rem; }
+      .ap-card-x { font-size: 1.3rem; top: 14px; right: 16px; }
+      .ap-top5-card { padding: 36px 28px 32px; }
+      .ap-next-grid { grid-template-columns: 1fr; }
+      .ap-hero { padding-top: calc(var(--nav-height) + 60px); padding-bottom: 60px; }
+      .ap-cheatsheet-card { padding: 36px 24px 28px; }
+      .ap-category-header { flex-wrap: wrap; }
+    }
+
+    /* ── Print ── */
+    @media print {
+      #password-gate, .nav, .footer, .ap-hero-cta { display: none !important; }
+      body, .ap-hero, .ap-section, .ap-intro, .ap-index, .ap-top5, .ap-cheatsheet, .ap-next {
+        background: white !important;
+        color: #0a0f1a !important;
+      }
+      .ap-card, .ap-top5-card, .ap-cheatsheet-card, .ap-effective, .ap-next-card, .ap-index-card {
+        background: white !important;
+        border: 1px solid #cbd5e1 !important;
+        page-break-inside: avoid;
+        box-shadow: none !important;
+      }
+      .ap-card-number, .ap-hero h1 {
+        -webkit-text-fill-color: #b91c1c !important;
+        color: #b91c1c !important;
+        background: none !important;
+      }
+      .ap-block-body, .ap-intro-body, .ap-next-card-body {
+        color: #334155 !important;
+      }
+      .ap-consequence {
+        background: #fffbeb !important;
+        color: #78350f !important;
+      }
+      .ap-cheatsheet-content { color: #1e293b !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ════════════════════════════════════════════
+       PASSWORD GATE
+       ════════════════════════════════════════════ -->
+  <div id="password-gate" style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:var(--bg-primary);">
+    <div style="max-width:420px;width:90%;text-align:center;">
+      <div style="width:64px;height:64px;margin:0 auto 24px;border-radius:16px;background:linear-gradient(135deg,var(--green),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:white;box-shadow:0 0 40px rgba(16,185,129,0.3);">H</div>
+      <h1 style="font-size:1.5rem;font-weight:700;margin-bottom:8px;">Heaptrace Handbook</h1>
+      <p style="color:var(--text-secondary);margin-bottom:32px;font-size:0.95rem;">Enter access code to continue</p>
+      <input type="password" id="gate-input" placeholder="Access code" autocomplete="off" style="width:100%;padding:14px 18px;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;color:var(--text-primary);font-size:1rem;font-family:'JetBrains Mono',monospace;margin-bottom:16px;outline:none;transition:all 0.2s;">
+      <button id="gate-submit" style="width:100%;padding:14px;background:linear-gradient(135deg,var(--green),var(--cyan));border:none;border-radius:12px;color:white;font-weight:600;font-size:0.95rem;cursor:pointer;transition:all 0.2s;">Unlock</button>
+      <p id="gate-error" style="color:var(--red);margin-top:16px;font-size:0.85rem;min-height:1.2em;"></p>
+      <p style="color:var(--text-muted);margin-top:40px;font-size:0.8rem;">Private engineering handbook · Heaptrace Technology</p>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       MAIN CONTENT (hidden until unlock)
+       ════════════════════════════════════════════ -->
+  <div id="main-content">
+
+    <!-- NAV -->
+    <nav class="nav">
+      <div class="nav-inner">
+        <a href="../index.html" class="nav-logo"><div class="nav-logo-icon">H</div><span>Heaptrace Skills</span></a>
+        <div class="nav-links" id="navLinks">
+          <a href="../index.html" class="nav-link">Home</a>
+          <a href="../index.html#packs" class="nav-link">Packs</a>
+          <a href="../setup/index.html" class="nav-link">Setup</a>
+          <a href="../customize/index.html" class="nav-link">Customize</a>
+          <a href="index.html" class="nav-link active">Handbook</a>
+          <div class="nav-dropdown">
+            <button class="nav-dropdown-trigger">Security <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button>
+            <div class="nav-dropdown-menu">
+              <a href="../compliance-overview.html" class="nav-dropdown-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>Compliance Overview</a>
+              <a href="../ci-cd-security.html" class="nav-dropdown-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>CI/CD Security Gateway</a>
+              <a href="../cicd-security-setup.html" class="nav-dropdown-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>Setup Guide</a>
+            </div>
+          </div>
+          <a href="../rules/index.html" class="nav-link">Rules</a>
+          <a href="../mcp/index.html" class="nav-link">MCP Servers</a>
+        </div>
+        <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>GitHub
+        </a>
+      </div>
+    </nav>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 1 — HERO
+         ════════════════════════════════════════════ -->
+    <section class="ap-hero">
+      <div class="container ap-hero-content">
+        <div class="ap-hero-badge">
+          <span class="ap-hero-badge-dot"></span>
+          Doc 5 of 7 · Anti-Patterns
+        </div>
+        <h1>Thirty Things<br>We Don't Do</h1>
+        <p class="ap-hero-subtitle">
+          The shortest doc to write, the longest to enforce. Each pattern below is something we've watched
+          break a team or land a defect in production. The skill that prevents it is named with each one.
+        </p>
+        <div class="ap-hero-cta">
+          <a href="skills-playbook.html" class="ap-btn ap-btn-secondary">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            Back to Skills Playbook
+          </a>
+          <a href="quality-gates.html" class="ap-btn ap-btn-primary">
+            Quality Gates
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 2 — HOW TO READ THIS CATALOG
+         ════════════════════════════════════════════ -->
+    <section class="ap-section ap-intro">
+      <div class="container">
+        <div class="ap-section-narrow">
+          <div class="ap-eyebrow">How to read this catalog</div>
+          <h2 class="ap-title">Three rules for using this doc.</h2>
+          <p class="ap-lead" style="margin-bottom: 48px;">
+            This is not philosophy. It's a checklist of mistakes we've already paid for —
+            and the standards that keep us from paying for them again.
+          </p>
+
+          <div class="ap-intro-block">
+            <h3 class="ap-intro-heading">Not aspirations. Enforcements.</h3>
+            <p class="ap-intro-body">
+              Each anti-pattern below is something that already happened — at Heaptrace, or at a previous
+              company someone on the team worked at. They are not theoretical. They are documented because
+              they cost time, money, or trust — and because the cost was preventable. If you find yourself
+              reading one and thinking "that's a bit strict," remember: the strictness is what made the cost
+              go away.
+            </p>
+          </div>
+
+          <div class="ap-intro-block">
+            <h3 class="ap-intro-heading">The pattern. The fix. The receipt.</h3>
+            <p class="ap-intro-body">
+              Every entry follows the same structure. <strong>The Signal</strong> — what the anti-pattern
+              looks like at the surface, in code, in chat, in a PR description. <strong>Why It's Wrong</strong> —
+              the underlying cost, in dollars or trust or time. <strong>What We Do Instead</strong> — the
+              skill or rule that prevents it, named explicitly. <strong>The Consequence</strong> — what
+              happens when it shows up anyway, so the standard has teeth. Read all four. Skipping
+              the consequence is how standards rot.
+            </p>
+          </div>
+
+          <div class="ap-intro-block">
+            <h3 class="ap-intro-heading">Read once, recognize forever.</h3>
+            <p class="ap-intro-body">
+              The point of this doc is pattern recognition. After reading it once, every code review,
+              every Slack message, every PR description should feel familiar. You'll start spotting these
+              in others' work — and, more usefully, in your own draft before you ship it. The fastest
+              engineers on the team aren't the ones who type the most. They're the ones who recognize
+              an anti-pattern in their own draft and rewrite before anyone else has to.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 3 — CATEGORICAL INDEX
+         ════════════════════════════════════════════ -->
+    <section class="ap-section ap-index">
+      <div class="container">
+        <div class="text-center" style="max-width: 720px; margin: 0 auto;">
+          <div class="ap-eyebrow" style="justify-content:center;">Skim first</div>
+          <h2 class="ap-title" style="margin: 0 auto 16px;">Thirty anti-patterns, seven categories.</h2>
+          <p class="ap-lead" style="margin: 0 auto;">
+            Tap a category to jump straight to its anti-patterns. Or read top-to-bottom in one sitting —
+            the doc is structured to be ingested in 20 minutes.
+          </p>
+        </div>
+
+        <div class="ap-index-grid">
+          <a href="#planning" class="ap-index-card">
+            <span class="ap-index-card-icon">📐</span>
+            <div class="ap-index-card-title">Planning</div>
+            <div class="ap-index-card-count">5 anti-patterns · #01–#05</div>
+            <span class="ap-index-card-arrow">Jump to section →</span>
+          </a>
+          <a href="#ai-usage" class="ap-index-card">
+            <span class="ap-index-card-icon">🤖</span>
+            <div class="ap-index-card-title">AI Usage</div>
+            <div class="ap-index-card-count">5 anti-patterns · #06–#10</div>
+            <span class="ap-index-card-arrow">Jump to section →</span>
+          </a>
+          <a href="#code-review" class="ap-index-card">
+            <span class="ap-index-card-icon">🔍</span>
+            <div class="ap-index-card-title">Code &amp; Review</div>
+            <div class="ap-index-card-count">5 anti-patterns · #11–#15</div>
+            <span class="ap-index-card-arrow">Jump to section →</span>
+          </a>
+          <a href="#communication" class="ap-index-card">
+            <span class="ap-index-card-icon">💬</span>
+            <div class="ap-index-card-title">Communication</div>
+            <div class="ap-index-card-count">5 anti-patterns · #16–#20</div>
+            <span class="ap-index-card-arrow">Jump to section →</span>
+          </a>
+          <a href="#security" class="ap-index-card">
+            <span class="ap-index-card-icon">🛡️</span>
+            <div class="ap-index-card-title">Security &amp; Compliance</div>
+            <div class="ap-index-card-count">4 anti-patterns · #21–#24</div>
+            <span class="ap-index-card-arrow">Jump to section →</span>
+          </a>
+          <a href="#process" class="ap-index-card">
+            <span class="ap-index-card-icon">⚙️</span>
+            <div class="ap-index-card-title">Process &amp; Discipline</div>
+            <div class="ap-index-card-count">4 anti-patterns · #25–#28</div>
+            <span class="ap-index-card-arrow">Jump to section →</span>
+          </a>
+          <a href="#role-specific" class="ap-index-card">
+            <span class="ap-index-card-icon">🎯</span>
+            <div class="ap-index-card-title">Role-Specific</div>
+            <div class="ap-index-card-count">2 anti-patterns · #29–#30</div>
+            <span class="ap-index-card-arrow">Jump to section →</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 4 — ANTI-PATTERN CARDS
+         ════════════════════════════════════════════ -->
+    <section class="ap-section" style="padding-top: 40px; padding-bottom: 60px;">
+      <div class="container">
+
+        <!-- ─────────────────────────────────────
+             CATEGORY: PLANNING
+             ───────────────────────────────────── -->
+        <div class="ap-category" id="planning">
+          <div class="ap-category-header">
+            <div class="ap-category-icon">📐</div>
+            <div class="ap-category-meta">
+              <div class="ap-category-eyebrow">Category 1 of 7</div>
+              <div class="ap-category-title">Planning</div>
+            </div>
+            <div class="ap-category-count">5 anti-patterns</div>
+          </div>
+
+          <!-- AP #01 -->
+          <article class="ap-card">
+            <span class="ap-card-x">❌</span>
+            <div class="ap-card-header">
+              <div class="ap-card-number">01</div>
+              <div class="ap-card-tagrow">
+                <span class="ap-card-cat">Planning</span>
+                <div class="ap-card-statement">Opening the editor without running a plan.</div>
+              </div>
+            </div>
+
+            <div class="ap-block ap-signal">
+              <div class="ap-block-label"><span class="ap-block-label-icon">!</span>The Signal</div>
+              <p class="ap-block-body">
+                The developer says <em>"let me just take a quick look at the code first"</em> and starts editing.
+                No plan output. No file list. No scope check. Just a cursor blinking in the editor and a
+                vague intent.
+              </p>
+            </div>
+
+            <div class="ap-block ap-why">
+              <div class="ap-block-label"><span class="ap-block-label-icon">?</span>Why It's Wrong</div>
+              <p class="ap-block-body">
+                Without a plan, scope grows mid-edit. A 10-line fix becomes a 400-line PR. The reviewer
+                can't tell what was intentional and what was drift. <strong>The plan is the cheapest
+                cost-reduction we have</strong> — three minutes upfront prevents three hours of rework.
+              </p>
+            </div>
+
+            <div class="ap-block ap-instead">
+              <div class="ap-block-label"><span class="ap-block-label-icon">✓</span>What We Do Instead</div>
+              <p class="ap-block-body">
+                Every task starts with a plan. <code>/quick-plan</code> for anything under a session.
+                <code>/feature-plan</code> for anything that touches multiple modules or needs design.
+                <strong>No exceptions.</strong> Even a typo fix gets a 30-second plan — the discipline
+                matters more than the duration.
+              </p>
+            </div>
+
+            <div class="ap-consequence">
+              <div class="ap-consequence-label">The Consequence</div>
+              <div class="ap-consequence-body">
+                PR returned at first review with the comment: <strong>"Please run /quick-plan and
+                include the output in the PR description."</strong> No discussion of the code until
+                the plan exists.
+              </div>
+            </div>
+
+            <div class="ap-card-meta">
+              <div class="ap-card-meta-item">
+                <strong>Principle violated:</strong>
+                <span class="ap-card-meta-pill ap-card-meta-pill-principle">#1 Plan Before Code</span>
+              </div>
+              <div class="ap-card-meta-item">
+                <strong>Skill that prevents it:</strong>
+                <span class="ap-card-meta-pill">/quick-plan</span>
+                <span class="ap-card-meta-pill">/feature-plan</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- AP #02 -->
+          <article class="ap-card">
+            <span class="ap-card-x">❌</span>
+            <div class="ap-card-header">
+              <div class="ap-card-number">02</div>
+              <div class="ap-card-tagrow">
+                <span class="ap-card-cat">Planning</span>
+                <div class="ap-card-statement">Using /feature-plan for a one-line CSS change.</div>
+              </div>
+            </div>
+
+            <div class="ap-block ap-signal">
+              <div class="ap-block-label"><span class="ap-block-label-icon">!</span>The Signal</div>
+              <p class="ap-block-body">
+                A heavyweight plan with mockups, risk matrix, and a 14-step breakdown — for a fix
+                that should take five minutes. The developer ran <code>/feature-plan</code> reflexively
+                without checking scope first.
+              </p>
+            </div>
+
+            <div class="ap-block ap-why">
+              <div class="ap-block-label"><span class="ap-block-label-icon">?</span>Why It's Wrong</div>
+              <p class="ap-block-body">
+                Token waste, ceremony waste, developer fatigue. <code>/feature-plan</code> is meant
+                for substantial work — when you use it for trivial fixes, you train yourself to skim
+                its output, and then you'll skim it when it actually matters. <strong>Devaluing the
+                heavy skill is worse than skipping it.</strong>
+              </p>
+            </div>
+
+            <div class="ap-block ap-instead">
+              <div class="ap-block-label"><span class="ap-block-label-icon">✓</span>What We Do Instead</div>
+              <p class="ap-block-body">
+                <code>/quick-plan</code> for anything that fits in a single session. The scope check
+                at the top of <code>/feature-plan</code> is designed to make you escalate
+                <em>down</em>, not up. If the plan output says "this is an XS task, use /quick-plan
+                instead" — listen to it.
+              </p>
+            </div>
+
+            <div class="ap-consequence">
+              <div class="ap-consequence-label">The Consequence</div>
+              <div class="ap-consequence-body">
+                Slower work, frustrated developer, devalued heavy skill. Worse: <strong>the next time
+                /feature-plan is needed for an actual feature, the developer skips it</strong> because
+                they associate it with overhead.
+              </div>
+            </div>
+
+            <div class="ap-card-meta">
+              <div class="ap-card-meta-item">
+                <strong>Principle violated:</strong>
+                <span class="ap-card-meta-pill ap-card-meta-pill-principle">#1 Plan Before Code</span>
+              </div>
+              <div class="ap-card-meta-item">
+                <strong>Skill that prevents it:</strong>
+                <span class="ap-card-meta-pill">/quick-plan</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- AP #03 -->
+          <article class="ap-card">
+            <span class="ap-card-x">❌</span>
+            <div class="ap-card-header">
+              <div class="ap-card-number">03</div>
+              <div class="ap-card-tagrow">
+                <span class="ap-card-cat">Planning</span>
+                <div class="ap-card-statement">Using /quick-plan for a 3-day feature.</div>
+              </div>
+            </div>
+
+            <div class="ap-block ap-signal">
+              <div class="ap-block-label"><span class="ap-block-label-icon">!</span>The Signal</div>
+              <p class="ap-block-body">
+                The plan output says <em>"ETA 3 days, touches 4 modules, needs UI mockups and DB
+                changes — recommend escalating to /feature-plan."</em> The developer ignores the
+                scope check and starts coding anyway.
+              </p>
+            </div>
+
+            <div class="ap-block ap-why">
+              <div class="ap-block-label"><span class="ap-block-label-icon">?</span>Why It's Wrong</div>
+              <p class="ap-block-body">
+                <code>/quick-plan</code> can't capture the dependencies, risks, error states, and visual
+                design needed for substantial work. The PR will exceed scope, miss UI states, or land
+                without the migration plan. <strong>The scope check exists precisely to catch this.</strong>
+              </p>
+            </div>
+
+            <div class="ap-block ap-instead">
+              <div class="ap-block-label"><span class="ap-block-label-icon">✓</span>What We Do Instead</div>
+              <p class="ap-block-body">
+                When <code>/quick-plan</code> flags XL scope, accept it and run
+                <code>/feature-plan</code> instead. Yes, it costs another 5 minutes. It will save
+                you a day. The escalation isn't a failure — it's the system working.
+              </p>
+            </div>
+
+            <div class="ap-consequence">
+              <div class="ap-consequence-label">The Consequence</div>
+              <div class="ap-consequence-body">
+                Feature ships with missing UI states. Design rework adds two days. Reviewer asks
+                <strong>"where's the migration plan?"</strong> — and there isn't one, because the
+                quick-plan didn't surface it.
+              </div>
+            </div>
+
+            <div class="ap-card-meta">
+              <div class="ap-card-meta-item">
+                <strong>Principle violated:</strong>
+                <span class="ap-card-meta-pill ap-card-meta-pill-principle">#1 Plan Before Code</span>
+              </div>
+              <div class="ap-card-meta-item">
+                <strong>Skill that prevents it:</strong>
+                <span class="ap-card-meta-pill">/feature-plan</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- AP #04 -->
+          <article class="ap-card">
+            <span class="ap-card-x">❌</span>
+            <div class="ap-card-header">
+              <div class="ap-card-number">04</div>
+              <div class="ap-card-tagrow">
+                <span class="ap-card-cat">Planning</span>
+                <div class="ap-card-statement">Planning, then coding something different from the plan.</div>
+              </div>
+            </div>
+
+            <div class="ap-block ap-signal">
+              <div class="ap-block-label"><span class="ap-block-label-icon">!</span>The Signal</div>
+              <p class="ap-block-body">
+                The plan says <em>"5 steps, 3 files modified."</em> The PR diff touches 12 files and
+                adds 3 features the plan didn't mention. The plan output sits in the PR description
+                like a fossil from a different project.
+              </p>
+            </div>
+
+            <div class="ap-block ap-why">
+              <div class="ap-block-label"><span class="ap-block-label-icon">?</span>Why It's Wrong</div>
+              <p class="ap-block-body">
+                The plan is the contract — with yourself, with the reviewer, with the team. Coding
+                different from the plan <strong>defeats the planning step entirely</strong>. The
+                reviewer can no longer ask "does the diff match the plan?" because the answer is
+                obviously no, and that question was the cheapest review tool you had.
+              </p>
+            </div>
+
+            <div class="ap-block ap-instead">
+              <div class="ap-block-label"><span class="ap-block-label-icon">✓</span>What We Do Instead</div>
+              <p class="ap-block-body">
+                If you discover the plan is wrong mid-execution, <strong>STOP</strong>. Re-run
+                <code>/quick-plan</code> with the new information. Update the PR description with the
+                revised plan. <em>Don't silently expand scope.</em> The five minutes it takes to
+                re-plan is the cheapest part of the work you're already mid-flight on.
+              </p>
+            </div>
+
+            <div class="ap-consequence">
+              <div class="ap-consequence-label">The Consequence</div>
+              <div class="ap-consequence-body">
+                Reviewer rejects the PR with: <strong>"Diff doesn't match the plan. Re-plan or
+                split."</strong> Whatever momentum you had is gone — and the fix is the same five
+                minutes of re-planning you should have done in the first place.
+              </div>
+            </div>
+
+            <div class="ap-card-meta">
+              <div class="ap-card-meta-item">
+                <strong>Principle violated:</strong>
+                <span class="ap-card-meta-pill ap-card-meta-pill-principle">#1 Plan Before Code</span>
+              </div>
+              <div class="ap-card-meta-item">
+                <strong>Skill that prevents it:</strong>
+                <span class="ap-card-meta-pill">/quick-plan</span>
+                <span class="ap-card-meta-pill">/quick-work</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- AP #05 -->
+          <article class="ap-card">
+            <span class="ap-card-x">❌</span>
+            <div class="ap-card-header">
+              <div class="ap-card-number">05</div>
+              <div class="ap-card-tagrow">
+                <span class="ap-card-cat">Planning</span>
+                <div class="ap-card-statement">Accepting an AI-generated plan without skim-reading.</div>
+              </div>
+            </div>
+
+            <div class="ap-block ap-signal">
+              <div class="ap-block-label"><span class="ap-block-label-icon">!</span>The Signal</div>
+              <p class="ap-block-body">
+                <code>/quick-plan</code> outputs a plan with an A/B confirmation prompt. The developer
+                hits <strong>B</strong> within two seconds — no time to have read anything. The
+                terminal scrolls and coding begins.
+              </p>
+            </div>
+
+            <div class="ap-block ap-why">
+              <div class="ap-block-label"><span class="ap-block-label-icon">?</span>Why It's Wrong</div>
+              <p class="ap-block-body">
+                The plan may be wrong. The scope may be off. The file list may be incomplete. The
+                AI may have hallucinated a step. <strong>Thirty seconds of reading prevents thirty
+                minutes of rework.</strong> An unread plan is no better than no plan — worse,
+                because you've now also wasted the plan's tokens.
+              </p>
+            </div>
+
+            <div class="ap-block ap-instead">
+              <div class="ap-block-label"><span class="ap-block-label-icon">✓</span>What We Do Instead</div>
+              <p class="ap-block-body">
+                Always skim-read the plan before accepting. Check: does the file list match what you
+                expect? Are the steps in a sensible order? Did it miss an obvious risk? If it's wrong,
+                edit it inline or re-run with more context. <strong>The verification IS the value.</strong>
+              </p>
+            </div>
+
+            <div class="ap-consequence">
+              <div class="ap-consequence-label">The Consequence</div>
+              <div class="ap-consequence-body">
+                Half-completed work. Missed acceptance criteria. Reviewer asks
+                <strong>"did you read the plan you generated?"</strong> — and the honest answer is no.
+              </div>
+            </div>
+
+            <div class="ap-card-meta">
+              <div class="ap-card-meta-item">
+                <strong>Principle violated:</strong>
+                <span class="ap-card-meta-pill ap-card-meta-pill-principle">#5 Verify the AI</span>
+              </div>
+              <div class="ap-card-meta-item">
+                <strong>Skill that prevents it:</strong>
+                <span class="ap-card-meta-pill">/quick-plan</span>
+              </div>
+            </div>
+          </article>
+
+        </div>
+
+        <!-- ─────────────────────────────────────
+             CATEGORY: AI USAGE
+             ───────────────────────────────────── -->
+        <div class="ap-category" id="ai-usage">
+          <div class="ap-category-header">
+            <div class="ap-category-icon">🤖</div>
+            <div class="ap-category-meta">
+              <div class="ap-category-eyebrow">Category 2 of 7</div>
+              <div class="ap-category-title">AI Usage</div>
+            </div>
+            <div class="ap-category-count">5 anti-patterns</div>
+          </div>
+
+          <!-- AP #06 -->
+          <article class="ap-card">
+            <span class="ap-card-x">❌</span>
+            <div class="ap-card-header">
+              <div class="ap-card-number">06</div>
+              <div class="ap-card-tagrow">
+                <span class="ap-card-cat">AI Usage</span>
+                <div class="ap-card-statement">Using raw ChatGPT or Cursor for production code on regulated systems.</div>
+              </div>
+            </div>
+
+            <div class="ap-block ap-signal">
+              <div class="ap-block-label"><span class="ap-block-label-icon">!</span>The Signal</div>
+              <p class="ap-block-body">
+                Developer pastes a prompt into ChatGPT, copies the response into an auth flow, ships it.
+                Or worse: copies generated code from a Cursor side-chat into a payments module without
+                running any of our skills against it.
+              </p>
+            </div>
+
+            <div class="ap-block ap-why">
+              <div class="ap-block-label"><span class="ap-block-label-icon">?</span>Why It's Wrong</div>
+              <p class="ap-block-body">
+                Raw AI doesn't enforce our 7 principles. It doesn't carry our project conventions. It
+                doesn't run the scope guards. Output is <strong>inconsistent across developers</strong> —
+                which means consistency is gone, which means our Principle 4 is gone, which means the
+                whole system breaks down. Skills exist to make every developer ship the same way.
+              </p>
+            </div>
+
+            <div class="ap-block ap-instead">
+              <div class="ap-block-label"><span class="ap-block-label-icon">✓</span>What We Do Instead</div>
+              <p class="ap-block-body">
+                Skills only for regulated, production-bound, or compliance-sensitive code. Raw AI is fine
+                for rubber-ducking, learning a new library, or non-production prototypes — but the moment
+                code is headed for <code>main</code>, it goes through the skill pipeline.
+              </p>
+            </div>
+
+            <div class="ap-consequence">
+              <div class="ap-consequence-label">The Consequence</div>
+              <div class="ap-consequence-body">
+                PR rejected at review. Re-run via the appropriate skill (at minimum <code>/sec-audit</code>
+                if it touches regulated paths). <strong>Repeated offenses escalate to a written conversation
+                with the Tech Lead</strong> about whether the developer understands the principles.
+              </div>
+            </div>
+
+            <div class="ap-card-meta">
+              <div class="ap-card-meta-item">
+                <strong>Principle violated:</strong>
+                <span class="ap-card-meta-pill ap-card-meta-pill-principle">#2 Skills are the OS</span>
+              </div>
+              <div class="ap-card-meta-item">
+                <strong>Skill that prevents it:</strong>
+                <span class="ap-card-meta-pill">/sec-audit</span>
+                <span class="ap-card-meta-pill">/code-review</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- AP #07 -->
+          <article class="ap-card">
+            <span class="ap-card-x">❌</span>
+            <div class="ap-card-header">
+              <div class="ap-card-number">07</div>
+              <div class="ap-card-tagrow">
+                <span class="ap-card-cat">AI Usage</span>
+                <div class="ap-card-statement">Trusting AI-generated code without running it.</div>
+              </div>
+            </div>
+
+            <div class="ap-block ap-signal">
+              <div class="ap-block-label"><span class="ap-block-label-icon">!</span>The Signal</div>
+              <p class="ap-block-body">
+                PR description: <em>"it compiles"</em> or <em>"looks right to me."</em> Not <em>"I ran
+                the tests, clicked the button, checked the DB, verified the response."</em> The
+                developer trusted the skill output and pushed.
+              </p>
+            </div>
+
+            <div class="ap-block ap-why">
+              <div class="ap-block-label"><span class="ap-block-label-icon">?</span>Why It's Wrong</div>
+              <p class="ap-block-body">
+                AI hallucinates. The skill minimizes the hallucination rate; <strong>verification
+                eliminates the rest</strong>. Skipping verification is how hallucinated code reaches
+                production. We have had exactly one incident attributable to this in the past year —
+                and that one cost us a weekend of incident response and a public apology.
+              </p>
+            </div>
+
+            <div class="ap-block ap-instead">
+              <div class="ap-block-label"><span class="ap-block-label-icon">✓</span>What We Do Instead</div>
+              <p class="ap-block-body">
+                Run the tests. Click the button. Check the database. <strong>Every acceptance criterion
+                gets verified before merge</strong> — not "I think it works," but "I have evidence it
+                works." Evidence goes in the PR description.
+              </p>
+            </div>
+
+            <div class="ap-consequence">
+              <div class="ap-consequence-label">The Consequence</div>
+              <div class="ap-consequence-body">
+                Production incident traceable to skipped verification. <strong>We had exactly one. Never
+                again.</strong> The next one is no longer treated as an honest mistake — it's a process
+                violation.
+              </div>
+            </div>
+
+            <div class="ap-card-meta">
+              <div class="ap-card-meta-item">
+                <strong>Principle violated:</strong>
+                <span class="ap-card-meta-pill ap-card-meta-pill-principle">#5 Verify the AI</span>
+              </div>
+              <div class="ap-card-meta-item">
+                <strong>Skill that prevents it:</strong>
+                <span class="ap-card-meta-pill">/code-review</span>
+                <span class="ap-card-meta-pill">/test-gen</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- AP #08 -->
+          <article class="ap-card">
+            <span class="ap-card-x">❌</span>
+            <div class="ap-card-header">
+              <div class="ap-card-number">08</div>
+              <div class="ap-card-tagrow">
+                <span class="ap-card-cat">AI Usage</span>
+                <div class="ap-card-statement">Treating AI-written tests as adequate without checking they fail on the bug.</div>
+              </div>
+            </div>
+
+            <div class="ap-block ap-signal">
+              <div class="ap-block-label"><span class="ap-block-label-icon">!</span>The Signal</div>
+              <p class="ap-block-body">
+                Bug fix PR. Tests pass on green. Developer didn't run the tests against the un-fixed
+                code. The PR description says <em>"added tests"</em> — but no evidence that the tests
+                would catch the original defect.
+              </p>
+            </div>
+
+            <div class="ap-block ap-why">
+              <div class="ap-block-label"><span class="ap-block-label-icon">?</span>Why It's Wrong</div>
+              <p class="ap-block-body">
+                A test that passes both before and after the fix is meaningless — it proves nothing
+                about the bug. AI is especially prone to writing tests that <em>look</em> right but
+                pass against any implementation. <strong>The whole point of a regression test is that
+                it would have caught the original bug.</strong>
+              </p>
+            </div>
+
+            <div class="ap-block ap-instead">
+              <div class="ap-block-label"><span class="ap-block-label-icon">✓</span>What We Do Instead</div>
+              <p class="ap-block-body">
+                For bug fixes: <strong>verify the test fails on the broken code before applying the
+                fix.</strong> Then apply the fix, watch it go green. Include both observations in the
+                PR description: "Test failed at SHA X (pre-fix), passes at SHA Y (post-fix)."
+              </p>
+            </div>
+
+            <div class="ap-consequence">
+              <div class="ap-consequence-label">The Consequence</div>
+              <div class="ap-consequence-body">
+                Bug reappears in production despite <em>"fixed and tested."</em> The fastest way to
+                <strong>destroy the team's trust in the test suite</strong> is to add a regression
+                test that doesn't catch the regression.
+              </div>
+            </div>
+
+            <div class="ap-card-meta">
+              <div class="ap-card-meta-item">
+                <strong>Principle violated:</strong>
+                <span class="ap-card-meta-pill ap-card-meta-pill-principle">#5 Verify the AI</span>
+              </div>
+              <div class="ap-card-meta-item">
+                <strong>Skill that prevents it:</strong>
+                <span class="ap-card-meta-pill">/test-gen</span>
+                <span class="ap-card-meta-pill">/find-fix</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- AP #09 -->
+          <article class="ap-card">
+            <span class="ap-card-x">❌</span>
+            <div class="ap-card-header">
+              <div class="ap-card-number">09</div>
+              <div class="ap-card-tagrow">
+                <span class="ap-card-cat">AI Usage</span>
+                <div class="ap-card-statement">Using AI as the documentation source for facts we can verify.</div>
+              </div>
+            </div>
+
+            <div class="ap-block ap-signal">
+              <div class="ap-block-label"><span class="ap-block-label-icon">!</span>The Signal</div>
+              <p class="ap-block-body">
+                <em>"ChatGPT says React 19 has X API..."</em> Or: <em>"Claude told me the Stripe webhook
+                signature is verified using SHA-512..."</em> The developer is treating AI output as
+                a primary source for verifiable facts.
+              </p>
+            </div>
+
+            <div class="ap-block ap-why">
+              <div class="ap-block-label"><span class="ap-block-label-icon">?</span>Why It's Wrong</div>
+              <p class="ap-block-body">
+                AI hallucinates docs. It will confidently invent API signatures, deprecated methods,
+                config flags that don't exist, and version numbers that have never shipped. Verifiable
+                facts — <strong>API signatures, schemas, syntax, version numbers</strong> — should be
+                looked up in primary source, not asked of a language model.
+              </p>
+            </div>
+
+            <div class="ap-block ap-instead">
+              <div class="ap-block-label"><span class="ap-block-label-icon">✓</span>What We Do Instead</div>
+              <p class="ap-block-body">
+                Use AI to <strong>navigate</strong> ("find me the docs for X") or to <strong>summarize
+                after you've read primary source</strong> ("summarize what I just read"). Never use it
+                as the source of truth for API signatures, library behavior, or schemas. Five seconds
+                in the actual docs beats a confident hallucination every time.
+              </p>
+            </div>
+
+            <div class="ap-consequence">
+              <div class="ap-consequence-label">The Consequence</div>
+              <div class="ap-consequence-body">
+                Wrong API call ships. Bug surfaces in production. Root-cause analysis traces it to a
+                hallucinated function signature. <strong>The fix is documentation discipline, not a
+                better prompt.</strong>
+              </div>
+            </div>
+
+            <div class="ap-card-meta">
+              <div class="ap-card-meta-item">
+                <strong>Principle violated:</strong>
+                <span class="ap-card-meta-pill ap-card-meta-pill-principle">#5 Verify the AI</span>
+              </div>
+              <div class="ap-card-meta-item">
+                <strong>Skill that prevents it:</strong>
+                <span class="ap-card-meta-pill">/explain</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- AP #10 -->
+          <article class="ap-card">
+            <span class="ap-card-x">❌</span>
+            <div class="ap-card-header">
+              <div class="ap-card-number">10</div>
+              <div class="ap-card-tagrow">
+                <span class="ap-card-cat">AI Usage</span>
+                <div class="ap-card-statement">Pasting an AI-generated migration without reading line-by-line.</div>
+              </div>
+            </div>
+
+            <div class="ap-block ap-signal">
+              <div class="ap-block-label"><span class="ap-block-label-icon">!</span>The Signal</div>
+              <p class="ap-block-body">
+                <em>"It looks like the migration I described."</em> The developer skimmed the
+                SQL, didn't read each statement, didn't trace the rollback path. The migration is
+                in a PR with a one-line description.
+              </p>
+            </div>
+
+            <div class="ap-block ap-why">
+              <div class="ap-block-label"><span class="ap-block-label-icon">?</span>Why It's Wrong</div>
+              <p class="ap-block-body">
+                AI-generated SQL has — in real, documented incidents at this firm and others —
+                <strong>hallucinated migrations into deleting columns, dropping tables, or running
+                irreversible operations</strong>. The model isn't malicious; it's just confidently
+                wrong about a destructive operation. The blast radius of a bad migration is the entire
+                production database.
+              </p>
+            </div>
+
+            <div class="ap-block ap-instead">
+              <div class="ap-block-label"><span class="ap-block-label-icon">✓</span>What We Do Instead</div>
+              <p class="ap-block-body">
+                Every migration is <strong>line-by-line reviewed</strong> by the author before submission.
+                Run on local DB first. Run on staging with production-like data second. Verify that
+                rollback is possible. <code>/db-design</code> and <code>/migration-plan</code> exist
+                specifically for this — they catch the destructive patterns the eye misses.
+              </p>
+            </div>
+
+            <div class="ap-consequence">
+              <div class="ap-consequence-label">The Consequence</div>
+              <div class="ap-consequence-body">
+                <strong>This is the one production incident we've had.</strong> Not the AI's fault —
+                the developer's. The migration dropped a column the model "thought" was unused.
+                Recovery cost us four hours of downtime and a credit on three client contracts. The
+                fix isn't a better model. The fix is reading every line.
+              </div>
+            </div>
+
+            <div class="ap-card-meta">
+              <div class="ap-card-meta-item">
+                <strong>Principle violated:</strong>
+                <span class="ap-card-meta-pill ap-card-meta-pill-principle">#5 Verify the AI</span>
+              </div>
+              <div class="ap-card-meta-item">
+                <strong>Skill that prevents it:</strong>
+                <span class="ap-card-meta-pill">/db-design</span>
+                <span class="ap-card-meta-pill">/migration-plan</span>
+              </div>
+            </div>
+          </article>
+
+        </div>
+
+        <!-- ─────────────────────────────────────
+             CATEGORY: CODE & REVIEW
+             ───────────────────────────────────── -->
+        <div class="ap-category" id="code-review">
+          <div class="ap-category-header">
+            <div class="ap-category-icon">🔍</div>
+            <div class="ap-category-meta">
+              <div class="ap-category-eyebrow">Category 3 of 7</div>
+              <div class="ap-category-title">Code &amp; Review</div>
+            </div>
+            <div class="ap-category-count">5 anti-patterns</div>
+          </div>
+
+          <!-- AP #11 -->
+          <article class="ap-card">
+            <span class="ap-card-x">❌</span>
+            <div class="ap-card-header">
+              <div class="ap-card-number">11</div>
+              <div class="ap-card-tagrow">
+                <span class="ap-card-cat">Code &amp; Review</span>
+                <div class="ap-card-statement">Pushing a PR without running /code-review.</div>
+              </div>
+            </div>
+
+            <div class="ap-block ap-signal">
+              <div class="ap-block-label"><span class="ap-block-label-icon">!</span>The Signal</div>
+              <p class="ap-block-body">
+                PR opens with no <code>/code-review</code> output in the description. No mention of
+                what the skill said. The developer pushed straight from "code complete" to "ready
+                for review."
+              </p>
+            </div>
+
+            <div class="ap-block ap-why">
+              <div class="ap-block-label"><span class="ap-block-label-icon">?</span>Why It's Wrong</div>
+              <p class="ap-block-body">
+                <code>/code-review</code> catches the 80% of issues a human reviewer would catch —
+                but in seconds, not hours. <strong>Skipping it wastes the reviewer's time on issues
+                a robot could have flagged</strong>, and it lengthens review cycles for every PR
+                across the team. The skill exists to make human review focus on architecture and
+                judgment, not formatting and unused imports.
+              </p>
+            </div>
+
+            <div class="ap-block ap-instead">
+              <div class="ap-block-label"><span class="ap-block-label-icon">✓</span>What We Do Instead</div>
+              <p class="ap-block-body">
+                Run <code>/code-review</code> on every PR. Include its output — verbatim — in the PR
+                description. The reviewer reads the skill output first, then the diff. <strong>The
+                skill is a co-reviewer, not a substitute.</strong>
+              </p>
+            </div>
+
+            <div class="ap-consequence">
+              <div class="ap-consequence-label">The Consequence</div>
+              <div class="ap-consequence-body">
+                PR returned at first review with: <strong>"Please run /code-review and paste the
+                output."</strong> This is the most common anti-pattern we see — it happens weekly,
+                and it shouldn't.
+              </div>
+            </div>
+
+            <div class="ap-card-meta">
+              <div class="ap-card-meta-item">
+                <strong>Principle violated:</strong>
+                <span class="ap-card-meta-pill ap-card-meta-pill-principle">#2 Skills are the OS</span>
+              </div>
+              <div class="ap-card-meta-item">
+                <strong>Skill that prevents it:</strong>
+                <span class="ap-card-meta-pill">/code-review</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- AP #12 -->
+          <article class="ap-card">
+            <span class="ap-card-x">❌</span>
+            <div class="ap-card-header">
+              <div class="ap-card-number">12</div>
+              <div class="ap-card-tagrow">
+                <span class="ap-card-cat">Code &amp; Review</span>
+                <div class="ap-card-statement">Treating /code-review warnings as "I'll fix later."</div>
+              </div>
+            </div>
+
+            <div class="ap-block ap-signal">
+              <div class="ap-block-label"><span class="ap-block-label-icon">!</span>The Signal</div>
+              <p class="ap-block-body">
+                PR description: <em>"/code-review flagged X but I'll address in a follow-up PR."</em>
+                No follow-up PR is opened. Six months later, X is still there.
+              </p>
+            </div>
+
+            <div class="ap-block ap-why">
+              <div class="ap-block-label"><span class="ap-block-label-icon">?</span>Why It's Wrong</div>
+              <p class="ap-block-body">
+                Follow-up PRs are <strong>5x less likely to land than blocking issues fixed in the
+                originating PR</strong>. The context is hottest right now — once you context-switch,
+                the cost of returning is high enough that "later" usually becomes "never." Defects
+                compound. Six months of "later" is how a codebase rots.
+              </p>
+            </div>
+
+            <div class="ap-block ap-instead">
+              <div class="ap-block-label"><span class="ap-block-label-icon">✓</span>What We Do Instead</div>
+              <p class="ap-block-body">
+                Either fix the warning in this PR, or <strong>explicitly document why it doesn't
+                apply</strong> — with reviewer sign-off and a justification longer than one sentence.
+                "I'll fix later" is not a justification.
+              </p>
+            </div>
+
+            <div class="ap-consequence">
+              <div class="ap-consequence-label">The Consequence</div>
+              <div class="ap-consequence-body">
+                Tech debt accrues silently. <strong>Six months later, the warning is still there,</strong>
+                now buried under newer code that depends on the original mistake. The cost of fixing it
+                has 10x'd.
+              </div>
+            </div>
+
+            <div class="ap-card-meta">
+              <div class="ap-card-meta-item">
+                <strong>Principle violated:</strong>
+                <span class="ap-card-meta-pill ap-card-meta-pill-principle">#7 Standards have teeth</span>
+              </div>
+              <div class="ap-card-meta-item">
+                <strong>Skill that prevents it:</strong>
+                <span class="ap-card-meta-pill">/code-review</span>
+                <span class="ap-card-meta-pill">/tech-debt-audit</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- AP #13 -->
+          <article class="ap-card">
+            <span class="ap-card-x">❌</span>
+            <div class="ap-card-header">
+              <div class="ap-card-number">13</div>
+              <div class="ap-card-tagrow">
+                <span class="ap-card-cat">Code &amp; Review</span>
+                <div class="ap-card-statement">Refactoring adjacent code in the same PR ("while I'm in here").</div>
+              </div>
+            </div>
+
+            <div class="ap-block ap-signal">
+              <div class="ap-block-label"><span class="ap-block-label-icon">!</span>The Signal</div>
+              <p class="ap-block-body">
+                PR diff includes 200 lines of unrelated cleanup alongside the actual feature. PR title:
+                <em>"Add feature X"</em>. PR description: <em>"Also cleaned up some old helpers while
+                I was in here."</em>
+              </p>
+            </div>
+
+            <div class="ap-block ap-why">
+              <div class="ap-block-label"><span class="ap-block-label-icon">?</span>Why It's Wrong</div>
+              <p class="ap-block-body">
+                The reviewer can't separate intentional change from cleanup. PR takes 4x longer to
+                review. <strong>Increased blast radius if rolled back</strong> — you can't revert the
+                feature without also reverting the cleanup, and vice versa. The temptation is real;
+                the discipline is to resist it.
+              </p>
+            </div>
+
+            <div class="ap-block ap-instead">
+              <div class="ap-block-label"><span class="ap-block-label-icon">✓</span>What We Do Instead</div>
+              <p class="ap-block-body">
+                Adjacent cleanup goes in a <strong>separate PR</strong>. One PR = one purpose. If
+                the cleanup is genuinely required for the feature to work, mention it in the plan
+                first, so the reviewer expects it. <code>/pr-strategy</code> teaches the splitting
+                discipline.
+              </p>
+            </div>
+
+            <div class="ap-consequence">
+              <div class="ap-consequence-label">The Consequence</div>
+              <div class="ap-consequence-body">
+                PR returned with: <strong>"Split into two — the feature change and the cleanup —
+                so each can be reviewed and reverted independently."</strong>
+              </div>
+            </div>
+
+            <div class="ap-card-meta">
+              <div class="ap-card-meta-item">
+                <strong>Principle violated:</strong>
+                <span class="ap-card-meta-pill ap-card-meta-pill-principle">#4 Consistency</span>
+              </div>
+              <div class="ap-card-meta-item">
+                <strong>Skill that prevents it:</strong>
+                <span class="ap-card-meta-pill">/code-review</span>
+                <span class="ap-card-meta-pill">/pr-strategy</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- AP #14 -->
+          <article class="ap-card">
+            <span class="ap-card-x">❌</span>
+            <div class="ap-card-header">
+              <div class="ap-card-number">14</div>
+              <div class="ap-card-tagrow">
+                <span class="ap-card-cat">Code &amp; Review</span>
+                <div class="ap-card-statement">PR description: "fixes bug".</div>
+              </div>
+            </div>
+
+            <div class="ap-block ap-signal">
+              <div class="ap-block-label"><span class="ap-block-label-icon">!</span>The Signal</div>
+              <p class="ap-block-body">
+                The PR description field has fewer than 20 words. No mention of what changed, why, or
+                how it was verified. The body might be empty entirely. The commit message reads
+                <em>"fix"</em> and the diff is 400 lines.
+              </p>
+            </div>
+
+            <div class="ap-block ap-why">
+              <div class="ap-block-label"><span class="ap-block-label-icon">?</span>Why It's Wrong</div>
+              <p class="ap-block-body">
+                Future engineers — <strong>including you in three months</strong> — can't understand
+                the change. Bisecting a regression becomes guessing. Onboarding a new hire becomes
+                impossible. The PR description is for the team's future self, not for the reviewer
+                today.
+              </p>
+            </div>
+
+            <div class="ap-block ap-instead">
+              <div class="ap-block-label"><span class="ap-block-label-icon">✓</span>What We Do Instead</div>
+              <p class="ap-block-body">
+                Every PR description includes: <strong>what changed, why, how to verify, and the
+                skill outputs</strong> (<code>/code-review</code>, <code>/sec-audit</code>, etc.).
+                <code>/smart-commit</code> generates structured PR descriptions automatically — there
+                is no excuse for an empty body.
+              </p>
+            </div>
+
+            <div class="ap-consequence">
+              <div class="ap-consequence-label">The Consequence</div>
+              <div class="ap-consequence-body">
+                PR returned at first review with: <strong>"Please write a real description. Use
+                /smart-commit if you need help."</strong>
+              </div>
+            </div>
+
+            <div class="ap-card-meta">
+              <div class="ap-card-meta-item">
+                <strong>Principle violated:</strong>
+                <span class="ap-card-meta-pill ap-card-meta-pill-principle">#6 Communication is Engineering</span>
+              </div>
+              <div class="ap-card-meta-item">
+                <strong>Skill that prevents it:</strong>
+                <span class="ap-card-meta-pill">/smart-commit</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- AP #15 -->
+          <article class="ap-card">
+            <span class="ap-card-x">❌</span>
+            <div class="ap-card-header">
+              <div class="ap-card-number">15</div>
+              <div class="ap-card-tagrow">
+                <span class="ap-card-cat">Code &amp; Review</span>
+                <div class="ap-card-statement">Skipping /sec-audit on auth, payments, or PII code.</div>
+              </div>
+            </div>
+
+            <div class="ap-block ap-signal">
+              <div class="ap-block-label"><span class="ap-block-label-icon">!</span>The Signal</div>
+              <p class="ap-block-body">
+                PR touches an auth flow, a payment processor, or a PII-handling path. No
+                <code>/sec-audit</code> output in the description. Reviewer has to ask: <em>"did you
+                run sec-audit on this?"</em>
+              </p>
+            </div>
+
+            <div class="ap-block ap-why">
+              <div class="ap-block-label"><span class="ap-block-label-icon">?</span>Why It's Wrong</div>
+              <p class="ap-block-body">
+                These code paths are where <strong>breaches happen</strong>. The cost of a missed
+                vulnerability is months of incident response, regulatory exposure, lost client trust,
+                and in regulated industries, real fines. <code>/sec-audit</code> catches the standard
+                OWASP-class issues in under a minute. Skipping it is unforgivable on sensitive paths.
+              </p>
+            </div>
+
+            <div class="ap-block ap-instead">
+              <div class="ap-block-label"><span class="ap-block-label-icon">✓</span>What We Do Instead</div>
+              <p class="ap-block-body">
+                <code>/sec-audit</code> is <strong>MANDATORY</strong> on any auth, payments, or PII
+                code. Output goes in the PR description. If the skill flags anything, it gets
+                resolved or explicitly waived (with Tech Lead sign-off) before merge.
+              </p>
+            </div>
+
+            <div class="ap-consequence">
+              <div class="ap-consequence-label">The Consequence</div>
+              <div class="ap-consequence-body">
+                PR blocked at <strong>CI tier-2 gate (automated)</strong> — the pipeline detects
+                touched-sensitive-paths and refuses merge without sec-audit output. Re-submit with
+                the audit attached. This is non-negotiable.
+              </div>
+            </div>
+
+            <div class="ap-card-meta">
+              <div class="ap-card-meta-item">
+                <strong>Principle violated:</strong>
+                <span class="ap-card-meta-pill ap-card-meta-pill-principle">#2 Skills are the OS</span>
+              </div>
+              <div class="ap-card-meta-item">
+                <strong>Skill that prevents it:</strong>
+                <span class="ap-card-meta-pill">/sec-audit</span>
+              </div>
+            </div>
+          </article>
+
+        </div>
+
+        <!-- ─────────────────────────────────────
+             CATEGORY: COMMUNICATION
+             ───────────────────────────────────── -->
+        <div class="ap-category" id="communication">
+          <div class="ap-category-header">
+            <div class="ap-category-icon">💬</div>
+            <div class="ap-category-meta">
+              <div class="ap-category-eyebrow">Category 4 of 7</div>
+              <div class="ap-category-title">Communication</div>
+            </div>
+            <div class="ap-category-count">5 anti-patterns</div>
+          </div>
+
+          <!-- AP #16 -->
+          <article class="ap-card">
+            <span class="ap-card-x">❌</span>
+            <div class="ap-card-header">
+              <div class="ap-card-number">16</div>
+              <div class="ap-card-tagrow">
+                <span class="ap-card-cat">Communication</span>
+                <div class="ap-card-statement">Apologizing to a client before diagnosing the issue.</div>
+              </div>
+            </div>
+
+            <div class="ap-block ap-signal">
+              <div class="ap-block-label"><span class="ap-block-label-icon">!</span>The Signal</div>
+              <p class="ap-block-body">
+                Client emails: <em>"the service feels slow today."</em> Developer's reply, within
+                two minutes: <em>"So sorry for the issue! We're looking into it right now."</em>
+                No diagnosis yet. No evidence anything is wrong on our side.
+              </p>
+            </div>
+
+            <div class="ap-block ap-why">
+              <div class="ap-block-label"><span class="ap-block-label-icon">?</span>Why It's Wrong</div>
+              <p class="ap-block-body">
+                <strong>You don't know yet if there IS an issue on your end.</strong> The slowness
+                could be the client's local network. Premature accountability trains the client to
+                expect apologies — then to expect blame-acceptance — then to expect compensation.
+                You're setting the bar for every future incident, and you're setting it before you
+                even know what happened.
+              </p>
+            </div>
+
+            <div class="ap-block ap-instead">
+              <div class="ap-block-label"><span class="ap-block-label-icon">✓</span>What We Do Instead</div>
+              <p class="ap-block-body">
+                <em>"Looking into it; will report back within 30 minutes."</em> Accountability comes
+                <strong>after</strong> diagnosis. If it turns out to be our issue, then we own it
+                clearly. If it turns out not to be, we don't — and the client respects the
+                discipline.
+              </p>
+            </div>
+
+            <div class="ap-consequence">
+              <div class="ap-consequence-label">The Consequence</div>
+              <div class="ap-consequence-body">
+                Long-term client relationship erodes. <strong>You become the team that's always
+                apologizing</strong> — and apologetic teams don't get the next contract. Clients
+                hire confident engineering, not contrite engineering.
+              </div>
+            </div>
+
+            <div class="ap-card-meta">
+              <div class="ap-card-meta-item">
+                <strong>Principle violated:</strong>
+                <span class="ap-card-meta-pill ap-card-meta-pill-principle">#6 Communication is Engineering</span>
+              </div>
+              <div class="ap-card-meta-item">
+                <strong>Skill that prevents it:</strong>
+                <span class="ap-card-meta-pill">/message-craft</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- AP #17 -->
+          <article class="ap-card">
+            <span class="ap-card-x">❌</span>
+            <div class="ap-card-header">
+              <div class="ap-card-number">17</div>
+              <div class="ap-card-tagrow">
+                <span class="ap-card-cat">Communication</span>
+                <div class="ap-card-statement">Sending a client email without /message-craft review.</div>
+              </div>
+            </div>
+
+            <div class="ap-block ap-signal">
+              <div class="ap-block-label"><span class="ap-block-label-icon">!</span>The Signal</div>
+              <p class="ap-block-body">
+                Direct client-facing email goes out with hedging language, premature apology, a buried
+                headline, or a permission-seeking close. The developer wrote it and sent it — no
+                <code>/message-craft</code> pass. <em>"It was just a quick reply."</em>
+              </p>
+            </div>
+
+            <div class="ap-block ap-why">
+              <div class="ap-block-label"><span class="ap-block-label-icon">?</span>Why It's Wrong</div>
+              <p class="ap-block-body">
+                Client trust is <strong>more correlated with comms quality than with actual
+                MTTR</strong>. We have data on this. A great fix delivered with a bad email is rated
+                lower than a slow fix delivered with a great email. The communication is part of the
+                deliverable.
+              </p>
+            </div>
+
+            <div class="ap-block ap-instead">
+              <div class="ap-block-label"><span class="ap-block-label-icon">✓</span>What We Do Instead</div>
+              <p class="ap-block-body">
+                <code>/message-craft</code> on every client-facing message — even <em>"quick
+                replies."</em> Especially quick replies, because that's where the bad habits show up.
+                The skill takes 90 seconds. The bad email costs 90 days of trust.
+              </p>
+            </div>
+
+            <div class="ap-consequence">
+              <div class="ap-consequence-label">The Consequence</div>
+              <div class="ap-consequence-body">
+                Account-management escalation. Trust score drops. <strong>The Account Lead pulls
+                client comms out of engineering's hands</strong> — which is exactly the autonomy
+                we don't want to lose.
+              </div>
+            </div>
+
+            <div class="ap-card-meta">
+              <div class="ap-card-meta-item">
+                <strong>Principle violated:</strong>
+                <span class="ap-card-meta-pill ap-card-meta-pill-principle">#6 Communication is Engineering</span>
+              </div>
+              <div class="ap-card-meta-item">
+                <strong>Skill that prevents it:</strong>
+                <span class="ap-card-meta-pill">/message-craft</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- AP #18 -->
+          <article class="ap-card">
+            <span class="ap-card-x">❌</span>
+            <div class="ap-card-header">
+              <div class="ap-card-number">18</div>
+              <div class="ap-card-tagrow">
+                <span class="ap-card-cat">Communication</span>
+                <div class="ap-card-statement">Burying the headline in long context-dumps.</div>
+              </div>
+            </div>
+
+            <div class="ap-block ap-signal">
+              <div class="ap-block-label"><span class="ap-block-label-icon">!</span>The Signal</div>
+              <p class="ap-block-body">
+                First three paragraphs of an email describe <em>what the developer has been thinking</em>.
+                The actual update — <em>"the deploy is delayed by 24 hours"</em> — is sentence 14, after
+                three paragraphs of context, troubleshooting notes, and ideas-in-progress.
+              </p>
+            </div>
+
+            <div class="ap-block ap-why">
+              <div class="ap-block-label"><span class="ap-block-label-icon">?</span>Why It's Wrong</div>
+              <p class="ap-block-body">
+                Most readers stop at line two. Executives stop at line one. <strong>Your headline must
+                carry the message even if they read nothing else.</strong> Buried headlines aren't
+                thorough — they're disrespectful of the reader's time, and they hide the very
+                information you're being paid to deliver.
+              </p>
+            </div>
+
+            <div class="ap-block ap-instead">
+              <div class="ap-block-label"><span class="ap-block-label-icon">✓</span>What We Do Instead</div>
+              <p class="ap-block-body">
+                Headline first. Then context, if asked. <strong>BLUF — Bottom Line Up Front.</strong>
+                <code>/message-craft</code> enforces this structure: the first line is the takeaway,
+                everything else is support. If your reader stops at line one, they still got the
+                message.
+              </p>
+            </div>
+
+            <div class="ap-consequence">
+              <div class="ap-consequence-label">The Consequence</div>
+              <div class="ap-consequence-body">
+                Client misses the update entirely. <strong>Chases you the next day asking for status
+                that was already in the email</strong> — because they only read the first paragraph,
+                and the first paragraph wasn't the headline.
+              </div>
+            </div>
+
+            <div class="ap-card-meta">
+              <div class="ap-card-meta-item">
+                <strong>Principle violated:</strong>
+                <span class="ap-card-meta-pill ap-card-meta-pill-principle">#6 Communication is Engineering</span>
+              </div>
+              <div class="ap-card-meta-item">
+                <strong>Skill that prevents it:</strong>
+                <span class="ap-card-meta-pill">/message-craft</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- AP #19 -->
+          <article class="ap-card">
+            <span class="ap-card-x">❌</span>
+            <div class="ap-card-header">
+              <div class="ap-card-number">19</div>
+              <div class="ap-card-tagrow">
+                <span class="ap-card-cat">Communication</span>
+                <div class="ap-card-statement">Using hedging language in client comms.</div>
+              </div>
+            </div>
+
+            <div class="ap-block ap-signal">
+              <div class="ap-block-label"><span class="ap-block-label-icon">!</span>The Signal</div>
+              <p class="ap-block-body">
+                <em>"I think we can probably have a fix by tomorrow."</em> Or: <em>"This might be
+                related to..."</em> Or: <em>"It's possible that..."</em> Every sentence hedged with
+                "I think," "maybe," "probably," "kind of."
+              </p>
+            </div>
+
+            <div class="ap-block ap-why">
+              <div class="ap-block-label"><span class="ap-block-label-icon">?</span>Why It's Wrong</div>
+              <p class="ap-block-body">
+                Hedging <strong>undermines confidence</strong>. It reads as junior. Clients trust
+                leaders who name dates and stand by them. There is a difference between <em>"I
+                don't know yet, I'll have an answer by 5pm"</em> (confident uncertainty) and
+                <em>"I think probably maybe tomorrow"</em> (hedged uncertainty). One is leadership.
+                The other is not.
+              </p>
+            </div>
+
+            <div class="ap-block ap-instead">
+              <div class="ap-block-label"><span class="ap-block-label-icon">✓</span>What We Do Instead</div>
+              <p class="ap-block-body">
+                <em>"Engineering is on it. Deploy targeted for tomorrow EOD."</em> Set the timeline.
+                Own it. If you're not sure, name the next checkpoint: <em>"We'll have a confirmed
+                ETA by 3pm."</em> <code>/message-craft</code> flags hedging language automatically.
+              </p>
+            </div>
+
+            <div class="ap-consequence">
+              <div class="ap-consequence-label">The Consequence</div>
+              <div class="ap-consequence-body">
+                Client follows up the next day asking <strong>"is it actually fixed?"</strong> —
+                because you never said it would be. You said you thought it might be. Those are
+                different sentences.
+              </div>
+            </div>
+
+            <div class="ap-card-meta">
+              <div class="ap-card-meta-item">
+                <strong>Principle violated:</strong>
+                <span class="ap-card-meta-pill ap-card-meta-pill-principle">#6 Communication is Engineering</span>
+              </div>
+              <div class="ap-card-meta-item">
+                <strong>Skill that prevents it:</strong>
+                <span class="ap-card-meta-pill">/message-craft</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- AP #20 -->
+          <article class="ap-card">
+            <span class="ap-card-x">❌</span>
+            <div class="ap-card-header">
+              <div class="ap-card-number">20</div>
+              <div class="ap-card-tagrow">
+                <span class="ap-card-cat">Communication</span>
+                <div class="ap-card-statement">Closing client emails with "let me know if that works."</div>
+              </div>
+            </div>
+
+            <div class="ap-block ap-signal">
+              <div class="ap-block-label"><span class="ap-block-label-icon">!</span>The Signal</div>
+              <p class="ap-block-body">
+                Email ends with: <em>"Let me know if that works for you!"</em> Or: <em>"Does this
+                seem okay?"</em> Or: <em>"Open to your thoughts."</em> A permission-seeking question
+                to a client.
+              </p>
+            </div>
+
+            <div class="ap-block ap-why">
+              <div class="ap-block-label"><span class="ap-block-label-icon">?</span>Why It's Wrong</div>
+              <p class="ap-block-body">
+                Clients want <strong>decisions, not options</strong>. They hired us to know the answer.
+                Permission-seeking reads as <em>you don't know either</em>. It transfers the decision
+                weight back to the client — which is exactly the work they're paying us to do.
+              </p>
+            </div>
+
+            <div class="ap-block ap-instead">
+              <div class="ap-block-label"><span class="ap-block-label-icon">✓</span>What We Do Instead</div>
+              <p class="ap-block-body">
+                State the plan. Offer to discuss only if needed: <em>"Will proceed Tuesday unless
+                you flag a concern by EOD Monday."</em> <strong>Default to action.</strong> The
+                client can always object — and most won't, because the plan was reasonable, and you
+                gave them an explicit out.
+              </p>
+            </div>
+
+            <div class="ap-consequence">
+              <div class="ap-consequence-label">The Consequence</div>
+              <div class="ap-consequence-body">
+                Client reads it as <strong>you're not sure</strong>. Trust erodes. Worse: the
+                decision sits in the client's inbox for three days, blocking work that could have
+                proceeded.
+              </div>
+            </div>
+
+            <div class="ap-card-meta">
+              <div class="ap-card-meta-item">
+                <strong>Principle violated:</strong>
+                <span class="ap-card-meta-pill ap-card-meta-pill-principle">#6 Communication is Engineering</span>
+              </div>
+              <div class="ap-card-meta-item">
+                <strong>Skill that prevents it:</strong>
+                <span class="ap-card-meta-pill">/message-craft</span>
+              </div>
+            </div>
+          </article>
+
+        </div>
+
+        <!-- ─────────────────────────────────────
+             CATEGORY: SECURITY & COMPLIANCE
+             ───────────────────────────────────── -->
+        <div class="ap-category" id="security">
+          <div class="ap-category-header">
+            <div class="ap-category-icon">🛡️</div>
+            <div class="ap-category-meta">
+              <div class="ap-category-eyebrow">Category 5 of 7</div>
+              <div class="ap-category-title">Security &amp; Compliance</div>
+            </div>
+            <div class="ap-category-count">4 anti-patterns</div>
+          </div>
+
+          <!-- AP #21 -->
+          <article class="ap-card">
+            <span class="ap-card-x">❌</span>
+            <div class="ap-card-header">
+              <div class="ap-card-number">21</div>
+              <div class="ap-card-tagrow">
+                <span class="ap-card-cat">Security</span>
+                <div class="ap-card-statement">Skipping /dep-vuln when adding a new dependency.</div>
+              </div>
+            </div>
+
+            <div class="ap-block ap-signal">
+              <div class="ap-block-label"><span class="ap-block-label-icon">!</span>The Signal</div>
+              <p class="ap-block-body">
+                <code>package.json</code> (or <code>requirements.txt</code>, <code>Gemfile</code>,
+                <code>go.mod</code>) gains a new entry. PR has no <code>/dep-vuln</code> output.
+                The dependency is some lesser-known package the developer found on Stack Overflow.
+              </p>
+            </div>
+
+            <div class="ap-block ap-why">
+              <div class="ap-block-label"><span class="ap-block-label-icon">?</span>Why It's Wrong</div>
+              <p class="ap-block-body">
+                Supply chain attacks happen <strong>through new dependencies</strong> — typosquatted
+                packages, compromised maintainer accounts, malicious version bumps. A 30-second scan
+                with <code>/dep-vuln</code> catches the known-bad ones. Skipping it is how a backdoor
+                ends up in your bundle.
+              </p>
+            </div>
+
+            <div class="ap-block ap-instead">
+              <div class="ap-block-label"><span class="ap-block-label-icon">✓</span>What We Do Instead</div>
+              <p class="ap-block-body">
+                <code>/dep-vuln</code> on every PR that touches dependency files. Output goes in the
+                PR description. If the skill flags anything, resolve it or pick an alternative
+                package — and document why if you're proceeding anyway.
+              </p>
+            </div>
+
+            <div class="ap-consequence">
+              <div class="ap-consequence-label">The Consequence</div>
+              <div class="ap-consequence-body">
+                CI tier-2 gate blocks merge automatically. <strong>You don't get to override it without
+                Tech Lead written exemption.</strong> The pipeline is the enforcement layer
+                precisely because manual gates fail in a rush.
+              </div>
+            </div>
+
+            <div class="ap-card-meta">
+              <div class="ap-card-meta-item">
+                <strong>Principle violated:</strong>
+                <span class="ap-card-meta-pill ap-card-meta-pill-principle">#2 Skills are the OS</span>
+              </div>
+              <div class="ap-card-meta-item">
+                <strong>Skill that prevents it:</strong>
+                <span class="ap-card-meta-pill">/dep-vuln</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- AP #22 -->
+          <article class="ap-card">
+            <span class="ap-card-x">❌</span>
+            <div class="ap-card-header">
+              <div class="ap-card-number">22</div>
+              <div class="ap-card-tagrow">
+                <span class="ap-card-cat">Security</span>
+                <div class="ap-card-statement">Bypassing scope guards because "the skill got it wrong."</div>
+              </div>
+            </div>
+
+            <div class="ap-block ap-signal">
+              <div class="ap-block-label"><span class="ap-block-label-icon">!</span>The Signal</div>
+              <p class="ap-block-body">
+                <code>/quick-plan</code> flags <strong>XL scope, recommend /feature-plan</strong>.
+                Developer says <em>"that should still be doable in a session"</em> and starts coding.
+                No escalation. No Tech Lead conversation.
+              </p>
+            </div>
+
+            <div class="ap-block ap-why">
+              <div class="ap-block-label"><span class="ap-block-label-icon">?</span>Why It's Wrong</div>
+              <p class="ap-block-body">
+                The scope check is <strong>calibrated</strong>. We tuned it on real PRs. When it
+                flags XL, escalating to <code>/feature-plan</code> is cheaper than mid-flight scope
+                correction. Bypassing the guard because <em>you</em> think it's wrong is the same
+                argument every junior makes — and 90% of the time, the guard is right.
+              </p>
+            </div>
+
+            <div class="ap-block ap-instead">
+              <div class="ap-block-label"><span class="ap-block-label-icon">✓</span>What We Do Instead</div>
+              <p class="ap-block-body">
+                Trust the scope check by default. If you genuinely disagree, <strong>document why
+                in writing and have a Tech Lead sign off</strong> before proceeding. The friction is
+                the point — it forces the conversation that prevents the rescue mission later.
+              </p>
+            </div>
+
+            <div class="ap-consequence">
+              <div class="ap-consequence-label">The Consequence</div>
+              <div class="ap-consequence-body">
+                Mid-week scope rescue. Missed deadline. Tech Lead pulled in to triage. <strong>Whatever
+                speed you thought you were gaining by skipping the escalation is now lost three
+                times over.</strong>
+              </div>
+            </div>
+
+            <div class="ap-card-meta">
+              <div class="ap-card-meta-item">
+                <strong>Principle violated:</strong>
+                <span class="ap-card-meta-pill ap-card-meta-pill-principle">#7 Standards have teeth</span>
+              </div>
+              <div class="ap-card-meta-item">
+                <strong>Skill that prevents it:</strong>
+                <span class="ap-card-meta-pill">/quick-plan</span>
+                <span class="ap-card-meta-pill">/feature-plan</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- AP #23 -->
+          <article class="ap-card">
+            <span class="ap-card-x">❌</span>
+            <div class="ap-card-header">
+              <div class="ap-card-number">23</div>
+              <div class="ap-card-tagrow">
+                <span class="ap-card-cat">Security</span>
+                <div class="ap-card-statement">Shipping a skill warning unresolved without explicit acceptance.</div>
+              </div>
+            </div>
+
+            <div class="ap-block ap-signal">
+              <div class="ap-block-label"><span class="ap-block-label-icon">!</span>The Signal</div>
+              <p class="ap-block-body">
+                <code>/sec-audit</code> flagged a moderate-severity risk. Developer left it in the
+                PR description with no explanation. The reviewer assumes it must be intentional.
+                The Tech Lead assumes the reviewer addressed it. <em>Everyone assumes someone else
+                handled it.</em>
+              </p>
+            </div>
+
+            <div class="ap-block ap-why">
+              <div class="ap-block-label"><span class="ap-block-label-icon">?</span>Why It's Wrong</div>
+              <p class="ap-block-body">
+                Skill warnings are real. <strong>Ignoring them silently is worse than not running
+                the skill</strong> — because now there's a paper trail showing the team saw the
+                warning and shipped anyway. That's the kind of artifact that turns a minor incident
+                into a major liability issue.
+              </p>
+            </div>
+
+            <div class="ap-block ap-instead">
+              <div class="ap-block-label"><span class="ap-block-label-icon">✓</span>What We Do Instead</div>
+              <p class="ap-block-body">
+                Either <strong>fix the warning</strong>, OR explicitly document acceptance with
+                (a) a reason it doesn't apply in this context, and (b) Tech Lead sign-off. Both in
+                writing, both in the PR description, both before merge.
+              </p>
+            </div>
+
+            <div class="ap-consequence">
+              <div class="ap-consequence-label">The Consequence</div>
+              <div class="ap-consequence-body">
+                PR blocked at review. <strong>Explicit written acceptance required before merge.</strong>
+                If you ignore this pattern repeatedly, your PRs start requiring Tech Lead approval
+                on every change — your autonomy is what's at stake.
+              </div>
+            </div>
+
+            <div class="ap-card-meta">
+              <div class="ap-card-meta-item">
+                <strong>Principle violated:</strong>
+                <span class="ap-card-meta-pill ap-card-meta-pill-principle">#7 Standards have teeth</span>
+              </div>
+              <div class="ap-card-meta-item">
+                <strong>Skill that prevents it:</strong>
+                <span class="ap-card-meta-pill">/sec-audit</span>
+                <span class="ap-card-meta-pill">(any skill)</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- AP #24 -->
+          <article class="ap-card">
+            <span class="ap-card-x">❌</span>
+            <div class="ap-card-header">
+              <div class="ap-card-number">24</div>
+              <div class="ap-card-tagrow">
+                <span class="ap-card-cat">Security</span>
+                <div class="ap-card-statement">Hardcoding secrets, even "just for local testing."</div>
+              </div>
+            </div>
+
+            <div class="ap-block ap-signal">
+              <div class="ap-block-label"><span class="ap-block-label-icon">!</span>The Signal</div>
+              <p class="ap-block-body">
+                An API key, password, JWT secret, or token appears in a code file. Comment next to it:
+                <em>"// TODO: move to env before merging"</em> or <em>"// just for local testing"</em>.
+                The TODO never gets done. The commit lands.
+              </p>
+            </div>
+
+            <div class="ap-block ap-why">
+              <div class="ap-block-label"><span class="ap-block-label-icon">?</span>Why It's Wrong</div>
+              <p class="ap-block-body">
+                <strong>Git history is forever.</strong> "Just for local" leaks through shared dev
+                branches, CI logs, screen-shares with clients, and accidental pushes to public
+                forks. Once a secret is in git history, rotation is the only remedy — and rotation
+                is expensive when third-party systems are involved.
+              </p>
+            </div>
+
+            <div class="ap-block ap-instead">
+              <div class="ap-block-label"><span class="ap-block-label-icon">✓</span>What We Do Instead</div>
+              <p class="ap-block-body">
+                <code>.env</code> files (in <code>.gitignore</code>) for local. Proper secrets
+                management (Vault, AWS Secrets Manager) for staging and production.
+                <code>/secrets-scan</code> runs in CI and catches the obvious patterns;
+                <code>/secrets-manage</code> is the design discipline for getting it right from day one.
+              </p>
+            </div>
+
+            <div class="ap-consequence">
+              <div class="ap-consequence-label">The Consequence</div>
+              <div class="ap-consequence-body">
+                Secret rotation required. Security incident report filed. <strong>Audit trail of the
+                leak preserved for compliance review.</strong> If the secret was a client's API key,
+                add an apologetic client email to the cost.
+              </div>
+            </div>
+
+            <div class="ap-card-meta">
+              <div class="ap-card-meta-item">
+                <strong>Principle violated:</strong>
+                <span class="ap-card-meta-pill ap-card-meta-pill-principle">#5 Verify the AI</span>
+              </div>
+              <div class="ap-card-meta-item">
+                <strong>Skill that prevents it:</strong>
+                <span class="ap-card-meta-pill">/secrets-scan</span>
+                <span class="ap-card-meta-pill">/secrets-manage</span>
+              </div>
+            </div>
+          </article>
+
+        </div>
+
+        <!-- ─────────────────────────────────────
+             CATEGORY: PROCESS & DISCIPLINE
+             ───────────────────────────────────── -->
+        <div class="ap-category" id="process">
+          <div class="ap-category-header">
+            <div class="ap-category-icon">⚙️</div>
+            <div class="ap-category-meta">
+              <div class="ap-category-eyebrow">Category 6 of 7</div>
+              <div class="ap-category-title">Process &amp; Discipline</div>
+            </div>
+            <div class="ap-category-count">4 anti-patterns</div>
+          </div>
+
+          <!-- AP #25 -->
+          <article class="ap-card">
+            <span class="ap-card-x">❌</span>
+            <div class="ap-card-header">
+              <div class="ap-card-number">25</div>
+              <div class="ap-card-tagrow">
+                <span class="ap-card-cat">Process</span>
+                <div class="ap-card-statement">"Let it slide just this once" on a standard.</div>
+              </div>
+            </div>
+
+            <div class="ap-block ap-signal">
+              <div class="ap-block-label"><span class="ap-block-label-icon">!</span>The Signal</div>
+              <p class="ap-block-body">
+                A reviewer waives a missing <code>/code-review</code> output <em>"because it's a small
+                change."</em> Or a Tech Lead approves a missing <code>/sec-audit</code> <em>"because
+                we're rushing to ship before the demo."</em>
+              </p>
+            </div>
+
+            <div class="ap-block ap-why">
+              <div class="ap-block-label"><span class="ap-block-label-icon">?</span>Why It's Wrong</div>
+              <p class="ap-block-body">
+                <strong>Exceptions compound.</strong> The next exception is harder to deny because
+                the precedent exists. Within three months, no one runs the skill because <em>"it's
+                fine, we let it slide last time."</em> Standards are eroded one slide at a time — and
+                the slide is always plausibly small in the moment.
+              </p>
+            </div>
+
+            <div class="ap-block ap-instead">
+              <div class="ap-block-label"><span class="ap-block-label-icon">✓</span>What We Do Instead</div>
+              <p class="ap-block-body">
+                Standards are bendable <strong>in writing only</strong>. Tech Lead documents the
+                exemption — what was waived, why, and an expiration date. No verbal exceptions.
+                <code>/pr-strategy</code> describes the formal exemption process.
+              </p>
+            </div>
+
+            <div class="ap-consequence">
+              <div class="ap-consequence-label">The Consequence</div>
+              <div class="ap-consequence-body">
+                The standard becomes a suggestion. Within three months, no one runs the skill.
+                <strong>This is the gateway anti-pattern — it's the one that lets every other
+                anti-pattern in.</strong>
+              </div>
+            </div>
+
+            <div class="ap-card-meta">
+              <div class="ap-card-meta-item">
+                <strong>Principle violated:</strong>
+                <span class="ap-card-meta-pill ap-card-meta-pill-principle">#7 Standards have teeth</span>
+              </div>
+              <div class="ap-card-meta-item">
+                <strong>Skill that prevents it:</strong>
+                <span class="ap-card-meta-pill">/pr-strategy</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- AP #26 -->
+          <article class="ap-card">
+            <span class="ap-card-x">❌</span>
+            <div class="ap-card-header">
+              <div class="ap-card-number">26</div>
+              <div class="ap-card-tagrow">
+                <span class="ap-card-cat">Process</span>
+                <div class="ap-card-statement">Senior rewriting a junior PR to "fix the structure."</div>
+              </div>
+            </div>
+
+            <div class="ap-block ap-signal">
+              <div class="ap-block-label"><span class="ap-block-label-icon">!</span>The Signal</div>
+              <p class="ap-block-body">
+                Senior takes over the PR. Force-pushes the fix. Junior moves on. The commit log
+                shows the senior as author. The junior never sees the rewrite, never learns
+                what was wrong, never improves.
+              </p>
+            </div>
+
+            <div class="ap-block ap-why">
+              <div class="ap-block-label"><span class="ap-block-label-icon">?</span>Why It's Wrong</div>
+              <p class="ap-block-body">
+                Junior doesn't learn. <strong>The pattern repeats next sprint.</strong> The senior
+                becomes the bottleneck — every junior PR routes back to them for rewrites. And the
+                junior plateaus, because the feedback loop that would have made them better was
+                short-circuited by helpfulness.
+              </p>
+            </div>
+
+            <div class="ap-block ap-instead">
+              <div class="ap-block-label"><span class="ap-block-label-icon">✓</span>What We Do Instead</div>
+              <p class="ap-block-body">
+                <strong>Bounce the PR back</strong> with specific, actionable feedback. Junior
+                re-submits. Slower this PR, faster the next ten. <code>/onboard-dev</code> and
+                <code>/code-review</code> are the tools — both pair a skill output with human
+                feedback so the junior can map their mistake to a named pattern.
+              </p>
+            </div>
+
+            <div class="ap-consequence">
+              <div class="ap-consequence-label">The Consequence</div>
+              <div class="ap-consequence-body">
+                <strong>Junior plateaus. Senior burns out.</strong> Six months later, you're hiring
+                another senior because the current one can't take any more rewrite duty. The
+                short-cut became the bottleneck.
+              </div>
+            </div>
+
+            <div class="ap-card-meta">
+              <div class="ap-card-meta-item">
+                <strong>Principle violated:</strong>
+                <span class="ap-card-meta-pill ap-card-meta-pill-principle">#3 Skills flatten the curve</span>
+              </div>
+              <div class="ap-card-meta-item">
+                <strong>Skill that prevents it:</strong>
+                <span class="ap-card-meta-pill">/code-review</span>
+                <span class="ap-card-meta-pill">/onboard-dev</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- AP #27 -->
+          <article class="ap-card">
+            <span class="ap-card-x">❌</span>
+            <div class="ap-card-header">
+              <div class="ap-card-number">27</div>
+              <div class="ap-card-tagrow">
+                <span class="ap-card-cat">Process</span>
+                <div class="ap-card-statement">Treating SE I/II PRs as rubber-stamp reviews.</div>
+              </div>
+            </div>
+
+            <div class="ap-block ap-signal">
+              <div class="ap-block-label"><span class="ap-block-label-icon">!</span>The Signal</div>
+              <p class="ap-block-body">
+                Reviewer approves the PR within 30 seconds with: <em>"looks good 👍"</em>. No
+                substantive comments. No questions. Just a quick LGTM and a merge.
+              </p>
+            </div>
+
+            <div class="ap-block ap-why">
+              <div class="ap-block-label"><span class="ap-block-label-icon">?</span>Why It's Wrong</div>
+              <p class="ap-block-body">
+                Even with skills, <strong>code review is where craft transfers</strong>. Skipping it
+                stunts growth, ships defects, and trains the junior to expect their PRs aren't worth
+                reading. <em>The skill handles surface issues. Humans do architectural review.</em>
+                One does not replace the other.
+              </p>
+            </div>
+
+            <div class="ap-block ap-instead">
+              <div class="ap-block-label"><span class="ap-block-label-icon">✓</span>What We Do Instead</div>
+              <p class="ap-block-body">
+                Every PR — from any level — gets real review. <code>/code-review</code> handles the
+                first pass; the human's job is to ask the architectural questions the skill
+                can't. "Why this approach over X?" "What happens when Y fails?" "Did we consider Z?"
+                Those questions are how the junior learns to ask them of themselves.
+              </p>
+            </div>
+
+            <div class="ap-consequence">
+              <div class="ap-consequence-label">The Consequence</div>
+              <div class="ap-consequence-body">
+                <strong>Defects ship. Juniors stall.</strong> Three months in, the SE I is still
+                writing SE I code, because nobody's pushed them to the next level. That's the
+                reviewer's fault, not the junior's.
+              </div>
+            </div>
+
+            <div class="ap-card-meta">
+              <div class="ap-card-meta-item">
+                <strong>Principle violated:</strong>
+                <span class="ap-card-meta-pill ap-card-meta-pill-principle">#4 Consistency requires review</span>
+              </div>
+              <div class="ap-card-meta-item">
+                <strong>Skill that prevents it:</strong>
+                <span class="ap-card-meta-pill">/code-review</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- AP #28 -->
+          <article class="ap-card">
+            <span class="ap-card-x">❌</span>
+            <div class="ap-card-header">
+              <div class="ap-card-number">28</div>
+              <div class="ap-card-tagrow">
+                <span class="ap-card-cat">Process</span>
+                <div class="ap-card-statement">Making exceptions to skills without written exemption.</div>
+              </div>
+            </div>
+
+            <div class="ap-block ap-signal">
+              <div class="ap-block-label"><span class="ap-block-label-icon">!</span>The Signal</div>
+              <p class="ap-block-body">
+                Slack: <em>"Just for this PR, we're skipping /sec-audit because we're in a rush
+                for the demo."</em> No written exemption. No expiration. No conversation about
+                what happens to the skipped audit after the demo.
+              </p>
+            </div>
+
+            <div class="ap-block ap-why">
+              <div class="ap-block-label"><span class="ap-block-label-icon">?</span>Why It's Wrong</div>
+              <p class="ap-block-body">
+                Skills exist <strong>precisely for high-pressure moments</strong>. Skipping them under
+                pressure is exactly when they catch the most — because pressure is when developers
+                cut corners. Verbal exceptions in Slack don't survive — three weeks later, no one
+                remembers the context, and the skipped audit is still skipped.
+              </p>
+            </div>
+
+            <div class="ap-block ap-instead">
+              <div class="ap-block-label"><span class="ap-block-label-icon">✓</span>What We Do Instead</div>
+              <p class="ap-block-body">
+                <strong>No verbal exceptions.</strong> If a skill must be skipped, written Tech Lead
+                exemption with: (a) the explicit reason, (b) the date by which the skill will be
+                run retroactively, and (c) the issue tracker ticket holding the follow-up. Three
+                conditions, all in writing.
+              </p>
+            </div>
+
+            <div class="ap-consequence">
+              <div class="ap-consequence-label">The Consequence</div>
+              <div class="ap-consequence-body">
+                CI gate fails. Merge blocked. <strong>The rush turns into a longer delay than the
+                skill would have caused</strong> — because now you're in a Slack thread debating
+                whether to break process, instead of in the IDE running the skill.
+              </div>
+            </div>
+
+            <div class="ap-card-meta">
+              <div class="ap-card-meta-item">
+                <strong>Principle violated:</strong>
+                <span class="ap-card-meta-pill ap-card-meta-pill-principle">#7 Standards have teeth</span>
+              </div>
+              <div class="ap-card-meta-item">
+                <strong>Skill that prevents it:</strong>
+                <span class="ap-card-meta-pill">(context-specific)</span>
+              </div>
+            </div>
+          </article>
+
+        </div>
+
+        <!-- ─────────────────────────────────────
+             CATEGORY: ROLE-SPECIFIC
+             ───────────────────────────────────── -->
+        <div class="ap-category" id="role-specific">
+          <div class="ap-category-header">
+            <div class="ap-category-icon">🎯</div>
+            <div class="ap-category-meta">
+              <div class="ap-category-eyebrow">Category 7 of 7</div>
+              <div class="ap-category-title">Role-Specific</div>
+            </div>
+            <div class="ap-category-count">2 anti-patterns</div>
+          </div>
+
+          <!-- AP #29 -->
+          <article class="ap-card">
+            <span class="ap-card-x">❌</span>
+            <div class="ap-card-header">
+              <div class="ap-card-number">29</div>
+              <div class="ap-card-tagrow">
+                <span class="ap-card-cat">Role-Specific</span>
+                <div class="ap-card-statement">SE III/IV hoarding architectural decisions in their head.</div>
+              </div>
+            </div>
+
+            <div class="ap-block ap-signal">
+              <div class="ap-block-label"><span class="ap-block-label-icon">!</span>The Signal</div>
+              <p class="ap-block-body">
+                Senior makes the architectural call in a DM. Or in a face-to-face conversation. Or
+                in their own head, without telling anyone. Six months later, no one remembers why
+                the system is shaped that way — including the senior.
+              </p>
+            </div>
+
+            <div class="ap-block ap-why">
+              <div class="ap-block-label"><span class="ap-block-label-icon">?</span>Why It's Wrong</div>
+              <p class="ap-block-body">
+                Patterns become tribal knowledge. <strong>New hires re-learn the same lessons</strong>
+                because the lessons aren't written down. The senior becomes irreplaceable in a bad
+                way — if they leave, the architectural intent goes with them. The org pays for the
+                debate twice: once when it happened, once when it gets re-debated.
+              </p>
+            </div>
+
+            <div class="ap-block ap-instead">
+              <div class="ap-block-label"><span class="ap-block-label-icon">✓</span>What We Do Instead</div>
+              <p class="ap-block-body">
+                <code>/decision-doc</code> for every architectural choice. Stored, searchable,
+                citable. <strong>Every "we chose X over Y because Z" gets a document.</strong> No
+                exceptions for senior engineers — the more senior, the more important the
+                documentation, because more downstream decisions depend on it.
+              </p>
+            </div>
+
+            <div class="ap-consequence">
+              <div class="ap-consequence-label">The Consequence</div>
+              <div class="ap-consequence-body">
+                Same architectural decision <strong>re-debated three months later</strong>. The org
+                pays for the debate twice. Worse: a new hire builds on the wrong assumption because
+                they couldn't find the original rationale.
+              </div>
+            </div>
+
+            <div class="ap-card-meta">
+              <div class="ap-card-meta-item">
+                <strong>Principle violated:</strong>
+                <span class="ap-card-meta-pill ap-card-meta-pill-principle">#7 Standards have teeth</span>
+              </div>
+              <div class="ap-card-meta-item">
+                <strong>Skill that prevents it:</strong>
+                <span class="ap-card-meta-pill">/decision-doc</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- AP #30 -->
+          <article class="ap-card">
+            <span class="ap-card-x">❌</span>
+            <div class="ap-card-header">
+              <div class="ap-card-number">30</div>
+              <div class="ap-card-tagrow">
+                <span class="ap-card-cat">Role-Specific</span>
+                <div class="ap-card-statement">SE IV operating at SE III level (reviewing PRs instead of designing systems).</div>
+              </div>
+            </div>
+
+            <div class="ap-block ap-signal">
+              <div class="ap-block-label"><span class="ap-block-label-icon">!</span>The Signal</div>
+              <p class="ap-block-body">
+                SE IV's calendar is <strong>80% PR review, 5% architecture</strong>, 15% meetings. No
+                blocks of time for system design, hiring, or handbook work. Asked about the
+                org-wide migration plan, they say <em>"haven't gotten to it yet."</em>
+              </p>
+            </div>
+
+            <div class="ap-block ap-why">
+              <div class="ap-block-label"><span class="ap-block-label-icon">?</span>Why It's Wrong</div>
+              <p class="ap-block-body">
+                SE IV time is for <strong>systems, hiring, mentorship, and the handbook itself</strong>.
+                Routine PR review is SE II/III work. When an SE IV operates at the SE III level,
+                the SE III level is over-saturated, the SE IV's actual job goes undone, and the
+                whole leveling structure collapses downward.
+              </p>
+            </div>
+
+            <div class="ap-block ap-instead">
+              <div class="ap-block-label"><span class="ap-block-label-icon">✓</span>What We Do Instead</div>
+              <p class="ap-block-body">
+                SE IV reviews PRs <strong>only when architectural concerns are at stake</strong> —
+                cross-system designs, security-critical paths, new patterns being introduced.
+                Routine review is delegated. <code>/system-design</code> and <code>/arch-review</code>
+                are how SE IV time is spent — at the level the level demands.
+              </p>
+            </div>
+
+            <div class="ap-consequence">
+              <div class="ap-consequence-label">The Consequence</div>
+              <div class="ap-consequence-body">
+                <strong>Org-wide architecture decisions don't happen.</strong> Systems drift. The
+                next migration is bigger because the small migrations didn't get planned.
+                Compensation for SE IV becomes hard to justify because they're producing SE III
+                output.
+              </div>
+            </div>
+
+            <div class="ap-card-meta">
+              <div class="ap-card-meta-item">
+                <strong>Principle violated:</strong>
+                <span class="ap-card-meta-pill ap-card-meta-pill-principle">#4 Consistency</span>
+              </div>
+              <div class="ap-card-meta-item">
+                <strong>Skill that prevents it:</strong>
+                <span class="ap-card-meta-pill">/system-design</span>
+                <span class="ap-card-meta-pill">/arch-review</span>
+              </div>
+            </div>
+          </article>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 5 — TOP 5 MOST COMMON
+         ════════════════════════════════════════════ -->
+    <section class="ap-section ap-top5">
+      <div class="container">
+        <div class="text-center" style="max-width: 720px; margin: 0 auto 56px;">
+          <div class="ap-eyebrow" style="justify-content:center;">Watch for these</div>
+          <h2 class="ap-title" style="margin: 0 auto 16px;">The five most common.</h2>
+          <p class="ap-lead" style="margin: 0 auto;">
+            Of the thirty patterns above, these five account for roughly 80% of what we
+            see in PR review. If a team is going to enforce only five, enforce these.
+          </p>
+        </div>
+
+        <div class="ap-top5-card">
+          <div class="ap-top5-header">
+            <div class="ap-top5-sign">⚠</div>
+            <div>
+              <div class="ap-top5-title">High-frequency anti-patterns</div>
+              <div class="ap-top5-subtitle">Based on internal PR review data, last 12 months</div>
+            </div>
+          </div>
+
+          <ol class="ap-top5-list">
+            <li>
+              <div class="ap-top5-list-body">
+                <div class="ap-top5-list-headline">
+                  <code>#11</code> Pushing without <code>/code-review</code>
+                </div>
+                <div class="ap-top5-list-note">
+                  Most common by far. Happens at least weekly across the team. The "I'll add it before
+                  merge" promise rarely materializes. Easy to enforce mechanically via PR template
+                  and CI gate — but the discipline has to come from the developer first.
+                </div>
+              </div>
+            </li>
+            <li>
+              <div class="ap-top5-list-body">
+                <div class="ap-top5-list-headline">
+                  <code>#13</code> Refactoring adjacent code in the same PR
+                </div>
+                <div class="ap-top5-list-note">
+                  Subtle, requires PR discipline. Every developer has the urge — "while I'm in here,
+                  I'll clean this up." Resist. The split into two PRs costs five minutes and saves
+                  the reviewer an hour.
+                </div>
+              </div>
+            </li>
+            <li>
+              <div class="ap-top5-list-body">
+                <div class="ap-top5-list-headline">
+                  <code>#16</code> Apologizing to clients before diagnosis
+                </div>
+                <div class="ap-top5-list-note">
+                  Instinctive — the hardest to unlearn. The reflex to apologize is empathetic and
+                  human, but in client communication, it's also untrained accountability. Replace
+                  reflex apology with "Looking into it; report back within 30 min."
+                </div>
+              </div>
+            </li>
+            <li>
+              <div class="ap-top5-list-body">
+                <div class="ap-top5-list-headline">
+                  <code>#22</code> Bypassing scope guards
+                </div>
+                <div class="ap-top5-list-note">
+                  Developer pride at play. "I can do this in a session, the skill is wrong." Sometimes
+                  the skill is wrong — about 10% of the time. The other 90% is the developer
+                  underestimating, and the cost of the underestimate is the rescue mission.
+                </div>
+              </div>
+            </li>
+            <li>
+              <div class="ap-top5-list-body">
+                <div class="ap-top5-list-headline">
+                  <code>#25</code> "Let it slide just this once"
+                </div>
+                <div class="ap-top5-list-note">
+                  The gateway to all other anti-patterns. Reviewers and Tech Leads — this one is on
+                  you. Every slide compounds. Every exception is a precedent. The friction is the
+                  feature.
+                </div>
+              </div>
+            </li>
+          </ol>
+
+          <div class="ap-top5-footer">
+            <strong>The 80/20 rule for this doc:</strong> If your team isn't ready to enforce all
+            thirty, start with these five. They'll cover the majority of the damage — and they'll
+            train the muscle for the rest.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 6 — PATTERN RECOGNITION CHEATSHEET
+         ════════════════════════════════════════════ -->
+    <section class="ap-section ap-cheatsheet">
+      <div class="container">
+        <div class="ap-cheatsheet-intro">
+          <div class="ap-eyebrow" style="justify-content:center;">Pattern recognition</div>
+          <h2 class="ap-title" style="margin: 0 auto 16px;">The cheatsheet.</h2>
+          <p class="ap-lead" style="margin: 0 auto;">
+            All thirty, one line each. Screenshot it. Pin it above your monitor. The point isn't to
+            memorize them — it's to recognize the shape when it appears in your own draft.
+          </p>
+        </div>
+
+        <div class="ap-cheatsheet-card">
+          <div class="ap-cheatsheet-dots">
+            <span class="ap-cheatsheet-dot"></span>
+            <span class="ap-cheatsheet-dot"></span>
+            <span class="ap-cheatsheet-dot"></span>
+          </div>
+          <div class="ap-cheatsheet-label">anti-patterns.txt</div>
+
+          <div class="ap-cheatsheet-content">
+            <div class="ap-cheatsheet-title">THE 30 ANTI-PATTERNS — INDEX</div>
+            <div class="ap-cheatsheet-subtitle">Heaptrace Engineering Handbook · Doc 5 of 7 · v1.0</div>
+
+            <div class="ap-cheatsheet-grid">
+
+              <div class="ap-cheatsheet-col">
+                <h4>📐 Planning</h4>
+                <ol>
+                  <li>No plan</li>
+                  <li>Too heavy (overkill plan)</li>
+                  <li>Too light (skipped escalation)</li>
+                  <li>Plan vs. diff diverge</li>
+                  <li>Accepting plan without reading</li>
+                </ol>
+              </div>
+
+              <div class="ap-cheatsheet-col">
+                <h4>🤖 AI Usage</h4>
+                <ol>
+                  <li>Raw AI on prod code</li>
+                  <li>No verification of output</li>
+                  <li>Fake tests (pass either way)</li>
+                  <li>AI as documentation</li>
+                  <li>Unread migration SQL</li>
+                </ol>
+              </div>
+
+              <div class="ap-cheatsheet-col">
+                <h4>🔍 Code &amp; Review</h4>
+                <ol>
+                  <li>No /code-review run</li>
+                  <li>"Fix later" warnings</li>
+                  <li>Adjacent refactor</li>
+                  <li>"fixes bug" descriptions</li>
+                  <li>No /sec-audit on sensitive code</li>
+                </ol>
+              </div>
+
+              <div class="ap-cheatsheet-col">
+                <h4>💬 Communication</h4>
+                <ol>
+                  <li>Pre-diagnosis apology</li>
+                  <li>No /message-craft pass</li>
+                  <li>Buried headline</li>
+                  <li>Hedging language</li>
+                  <li>Permission-seeking close</li>
+                </ol>
+              </div>
+
+              <div class="ap-cheatsheet-col">
+                <h4>🛡️ Security</h4>
+                <ol>
+                  <li>No /dep-vuln on new deps</li>
+                  <li>Bypassing scope guards</li>
+                  <li>Unresolved skill warnings</li>
+                  <li>Hardcoded secrets</li>
+                </ol>
+              </div>
+
+              <div class="ap-cheatsheet-col">
+                <h4>⚙️ Process</h4>
+                <ol>
+                  <li>"Let it slide just this once"</li>
+                  <li>Senior rewrites junior PR</li>
+                  <li>Rubber-stamp review</li>
+                  <li>Verbal skill exceptions</li>
+                </ol>
+              </div>
+
+              <div class="ap-cheatsheet-col">
+                <h4>🎯 Role-Specific</h4>
+                <ol>
+                  <li>Hoarded architecture decisions</li>
+                  <li>SE IV operating at SE III level</li>
+                </ol>
+              </div>
+
+              <div class="ap-cheatsheet-col">
+                <h4>📌 Reference</h4>
+                <ol style="list-style:none;">
+                  <li style="padding-left:0;">
+                    <span style="color:var(--accent-light);">/code-review</span>
+                    blocks #11–13
+                  </li>
+                  <li style="padding-left:0;">
+                    <span style="color:var(--accent-light);">/sec-audit</span>
+                    blocks #15, #23
+                  </li>
+                  <li style="padding-left:0;">
+                    <span style="color:var(--accent-light);">/message-craft</span>
+                    blocks #16–20
+                  </li>
+                  <li style="padding-left:0;">
+                    <span style="color:var(--accent-light);">/quick-plan</span>
+                    blocks #01–05
+                  </li>
+                </ol>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 7 — WHERE TO GO NEXT
+         ════════════════════════════════════════════ -->
+    <section class="ap-section ap-next">
+      <div class="container">
+        <div class="text-center" style="max-width: 720px; margin: 0 auto;">
+          <div class="ap-eyebrow" style="justify-content:center;">Where to next</div>
+          <h2 class="ap-title" style="margin: 0 auto 16px;">Pick your next read.</h2>
+          <p class="ap-lead" style="margin: 0 auto;">
+            You now know the thirty patterns we don't do. The next doc tells you how
+            the patterns get enforced — at the PR, in CI, and in the calendar.
+          </p>
+        </div>
+
+        <div class="ap-next-grid">
+          <a href="quality-gates.html" class="ap-next-card">
+            <div class="ap-next-card-label">Doc 6 · For the standards</div>
+            <div class="ap-next-card-title">Quality Gates</div>
+            <div class="ap-next-card-body">
+              The mechanical enforcement layer. CI gates, PR templates, exemption process,
+              and how skills become CI-checkable artifacts that block bad merges before
+              they reach review.
+            </div>
+            <span class="ap-next-card-cta">
+              Read now →
+            </span>
+          </a>
+
+          <div class="ap-next-card is-disabled">
+            <span class="ap-next-card-badge">Coming soon</span>
+            <div class="ap-next-card-label">Doc 7 · For clients</div>
+            <div class="ap-next-card-title">Client Edition</div>
+            <div class="ap-next-card-body">
+              A shareable, sanitized version of the handbook — the parts that explain how
+              we work, written for the clients who hire us. The "why we ship faster"
+              document, with no internal terminology.
+            </div>
+            <span class="ap-next-card-cta">
+              Available shortly
+            </span>
+          </div>
+
+          <a href="principles.html" class="ap-next-card">
+            <div class="ap-next-card-label">Doc 2 · The foundation</div>
+            <div class="ap-next-card-title">Back to Principles</div>
+            <div class="ap-next-card-body">
+              The seven principles these anti-patterns came from. If a pattern in this doc
+              feels arbitrary, return to the principle it serves. Every anti-pattern is a
+              concrete expression of a principle.
+            </div>
+            <span class="ap-next-card-cta">
+              Revisit →
+            </span>
+          </a>
+        </div>
+
+        <!-- Effective footer card -->
+        <div class="ap-effective">
+          <div class="ap-effective-divider">─────────────────────────────────────────────────────────</div>
+          <div><strong>Effective:</strong> April 2026</div>
+          <div><strong>Version:</strong> 1.0 (Initial Release)</div>
+          <div><strong>Maintained by:</strong> Heaptrace Engineering Leadership</div>
+          <div class="ap-effective-divider">─────────────────────────────────────────────────────────</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         FOOTER
+         ════════════════════════════════════════════ -->
+    <footer class="footer">
+      <div class="footer-inner">
+        <div class="footer-links">
+          <a href="../index.html" class="footer-link">Home</a>
+          <a href="../index.html#packs" class="footer-link">Packs</a>
+          <a href="../setup/index.html" class="footer-link">Setup Guide</a>
+          <a href="../customize/index.html" class="footer-link">Customize</a>
+          <a href="index.html" class="footer-link">Handbook</a>
+          <a href="https://heaptrace.com" class="footer-link" target="_blank" rel="noopener">Heaptrace</a>
+        </div>
+        <div class="footer-copy">
+          MIT License &middot; Built by <a href="https://heaptrace.com" target="_blank" rel="noopener">Heaptrace Technology</a>
+          <br>101 Skills &middot; 10 Packs &middot; Free &amp; Open Source
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       PASSWORD GATE SCRIPT
+       ════════════════════════════════════════════ -->
+  <script>
+    (function() {
+      const STORED_HASH = '5866f0f6f885b943472fd7572b9c783e6b1a29958a34bd9f18e1f1e17b9a57a6';
+      const STORAGE_KEY = 'htms-handbook-access';
+      const EXPIRY_DAYS = 30;
+      const gate = document.getElementById('password-gate');
+      const content = document.getElementById('main-content');
+      const input = document.getElementById('gate-input');
+      const submit = document.getElementById('gate-submit');
+      const error = document.getElementById('gate-error');
+
+      function unlock() {
+        gate.style.display = 'none';
+        content.style.display = 'block';
+        document.body.style.overflow = 'auto';
+      }
+
+      function checkStored() {
+        try {
+          const stored = localStorage.getItem(STORAGE_KEY);
+          if (!stored) return false;
+          const { hash, expiry } = JSON.parse(stored);
+          if (hash !== STORED_HASH) return false;
+          if (Date.now() > expiry) { localStorage.removeItem(STORAGE_KEY); return false; }
+          return true;
+        } catch { return false; }
+      }
+
+      async function sha256(str) {
+        const buf = new TextEncoder().encode(str);
+        const hashBuf = await crypto.subtle.digest('SHA-256', buf);
+        return Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
+      }
+
+      async function tryUnlock() {
+        error.textContent = '';
+        const val = input.value.trim();
+        if (!val) return;
+        const hash = await sha256(val);
+        if (hash === STORED_HASH) {
+          const expiry = Date.now() + EXPIRY_DAYS * 24 * 60 * 60 * 1000;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({ hash, expiry }));
+          unlock();
+        } else {
+          error.textContent = 'Incorrect code. Contact your Heaptrace contact.';
+          input.value = '';
+          input.focus();
+        }
+      }
+
+      content.style.display = 'none';
+      document.body.style.overflow = 'hidden';
+
+      if (checkStored()) {
+        unlock();
+      } else {
+        submit.addEventListener('click', tryUnlock);
+        input.addEventListener('keyup', (e) => { if (e.key === 'Enter') tryUnlock(); });
+        setTimeout(() => input.focus(), 100);
+      }
+    })();
+  </script>
+
+</body>
+</html>
