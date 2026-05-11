@@ -1,0 +1,2113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How We Work by Role — Heaptrace Engineering Handbook</title>
+  <meta name="description" content="Day-to-day operating procedures for Software Engineer I through IV. Doc 3 of 7 in the Heaptrace Engineering Handbook.">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="author" content="Heaptrace Technology">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="../css/styles.css">
+
+  <style>
+    /* ═════════════════════════════════════════════
+       HOW WE WORK — PAGE STYLES
+       Primary accent: GREEN (--green)
+       ═════════════════════════════════════════════ */
+
+    :root {
+      --accent: var(--green);
+      --accent-light: #34d399;
+      --accent-soft: rgba(16, 185, 129, 0.10);
+      --accent-border: rgba(16, 185, 129, 0.28);
+      --accent-glow: rgba(16, 185, 129, 0.18);
+    }
+
+    body { line-height: 1.7; }
+
+    /* ── Active nav (green override) ── */
+    .nav-link.active {
+      color: var(--green);
+      background: rgba(16, 185, 129, 0.08);
+    }
+
+    /* ── Password Gate ── */
+    #password-gate {
+      position: fixed; inset: 0; z-index: 9999;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--bg-primary);
+      background-image:
+        radial-gradient(ellipse 60% 40% at 50% 20%, rgba(16, 185, 129, 0.08), transparent 70%),
+        radial-gradient(ellipse 40% 30% at 50% 80%, rgba(6, 182, 212, 0.05), transparent 60%);
+    }
+    #gate-input:focus {
+      border-color: var(--accent) !important;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+    }
+    #gate-submit:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 30px rgba(16, 185, 129, 0.35);
+    }
+
+    /* ── Section eyebrow ── */
+    .hw-eyebrow {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 0.78rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.12em; color: var(--accent-light);
+      margin-bottom: 14px;
+    }
+    .hw-eyebrow::before {
+      content: ''; width: 24px; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent));
+    }
+    .hw-title {
+      font-size: clamp(1.9rem, 3.2vw, 2.6rem);
+      font-weight: 800; line-height: 1.15; margin-bottom: 16px;
+      letter-spacing: -0.02em;
+    }
+    .hw-lead {
+      font-size: 1.08rem; color: var(--text-secondary);
+      line-height: 1.75; max-width: 720px;
+    }
+    .hw-section {
+      padding: 100px 0;
+      position: relative;
+    }
+    .hw-section-narrow { max-width: 980px; margin: 0 auto; }
+
+    /* ── Hero ── */
+    .hw-hero {
+      padding: calc(var(--nav-height) + 100px) 0 90px;
+      text-align: center; position: relative; overflow: hidden;
+    }
+    .hw-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 40% at 50% 0%, rgba(16, 185, 129, 0.10), transparent 70%),
+        radial-gradient(ellipse 40% 30% at 30% 30%, rgba(6, 182, 212, 0.05), transparent 60%),
+        radial-gradient(ellipse 40% 30% at 70% 20%, rgba(52, 211, 153, 0.05), transparent 60%);
+      pointer-events: none;
+    }
+    .hw-hero::after {
+      content: ''; position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='grid' width='60' height='60' patternUnits='userSpaceOnUse'%3E%3Cpath d='M 60 0 L 0 0 0 60' fill='none' stroke='%231e293b' stroke-width='0.5'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23grid)'/%3E%3C/svg%3E");
+      opacity: 0.3; pointer-events: none;
+    }
+    .hw-hero-content { position: relative; z-index: 1; }
+    .hw-hero-badge {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--accent-soft);
+      border: 1px solid var(--accent-border);
+      color: var(--accent-light); padding: 8px 20px; border-radius: 999px;
+      font-size: 0.78rem; font-weight: 700; margin-bottom: 32px;
+      letter-spacing: 0.12em; text-transform: uppercase;
+    }
+    .hw-hero-badge-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent); box-shadow: 0 0 12px var(--accent);
+      animation: pulseGreen 2.4s infinite;
+    }
+    @keyframes pulseGreen {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.45); }
+      50% { opacity: 0.85; box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+    }
+    .hw-hero h1 {
+      font-size: clamp(2.6rem, 5.2vw, 4rem);
+      font-weight: 800; line-height: 1.08; margin-bottom: 24px;
+      letter-spacing: -0.025em;
+      background: linear-gradient(135deg, var(--text-primary) 0%, #34d399 45%, var(--cyan-light) 85%, var(--text-primary) 100%);
+      background-size: 200% auto;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmer 7s ease-in-out infinite;
+    }
+    @keyframes shimmer {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+    .hw-hero-subtitle {
+      font-size: 1.18rem; color: var(--text-secondary);
+      max-width: 740px; margin: 0 auto 48px; line-height: 1.75;
+    }
+    .hw-hero-cta {
+      display: inline-flex; align-items: center; gap: 14px;
+      margin-top: 8px; flex-wrap: wrap; justify-content: center;
+    }
+    .hw-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 14px 26px; border-radius: var(--radius-md);
+      font-weight: 600; font-size: 0.95rem; letter-spacing: 0.005em;
+      transition: var(--transition); border: 1px solid transparent;
+    }
+    .hw-btn-primary {
+      background: linear-gradient(135deg, var(--green), var(--cyan));
+      color: white;
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.25);
+    }
+    .hw-btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 32px rgba(16, 185, 129, 0.4);
+    }
+    .hw-btn-secondary {
+      background: transparent;
+      color: var(--text-primary);
+      border-color: var(--border-hover);
+    }
+    .hw-btn-secondary:hover {
+      border-color: var(--accent);
+      color: var(--accent-light);
+      background: var(--accent-soft);
+    }
+
+    /* ── Ladder overview ── */
+    .hw-ladder {
+      background:
+        radial-gradient(ellipse 80% 50% at 50% 0%, rgba(16, 185, 129, 0.04), transparent 70%);
+    }
+    .hw-ladder-diagram {
+      max-width: 920px; margin: 0 auto 56px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 36px 24px;
+      font-family: 'JetBrains Mono', monospace;
+      overflow-x: auto;
+    }
+    .hw-ladder-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      align-items: center;
+      text-align: center;
+    }
+    .hw-ladder-cell {
+      padding: 14px 8px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      background: var(--bg-elevated);
+      border: 1px solid var(--accent-border);
+      border-radius: var(--radius-sm);
+      letter-spacing: 0.02em;
+    }
+    .hw-ladder-arrow {
+      text-align: center;
+      color: var(--accent);
+      font-size: 1.3rem;
+      padding: 12px 0 8px;
+      font-weight: 700;
+    }
+    .hw-ladder-sub {
+      padding: 10px 8px;
+      font-size: 0.85rem;
+      color: var(--accent-light);
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .hw-ladder-intros {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+      max-width: 1080px;
+      margin: 0 auto;
+    }
+    .hw-ladder-intro {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius-sm);
+      padding: 28px 28px 24px;
+    }
+    .hw-ladder-intro h4 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 10px;
+      letter-spacing: -0.01em;
+    }
+    .hw-ladder-intro h4 .role-suffix {
+      color: var(--accent-light);
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-left: 8px;
+      letter-spacing: 0.04em;
+    }
+    .hw-ladder-intro p {
+      color: var(--text-secondary);
+      font-size: 0.98rem;
+      line-height: 1.7;
+      margin: 0;
+    }
+
+    /* ── Role section ── */
+    .hw-role {
+      max-width: 980px; margin: 0 auto 80px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 56px 56px 48px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hw-role::before {
+      content: ''; position: absolute; top: 0; left: 0;
+      width: 4px; height: 100%;
+      background: linear-gradient(180deg, var(--green) 0%, var(--cyan) 100%);
+    }
+    .hw-role-header {
+      display: flex; align-items: flex-start; gap: 28px;
+      margin-bottom: 40px;
+      padding-bottom: 28px;
+      border-bottom: 1px solid var(--border);
+    }
+    .hw-role-tag {
+      font-size: 3.2rem;
+      font-weight: 800;
+      line-height: 0.9;
+      background: linear-gradient(135deg, var(--green), var(--cyan));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.03em;
+      flex-shrink: 0;
+      min-width: 110px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .hw-role-meta {
+      font-size: 0.72rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.14em;
+      color: var(--accent-light);
+      margin-bottom: 10px;
+    }
+    .hw-role-title {
+      font-size: 1.6rem;
+      font-weight: 800;
+      line-height: 1.25;
+      letter-spacing: -0.015em;
+      color: var(--text-primary);
+    }
+    .hw-role-subtitle {
+      color: var(--text-secondary);
+      font-size: 1rem;
+      margin-top: 8px;
+      line-height: 1.6;
+    }
+
+    /* Subsection within role */
+    .hw-sub {
+      margin-bottom: 40px;
+    }
+    .hw-sub:last-child { margin-bottom: 0; }
+    .hw-sub-label {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 0.72rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.14em;
+      margin-bottom: 16px;
+    }
+    .hw-sub-label-icon {
+      width: 22px; height: 22px;
+      display: inline-flex; align-items: center; justify-content: center;
+      border-radius: 4px;
+      font-size: 0.78rem; font-weight: 800;
+    }
+
+    /* "Owns" — cyan */
+    .hw-owns .hw-sub-label { color: var(--cyan-light); }
+    .hw-owns .hw-sub-label-icon {
+      background: rgba(6, 182, 212, 0.10);
+      color: var(--cyan-light);
+      border: 1px solid rgba(6, 182, 212, 0.28);
+    }
+
+    /* "Mandatory skills" — green */
+    .hw-mand .hw-sub-label { color: var(--accent-light); }
+    .hw-mand .hw-sub-label-icon {
+      background: var(--accent-soft);
+      color: var(--accent-light);
+      border: 1px solid var(--accent-border);
+    }
+
+    /* "Anti-patterns" — red */
+    .hw-anti .hw-sub-label { color: #fca5a5; }
+    .hw-anti .hw-sub-label-icon {
+      background: rgba(239, 68, 68, 0.10);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.28);
+    }
+
+    /* "Promotion signal" — amber */
+    .hw-promo .hw-sub-label { color: #fbbf24; }
+    .hw-promo .hw-sub-label-icon {
+      background: rgba(245, 158, 11, 0.10);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.28);
+    }
+
+    /* "A day in the life" — purple */
+    .hw-day .hw-sub-label { color: #c4b5fd; }
+    .hw-day .hw-sub-label-icon {
+      background: rgba(168, 85, 247, 0.10);
+      color: #c4b5fd;
+      border: 1px solid rgba(168, 85, 247, 0.28);
+    }
+
+    /* Lists inside roles */
+    .hw-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .hw-list li {
+      position: relative;
+      padding: 12px 0 12px 30px;
+      color: var(--text-secondary);
+      font-size: 1rem;
+      line-height: 1.65;
+      border-bottom: 1px solid rgba(30, 41, 59, 0.5);
+    }
+    .hw-list li:last-child { border-bottom: none; }
+    .hw-list li::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 21px;
+      width: 16px; height: 2px;
+      border-radius: 2px;
+    }
+    .hw-owns .hw-list li::before {
+      background: var(--cyan);
+      box-shadow: 0 0 8px rgba(6, 182, 212, 0.3);
+    }
+    .hw-mand .hw-list li::before {
+      content: '✓';
+      background: transparent;
+      box-shadow: none;
+      width: auto; height: auto;
+      top: 11px;
+      color: var(--accent-light);
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+    .hw-anti .hw-list li::before {
+      content: '✕';
+      background: transparent;
+      box-shadow: none;
+      width: auto; height: auto;
+      top: 11px;
+      color: #fca5a5;
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+    .hw-promo .hw-list li::before {
+      content: '↗';
+      background: transparent;
+      box-shadow: none;
+      width: auto; height: auto;
+      top: 11px;
+      color: #fbbf24;
+      font-weight: 700;
+      font-size: 1rem;
+    }
+    .hw-list li strong { color: var(--text-primary); font-weight: 600; }
+    .hw-list li code {
+      background: var(--bg-code);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.88em;
+      color: var(--accent-light);
+      border: 1px solid var(--border);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .hw-mand .hw-list li code { color: var(--accent-light); }
+    .hw-anti .hw-list li code { color: #fca5a5; }
+
+    .hw-list-tight li { padding: 8px 0 8px 28px; }
+    .hw-list-tight li::before { top: 17px; }
+
+    /* "A day in the life" — narrative block */
+    .hw-narrative {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-left: 3px solid #a855f7;
+      border-radius: var(--radius-sm);
+      padding: 32px 36px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.92rem;
+      line-height: 1.85;
+      color: var(--text-secondary);
+      white-space: pre-wrap;
+      overflow-x: auto;
+    }
+    .hw-narrative .nm-time {
+      color: #c4b5fd;
+      font-weight: 600;
+    }
+    .hw-narrative .nm-emph {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+    .hw-narrative .nm-skill {
+      color: var(--accent-light);
+      font-weight: 600;
+    }
+    .hw-narrative .nm-final {
+      color: var(--text-primary);
+      font-style: italic;
+      font-weight: 600;
+      display: block;
+      margin-top: 24px;
+      padding-top: 18px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* Promotion signal callout */
+    .hw-promo-callout {
+      background: rgba(245, 158, 11, 0.04);
+      border: 1px solid rgba(245, 158, 11, 0.18);
+      border-left: 3px solid var(--amber);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      margin-top: 16px;
+      color: var(--text-secondary);
+      font-size: 0.98rem;
+      line-height: 1.7;
+    }
+    .hw-promo-callout strong { color: #fbbf24; }
+
+    /* ── Cross-role norms ── */
+    .hw-norms {
+      background:
+        radial-gradient(ellipse 80% 50% at 50% 50%, rgba(16, 185, 129, 0.05), transparent 70%);
+    }
+    .hw-norms-card {
+      max-width: 920px; margin: 0 auto;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 48px 48px 40px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hw-norms-card::before {
+      content: ''; position: absolute;
+      top: -50%; left: -50%;
+      width: 200%; height: 200%;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(16, 185, 129, 0.06), transparent 50%),
+        radial-gradient(circle at 70% 70%, rgba(6, 182, 212, 0.04), transparent 50%);
+      pointer-events: none;
+    }
+    .hw-norms-card-header {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent-light);
+      margin-bottom: 28px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+      z-index: 1;
+    }
+    .hw-norms-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      position: relative;
+      z-index: 1;
+    }
+    .hw-norms-list li {
+      display: flex; align-items: flex-start; gap: 16px;
+      padding: 16px 0;
+      border-bottom: 1px dashed var(--border);
+      font-size: 1rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    .hw-norms-list li:last-child { border-bottom: none; }
+    .hw-norms-list li::before {
+      content: '★';
+      flex-shrink: 0;
+      color: var(--accent);
+      font-size: 0.9rem;
+      padding-top: 3px;
+    }
+    .hw-norms-list li strong { color: var(--text-primary); font-weight: 600; }
+    .hw-norms-list li code {
+      background: var(--bg-code);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.88em;
+      color: var(--accent-light);
+      border: 1px solid var(--border);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ── Promotion framework table ── */
+    .hw-promo-table-wrap {
+      max-width: 980px;
+      margin: 0 auto;
+      overflow-x: auto;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+    .hw-promo-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+      min-width: 720px;
+    }
+    .hw-promo-table th {
+      text-align: left;
+      padding: 18px 20px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent-light);
+      border-bottom: 1px solid var(--accent-border);
+      background: var(--accent-soft);
+    }
+    .hw-promo-table td {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+      line-height: 1.55;
+      vertical-align: top;
+    }
+    .hw-promo-table tr:last-child td { border-bottom: none; }
+    .hw-promo-table td strong { color: var(--text-primary); font-weight: 600; }
+    .hw-promo-table td:first-child {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      color: var(--accent-light);
+      white-space: nowrap;
+    }
+
+    /* ── Quick reference card ── */
+    .hw-quickref {
+      background:
+        radial-gradient(ellipse 60% 40% at 50% 100%, rgba(16, 185, 129, 0.06), transparent 70%);
+    }
+    .hw-quickref-card {
+      max-width: 980px; margin: 0 auto;
+      background: var(--bg-card);
+      border: 2px solid var(--accent-border);
+      border-radius: var(--radius);
+      padding: 48px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hw-quickref-card::before {
+      content: ''; position: absolute; top: 0; left: 0;
+      width: 100%; height: 4px;
+      background: linear-gradient(90deg, var(--green) 0%, var(--cyan) 50%, var(--green) 100%);
+    }
+    .hw-quickref-header {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent-light);
+      margin-bottom: 8px;
+    }
+    .hw-quickref-title {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+      letter-spacing: -0.015em;
+    }
+    .hw-quickref-sub {
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      margin-bottom: 36px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .hw-quickref-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+    .hw-quickref-role {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 24px 24px 20px;
+    }
+    .hw-quickref-role-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--accent-light);
+      margin-bottom: 4px;
+      letter-spacing: 0.06em;
+    }
+    .hw-quickref-role-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 14px;
+      letter-spacing: -0.01em;
+    }
+    .hw-quickref-row {
+      display: flex; gap: 10px;
+      padding: 8px 0;
+      border-top: 1px solid var(--border);
+      font-size: 0.88rem;
+      line-height: 1.55;
+    }
+    .hw-quickref-row-label {
+      flex-shrink: 0;
+      width: 70px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding-top: 2px;
+    }
+    .hw-quickref-row-body {
+      color: var(--text-secondary);
+      flex: 1;
+    }
+    .hw-quickref-row-body code {
+      background: var(--bg-code);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 0.86em;
+      color: var(--accent-light);
+      border: 1px solid var(--border);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .hw-quickref-row.anti .hw-quickref-row-label { color: #fca5a5; }
+
+    /* ── Next steps grid ── */
+    .hw-next {
+      background:
+        radial-gradient(ellipse 60% 40% at 50% 100%, rgba(16, 185, 129, 0.04), transparent 70%);
+    }
+    .hw-next-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      max-width: 1080px; margin: 48px auto 0;
+    }
+    .hw-next-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px 28px;
+      transition: var(--transition);
+      display: flex; flex-direction: column; gap: 14px;
+      min-height: 220px;
+      position: relative;
+    }
+    .hw-next-card.is-disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+    .hw-next-card:not(.is-disabled):hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(16, 185, 129, 0.10);
+    }
+    .hw-next-card-label {
+      font-size: 0.72rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.12em;
+      color: var(--text-muted);
+    }
+    .hw-next-card-title {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+      line-height: 1.3;
+    }
+    .hw-next-card-body {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      line-height: 1.65;
+      flex-grow: 1;
+    }
+    .hw-next-card-cta {
+      display: inline-flex; align-items: center; gap: 6px;
+      color: var(--accent-light);
+      font-size: 0.9rem; font-weight: 600;
+      margin-top: auto;
+    }
+    .hw-next-card.is-disabled .hw-next-card-cta {
+      color: var(--text-muted);
+    }
+    .hw-next-card-badge {
+      position: absolute;
+      top: 16px; right: 16px;
+      font-size: 0.65rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 4px 8px;
+      border-radius: 4px;
+      background: rgba(245, 158, 11, 0.10);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.25);
+    }
+
+    /* ── Effective footer ── */
+    .hw-effective {
+      max-width: 720px; margin: 80px auto 0;
+      padding: 32px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 2;
+    }
+    .hw-effective-divider {
+      color: var(--border-hover);
+      letter-spacing: 0.1em;
+    }
+    .hw-effective strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .hw-section { padding: 70px 0; }
+      .hw-role { padding: 36px 28px 32px; }
+      .hw-role-header {
+        flex-direction: column;
+        gap: 12px;
+      }
+      .hw-role-tag { font-size: 2.4rem; min-width: 0; }
+      .hw-role-title { font-size: 1.3rem; }
+      .hw-ladder-row { grid-template-columns: 1fr; gap: 6px; }
+      .hw-ladder-arrow { display: none; }
+      .hw-ladder-intros { grid-template-columns: 1fr; }
+      .hw-quickref-card { padding: 32px 24px; }
+      .hw-quickref-grid { grid-template-columns: 1fr; }
+      .hw-norms-card { padding: 32px 24px 28px; }
+      .hw-next-grid { grid-template-columns: 1fr; }
+      .hw-hero { padding-top: calc(var(--nav-height) + 60px); padding-bottom: 60px; }
+      .hw-narrative { padding: 22px 20px; font-size: 0.82rem; }
+    }
+
+    /* ── Print ── */
+    @media print {
+      #password-gate, .nav, .footer, .hw-hero-cta { display: none !important; }
+      body, .hw-hero, .hw-section, .hw-ladder, .hw-norms, .hw-quickref, .hw-next {
+        background: white !important;
+        color: #0a0f1a !important;
+      }
+      .hw-role, .hw-norms-card, .hw-quickref-card, .hw-effective, .hw-next-card,
+      .hw-ladder-diagram, .hw-ladder-intro, .hw-promo-table-wrap {
+        background: white !important;
+        border: 1px solid #cbd5e1 !important;
+        page-break-inside: avoid;
+        box-shadow: none !important;
+      }
+      .hw-role-tag, .hw-hero h1, .hw-role-meta, .hw-norms-card-header,
+      .hw-quickref-header, .hw-quickref-role-tag {
+        -webkit-text-fill-color: #0f766e !important;
+        color: #0f766e !important;
+        background: none !important;
+      }
+      .hw-list li, .hw-ladder-intro p, .hw-next-card-body, .hw-norms-list li,
+      .hw-promo-table td {
+        color: #334155 !important;
+      }
+      .hw-narrative {
+        background: #f8fafc !important;
+        color: #334155 !important;
+        border-color: #cbd5e1 !important;
+      }
+      .hw-promo-callout {
+        background: #fffbeb !important;
+        color: #78350f !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ════════════════════════════════════════════
+       PASSWORD GATE
+       ════════════════════════════════════════════ -->
+  <div id="password-gate" style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:var(--bg-primary);">
+    <div style="max-width:420px;width:90%;text-align:center;">
+      <div style="width:64px;height:64px;margin:0 auto 24px;border-radius:16px;background:linear-gradient(135deg,var(--green),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:white;box-shadow:0 0 40px rgba(16,185,129,0.3);">H</div>
+      <h1 style="font-size:1.5rem;font-weight:700;margin-bottom:8px;">Heaptrace Handbook</h1>
+      <p style="color:var(--text-secondary);margin-bottom:32px;font-size:0.95rem;">Enter access code to continue</p>
+      <input type="password" id="gate-input" placeholder="Access code" autocomplete="off" style="width:100%;padding:14px 18px;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;color:var(--text-primary);font-size:1rem;font-family:'JetBrains Mono',monospace;margin-bottom:16px;outline:none;transition:all 0.2s;">
+      <button id="gate-submit" style="width:100%;padding:14px;background:linear-gradient(135deg,var(--green),var(--cyan));border:none;border-radius:12px;color:white;font-weight:600;font-size:0.95rem;cursor:pointer;transition:all 0.2s;">Unlock</button>
+      <p id="gate-error" style="color:var(--red);margin-top:16px;font-size:0.85rem;min-height:1.2em;"></p>
+      <p style="color:var(--text-muted);margin-top:40px;font-size:0.8rem;">Private engineering handbook · Heaptrace Technology</p>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       MAIN CONTENT (hidden until unlock)
+       ════════════════════════════════════════════ -->
+  <div id="main-content">
+
+    <!-- NAV -->
+    <nav class="nav">
+      <div class="nav-inner">
+        <a href="../index.html" class="nav-logo"><div class="nav-logo-icon">H</div><span>Heaptrace Skills</span></a>
+        <div class="nav-links" id="navLinks">
+          <a href="../index.html" class="nav-link">Home</a>
+          <a href="../index.html#packs" class="nav-link">Packs</a>
+          <a href="../setup/index.html" class="nav-link">Setup</a>
+          <a href="../customize/index.html" class="nav-link">Customize</a>
+          <a href="index.html" class="nav-link active">Handbook</a>
+          <div class="nav-dropdown">
+            <button class="nav-dropdown-trigger">Security <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button>
+            <div class="nav-dropdown-menu">
+              <a href="../compliance-overview.html" class="nav-dropdown-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>Compliance Overview</a>
+              <a href="../ci-cd-security.html" class="nav-dropdown-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>CI/CD Security Gateway</a>
+              <a href="../cicd-security-setup.html" class="nav-dropdown-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>Setup Guide</a>
+            </div>
+          </div>
+          <a href="../rules/index.html" class="nav-link">Rules</a>
+          <a href="../mcp/index.html" class="nav-link">MCP Servers</a>
+        </div>
+        <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>GitHub
+        </a>
+      </div>
+    </nav>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 1 — HERO
+         ════════════════════════════════════════════ -->
+    <section class="hw-hero">
+      <div class="container hw-hero-content">
+        <div class="hw-hero-badge">
+          <span class="hw-hero-badge-dot"></span>
+          Doc 3 of 7 · Operating Procedures
+        </div>
+        <h1>How We Work<br>By Role</h1>
+        <p class="hw-hero-subtitle">
+          Day-to-day operating procedures for Software Engineer I through IV.
+          What's expected, what's mandatory, and what changes as you grow.
+        </p>
+        <div class="hw-hero-cta">
+          <a href="principles.html" class="hw-btn hw-btn-secondary">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            Back to Principles
+          </a>
+          <a href="skills-playbook.html" class="hw-btn hw-btn-primary">
+            Skills Playbook
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 2 — THE ROLE LADDER (OVERVIEW)
+         ════════════════════════════════════════════ -->
+    <section class="hw-section hw-ladder">
+      <div class="container">
+        <div style="text-align: center; max-width: 760px; margin: 0 auto 56px;">
+          <div class="hw-eyebrow" style="justify-content:center;">The ladder</div>
+          <h2 class="hw-title" style="margin: 0 auto 16px;">Four roles. One trajectory.</h2>
+          <p class="hw-lead" style="margin: 0 auto;">
+            Each role is genuinely distinct. The work changes, the scope changes,
+            the mentorship changes. The skills you run change too.
+          </p>
+        </div>
+
+        <!-- Visual ladder diagram -->
+        <div class="hw-ladder-diagram">
+          <div class="hw-ladder-row">
+            <div class="hw-ladder-cell">SE I</div>
+            <div class="hw-ladder-cell">SE II</div>
+            <div class="hw-ladder-cell">SE III</div>
+            <div class="hw-ladder-cell">SE IV</div>
+          </div>
+          <div class="hw-ladder-row">
+            <div class="hw-ladder-arrow">↓</div>
+            <div class="hw-ladder-arrow">↓</div>
+            <div class="hw-ladder-arrow">↓</div>
+            <div class="hw-ladder-arrow">↓</div>
+          </div>
+          <div class="hw-ladder-row">
+            <div class="hw-ladder-sub">Learn &amp; Ship</div>
+            <div class="hw-ladder-sub">Apply &amp; Own</div>
+            <div class="hw-ladder-sub">Define &amp; Mentor</div>
+            <div class="hw-ladder-sub">Architect &amp; Influence</div>
+          </div>
+        </div>
+
+        <!-- 4 role intro cards -->
+        <div class="hw-ladder-intros">
+          <div class="hw-ladder-intro">
+            <h4>Software Engineer I<span class="role-suffix">Learn &amp; Ship</span></h4>
+            <p>
+              SE I engineers are typically in their first one to two years. We don't
+              hire them to fail safely — we hire them to ship real work with strong
+              scaffolding. Skills carry the domain expertise; SE I brings judgment
+              and curiosity. The handbook removes the variance.
+            </p>
+          </div>
+
+          <div class="hw-ladder-intro">
+            <h4>Software Engineer II<span class="role-suffix">Apply &amp; Own</span></h4>
+            <p>
+              SE II owns features end-to-end. They configure projects, choose
+              skills, and ship without supervision. Their PRs are reviewed for
+              judgment, not for catching basic mistakes — the skills caught those.
+            </p>
+          </div>
+
+          <div class="hw-ladder-intro">
+            <h4>Software Engineer III<span class="role-suffix">Define &amp; Mentor</span></h4>
+            <p>
+              SE III shapes patterns for the team. They write new skills when none
+              exist. They mentor SE I and II by example — through PRs, through
+              pairing, through the decisions they document.
+            </p>
+          </div>
+
+          <div class="hw-ladder-intro">
+            <h4>Software Engineer IV<span class="role-suffix">Architect &amp; Influence</span></h4>
+            <p>
+              SE IV operates above features. They design systems, set technical
+              direction, and own the org-wide standards in the handbook itself.
+              They're the ones who notice when a pattern needs to become a skill —
+              and they write it.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 3 — SOFTWARE ENGINEER I
+         ════════════════════════════════════════════ -->
+    <section class="hw-section">
+      <div class="container">
+        <div style="text-align: center; max-width: 720px; margin: 0 auto 56px;">
+          <div class="hw-eyebrow" style="justify-content:center;">Software Engineer I</div>
+          <h2 class="hw-title" style="margin: 0 auto 16px;">The first eighteen months.</h2>
+          <p class="hw-lead" style="margin: 0 auto;">
+            SE I is where the handbook earns its keep. Done right, an SE I in
+            their third week ships at a quality bar that took a SE III five
+            years to reach on a team without skills.
+          </p>
+        </div>
+
+        <article class="hw-role">
+          <header class="hw-role-header">
+            <div class="hw-role-tag">SE I</div>
+            <div>
+              <div class="hw-role-meta">Section 3 · Learn &amp; Ship</div>
+              <h3 class="hw-role-title">The Software Engineer I role</h3>
+              <p class="hw-role-subtitle">
+                12–18 months at this level. Tightly scaffolded. Heavily mentored.
+                Real work, not training-wheel work.
+              </p>
+            </div>
+          </header>
+
+          <!-- What SE I Owns -->
+          <div class="hw-sub hw-owns">
+            <div class="hw-sub-label">
+              <span class="hw-sub-label-icon">◆</span>
+              What SE I owns
+            </div>
+            <ul class="hw-list">
+              <li>Tasks scoped by a Tech Lead or SE III — the SE I doesn't yet scope their own work.</li>
+              <li>Small features and bug fixes — always with a plan, never freehand.</li>
+              <li>Test coverage for their own work — they don't ship code without tests, and they don't ship tests that don't fail under failure conditions.</li>
+              <li>Documentation updates that touch the code they wrote — if you changed the API, you updated the doc.</li>
+              <li>Reviewing other SE I PRs as a learning exercise — under supervision, with a SE II or above co-reviewing.</li>
+            </ul>
+          </div>
+
+          <!-- Mandatory Skills for SE I -->
+          <div class="hw-sub hw-mand">
+            <div class="hw-sub-label">
+              <span class="hw-sub-label-icon">✓</span>
+              Mandatory skills
+            </div>
+            <ul class="hw-list">
+              <li><code>/quick-plan</code> before every task — required. No editor opens before a plan exists, even for a copy change.</li>
+              <li><code>/quick-work</code> to execute plans — required for any task that has a <code>/quick-plan</code>.</li>
+              <li><code>/code-review</code> before every PR — required. The Tech Lead checks the output is attached; PRs without it bounce.</li>
+              <li><code>/sec-audit</code> on any auth, payments, or PII code — required. No exceptions for "small changes."</li>
+              <li><code>/smart-commit</code> for commit messages — required. Consistency across the team starts here.</li>
+              <li><code>/feature-plan</code> on any work bigger than a single session — required. Pair with a senior to review the plan before implementation.</li>
+              <li><code>/find-fix</code> when diagnosing a bug — required before planning the fix. Cause first, fix second.</li>
+              <li><code>/explain</code> when reading unfamiliar code — recommended. Strongly preferred over guessing what code does.</li>
+              <li><code>/test-gen</code> when adding tests to a new file — recommended. Pairs naturally with <code>/quick-work</code>.</li>
+            </ul>
+          </div>
+
+          <!-- A Day in the Life — SE I -->
+          <div class="hw-sub hw-day">
+            <div class="hw-sub-label">
+              <span class="hw-sub-label-icon">⏱</span>
+              A day in the life — Maya, SE I, week 3
+            </div>
+            <div class="hw-narrative"><span class="nm-time">9:00 AM</span> — Maya logs in. Her Jira board shows three tickets
+assigned: a UI bug (logo alignment on mobile dashboard), a copy change
+in the welcome email, and a flaky test in the auth suite. She doesn't
+open her editor yet.
+
+<span class="nm-time">9:05 AM</span> — She runs <span class="nm-skill">/quick-plan</span> on the first ticket — the UI bug.
+Output: "Task: Fix logo alignment on mobile dashboard. Files: 1.
+Steps: 3. Estimate: S." She skim-reads it in 20 seconds, agrees, and
+replies B (implement now).
+
+<span class="nm-time">9:15 AM</span> — Standup. Priya, the Tech Lead, asks about the auth flaky
+test. Maya hasn't started it yet but doesn't fake a status. <span class="nm-emph">"I'll
+plan it after the UI fix — likely M-sized. If it grows, I'll flag."</span>
+Priya nods. That answer would have been "yeah, looking at it" two
+weeks ago. The handbook taught her not to bluff.
+
+<span class="nm-time">9:20 AM</span> — Back to the dashboard fix. <span class="nm-skill">/quick-work</span> made the change.
+Maya verifies in browser — desktop and mobile, on three viewport sizes.
+Logo is aligned. She runs <span class="nm-skill">/code-review</span> on the diff. Output flags
+one issue: a missing accessibility label on the new icon she touched.
+She fixes it and re-runs review. Clean.
+
+<span class="nm-time">9:45 AM</span> — <span class="nm-skill">/smart-commit</span> generates the commit message:
+"fix(ui): align logo on mobile dashboard." She pushes. PR opens.
+Priya approves within the hour.
+
+<span class="nm-time">10:30 AM</span> — On to the welcome email copy change. Trivially S. She
+almost skips <span class="nm-skill">/quick-plan</span> and... no, wait. The handbook says
+every task gets a plan. She runs it. 30 seconds. Output: "Task:
+Update welcome email subject line. Files: 2. Steps: 1."
+
+Two files. <span class="nm-emph">The plan caught that the copy lives in two places — the
+email template and the i18n catalog.</span> Without the plan, she would
+have shipped half the change. The plan paid for itself.
+
+<span class="nm-time">11:00 AM</span> — The auth flaky test. <span class="nm-skill">/find-fix</span> first — diagnose
+before plan. Output: "Root cause: race condition between mocked OAuth
+callback and session-cookie setter. The test setup doesn't await the
+session ID before clicking 'continue.'" Now she runs <span class="nm-skill">/quick-plan</span>
+against the diagnosed cause. M-sized. She implements with <span class="nm-skill">/quick-work</span>.
+
+<span class="nm-time">11:45 AM</span> — She runs the test thirty times to verify it no longer
+flakes. <span class="nm-emph">Verify, don't trust — Principle 5.</span> It passes thirty
+times. She pushes.
+
+<span class="nm-time">12:30 PM</span> — Lunch. She doesn't think about work for an hour.
+
+<span class="nm-time">2:00 PM</span> — PR review. Daniyal (SE II) asked her to review a small
+refactor PR. She runs <span class="nm-skill">/explain</span> on a chunk of code she doesn't
+fully understand — a custom hook for paginated queries. The skill
+explains it in plain language. She leaves three comments on the PR,
+two of which Daniyal acts on.
+
+<span class="nm-time">3:00 PM</span> — Pairs with Sahil, another SE I who started last week.
+She walks him through <span class="nm-skill">/quick-plan</span> on his first ticket. He keeps
+trying to skip it. <span class="nm-emph">"No — every task. Even copy changes. I learned
+that the hard way this morning."</span>
+
+<span class="nm-time">4:30 PM</span> — Ends the day with a small doc PR: she noticed the
+README for the auth module was out of date after her flaky-test fix.
+<span class="nm-skill">/smart-commit</span> generates the message: "docs(auth): update OAuth
+flow diagram after race-condition fix." Pushed.
+
+<span class="nm-time">5:30 PM</span> — Logs off.
+
+<span class="nm-final">She didn't write a single line of code today without first running a plan.
+That's the standard, not the exception.</span></div>
+          </div>
+
+          <!-- Anti-Patterns for SE I -->
+          <div class="hw-sub hw-anti">
+            <div class="hw-sub-label">
+              <span class="hw-sub-label-icon">✕</span>
+              Anti-patterns — what SE I must not do
+            </div>
+            <ul class="hw-list">
+              <li>Open the editor without running <code>/quick-plan</code> (or <code>/feature-plan</code> for larger work). The plan is the entry condition for coding.</li>
+              <li>Ship a PR without <code>/code-review</code> output attached. Reviewer rejects on sight — they don't run it for you.</li>
+              <li>Bypass <code>/sec-audit</code> on regulated code "because it's a small change." The size of the change has nothing to do with the size of the security risk.</li>
+              <li>Trust AI-generated code without verifying acceptance criteria. Read the diff. Run the tests. Click the button. Don't assume.</li>
+              <li>Accept blame for a production issue without diagnosis. Run <code>/find-fix</code>. The bug has a cause; the cause is not "I was sloppy."</li>
+              <li>Stay silent in standup when blocked. Asking for help is the cheapest cost-reduction mechanism the team has — silence costs everyone.</li>
+              <li>Copy-paste code from a teammate's PR without running <code>/explain</code> on it. Borrowed patterns become bugs when their context isn't borrowed too.</li>
+            </ul>
+          </div>
+
+          <!-- Promotion Signal — SE I to SE II -->
+          <div class="hw-sub hw-promo">
+            <div class="hw-sub-label">
+              <span class="hw-sub-label-icon">↗</span>
+              Promotion signal — from SE I to SE II
+            </div>
+            <ul class="hw-list">
+              <li><strong>Consistent skill usage for 3+ months</strong> — every task, no exceptions, even when nobody's watching.</li>
+              <li><strong>95%+ PRs merge on first review</strong> — the review catches judgment calls, not basic mistakes.</li>
+              <li><strong>Caught a real bug via <code>/sec-audit</code> or <code>/dep-vuln</code></strong> — something a senior reviewer would have missed without the skill.</li>
+              <li><strong>Wrote a <code>/decision-doc</code></strong> for an architecture choice that affected someone other than themselves.</li>
+              <li><strong>Mentored another SE I</strong> on skill usage during onboarding — not just answered questions, but actively coached.</li>
+            </ul>
+            <div class="hw-promo-callout">
+              <strong>Note —</strong> The promotion to SE II is not about more code per week. It's
+              about the moment a Tech Lead realizes they no longer need to scope your tickets.
+              You're scoping them yourself, and the scopes are right.
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 4 — SOFTWARE ENGINEER II
+         ════════════════════════════════════════════ -->
+    <section class="hw-section">
+      <div class="container">
+        <div style="text-align: center; max-width: 720px; margin: 0 auto 56px;">
+          <div class="hw-eyebrow" style="justify-content:center;">Software Engineer II</div>
+          <h2 class="hw-title" style="margin: 0 auto 16px;">Autonomy, with proof.</h2>
+          <p class="hw-lead" style="margin: 0 auto;">
+            SE II is the first level where you scope your own work. The reviews
+            change shape too — they get faster, but the questions get sharper.
+          </p>
+        </div>
+
+        <article class="hw-role">
+          <header class="hw-role-header">
+            <div class="hw-role-tag">SE II</div>
+            <div>
+              <div class="hw-role-meta">Section 4 · Apply &amp; Own</div>
+              <h3 class="hw-role-title">The Software Engineer II role</h3>
+              <p class="hw-role-subtitle">
+                18–30 months at this level. Owns features end-to-end. Configures projects.
+                Mentors SE I by example.
+              </p>
+            </div>
+          </header>
+
+          <div class="hw-sub hw-owns">
+            <div class="hw-sub-label">
+              <span class="hw-sub-label-icon">◆</span>
+              What SE II owns
+            </div>
+            <ul class="hw-list">
+              <li>Features end-to-end — no daily Tech Lead scoping needed. You read the requirement, you scope it, you ship it.</li>
+              <li>Project-level <code>.heaptrace/</code> configurations — including <code>quick-plan.json</code>, <code>code-review.json</code>, and <code>code-standards.json</code> for the projects you touch most.</li>
+              <li>Test strategy for your own features — what to test at unit level, what at integration, what at e2e. The strategy is documented in the PR.</li>
+              <li>Onboarding documentation for components you touch — when an SE I joins, your docs are part of how they learn.</li>
+              <li>Pairing with SE I on review — not just rubber-stamp, but actual review with explanation.</li>
+              <li>Identifying patterns that should become skills — and raising them with SE III or above.</li>
+            </ul>
+          </div>
+
+          <div class="hw-sub hw-mand">
+            <div class="hw-sub-label">
+              <span class="hw-sub-label-icon">✓</span>
+              Mandatory skills
+            </div>
+            <ul class="hw-list">
+              <li><strong>All SE I mandates remain</strong> — they don't graduate; they compound.</li>
+              <li><code>/feature-plan</code> and <code>/feature-work</code> for any multi-session feature work. No exceptions for "I've built something like this before."</li>
+              <li><code>/sec-audit</code> self-initiated — not just when reminded. If your code touches a security surface, you run it before opening the PR.</li>
+              <li><code>/test-gen</code> for new test suites — paired with manual review of the generated tests for hallucination patterns.</li>
+              <li><code>/code-standards</code> per-project tuning — every project you touch should have its <code>.heaptrace/</code> set up by the time you've shipped two features in it.</li>
+              <li><code>/message-craft</code> for any cross-team or client-facing message — non-negotiable for client-facing, strongly recommended for internal.</li>
+              <li><code>/release-notes</code> when your work ships in a release — your features get documented by you, not by the PM.</li>
+              <li><code>/decision-doc</code> when you make a non-trivial technical choice — the doc lives forever; the Slack message doesn't.</li>
+              <li><code>/arch-review</code> on architecture changes you propose — even if you're confident, the skill catches things confidence misses.</li>
+            </ul>
+          </div>
+
+          <div class="hw-sub hw-day">
+            <div class="hw-sub-label">
+              <span class="hw-sub-label-icon">⏱</span>
+              A day in the life — Daniyal, SE II, 18 months in
+            </div>
+            <div class="hw-narrative"><span class="nm-time">8:45 AM</span> — Daniyal opens the new project repo he was assigned
+last Friday. It's a payments-integration feature, three to four weeks
+of work. Before he opens any file, he runs <span class="nm-skill">/code-standards</span> on
+the repo. The skill detects the project uses React Query — but the
+existing rules are tuned for SWR. He updates <span class="nm-emph">.heaptrace/code-standards.json</span>
+to match. Commits it as the first PR on this project.
+
+<span class="nm-time">9:00 AM</span> — <span class="nm-skill">/feature-plan</span> for the payments integration. He
+spends the next 40 minutes reading the requirement, running the
+plan, reviewing the output, iterating once. The plan comes out with:
+12 sub-tasks, 4 risk items (one of which Daniyal hadn't considered
+— a webhook idempotency edge case), data-flow diagram, acceptance
+criteria broken down per sub-task.
+
+<span class="nm-time">9:40 AM</span> — He shares the plan with Sarah (SE III) for a 5-minute
+review. She catches one thing: a misalignment between his retry
+strategy and the team's existing convention for Stripe webhooks.
+He updates the plan and adds a <span class="nm-skill">/decision-doc</span> capturing the
+retry strategy so the next person who touches webhooks finds it.
+
+<span class="nm-time">10:00 AM</span> — Standup. He gives a precise update: "Yesterday:
+finished the user-invite redesign, merged. Today: scoping the
+payments integration, plan reviewed by Sarah, expecting first
+PR by Wednesday. Blockers: none. Next: I'll need 30 min from
+Marcus on Wednesday to walk through the webhook idempotency edge."
+
+<span class="nm-time">10:15 AM</span> — Two SE I PRs in his queue. The first looks clean —
+<span class="nm-skill">/code-review</span> output attached, tests pass, plan referenced.
+Approved in 8 minutes.
+
+The second is from Sahil — he forgot to run <span class="nm-skill">/code-review</span>.
+Daniyal bounces it. <span class="nm-emph">"Run /code-review and re-submit — I don't
+run it for you."</span> No softening. The next time Sahil submits a
+PR, the skill output is attached. The bounce taught it.
+
+<span class="nm-time">11:00 AM</span> — Starts implementation on sub-task 1 of the payments
+plan. <span class="nm-skill">/feature-work</span> generates the scaffolding. He hand-writes
+the parts that involve the Stripe SDK, because he doesn't trust
+generated code on third-party SDK calls without verification —
+<span class="nm-emph">Principle 5 again</span>.
+
+<span class="nm-time">12:30 PM</span> — Lunch.
+
+<span class="nm-time">1:30 PM</span> — Continues implementation. Hits the webhook idempotency
+edge mentioned in the plan. Spends 45 minutes on it, ends up with
+a clean solution. Adds a test for it (the test fails when he
+deliberately breaks the idempotency check — verified, not assumed).
+
+<span class="nm-time">2:30 PM</span> — Scope creep risk. The PM Slacks: "Hey, can we also
+add tipping support while you're in there?" Daniyal pulls up his
+plan, points to it, and replies: <span class="nm-emph">"Tipping wasn't in the original
+scope. Want me to estimate it as a separate ticket? If we add it
+to this one, ship date moves from next Wednesday to the following
+Monday."</span> The PM picks the separate ticket. The plan paid for
+itself again.
+
+<span class="nm-time">3:00 PM</span> — Runs <span class="nm-skill">/message-craft</span> on a Slack post he's drafting
+for the PM channel about the scope change. The skill catches one
+hedge ("I think this might be...") and removes it. The message
+goes out clean.
+
+<span class="nm-time">4:00 PM</span> — Pairs with Sarah (SE III) on a <span class="nm-skill">/decision-doc</span>
+they're co-authoring — state management refactor for the dashboard.
+Daniyal does most of the writing; Sarah pushes back on the
+trade-off analysis section. He rewrites it twice. The doc lands
+before end of day.
+
+<span class="nm-time">5:00 PM</span> — Last PR review of the day. Approves. Logs off.
+
+<span class="nm-final">He shipped one sub-task, reviewed two SE I PRs, co-wrote a decision
+doc, and resisted scope creep. None of this required a Tech Lead
+to scaffold for him. That's the SE II shape.</span></div>
+          </div>
+
+          <div class="hw-sub hw-anti">
+            <div class="hw-sub-label">
+              <span class="hw-sub-label-icon">✕</span>
+              Anti-patterns — what SE II must not do
+            </div>
+            <ul class="hw-list">
+              <li>Re-do scaffolding work the skills already do. If you find yourself writing the same kind of plan from scratch every Monday, you're vibe-coding the plan — run the skill instead.</li>
+              <li>Skip <code>/feature-plan</code> when a ticket says "feature." Token waste? Sure. Quality matters more. Cynicism about the skill is what kills it on the team.</li>
+              <li>Leave <code>.heaptrace/</code> unconfigured on a project you've shipped multiple features in. That forces every SE I after you to ask the same questions you already answered.</li>
+              <li>Rubber-stamp SE I PRs. Reviews are teaching. If you don't have time to explain why something is wrong, you don't have time to approve it.</li>
+              <li>Ship a feature without a <code>/code-review</code>-passing diff and a passing test suite. Standards have teeth — Principle 7. You're the one giving them teeth at SE II.</li>
+              <li>Hide a hallucination you caught. Every hallucination that's not reported is one that hits the next developer harder.</li>
+              <li>Accept a scope-creep request without re-running the plan. The plan is the negotiation document — bring it to the conversation.</li>
+            </ul>
+          </div>
+
+          <div class="hw-sub hw-promo">
+            <div class="hw-sub-label">
+              <span class="hw-sub-label-icon">↗</span>
+              Promotion signal — from SE II to SE III
+            </div>
+            <ul class="hw-list">
+              <li><strong>Owned 5+ features ship-to-prod without escalation</strong> — including at least one with cross-team dependencies.</li>
+              <li><strong>Authored or significantly extended at least 1 internal skill</strong> — proven by it being used by someone other than you.</li>
+              <li><strong>Mentored an SE I from onboarding to first solo feature</strong> — the SE I ships without escalating to you for help.</li>
+              <li><strong>Drove a <code>/decision-doc</code> that changed team direction</strong> — not just documented; actually altered how the team works.</li>
+              <li><strong>Identified an anti-pattern that became a handbook entry</strong> — caught a pattern, named it, escalated to SE III/IV for codification.</li>
+            </ul>
+            <div class="hw-promo-callout">
+              <strong>Note —</strong> The signal isn't tenure. We've promoted in 14 months and
+              we've held in place at 30. The signal is that SE III work starts happening
+              before the title catches up.
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 5 — SOFTWARE ENGINEER III
+         ════════════════════════════════════════════ -->
+    <section class="hw-section">
+      <div class="container">
+        <div style="text-align: center; max-width: 720px; margin: 0 auto 56px;">
+          <div class="hw-eyebrow" style="justify-content:center;">Software Engineer III</div>
+          <h2 class="hw-title" style="margin: 0 auto 16px;">The pattern-setter.</h2>
+          <p class="hw-lead" style="margin: 0 auto;">
+            SE III is the role that scales the team. They turn one person's hard-won
+            knowledge into a skill the whole team gets to use forever.
+          </p>
+        </div>
+
+        <article class="hw-role">
+          <header class="hw-role-header">
+            <div class="hw-role-tag">SE III</div>
+            <div>
+              <div class="hw-role-meta">Section 5 · Define &amp; Mentor</div>
+              <h3 class="hw-role-title">The Software Engineer III role</h3>
+              <p class="hw-role-subtitle">
+                24–48 months at this level. Owns patterns. Writes skills. Reviews architecture.
+                Mentors SE I and II directly.
+              </p>
+            </div>
+          </header>
+
+          <div class="hw-sub hw-owns">
+            <div class="hw-sub-label">
+              <span class="hw-sub-label-icon">◆</span>
+              What SE III owns
+            </div>
+            <ul class="hw-list">
+              <li>Patterns and standards within a domain — frontend, backend, mobile, data, infra. You're the one the team escalates "is this how we do it?" questions to.</li>
+              <li>Skill authorship and refinement — when no skill exists for a recurring need, you write it. When a skill is wrong, you fix it.</li>
+              <li>Architecture reviews via <code>/arch-review</code> — both for your own work and for cross-domain proposals from SE II.</li>
+              <li>Cross-feature consistency — you notice when two features diverge in shape and you reconcile them, before three features become four.</li>
+              <li>Direct mentorship of SE I and II — including running the first skip-level meetings to feed promotion signal back to the Tech Lead.</li>
+              <li>Quarterly <code>/tech-debt-audit</code> on your domain — the work nobody else will do if you don't.</li>
+            </ul>
+          </div>
+
+          <div class="hw-sub hw-mand">
+            <div class="hw-sub-label">
+              <span class="hw-sub-label-icon">✓</span>
+              Mandatory skills
+            </div>
+            <ul class="hw-list">
+              <li><strong>All SE I and II mandates remain</strong> — and you model them visibly so juniors see the standard.</li>
+              <li><code>/arch-review</code> on any significant architecture change in your domain — your own or someone else's.</li>
+              <li><code>/tech-debt-audit</code> quarterly per domain — calendar-blocked, not "when I have time."</li>
+              <li><code>/decision-doc</code> for any pattern that affects others — the doc index is your responsibility, not the SE IV's.</li>
+              <li><code>/onboard-dev</code> content updates when patterns change — old docs that contradict new patterns are how teams produce inconsistent PRs.</li>
+              <li><code>/pr-strategy</code> ownership for your domain — branch hygiene, review SLAs, merge cadence. Set them, enforce them.</li>
+              <li><code>/perf-audit</code> when shipping a feature that has scale implications — the SE II didn't catch it; you do.</li>
+              <li><code>/integration-plan</code> when introducing a new external dependency — third-party SDK, new internal service, anything across a network boundary.</li>
+              <li><code>/sprint-plan</code> co-ownership with the Tech Lead — you bring the domain knowledge into the sprint shape.</li>
+            </ul>
+          </div>
+
+          <div class="hw-sub hw-day">
+            <div class="hw-sub-label">
+              <span class="hw-sub-label-icon">⏱</span>
+              A day in the life — Sarah, SE III, 4 years at Heaptrace, owns Frontend Patterns
+            </div>
+            <div class="hw-narrative"><span class="nm-time">8:30 AM</span> — Sarah starts the day with the quarterly <span class="nm-skill">/tech-debt-audit</span>
+on the frontend component library. The skill flags 17 items. She
+spends 90 minutes triaging — 6 are real, 4 are noise, 7 are valid
+but already covered by an in-flight migration. She turns the 6 real
+ones into tickets and assigns them across the next two sprints.
+
+<span class="nm-time">10:00 AM</span> — Daniyal (SE II) pings: he wants her review on a
+<span class="nm-skill">/decision-doc</span> he's drafting about React Query vs SWR for the
+new dashboard. She doesn't just rubber-stamp it. She pulls up the
+existing decision doc from two years ago (her own), reads it, then
+reads Daniyal's draft. Catches that he's argued from a different
+context — they have different data freshness needs now. She suggests
+a small extension to the original doc rather than a new one, and a
+deprecation note on the legacy SWR usage. He agrees. She adds the
+revision herself in 10 minutes.
+
+<span class="nm-time">10:45 AM</span> — Standup. Sarah reports: "Yesterday: tech-debt audit
+on the component library, 6 real items now ticketed. Today: skip-
+level with Maya at 11, then writing the legacy-migration skill I
+mentioned last week. Blockers: none."
+
+<span class="nm-time">11:00 AM</span> — Skip-level 1:1 with Maya (SE I, week 3). Maya is
+nervous; this is her first one. Sarah keeps it casual. She asks what
+Maya is finding hard, what she's enjoying, where the handbook feels
+unclear. Maya mentions that <span class="nm-skill">/quick-plan</span> sometimes feels excessive
+on trivial tickets — but then describes the welcome-email two-files
+incident from earlier in the week, and answers her own question
+mid-sentence. Sarah laughs and says <span class="nm-emph">"That's why."</span> She makes a
+note: <span class="nm-emph">Maya is ahead of pace. Tell Priya at the next promotion review.</span>
+
+<span class="nm-time">12:00 PM</span> — Lunch with Marcus (SE IV). They talk about whether
+the new event-driven module he's designing should reuse the existing
+queueing infrastructure or stand up a new one. Sarah pushes for
+reuse; Marcus pushes for separation. They agree to schedule a
+<span class="nm-skill">/system-design</span> review next week. Decision deferred, but defined.
+
+<span class="nm-time">1:30 PM</span> — She writes a new internal skill: <span class="nm-skill">/legacy-migration-step</span>.
+It's based on a pattern she's seen recur five times in the last
+quarter — a feature needs to be migrated from the legacy state
+store, but every developer does it slightly differently. By 3 PM
+the skill is drafted. She runs it on the next legacy-migration
+ticket in the backlog as a dogfooding test. Two issues caught,
+fixed. The skill ships to <span class="nm-emph">.heaptrace/skills/internal/</span> on Friday
+after one more review pass.
+
+<span class="nm-time">3:30 PM</span> — Reviews an <span class="nm-skill">/arch-review</span> output that another SE III
+in the backend domain ran on his proposed event-bus schema. She
+doesn't just check the syntax — she checks the architectural fit
+with the frontend's data subscriptions. Finds one mismatch (the
+event payloads don't include enough context for optimistic UI
+updates). Comments. The backend SE III replies within 20 minutes
+with a fix.
+
+<span class="nm-time">4:30 PM</span> — Approves three PRs. One of them she bounces back —
+not because the code is wrong, but because the SE II author hadn't
+included the <span class="nm-skill">/decision-doc</span> link for a non-trivial trade-off
+he made. <span class="nm-emph">"Add the doc. The next person needs to understand the
+choice."</span>
+
+<span class="nm-time">5:15 PM</span> — Logs off.
+
+<span class="nm-final">She wrote no production code today. She wrote one skill, one decision
+revision, one tech-debt triage, and one mentorship hour. That's the
+SE III shape. The leverage is in the multipliers, not the keystrokes.</span></div>
+          </div>
+
+          <div class="hw-sub hw-anti">
+            <div class="hw-sub-label">
+              <span class="hw-sub-label-icon">✕</span>
+              Anti-patterns — what SE III must not do
+            </div>
+            <ul class="hw-list">
+              <li>Solve problems alone that should become skills or docs. One-off heroics make you look senior; they make the team weaker. Codify or step away.</li>
+              <li>Code-review only the syntax. SE III review is about architectural fit, pattern consistency, and risk. If your reviews are line-by-line nitpicks, you've regressed to SE II.</li>
+              <li>Skip the handbook update when a new pattern is adopted. Drift starts the day the doc lags the practice.</li>
+              <li>Hoard domain knowledge "because nobody asks." Push it out. <code>/onboard-dev</code> exists. The doc index exists. Use them.</li>
+              <li>Approve a PR that violates a pattern you wrote. That's how patterns die — slowly, by exception.</li>
+              <li>Treat mentorship as optional. Mentorship is the multiplier; without it, you're an expensive SE II.</li>
+              <li>Refuse to write a skill "because the team can just learn it." If you find yourself explaining the same thing three times, you've already wasted more time than writing the skill would have cost.</li>
+            </ul>
+          </div>
+
+          <div class="hw-sub hw-promo">
+            <div class="hw-sub-label">
+              <span class="hw-sub-label-icon">↗</span>
+              Promotion signal — from SE III to SE IV
+            </div>
+            <ul class="hw-list">
+              <li><strong>Authored 3+ skills used across multiple teams</strong> — proven by usage telemetry or by other SE IIIs citing them.</li>
+              <li><strong>Drove a cross-domain architecture decision</strong> — frontend × backend, mobile × infra, the kind of decision that spans more than one SE III's domain.</li>
+              <li><strong>Identified and resolved a recurring class of bugs</strong> — via a skill change or pattern change, not by fixing them one at a time.</li>
+              <li><strong>Mentored an SE II to SE III promotion</strong> — the mentee shipped at SE III level for 3+ months before the title moved.</li>
+              <li><strong>Influenced the handbook itself</strong> — a new principle, a new anti-pattern, a new doc section that carries your name in the contribution history.</li>
+            </ul>
+            <div class="hw-promo-callout">
+              <strong>Note —</strong> SE III to SE IV is the longest gap in the ladder. Most engineers
+              who reach SE III stay there happily for years. That's not a failure mode — SE III is a
+              genuinely high-leverage role. SE IV is the role for engineers who want to influence
+              architecture across teams, not just within one.
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 6 — SOFTWARE ENGINEER IV
+         ════════════════════════════════════════════ -->
+    <section class="hw-section">
+      <div class="container">
+        <div style="text-align: center; max-width: 720px; margin: 0 auto 56px;">
+          <div class="hw-eyebrow" style="justify-content:center;">Software Engineer IV (Staff)</div>
+          <h2 class="hw-title" style="margin: 0 auto 16px;">The handbook itself.</h2>
+          <p class="hw-lead" style="margin: 0 auto;">
+            SE IV is the role that owns this document. They notice the gap, name it,
+            and write the principle. The team operates because they wrote down how.
+          </p>
+        </div>
+
+        <article class="hw-role">
+          <header class="hw-role-header">
+            <div class="hw-role-tag">SE IV</div>
+            <div>
+              <div class="hw-role-meta">Section 6 · Architect &amp; Influence</div>
+              <h3 class="hw-role-title">The Software Engineer IV (Staff) role</h3>
+              <p class="hw-role-subtitle">
+                36+ months at this level, often indefinite. Operates above features.
+                Designs systems. Owns org-wide standards.
+              </p>
+            </div>
+          </header>
+
+          <div class="hw-sub hw-owns">
+            <div class="hw-sub-label">
+              <span class="hw-sub-label-icon">◆</span>
+              What SE IV owns
+            </div>
+            <ul class="hw-list">
+              <li>Org-wide engineering standards — the handbook itself, the principles, the doc structure. When this page changes, an SE IV signed off.</li>
+              <li>Cross-team architecture — systems that span multiple SE III domains. Event buses, data platforms, multi-service contracts.</li>
+              <li>The skill suite curriculum — which packs the team needs, which are missing, which are deprecated. The 101-skill inventory has an owner.</li>
+              <li>Mentorship of SE III — the longest mentorship loop in the company. Years, not quarters.</li>
+              <li>Engineering org-design input — hiring panels, promotion frameworks, headcount allocation. SE IV votes count.</li>
+              <li>External representation — the conference talk, the open-source PR upstream, the vendor evaluation that costs $200K to get wrong.</li>
+            </ul>
+          </div>
+
+          <div class="hw-sub hw-mand">
+            <div class="hw-sub-label">
+              <span class="hw-sub-label-icon">✓</span>
+              Mandatory skills
+            </div>
+            <ul class="hw-list">
+              <li><strong>All previous mandates remain</strong> — and SE IV models them publicly, in front of the org. If you skip your own skill, the org learns to.</li>
+              <li><code>/system-design</code> for any new system or significant rearchitecture. The doc lives in the architecture index for 5+ years.</li>
+              <li><code>/integration-plan</code> for cross-team work — the contract, the migration sequence, the rollback plan.</li>
+              <li><code>/cost-estimate</code> on architectural choices — every architecture proposal includes the dollars-per-month projection at 1×, 10×, and 100× scale.</li>
+              <li><code>/scalability-review</code> quarterly on owned systems — not "when something breaks," but on calendar.</li>
+              <li><code>/decision-doc</code> archive ownership — the doc index, the patterns, the long arc. New SE IVs inherit the archive; they don't restart it.</li>
+              <li><code>/api-design</code> for any new public or cross-service API — the schema is the contract; the contract is the constraint.</li>
+              <li><code>/db-design</code> review on any new persistence layer — even if an SE III did the first pass.</li>
+              <li><code>/migration-plan</code> for anything that touches production data — irreversible operations need a reversible plan.</li>
+            </ul>
+          </div>
+
+          <div class="hw-sub hw-day">
+            <div class="hw-sub-label">
+              <span class="hw-sub-label-icon">⏱</span>
+              A day in the life — Marcus, SE IV (Staff), 8 years at Heaptrace, owns Platform Architecture
+            </div>
+            <div class="hw-narrative"><span class="nm-time">7:30 AM</span> — Marcus starts before standup. He's writing a
+<span class="nm-skill">/system-design</span> doc for a new event-driven module the team needs
+in Q3. The doc is in its third revision. He spends 90 minutes on
+the failure modes section — the part most engineers skip and the
+part that pays off three years later. He includes a <span class="nm-skill">/cost-estimate</span>
+sub-section showing the system's dollar cost at 1×, 10×, and 100×
+scale. The 100× number is the one that will determine whether
+they reuse Kafka or stand up something cheaper. He doesn't decide
+yet — he lets the doc make the case.
+
+<span class="nm-time">9:30 AM</span> — Standup. He's deliberately brief. "Yesterday: system
+design draft 2 on the event module. Today: finishing the draft,
+review with Sarah at 4. Blockers: need a 30-min slot with the
+backend Tech Lead on the queueing reuse question."
+
+<span class="nm-time">9:45 AM</span> — Reviews a <span class="nm-skill">/scalability-review</span> Sarah (SE III) ran
+on the search service. She caught an indexing problem that would
+have surfaced at 5× current load. He approves her remediation
+plan with one addition: he asks her to write a <span class="nm-skill">/decision-doc</span>
+on why they're not pre-emptively migrating to OpenSearch, because
+the next SE III who looks at this will ask. She agrees.
+
+<span class="nm-time">10:30 AM</span> — Hiring panel. Two-hour slot for an SE III candidate.
+Marcus doesn't ask "tell me about a project" questions; he asks
+"walk me through a decision you made that turned out to be wrong,
+and what you'd do differently." The candidate's answer is honest
+and specific. He gives a strong yes.
+
+<span class="nm-time">12:30 PM</span> — Lunch. Open-source PR upstream — he submits a
+patch to a library the team depends on. The maintainer responds
+within an hour. <span class="nm-emph">This is part of the job, not a side project.</span>
+The library is critical infrastructure; a healthy upstream is
+risk reduction.
+
+<span class="nm-time">1:30 PM</span> — Vendor evaluation call. An observability vendor is
+pitching. He runs <span class="nm-skill">/cost-estimate</span> on their pricing model
+against the team's projected log volume for the next two years.
+The vendor's pricing is reasonable at year 1, brutal at year 3.
+He doesn't say no in the call; he says he'll review and reply
+by Friday. Then he replies on Wednesday so the vendor doesn't
+chase him.
+
+<span class="nm-time">2:30 PM</span> — Handbook PR. He's updating Principle 4 (Output
+Consistency) with a new measurement framework — they've collected
+six months of data and one of the four metrics turned out to be
+noisier than expected. He's deprecating it and adding a replacement
+(reviewer-iteration delta on PRs above 200 lines). The PR has a
+long description; the change is small but the rationale is what
+the team will read. He merges to <span class="nm-skill">handbook-main</span> after one
+review pass from another SE IV.
+
+<span class="nm-time">4:00 PM</span> — System-design review with Sarah. She pushes back on
+the queueing-reuse decision. He has the cost-estimate numbers
+in his back pocket; he shares them. <span class="nm-emph">"At 10× scale, the new
+queue saves us $11K/month. At 1× it costs us a week of
+engineering. I think it's worth it."</span> Sarah agrees. They
+schedule the migration plan for next sprint.
+
+<span class="nm-time">5:00 PM</span> — Skip-level with one of the SE IIIs. Asks how the
+domain ownership is going, where the rough edges are, whether the
+quarterly tech-debt cadence is the right rhythm. The SE III gives
+honest feedback: the quarterly cadence is too slow for the
+mobile domain. Marcus agrees and proposes shifting it to monthly
+for mobile while keeping it quarterly elsewhere. Logged as a
+handbook PR for next week.
+
+<span class="nm-time">6:00 PM</span> — Logs off.
+
+<span class="nm-final">He wrote one system design, approved one scalability review, ran one
+hiring panel, contributed one upstream PR, evaluated one vendor, merged
+one handbook update, and ran one skip-level. Zero production code. That's
+the SE IV shape. The output is the architecture; the architecture is the
+team's velocity for the next three years.</span></div>
+          </div>
+
+          <div class="hw-sub hw-anti">
+            <div class="hw-sub-label">
+              <span class="hw-sub-label-icon">✕</span>
+              Anti-patterns — what SE IV must not do
+            </div>
+            <ul class="hw-list">
+              <li>Operate at SE III level. Reviewing PRs instead of designing systems is the most common SE IV failure mode. If your week is mostly PR queue, the org is missing an SE IV — even if your title says you have one.</li>
+              <li>Hoard architectural decisions in your head. The <code>/decision-doc</code> archive is the proof you exist. Without it, the moment you leave, the team forgets why anything is the way it is.</li>
+              <li>Skip the handbook PRs. The handbook is your job. Let the team drift on principle wording, and they drift on principle behavior six months later.</li>
+              <li>Treat SE IV as "senior senior." It's a distinct role. If you can't articulate what's different about it from SE III, the role isn't being staffed; the title is.</li>
+              <li>Take engineering work that an SE III could do. You're not respecting your team's growth path; you're consuming it. Hand the work to SE III; review the output.</li>
+              <li>Ship a system design without a cost estimate. Architecture without dollars is daydreaming. The dollars are part of the design.</li>
+              <li>Stay in the office. Conferences, upstream PRs, vendor calls, industry meetups — these are part of the job. The team's reputation outside the company is part of the architecture.</li>
+            </ul>
+          </div>
+
+          <div class="hw-sub hw-promo">
+            <div class="hw-sub-label">
+              <span class="hw-sub-label-icon">↗</span>
+              Beyond SE IV
+            </div>
+            <ul class="hw-list">
+              <li><strong>SE IV isn't the cap.</strong> The next step is Principal Engineer or Tech Lead. Both are scope expansions, not level expansions.</li>
+              <li><strong>Principal Engineer</strong> — org-wide technical authority. Sets technical direction for the company, not the team. Reports into the CTO or directly to the board.</li>
+              <li><strong>Tech Lead</strong> — cross-org leadership. Same depth as SE IV, but spans multiple teams (frontend + backend + mobile + infra). Trades some hands-on architecture for organizational leverage.</li>
+              <li><strong>SE IV is the foundation for both paths.</strong> Without it, neither is open. The mistake we've watched repeatedly: promoting straight from SE III to Principal. It almost always fails. The handbook authorship loop only forms at SE IV.</li>
+              <li><strong>Most SE IVs stay SE IV.</strong> That's a healthy outcome, not a stalled one. SE IV is where the deepest technical work lives. Not everyone wants the org-leverage trade.</li>
+            </ul>
+            <div class="hw-promo-callout">
+              <strong>Note —</strong> If you're an SE IV reading this and you've never updated the
+              handbook, that's the gap. Pick a section. Improve it. The doc is yours to keep
+              honest.
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 7 — CROSS-ROLE NORMS
+         ════════════════════════════════════════════ -->
+    <section class="hw-section hw-norms">
+      <div class="container">
+        <div style="text-align: center; max-width: 720px; margin: 0 auto 56px;">
+          <div class="hw-eyebrow" style="justify-content:center;">Cross-role</div>
+          <h2 class="hw-title" style="margin: 0 auto 16px;">What everyone does, regardless of level.</h2>
+          <p class="hw-lead" style="margin: 0 auto;">
+            These don't change with title. They're the floor. The SE IV runs
+            them the same way the SE I does — and they bounce PRs that don't.
+          </p>
+        </div>
+
+        <div class="hw-norms-card">
+          <div class="hw-norms-card-header">Universal Operating Norms · All Engineering Roles</div>
+          <ul class="hw-norms-list">
+            <li>
+              <div>
+                <strong>Every PR runs <code>/code-review</code></strong> — no exceptions, no
+                "small change" carve-outs, no "I already eyeballed it." The output is
+                attached to the PR description. PRs without it bounce on first review.
+              </div>
+            </li>
+            <li>
+              <div>
+                <strong>Every regulated change runs <code>/sec-audit</code></strong> — auth,
+                payments, PII, healthcare data, financial calculations. The skill output
+                is attached. Any findings are resolved or explicitly accepted in writing
+                in the PR description.
+              </div>
+            </li>
+            <li>
+              <div>
+                <strong>Every commit uses <code>/smart-commit</code></strong> — for consistency
+                across the team. The five-minute saving from skipping it costs the next
+                developer twenty minutes when they're spelunking history six months later.
+              </div>
+            </li>
+            <li>
+              <div>
+                <strong>Every cross-team message considers <code>/message-craft</code></strong>
+                — required for client-facing communication, strongly recommended for internal.
+                The skill catches premature apology, hedging, and scope creep before send.
+              </div>
+            </li>
+            <li>
+              <div>
+                <strong>Every incident is logged via <code>/incident-response</code></strong>
+                (for live response) or <code>/incident-plan</code> (for post-mortem and prevention).
+                No incident is "too small to write up." The patterns only emerge from the log.
+              </div>
+            </li>
+            <li>
+              <div>
+                <strong>Every project has a <code>.heaptrace/</code> folder</strong> — configured
+                by SE II or above. <code>quick-plan.json</code>, <code>code-review.json</code>,
+                <code>code-standards.json</code> at minimum. New projects are blocked from
+                merging to main until the folder exists.
+              </div>
+            </li>
+            <li>
+              <div>
+                <strong>Every plan is reviewed by another human in 30 seconds before coding starts</strong> —
+                even the SE IV asks a peer to skim the system design before they start prototyping.
+                Plans that take longer than 30 seconds to read are rewritten.
+              </div>
+            </li>
+            <li>
+              <div>
+                <strong>Every hallucination caught gets reported back to the skill</strong> —
+                via issue or PR. A hallucination that's not reported is one that will catch
+                the next developer.
+              </div>
+            </li>
+            <li>
+              <div>
+                <strong>Every standup update follows the four-label format</strong>: Done ·
+                In Progress · Blockers · Next. No paragraphs. Everyone reads it the same way.
+              </div>
+            </li>
+            <li>
+              <div>
+                <strong>Every client-facing deliverable matches internal quality</strong> —
+                same PR description structure, same plan rigor, same verification standard.
+                If it's not good enough internally, it's not going to a client.
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 8 — PROMOTION FRAMEWORK
+         ════════════════════════════════════════════ -->
+    <section class="hw-section">
+      <div class="container">
+        <div style="text-align: center; max-width: 720px; margin: 0 auto 56px;">
+          <div class="hw-eyebrow" style="justify-content:center;">Promotion framework</div>
+          <h2 class="hw-title" style="margin: 0 auto 16px;">What it takes to move up.</h2>
+          <p class="hw-lead" style="margin: 0 auto;">
+            Time at level is the floor, not the ceiling. We've promoted faster and
+            we've held longer. The signal that matters is when the next-level work
+            starts happening before the title catches up.
+          </p>
+        </div>
+
+        <div class="hw-promo-table-wrap">
+          <table class="hw-promo-table">
+            <thead>
+              <tr>
+                <th>Transition</th>
+                <th>Time at level</th>
+                <th>Skill mastery</th>
+                <th>Mentorship</th>
+                <th>Decision scope</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>SE I → SE II</td>
+                <td>12–18 mo</td>
+                <td>All SE I mandates internalized — no reminders needed</td>
+                <td>Mentees: 0; reviewing other SE I work under supervision</td>
+                <td>Tickets, no scoping — scope comes from Tech Lead</td>
+              </tr>
+              <tr>
+                <td>SE II → SE III</td>
+                <td>18–30 mo</td>
+                <td>Skill author or significant extender; <code>/decision-doc</code> routinely used</td>
+                <td>Mentees: 1 SE I — through to first solo feature</td>
+                <td>Feature scoping — owns end-to-end, no daily check-ins</td>
+              </tr>
+              <tr>
+                <td>SE III → SE IV</td>
+                <td>24–48 mo</td>
+                <td>3+ skills authored, used across teams; <code>/arch-review</code> ownership</td>
+                <td>Mentees: 2 SE II — at least one to SE III promotion</td>
+                <td>Cross-domain — frontend × backend, etc.</td>
+              </tr>
+              <tr>
+                <td>SE IV → Principal</td>
+                <td>36 mo+</td>
+                <td>Skill curriculum owner; handbook contributor</td>
+                <td>Mentees: 2+ SE III; org-wide influence</td>
+                <td>Org-wide — sets technical direction</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div style="max-width: 720px; margin: 40px auto 0; text-align: center;">
+          <p class="hw-lead" style="margin: 0 auto;">
+            Promotion is a confirmation of work already happening — not a permission
+            slip to start. Every promotion in our history followed at least three
+            months of next-level output before the title moved.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 9 — QUICK REFERENCE CARD
+         ════════════════════════════════════════════ -->
+    <section class="hw-section hw-quickref">
+      <div class="container">
+        <div style="text-align: center; max-width: 720px; margin: 0 auto 56px;">
+          <div class="hw-eyebrow" style="justify-content:center;">Quick reference</div>
+          <h2 class="hw-title" style="margin: 0 auto 16px;">Pin this. Screenshot it. Wallpaper it.</h2>
+          <p class="hw-lead" style="margin: 0 auto;">
+            The page you'll actually look at on a Tuesday afternoon when you're
+            trying to remember whether <code>/sec-audit</code> is mandatory for your
+            current change. (It probably is.)
+          </p>
+        </div>
+
+        <div class="hw-quickref-card">
+          <div class="hw-quickref-header">Heaptrace Engineering · Roles at a Glance</div>
+          <div class="hw-quickref-title">SE I → SE IV · One-page summary</div>
+          <div class="hw-quickref-sub">Doc 3 of 7 · How We Work by Role · v1.0</div>
+
+          <div class="hw-quickref-grid">
+            <!-- SE I -->
+            <div class="hw-quickref-role">
+              <div class="hw-quickref-role-tag">SE I</div>
+              <div class="hw-quickref-role-title">Learn &amp; Ship</div>
+              <div class="hw-quickref-row">
+                <div class="hw-quickref-row-label">Role</div>
+                <div class="hw-quickref-row-body">Scoped tasks. Real work, strong scaffolding. 12–18 months at level.</div>
+              </div>
+              <div class="hw-quickref-row">
+                <div class="hw-quickref-row-label">Top 3</div>
+                <div class="hw-quickref-row-body"><code>/quick-plan</code>, <code>/code-review</code>, <code>/sec-audit</code></div>
+              </div>
+              <div class="hw-quickref-row anti">
+                <div class="hw-quickref-row-label">Avoid</div>
+                <div class="hw-quickref-row-body">Opening the editor before running a plan.</div>
+              </div>
+            </div>
+
+            <!-- SE II -->
+            <div class="hw-quickref-role">
+              <div class="hw-quickref-role-tag">SE II</div>
+              <div class="hw-quickref-role-title">Apply &amp; Own</div>
+              <div class="hw-quickref-row">
+                <div class="hw-quickref-row-label">Role</div>
+                <div class="hw-quickref-row-body">Owns features end-to-end. Configures projects. Mentors SE I. 18–30 months at level.</div>
+              </div>
+              <div class="hw-quickref-row">
+                <div class="hw-quickref-row-label">Top 3</div>
+                <div class="hw-quickref-row-body"><code>/feature-plan</code>, <code>/message-craft</code>, <code>/decision-doc</code></div>
+              </div>
+              <div class="hw-quickref-row anti">
+                <div class="hw-quickref-row-label">Avoid</div>
+                <div class="hw-quickref-row-body">Rubber-stamping SE I PRs without real review.</div>
+              </div>
+            </div>
+
+            <!-- SE III -->
+            <div class="hw-quickref-role">
+              <div class="hw-quickref-role-tag">SE III</div>
+              <div class="hw-quickref-role-title">Define &amp; Mentor</div>
+              <div class="hw-quickref-row">
+                <div class="hw-quickref-row-label">Role</div>
+                <div class="hw-quickref-row-body">Owns patterns within a domain. Writes skills. Reviews architecture. 24–48 months at level.</div>
+              </div>
+              <div class="hw-quickref-row">
+                <div class="hw-quickref-row-label">Top 3</div>
+                <div class="hw-quickref-row-body"><code>/arch-review</code>, <code>/tech-debt-audit</code>, <code>/onboard-dev</code></div>
+              </div>
+              <div class="hw-quickref-row anti">
+                <div class="hw-quickref-row-label">Avoid</div>
+                <div class="hw-quickref-row-body">Solving alone what should become a skill or doc.</div>
+              </div>
+            </div>
+
+            <!-- SE IV -->
+            <div class="hw-quickref-role">
+              <div class="hw-quickref-role-tag">SE IV</div>
+              <div class="hw-quickref-role-title">Architect &amp; Influence</div>
+              <div class="hw-quickref-row">
+                <div class="hw-quickref-row-label">Role</div>
+                <div class="hw-quickref-row-body">Cross-team architecture. Handbook authorship. Mentors SE III. 36+ months, often indefinite.</div>
+              </div>
+              <div class="hw-quickref-row">
+                <div class="hw-quickref-row-label">Top 3</div>
+                <div class="hw-quickref-row-body"><code>/system-design</code>, <code>/cost-estimate</code>, <code>/scalability-review</code></div>
+              </div>
+              <div class="hw-quickref-row anti">
+                <div class="hw-quickref-row-label">Avoid</div>
+                <div class="hw-quickref-row-body">Operating at SE III level — reviewing PRs instead of designing systems.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 10 — WHERE TO GO NEXT
+         ════════════════════════════════════════════ -->
+    <section class="hw-section hw-next">
+      <div class="container">
+        <div style="text-align: center; max-width: 720px; margin: 0 auto;">
+          <div class="hw-eyebrow" style="justify-content:center;">Where to next</div>
+          <h2 class="hw-title" style="margin: 0 auto 16px;">Pick your next read.</h2>
+          <p class="hw-lead" style="margin: 0 auto;">
+            The roles are the shape of the org. These three docs are the day-to-day —
+            what skill to run, what pattern to avoid, what every PR must pass.
+          </p>
+        </div>
+
+        <div class="hw-next-grid">
+          <div class="hw-next-card is-disabled">
+            <span class="hw-next-card-badge">Coming soon</span>
+            <div class="hw-next-card-label">Doc 4 · For your day-to-day</div>
+            <div class="hw-next-card-title">Skills Playbook</div>
+            <div class="hw-next-card-body">
+              The full inventory of skills, when to use each one, what to pair it
+              with, and what a clean PR output looks like for every skill.
+            </div>
+            <span class="hw-next-card-cta">
+              Available shortly
+            </span>
+          </div>
+
+          <div class="hw-next-card is-disabled">
+            <span class="hw-next-card-badge">Coming soon</span>
+            <div class="hw-next-card-label">Doc 5 · For what NOT to do</div>
+            <div class="hw-next-card-title">Anti-Patterns</div>
+            <div class="hw-next-card-body">
+              The full 30-item list of patterns that break teams — AI hallucination
+              traps, skill bypasses, communication failures — and how to spot each
+              one early.
+            </div>
+            <span class="hw-next-card-cta">
+              Available shortly
+            </span>
+          </div>
+
+          <div class="hw-next-card is-disabled">
+            <span class="hw-next-card-badge">Coming soon</span>
+            <div class="hw-next-card-label">Doc 6 · For every PR</div>
+            <div class="hw-next-card-title">Quality Gates</div>
+            <div class="hw-next-card-body">
+              What every PR must pass before merge. The metrics, the merge-blocking
+              rules, the exemption process. Standards with teeth, codified.
+            </div>
+            <span class="hw-next-card-cta">
+              Available shortly
+            </span>
+          </div>
+        </div>
+
+        <!-- Effective footer card -->
+        <div class="hw-effective">
+          <div class="hw-effective-divider">─────────────────────────────────────────────────────────</div>
+          <div><strong>Effective:</strong> April 2026</div>
+          <div><strong>Version:</strong> 1.0 (Initial Release)</div>
+          <div><strong>Maintained by:</strong> Heaptrace Engineering Leadership</div>
+          <div class="hw-effective-divider">─────────────────────────────────────────────────────────</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         FOOTER
+         ════════════════════════════════════════════ -->
+    <footer class="footer">
+      <div class="footer-inner">
+        <div class="footer-links">
+          <a href="../index.html" class="footer-link">Home</a>
+          <a href="../index.html#packs" class="footer-link">Packs</a>
+          <a href="../setup/index.html" class="footer-link">Setup Guide</a>
+          <a href="../customize/index.html" class="footer-link">Customize</a>
+          <a href="index.html" class="footer-link">Handbook</a>
+          <a href="https://heaptrace.com" class="footer-link" target="_blank" rel="noopener">Heaptrace</a>
+        </div>
+        <div class="footer-copy">
+          MIT License &middot; Built by <a href="https://heaptrace.com" target="_blank" rel="noopener">Heaptrace Technology</a>
+          <br>101 Skills &middot; 10 Packs &middot; Free &amp; Open Source
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       PASSWORD GATE SCRIPT
+       ════════════════════════════════════════════ -->
+  <script>
+    (function() {
+      const STORED_HASH = '5866f0f6f885b943472fd7572b9c783e6b1a29958a34bd9f18e1f1e17b9a57a6';
+      const STORAGE_KEY = 'htms-handbook-access';
+      const EXPIRY_DAYS = 30;
+      const gate = document.getElementById('password-gate');
+      const content = document.getElementById('main-content');
+      const input = document.getElementById('gate-input');
+      const submit = document.getElementById('gate-submit');
+      const error = document.getElementById('gate-error');
+
+      function unlock() {
+        gate.style.display = 'none';
+        content.style.display = 'block';
+        document.body.style.overflow = 'auto';
+      }
+
+      function checkStored() {
+        try {
+          const stored = localStorage.getItem(STORAGE_KEY);
+          if (!stored) return false;
+          const { hash, expiry } = JSON.parse(stored);
+          if (hash !== STORED_HASH) return false;
+          if (Date.now() > expiry) { localStorage.removeItem(STORAGE_KEY); return false; }
+          return true;
+        } catch { return false; }
+      }
+
+      async function sha256(str) {
+        const buf = new TextEncoder().encode(str);
+        const hashBuf = await crypto.subtle.digest('SHA-256', buf);
+        return Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
+      }
+
+      async function tryUnlock() {
+        error.textContent = '';
+        const val = input.value.trim();
+        if (!val) return;
+        const hash = await sha256(val);
+        if (hash === STORED_HASH) {
+          const expiry = Date.now() + EXPIRY_DAYS * 24 * 60 * 60 * 1000;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({ hash, expiry }));
+          unlock();
+        } else {
+          error.textContent = 'Incorrect code. Contact your Heaptrace contact.';
+          input.value = '';
+          input.focus();
+        }
+      }
+
+      content.style.display = 'none';
+      document.body.style.overflow = 'hidden';
+
+      if (checkStored()) {
+        unlock();
+      } else {
+        submit.addEventListener('click', tryUnlock);
+        input.addEventListener('keyup', (e) => { if (e.key === 'Enter') tryUnlock(); });
+        setTimeout(() => input.focus(), 100);
+      }
+    })();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,2413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skills Playbook — Heaptrace Engineering Handbook</title>
+  <meta name="description" content="Every Heaptrace skill, organized by what you're trying to do. Decision trees, pairings, per-pack reference, and alphabetical lookup. Doc 4 of 7 in the Engineering Handbook.">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="author" content="Heaptrace Technology">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="../css/styles.css">
+
+  <style>
+    /* ═════════════════════════════════════════════
+       SKILLS PLAYBOOK — PAGE STYLES
+       Primary accent: GREEN (--green)
+       ═════════════════════════════════════════════ */
+
+    :root {
+      --accent: var(--green);
+      --accent-light: #34d399;
+      --accent-soft: rgba(16, 185, 129, 0.10);
+      --accent-border: rgba(16, 185, 129, 0.28);
+      --accent-glow: rgba(16, 185, 129, 0.18);
+    }
+
+    body { line-height: 1.7; }
+
+    /* ── Active nav (green override) ── */
+    .nav-link.active {
+      color: var(--green);
+      background: rgba(16, 185, 129, 0.08);
+    }
+
+    /* ── Password Gate ── */
+    #password-gate {
+      position: fixed; inset: 0; z-index: 9999;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--bg-primary);
+      background-image:
+        radial-gradient(ellipse 60% 40% at 50% 20%, rgba(16, 185, 129, 0.08), transparent 70%),
+        radial-gradient(ellipse 40% 30% at 50% 80%, rgba(6, 182, 212, 0.05), transparent 60%);
+    }
+    #gate-input:focus {
+      border-color: var(--accent) !important;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+    }
+    #gate-submit:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 30px rgba(16, 185, 129, 0.35);
+    }
+
+    /* ── Section primitives ── */
+    .pb-eyebrow {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 0.78rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.12em; color: var(--accent-light);
+      margin-bottom: 14px;
+    }
+    .pb-eyebrow::before {
+      content: ''; width: 24px; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent));
+    }
+    .pb-title {
+      font-size: clamp(1.9rem, 3.2vw, 2.6rem);
+      font-weight: 800; line-height: 1.15; margin-bottom: 16px;
+      letter-spacing: -0.02em;
+    }
+    .pb-lead {
+      font-size: 1.08rem; color: var(--text-secondary);
+      line-height: 1.75; max-width: 760px;
+    }
+    .pb-section {
+      padding: 100px 0;
+      position: relative;
+    }
+    .pb-section-narrow { max-width: 920px; margin: 0 auto; }
+    .pb-section-wide { max-width: 1180px; margin: 0 auto; }
+
+    /* ── Hero ── */
+    .pb-hero {
+      padding: calc(var(--nav-height) + 100px) 0 90px;
+      text-align: center; position: relative; overflow: hidden;
+    }
+    .pb-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 40% at 50% 0%, rgba(16, 185, 129, 0.10), transparent 70%),
+        radial-gradient(ellipse 40% 30% at 30% 30%, rgba(6, 182, 212, 0.05), transparent 60%),
+        radial-gradient(ellipse 40% 30% at 70% 20%, rgba(52, 211, 153, 0.05), transparent 60%);
+      pointer-events: none;
+    }
+    .pb-hero::after {
+      content: ''; position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='grid' width='60' height='60' patternUnits='userSpaceOnUse'%3E%3Cpath d='M 60 0 L 0 0 0 60' fill='none' stroke='%231e293b' stroke-width='0.5'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23grid)'/%3E%3C/svg%3E");
+      opacity: 0.3; pointer-events: none;
+    }
+    .pb-hero-content { position: relative; z-index: 1; }
+    .pb-hero-badge {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--accent-soft);
+      border: 1px solid var(--accent-border);
+      color: var(--accent-light); padding: 8px 20px; border-radius: 999px;
+      font-size: 0.78rem; font-weight: 700; margin-bottom: 32px;
+      letter-spacing: 0.12em; text-transform: uppercase;
+    }
+    .pb-hero-badge-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent); box-shadow: 0 0 12px var(--accent);
+      animation: pulseGreen 2.4s infinite;
+    }
+    @keyframes pulseGreen {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.45); }
+      50% { opacity: 0.85; box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+    }
+    .pb-hero h1 {
+      font-size: clamp(2.6rem, 5.2vw, 4rem);
+      font-weight: 800; line-height: 1.08; margin-bottom: 24px;
+      letter-spacing: -0.025em;
+      background: linear-gradient(135deg, var(--text-primary) 0%, #34d399 45%, var(--cyan-light) 85%, var(--text-primary) 100%);
+      background-size: 200% auto;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmer 7s ease-in-out infinite;
+    }
+    @keyframes shimmer {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+    .pb-hero-subtitle {
+      font-size: 1.18rem; color: var(--text-secondary);
+      max-width: 800px; margin: 0 auto 48px; line-height: 1.75;
+    }
+    .pb-hero-cta {
+      display: inline-flex; align-items: center; gap: 14px;
+      margin-top: 8px; flex-wrap: wrap; justify-content: center;
+    }
+    .pb-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 14px 26px; border-radius: var(--radius-md);
+      font-weight: 600; font-size: 0.95rem; letter-spacing: 0.005em;
+      transition: var(--transition); border: 1px solid transparent;
+      cursor: pointer;
+    }
+    .pb-btn-primary {
+      background: linear-gradient(135deg, var(--green), var(--cyan));
+      color: white;
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.25);
+    }
+    .pb-btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 32px rgba(16, 185, 129, 0.4);
+    }
+    .pb-btn-primary.is-disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+    .pb-btn-secondary {
+      background: transparent;
+      color: var(--text-primary);
+      border-color: var(--border-hover);
+    }
+    .pb-btn-secondary:hover {
+      border-color: var(--accent);
+      color: var(--accent-light);
+      background: var(--accent-soft);
+    }
+
+    /* ── How to read (3 blocks) ── */
+    .pb-intro {
+      background:
+        radial-gradient(ellipse 80% 50% at 50% 0%, rgba(16, 185, 129, 0.04), transparent 70%);
+    }
+    .pb-intro-block {
+      padding: 28px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .pb-intro-block:last-child { border-bottom: none; }
+    .pb-intro-heading {
+      font-size: 1.35rem; font-weight: 700;
+      margin-bottom: 14px;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+    }
+    .pb-intro-heading::before {
+      content: '"'; color: var(--accent);
+      font-family: 'JetBrains Mono', monospace;
+      margin-right: 6px; opacity: 0.6;
+    }
+    .pb-intro-heading::after {
+      content: '"'; color: var(--accent);
+      font-family: 'JetBrains Mono', monospace;
+      margin-left: 4px; opacity: 0.6;
+    }
+    .pb-intro-body {
+      color: var(--text-secondary);
+      font-size: 1.02rem;
+      line-height: 1.8;
+    }
+    .pb-intro-body code {
+      background: var(--bg-code);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.88em;
+      color: var(--accent-light);
+      border: 1px solid var(--border);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ── Decision Tree (Section 3) ── */
+    .pb-tree-section {
+      background:
+        radial-gradient(ellipse 70% 40% at 50% 50%, rgba(16, 185, 129, 0.03), transparent 70%);
+    }
+    .pb-tree-root {
+      max-width: 1140px;
+      margin: 56px auto 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+    .pb-tree-question {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(6, 182, 212, 0.05));
+      border: 1px solid var(--accent-border);
+      border-radius: var(--radius-md);
+      padding: 22px 36px;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+      text-align: center;
+      box-shadow: 0 0 32px rgba(16, 185, 129, 0.10);
+      position: relative;
+      z-index: 2;
+    }
+    .pb-tree-stem {
+      width: 2px;
+      height: 32px;
+      background: linear-gradient(180deg, var(--accent) 0%, transparent 100%);
+    }
+    .pb-tree-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      width: 100%;
+      position: relative;
+    }
+    .pb-tree-row::before {
+      content: '';
+      position: absolute;
+      top: -32px;
+      left: 16.67%;
+      right: 16.67%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent 0%, var(--accent-border) 10%, var(--accent-border) 90%, transparent 100%);
+    }
+    .pb-tree-branch {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+    .pb-tree-branch::before {
+      content: '';
+      width: 2px;
+      height: 24px;
+      background: var(--accent-border);
+      margin-bottom: -2px;
+    }
+    .pb-tree-node {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 22px;
+      font-weight: 600;
+      color: var(--text-primary);
+      text-align: center;
+      width: 100%;
+      transition: var(--transition);
+      font-size: 1rem;
+    }
+    .pb-tree-node.is-category {
+      background: var(--accent-soft);
+      border-color: var(--accent-border);
+      color: var(--accent-light);
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+    .pb-tree-sub {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px;
+      width: 100%;
+      margin-top: 28px;
+      position: relative;
+    }
+    .pb-tree-sub::before {
+      content: '';
+      position: absolute;
+      top: -28px;
+      left: 25%;
+      right: 25%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent 0%, var(--border-hover) 10%, var(--border-hover) 90%, transparent 100%);
+    }
+    .pb-tree-sub-stem {
+      width: 2px;
+      height: 20px;
+      background: var(--border-hover);
+      margin: 0 auto -2px;
+    }
+    .pb-tree-leaf {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      text-align: center;
+      transition: var(--transition);
+    }
+    .pb-tree-leaf:hover {
+      border-color: var(--accent);
+      background: rgba(16, 185, 129, 0.04);
+      transform: translateY(-1px);
+    }
+    .pb-tree-leaf-q {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+    .pb-tree-leaf-cmd {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--accent-light);
+      line-height: 1.5;
+      display: block;
+    }
+    .pb-tree-leaf-cmd + .pb-tree-leaf-cmd {
+      margin-top: 2px;
+    }
+
+    /* ── Workflow cards (Section 4) ── */
+    .pb-workflows {
+      background:
+        radial-gradient(ellipse 60% 30% at 50% 50%, rgba(6, 182, 212, 0.03), transparent 70%);
+    }
+    .pb-workflow {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px 36px;
+      margin-bottom: 24px;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    .pb-workflow::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 3px; height: 100%;
+      background: linear-gradient(180deg, var(--green) 0%, var(--cyan) 100%);
+    }
+    .pb-workflow:hover {
+      border-color: rgba(16, 185, 129, 0.25);
+    }
+    .pb-workflow-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .pb-workflow-title {
+      font-size: 1.18rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+    }
+    .pb-workflow-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      color: var(--accent-light);
+      text-transform: uppercase;
+    }
+    .pb-workflow-chain {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      padding: 18px 0;
+      margin: 0 0 18px;
+      overflow-x: auto;
+    }
+    .pb-chain-step {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--accent-light);
+      white-space: nowrap;
+      transition: var(--transition-fast);
+    }
+    .pb-chain-step:hover {
+      border-color: var(--accent);
+      background: rgba(16, 185, 129, 0.06);
+    }
+    .pb-chain-step.is-optional {
+      color: var(--text-muted);
+      border-style: dashed;
+    }
+    .pb-chain-arrow {
+      color: var(--accent);
+      font-weight: 800;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .pb-workflow-why {
+      color: var(--text-secondary);
+      font-size: 0.98rem;
+      line-height: 1.7;
+      padding-top: 8px;
+      border-top: 1px dashed var(--border);
+    }
+    .pb-workflow-why strong {
+      color: var(--accent-light);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      font-size: 0.78rem;
+      margin-right: 8px;
+    }
+
+    /* ── Pairings table (Section 5) ── */
+    .pb-pair-section {
+      background:
+        radial-gradient(ellipse 70% 40% at 50% 50%, rgba(16, 185, 129, 0.025), transparent 70%);
+    }
+    .pb-table-wrap {
+      max-width: 1080px;
+      margin: 48px auto 0;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .pb-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.96rem;
+    }
+    .pb-table thead {
+      background: var(--accent-soft);
+    }
+    .pb-table th {
+      text-align: left;
+      padding: 16px 22px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent-light);
+      border-bottom: 1px solid var(--accent-border);
+    }
+    .pb-table td {
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+      line-height: 1.6;
+      vertical-align: top;
+    }
+    .pb-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+    .pb-table tbody tr:nth-child(even) {
+      background: rgba(15, 23, 42, 0.25);
+    }
+    .pb-table tbody tr:hover {
+      background: rgba(16, 185, 129, 0.04);
+    }
+    .pb-table code {
+      background: var(--bg-code);
+      padding: 3px 9px;
+      border-radius: 4px;
+      font-size: 0.86em;
+      color: var(--accent-light);
+      border: 1px solid var(--border);
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .pb-table td:first-child {
+      width: 30%;
+    }
+    .pb-table td:nth-child(2) {
+      width: 36%;
+      color: var(--text-primary);
+    }
+
+    /* ── Per-pack section (Section 6) ── */
+    .pb-packs {
+      background:
+        radial-gradient(ellipse 80% 40% at 50% 50%, rgba(16, 185, 129, 0.03), transparent 70%);
+    }
+    .pb-pack {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 36px 40px;
+      margin-bottom: 32px;
+      transition: var(--transition);
+      position: relative;
+    }
+    .pb-pack:hover {
+      border-color: rgba(16, 185, 129, 0.20);
+    }
+    .pb-pack::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 3px;
+      background: linear-gradient(90deg, var(--green) 0%, var(--cyan) 100%);
+      border-radius: var(--radius) var(--radius) 0 0;
+    }
+    .pb-pack-header {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 6px;
+      flex-wrap: wrap;
+    }
+    .pb-pack-emoji {
+      font-size: 2rem;
+      line-height: 1;
+    }
+    .pb-pack-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+    }
+    .pb-pack-count {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--accent-light);
+      background: var(--accent-soft);
+      border: 1px solid var(--accent-border);
+      padding: 4px 10px;
+      border-radius: 999px;
+    }
+    .pb-pack-tagline {
+      font-size: 0.98rem;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+      font-style: italic;
+    }
+    .pb-pack-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+    .pb-pack-table th {
+      text-align: left;
+      padding: 10px 16px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+    }
+    .pb-pack-table td {
+      padding: 11px 16px;
+      border-bottom: 1px solid rgba(30, 41, 59, 0.5);
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+    .pb-pack-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+    .pb-pack-table tbody tr:hover td {
+      background: rgba(16, 185, 129, 0.03);
+    }
+    .pb-pack-table td:first-child {
+      width: 30%;
+    }
+    .pb-pack-table code {
+      background: var(--bg-code);
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 0.88em;
+      color: var(--accent-light);
+      border: 1px solid var(--border);
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    /* ── When NOT to use (Section 7) ── */
+    .pb-tradeoffs {
+      background:
+        radial-gradient(ellipse 60% 30% at 50% 50%, rgba(245, 158, 11, 0.025), transparent 70%);
+    }
+    .pb-tradeoff-list {
+      max-width: 920px;
+      margin: 48px auto 0;
+      list-style: none;
+      padding: 0;
+    }
+    .pb-tradeoff-list li {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--amber);
+      border-radius: var(--radius-sm);
+      padding: 18px 24px;
+      margin-bottom: 14px;
+      color: var(--text-secondary);
+      font-size: 1rem;
+      line-height: 1.65;
+    }
+    .pb-tradeoff-list li strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+    .pb-tradeoff-list li code {
+      background: var(--bg-code);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.88em;
+      color: var(--accent-light);
+      border: 1px solid var(--border);
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+    }
+    .pb-tradeoff-callout {
+      max-width: 920px;
+      margin: 32px auto 0;
+      padding: 24px 28px;
+      background: rgba(245, 158, 11, 0.04);
+      border: 1px solid rgba(245, 158, 11, 0.20);
+      border-left: 3px solid var(--amber);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      line-height: 1.75;
+      font-size: 1.02rem;
+    }
+    .pb-tradeoff-callout strong {
+      color: #fbbf24;
+    }
+    .pb-tradeoff-callout a {
+      color: var(--accent-light);
+      text-decoration: underline;
+      text-decoration-color: rgba(52, 211, 153, 0.3);
+      text-underline-offset: 3px;
+    }
+    .pb-tradeoff-callout a:hover {
+      text-decoration-color: var(--accent);
+    }
+
+    /* ── Anti-Skill section (Section 8) ── */
+    .pb-anti-section {
+      background:
+        radial-gradient(ellipse 60% 30% at 50% 50%, rgba(239, 68, 68, 0.025), transparent 70%);
+    }
+    .pb-anti-card {
+      max-width: 880px;
+      margin: 48px auto 0;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 44px 48px;
+      position: relative;
+      overflow: hidden;
+    }
+    .pb-anti-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 3px; height: 100%;
+      background: linear-gradient(180deg, #ef4444 0%, #f59e0b 100%);
+    }
+    .pb-anti-quote {
+      font-size: 1.18rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+      line-height: 1.45;
+      margin-bottom: 24px;
+    }
+    .pb-anti-body {
+      color: var(--text-secondary);
+      font-size: 1rem;
+      line-height: 1.8;
+      margin-bottom: 18px;
+    }
+    .pb-anti-body:last-child {
+      margin-bottom: 0;
+    }
+    .pb-anti-body strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    /* ── Alphabetical Lookup Table (Section 9) ── */
+    .pb-lookup-section {
+      background:
+        radial-gradient(ellipse 80% 50% at 50% 50%, rgba(6, 182, 212, 0.025), transparent 70%);
+    }
+    .pb-lookup-wrap {
+      max-width: 1180px;
+      margin: 48px auto 0;
+    }
+    .pb-lookup-search {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 24px;
+      padding: 14px 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      transition: var(--transition-fast);
+    }
+    .pb-lookup-search:focus-within {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.10);
+    }
+    .pb-lookup-search svg {
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+    .pb-lookup-search input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-primary);
+      font-size: 0.98rem;
+      font-family: 'JetBrains Mono', monospace;
+      flex-grow: 1;
+    }
+    .pb-lookup-search input::placeholder {
+      color: var(--text-muted);
+    }
+    .pb-lookup-count {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      letter-spacing: 0.06em;
+    }
+    .pb-lookup-table-wrap {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      max-height: 720px;
+      overflow-y: auto;
+      position: relative;
+    }
+    .pb-lookup-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    .pb-lookup-table thead {
+      position: sticky;
+      top: 0;
+      background: var(--bg-card);
+      z-index: 2;
+    }
+    .pb-lookup-table thead::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 1px;
+      background: var(--accent-border);
+    }
+    .pb-lookup-table th {
+      text-align: left;
+      padding: 14px 18px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent-light);
+      background: rgba(16, 185, 129, 0.06);
+    }
+    .pb-lookup-table td {
+      padding: 11px 18px;
+      border-bottom: 1px solid rgba(30, 41, 59, 0.5);
+      color: var(--text-secondary);
+      line-height: 1.5;
+      vertical-align: top;
+    }
+    .pb-lookup-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+    .pb-lookup-table tbody tr:nth-child(even) td {
+      background: rgba(15, 23, 42, 0.3);
+    }
+    .pb-lookup-table tbody tr:hover td {
+      background: rgba(16, 185, 129, 0.04);
+    }
+    .pb-lookup-table td:first-child {
+      width: 22%;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.86em;
+      color: var(--accent-light);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .pb-lookup-table td:nth-child(2) {
+      width: 18%;
+      color: var(--text-muted);
+      font-size: 0.82em;
+      letter-spacing: 0.02em;
+    }
+    .pb-lookup-table tr.is-hidden {
+      display: none;
+    }
+
+    /* ── Where to go next (Section 10) ── */
+    .pb-next {
+      background:
+        radial-gradient(ellipse 60% 40% at 50% 100%, rgba(16, 185, 129, 0.04), transparent 70%);
+    }
+    .pb-next-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      max-width: 1080px; margin: 48px auto 0;
+    }
+    .pb-next-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px 28px;
+      transition: var(--transition);
+      display: flex; flex-direction: column; gap: 14px;
+      min-height: 220px;
+      position: relative;
+    }
+    .pb-next-card.is-disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+    .pb-next-card:not(.is-disabled):hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(16, 185, 129, 0.10);
+    }
+    .pb-next-card-label {
+      font-size: 0.72rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.12em;
+      color: var(--text-muted);
+    }
+    .pb-next-card-title {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+      line-height: 1.3;
+    }
+    .pb-next-card-body {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      line-height: 1.65;
+      flex-grow: 1;
+    }
+    .pb-next-card-cta {
+      display: inline-flex; align-items: center; gap: 6px;
+      color: var(--accent-light);
+      font-size: 0.9rem; font-weight: 600;
+      margin-top: auto;
+    }
+    .pb-next-card.is-disabled .pb-next-card-cta {
+      color: var(--text-muted);
+    }
+    .pb-next-card-badge {
+      position: absolute;
+      top: 16px; right: 16px;
+      font-size: 0.65rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 4px 8px;
+      border-radius: 4px;
+      background: rgba(245, 158, 11, 0.10);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.25);
+    }
+
+    /* ── Effective footer ── */
+    .pb-effective {
+      max-width: 720px; margin: 80px auto 0;
+      padding: 32px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 2;
+    }
+    .pb-effective-divider {
+      color: var(--border-hover);
+      letter-spacing: 0.1em;
+    }
+    .pb-effective strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    /* ── Section divider chip ── */
+    .pb-divider {
+      max-width: 920px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .pb-divider::before,
+    .pb-divider::after {
+      content: '';
+      flex-grow: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 1024px) {
+      .pb-tree-row { grid-template-columns: 1fr; gap: 32px; }
+      .pb-tree-row::before { display: none; }
+      .pb-tree-sub { grid-template-columns: 1fr; }
+      .pb-tree-sub::before { display: none; }
+      .pb-next-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 900px) {
+      .pb-section { padding: 70px 0; }
+      .pb-pack { padding: 28px 24px; }
+      .pb-workflow { padding: 24px 22px; }
+      .pb-anti-card { padding: 32px 24px; }
+      .pb-hero { padding-top: calc(var(--nav-height) + 60px); padding-bottom: 60px; }
+      .pb-table, .pb-lookup-table { font-size: 0.85rem; }
+      .pb-table th, .pb-table td,
+      .pb-lookup-table th, .pb-lookup-table td { padding: 10px 12px; }
+      .pb-pack-table th, .pb-pack-table td { padding: 9px 10px; }
+    }
+
+    /* ── Print ── */
+    @media print {
+      #password-gate, .nav, .footer, .pb-hero-cta, .pb-lookup-search { display: none !important; }
+      body, .pb-hero, .pb-section, .pb-intro, .pb-workflows, .pb-packs, .pb-next, .pb-tree-section, .pb-pair-section, .pb-lookup-section, .pb-tradeoffs, .pb-anti-section {
+        background: white !important;
+        color: #0a0f1a !important;
+      }
+      .pb-workflow, .pb-pack, .pb-table-wrap, .pb-effective, .pb-next-card, .pb-anti-card, .pb-lookup-table-wrap {
+        background: white !important;
+        border: 1px solid #cbd5e1 !important;
+        page-break-inside: avoid;
+        box-shadow: none !important;
+      }
+      .pb-hero h1, .pb-pack-title, .pb-workflow-title {
+        -webkit-text-fill-color: #0f766e !important;
+        color: #0f766e !important;
+        background: none !important;
+      }
+      .pb-tree-leaf-cmd, .pb-chain-step, .pb-table code, .pb-pack-table code, .pb-lookup-table td:first-child {
+        color: #0f766e !important;
+      }
+      .pb-intro-body, .pb-workflow-why, .pb-tradeoff-list li, .pb-table td, .pb-pack-table td, .pb-lookup-table td {
+        color: #334155 !important;
+      }
+      .pb-lookup-table-wrap { max-height: none !important; overflow: visible !important; }
+      .pb-lookup-table tr.is-hidden { display: table-row !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ════════════════════════════════════════════
+       PASSWORD GATE
+       ════════════════════════════════════════════ -->
+  <div id="password-gate" style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:var(--bg-primary);">
+    <div style="max-width:420px;width:90%;text-align:center;">
+      <div style="width:64px;height:64px;margin:0 auto 24px;border-radius:16px;background:linear-gradient(135deg,var(--green),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:white;box-shadow:0 0 40px rgba(16,185,129,0.3);">H</div>
+      <h1 style="font-size:1.5rem;font-weight:700;margin-bottom:8px;">Heaptrace Handbook</h1>
+      <p style="color:var(--text-secondary);margin-bottom:32px;font-size:0.95rem;">Enter access code to continue</p>
+      <input type="password" id="gate-input" placeholder="Access code" autocomplete="off" style="width:100%;padding:14px 18px;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;color:var(--text-primary);font-size:1rem;font-family:'JetBrains Mono',monospace;margin-bottom:16px;outline:none;transition:all 0.2s;">
+      <button id="gate-submit" style="width:100%;padding:14px;background:linear-gradient(135deg,var(--green),var(--cyan));border:none;border-radius:12px;color:white;font-weight:600;font-size:0.95rem;cursor:pointer;transition:all 0.2s;">Unlock</button>
+      <p id="gate-error" style="color:var(--red);margin-top:16px;font-size:0.85rem;min-height:1.2em;"></p>
+      <p style="color:var(--text-muted);margin-top:40px;font-size:0.8rem;">Private engineering handbook · Heaptrace Technology</p>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       MAIN CONTENT (hidden until unlock)
+       ════════════════════════════════════════════ -->
+  <div id="main-content">
+
+    <!-- NAV -->
+    <nav class="nav">
+      <div class="nav-inner">
+        <a href="../index.html" class="nav-logo"><div class="nav-logo-icon">H</div><span>Heaptrace Skills</span></a>
+        <div class="nav-links" id="navLinks">
+          <a href="../index.html" class="nav-link">Home</a>
+          <a href="../index.html#packs" class="nav-link">Packs</a>
+          <a href="../setup/index.html" class="nav-link">Setup</a>
+          <a href="../customize/index.html" class="nav-link">Customize</a>
+          <a href="index.html" class="nav-link active">Handbook</a>
+          <div class="nav-dropdown">
+            <button class="nav-dropdown-trigger">Security <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button>
+            <div class="nav-dropdown-menu">
+              <a href="../compliance-overview.html" class="nav-dropdown-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>Compliance Overview</a>
+              <a href="../ci-cd-security.html" class="nav-dropdown-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>CI/CD Security Gateway</a>
+              <a href="../cicd-security-setup.html" class="nav-dropdown-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>Setup Guide</a>
+            </div>
+          </div>
+          <a href="../rules/index.html" class="nav-link">Rules</a>
+          <a href="../mcp/index.html" class="nav-link">MCP Servers</a>
+        </div>
+        <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>GitHub
+        </a>
+      </div>
+    </nav>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 1 — HERO
+         ════════════════════════════════════════════ -->
+    <section class="pb-hero">
+      <div class="container pb-hero-content">
+        <div class="pb-hero-badge">
+          <span class="pb-hero-badge-dot"></span>
+          Doc 4 of 7 · Skills Playbook
+        </div>
+        <h1>The Skills Playbook<br>Which Skill, When, Paired With What</h1>
+        <p class="pb-hero-subtitle">
+          Every Heaptrace skill, organized by what you're trying to do. Decision trees
+          for picking the right one. Pairings for chaining them together. Plus the
+          lookup table when you just need the alphabetical version.
+        </p>
+        <div class="pb-hero-cta">
+          <a href="how-we-work.html" class="pb-btn pb-btn-secondary">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            Back to How We Work
+          </a>
+          <span class="pb-btn pb-btn-primary is-disabled" aria-disabled="true">
+            Anti-Patterns
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 2 — HOW TO READ THIS PLAYBOOK
+         ════════════════════════════════════════════ -->
+    <section class="pb-section pb-intro">
+      <div class="container pb-section-narrow">
+        <div class="pb-eyebrow">How to read this</div>
+        <h2 class="pb-title">A decision system, not a list.</h2>
+        <p class="pb-lead">
+          You don't memorize 101 skills. You learn the three or four chains you'll
+          run every day, and you keep this page open for the rest. Read these
+          three short blocks first; then jump to the section that matches what
+          you're doing right now.
+        </p>
+
+        <div style="margin-top: 56px;">
+          <div class="pb-intro-block">
+            <div class="pb-intro-heading">Not a list. A decision system.</div>
+            <p class="pb-intro-body">
+              We have 101 skills. You don't need to know all of them — you need
+              to know which one fits the moment you're in. This playbook is
+              organized around the moments, not the skills. Start at "what are
+              you trying to do?" and follow the tree. The catalogue at the bottom
+              is for recall, not for learning.
+            </p>
+          </div>
+
+          <div class="pb-intro-block">
+            <div class="pb-intro-heading">Pairings beat single skills.</div>
+            <p class="pb-intro-body">
+              The biggest productivity gains come from chains:
+              <code>/find-fix → /quick-plan → /quick-work → /smart-commit</code>.
+              A bug becomes a fix becomes a commit in one workflow. Section 5
+              maps the chains. Memorize the chains, not the individual skills —
+              the chains are what change a Monday morning.
+            </p>
+          </div>
+
+          <div class="pb-intro-block">
+            <div class="pb-intro-heading">Quick lookup at the bottom.</div>
+            <p class="pb-intro-body">
+              If you already know the skill name and just want to recall what it
+              does, scroll to Section 9 — every one of the 101 skills,
+              alphabetical, one line each, searchable in the browser. That's the
+              table you bookmark.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 3 — THE MASTER DECISION TREE
+         ════════════════════════════════════════════ -->
+    <section class="pb-section pb-tree-section">
+      <div class="container">
+        <div style="text-align:center; max-width: 760px; margin: 0 auto 16px;">
+          <div class="pb-eyebrow" style="justify-content:center;">Section 3 · The Master Tree</div>
+          <h2 class="pb-title" style="margin: 0 auto 16px;">Start here. Follow the branches.</h2>
+          <p class="pb-lead" style="margin: 0 auto;">
+            Every task you do at Heaptrace fits one of three buckets. Pick the
+            bucket, then pick the branch. Each leaf is the skill — or pair of
+            skills — you start with.
+          </p>
+        </div>
+
+        <div class="pb-tree-root">
+          <div class="pb-tree-question">What are you trying to do?</div>
+          <div class="pb-tree-stem"></div>
+
+          <div class="pb-tree-row">
+            <!-- Branch 1: Plan work -->
+            <div class="pb-tree-branch">
+              <div class="pb-tree-node is-category">Plan work</div>
+              <div class="pb-tree-sub-stem"></div>
+              <div class="pb-tree-sub">
+                <div class="pb-tree-leaf">
+                  <div class="pb-tree-leaf-q">Task &lt; 1 day, one or two files</div>
+                  <code class="pb-tree-leaf-cmd">/quick-plan</code>
+                  <code class="pb-tree-leaf-cmd">/quick-work</code>
+                </div>
+                <div class="pb-tree-leaf">
+                  <div class="pb-tree-leaf-q">Feature &gt; 1 day, multi-file</div>
+                  <code class="pb-tree-leaf-cmd">/feature-plan</code>
+                  <code class="pb-tree-leaf-cmd">/feature-work</code>
+                </div>
+                <div class="pb-tree-leaf">
+                  <div class="pb-tree-leaf-q">Whole sprint or quarter</div>
+                  <code class="pb-tree-leaf-cmd">/sprint-plan</code>
+                  <code class="pb-tree-leaf-cmd">/feature-prioritize</code>
+                </div>
+                <div class="pb-tree-leaf">
+                  <div class="pb-tree-leaf-q">Mobile (iOS / Android)</div>
+                  <code class="pb-tree-leaf-cmd">/mobile-quick-plan</code>
+                  <code class="pb-tree-leaf-cmd">/mobile-feature</code>
+                </div>
+              </div>
+            </div>
+
+            <!-- Branch 2: Implement / Fix -->
+            <div class="pb-tree-branch">
+              <div class="pb-tree-node is-category">Implement / Fix</div>
+              <div class="pb-tree-sub-stem"></div>
+              <div class="pb-tree-sub">
+                <div class="pb-tree-leaf">
+                  <div class="pb-tree-leaf-q">Have a plan, execute it</div>
+                  <code class="pb-tree-leaf-cmd">/quick-work</code>
+                  <code class="pb-tree-leaf-cmd">/feature-work</code>
+                </div>
+                <div class="pb-tree-leaf">
+                  <div class="pb-tree-leaf-q">Bug — root cause unclear</div>
+                  <code class="pb-tree-leaf-cmd">/find-fix</code>
+                  <code class="pb-tree-leaf-cmd">/quick-plan</code>
+                </div>
+                <div class="pb-tree-leaf">
+                  <div class="pb-tree-leaf-q">Need test coverage</div>
+                  <code class="pb-tree-leaf-cmd">/test-gen</code>
+                  <code class="pb-tree-leaf-cmd">/test-plan</code>
+                </div>
+                <div class="pb-tree-leaf">
+                  <div class="pb-tree-leaf-q">Cloud / Infra change</div>
+                  <code class="pb-tree-leaf-cmd">/terraform-module</code>
+                  <code class="pb-tree-leaf-cmd">/ecs-deploy</code>
+                </div>
+              </div>
+            </div>
+
+            <!-- Branch 3: Review / Audit -->
+            <div class="pb-tree-branch">
+              <div class="pb-tree-node is-category">Review / Audit</div>
+              <div class="pb-tree-sub-stem"></div>
+              <div class="pb-tree-sub">
+                <div class="pb-tree-leaf">
+                  <div class="pb-tree-leaf-q">Code quality — pre-PR</div>
+                  <code class="pb-tree-leaf-cmd">/code-review</code>
+                  <code class="pb-tree-leaf-cmd">/code-standards</code>
+                </div>
+                <div class="pb-tree-leaf">
+                  <div class="pb-tree-leaf-q">Security — auth, payments, PII</div>
+                  <code class="pb-tree-leaf-cmd">/sec-audit</code>
+                  <code class="pb-tree-leaf-cmd">/dep-vuln</code>
+                </div>
+                <div class="pb-tree-leaf">
+                  <div class="pb-tree-leaf-q">Regulated — HIPAA / GDPR / SOC2 / PCI</div>
+                  <code class="pb-tree-leaf-cmd">/hipaa-audit</code>
+                  <code class="pb-tree-leaf-cmd">/gdpr-audit</code>
+                  <code class="pb-tree-leaf-cmd">/soc2-audit</code>
+                  <code class="pb-tree-leaf-cmd">/pci-audit</code>
+                </div>
+                <div class="pb-tree-leaf">
+                  <div class="pb-tree-leaf-q">Architecture decision</div>
+                  <code class="pb-tree-leaf-cmd">/arch-review</code>
+                  <code class="pb-tree-leaf-cmd">/decision-doc</code>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="text-align:center; margin-top: 64px; max-width: 720px; margin-left: auto; margin-right: auto; padding: 24px 28px; background: var(--accent-soft); border: 1px solid var(--accent-border); border-radius: var(--radius-md); color: var(--text-secondary); font-size: 0.96rem; line-height: 1.7;">
+          <strong style="color: var(--accent-light); font-weight: 700;">If you're not sure which branch:</strong>
+          start with <code style="background: var(--bg-code); padding: 3px 9px; border-radius: 4px; color: var(--accent-light); font-family: 'JetBrains Mono', monospace; font-size: 0.88em; border: 1px solid var(--border);">/suggest</code> — it will read your context and point you to the right skill. Don't guess. Guessing is how raw AI sneaks back in.
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 4 — DAILY WORKFLOWS
+         ════════════════════════════════════════════ -->
+    <section class="pb-section pb-workflows">
+      <div class="container pb-section-wide">
+        <div style="text-align:center; max-width: 760px; margin: 0 auto 16px;">
+          <div class="pb-eyebrow" style="justify-content:center;">Section 4 · Daily Workflows</div>
+          <h2 class="pb-title" style="margin: 0 auto 16px;">Ten chains you'll run every week.</h2>
+          <p class="pb-lead" style="margin: 0 auto;">
+            These are the sequences. Memorize them — or bookmark this section. The
+            chains are where the real productivity lives; single skills are how
+            engineers without skills work.
+          </p>
+        </div>
+
+        <div style="max-width: 1080px; margin: 56px auto 0;">
+
+          <!-- Workflow 1 -->
+          <div class="pb-workflow">
+            <div class="pb-workflow-header">
+              <div class="pb-workflow-title">Small Task (Bug Fix or Tweak)</div>
+              <div class="pb-workflow-num">Workflow 01</div>
+            </div>
+            <div class="pb-workflow-chain">
+              <span class="pb-chain-step">/find-fix</span>
+              <span class="pb-chain-arrow">→</span>
+              <span class="pb-chain-step">/quick-plan</span>
+              <span class="pb-chain-arrow">→</span>
+              <span class="pb-chain-step">/quick-work</span>
+              <span class="pb-chain-arrow">→</span>
+              <span class="pb-chain-step">/code-review</span>
+              <span class="pb-chain-arrow">→</span>
+              <span class="pb-chain-step">/smart-commit</span>
+            </div>
+            <div class="pb-workflow-why">
+              <strong>Why</strong>
+              Finds the root cause, plans the scoped fix, executes, reviews, commits.
+              The whole flow in under 30 minutes for an S-sized task. Skip
+              <code>/find-fix</code> if you already know the root cause; never skip
+              <code>/quick-plan</code>.
+            </div>
+          </div>
+
+          <!-- Workflow 2 -->
+          <div class="pb-workflow">
+            <div class="pb-workflow-header">
+              <div class="pb-workflow-title">New Feature (One Session, Multi-File)</div>
+              <div class="pb-workflow-num">Workflow 02</div>
+            </div>
+            <div class="pb-workflow-chain">
+              <span class="pb-chain-step">/feature-plan</span>
+              <span class="pb-chain-arrow">→</span>
+              <span class="pb-chain-step">/feature-work</span>
+              <span class="pb-chain-arrow">→</span>
+              <span class="pb-chain-step">/test-gen</span>
+              <span class="pb-chain-arrow">→</span>
+              <span class="pb-chain-step is-optional">/sec-audit</span>
+              <span class="pb-chain-arrow">→</span>
+              <span class="pb-chain-step">/code-review</span>
+              <span class="pb-chain-arrow">→</span>
+              <span class="pb-chain-step">/smart-commit</span>
+              <span class="pb-chain-arrow">→</span>
+              <span class="pb-chain-step is-optional">/release-notes</span>
+            </div>
+            <div class="pb-workflow-why">
+              <strong>Why</strong>
+              Full ceremony for substantive work — plan, implement, test, audit,
+              review, commit, release notes. <code>/sec-audit</code> is required if
+              the feature touches auth, payments, or PII. <code>/release-notes</code>
+              runs only when the feature ships.
+            </div>
+          </div>
+
+          <!-- Workflow 3 -->
+          <div class="pb-workflow">
+            <div class="pb-workflow-header">
+              <div class="pb-workflow-title">Mobile Task (iOS or Android)</div>
+              <div class="pb-workflow-num">Workflow 03</div>
+            </div>
+            <div class="pb-workflow-chain">
+              <span class="pb-chain-step">/mobile-quick-plan</span>
+              <span class="pb-chain-arrow">→</span>
+              <span class="pb-chain-step">/mobile-quick-work</span>
+              <span class="pb-chain-arrow">→</span>
+              <span class="pb-chain-step">/code-review</span>
+              <span class="pb-chain-arrow">→</span>
+              <span class="pb-chain-step">/smart-commit</span>
+            </div>
+            <div class="pb-workflow-why">
+              <strong>Why</strong>
+              Mobile-aware planner and implementer pair. Platform field, platform
+              quirks, native verify commands (<code>xcodebuild</code>, Gradle). Use
+              <code>/mobile-feature</code> instead of <code>/mobile-quick-plan</code>
+              when the work spans both iOS and Android navigation, state, and UI.
+            </div>
+          </div>
+
+          <!-- Workflow 4 -->
+          <div class="pb-workflow">
+            <div class="pb-workflow-header">
+              <div class="pb-workflow-title">Compliance / Regulated Code</div>
+              <div class="pb-workflow-num">Workflow 04</div>
+            </div>
+            <div class="pb-workflow-chain">
+              <span class="pb-chain-step">/feature-plan</span>
+              <span class="pb-chain-arrow">→</span>
+              <span class="pb-chain-step">/feature-work</span>
+              <span class="pb-chain-arrow">→</span>
+              <span class="pb-chain-step">/sec-audit</span>
+              <span class="pb-chain-arrow">→</span>
+              <span class="pb-chain-step">/hipaa-audit</span>
+              <span class="pb-chain-arrow">→</span>
+              <span class="pb-chain-step">/compliance-report</span>
+              <span class="pb-chain-arrow">→</span>
+              <span class="pb-chain-step">/code-review</span>
+              <span class="pb-chain-arrow">→</span>
+              <span class="pb-chain-step">/smart-commit</span>
+            </div>
+            <div class="pb-workflow-why">
+              <strong>Why</strong>
+              Regulated work needs framework-specific audits inline, not at the
+              end. Swap <code>/hipaa-audit</code> for <code>/gdpr-audit</code>,
+              <code>/soc2-audit</code>, or <code>/pci-audit</code> depending on the
+              regime. <code>/compliance-report</code> aggregates findings into the
+              evidence packet clients ask for.
+            </div>
+          </div>
+
+          <!-- Workflow 5 -->
+          <div class="pb-workflow">
+            <div class="pb-workflow-header">
+              <div class="pb-workflow-title">Architecture Decision</div>
+              <div class="pb-workflow-num">Workflow 05</div>
+            </div>
+            <div class="pb-workflow-chain">
+              <span class="pb-chain-step">/arch-review</span>
+              <span class="pb-chain-arrow">→</span>
+              <span class="pb-chain-step">/decision-doc</span>
+              <span class="pb-chain-arrow">→</span>
+              <span class="pb-chain-step is-optional">/scalability-review</span>
+              <span class="pb-chain-arrow">→</span>
+              <span class="pb-chain-step is-optional">/system-design</span>
+              <span class="pb-chain-arrow">→</span>
+              <span class="pb-chain-step">/integration-plan</span>
+            </div>
+            <div class="pb-workflow-why">
+              <strong>Why</strong>
+              SE III/IV territory. Decision flows from review → ADR → (if green-field)
+              system design → integration plan. <code>/scalability-review</code>
+              fires when the decision affects load characteristics.
+              <code>/decision-doc</code> is the artifact that survives the
+              conversation — write it before you implement.
+            </div>
+          </div>
+
+          <!-- Workflow 6 -->
+          <div class="pb-workflow">
+            <div class="pb-workflow-header">
+              <div class="pb-workflow-title">Incident Response (Active Incident)</div>
+              <div class="pb-workflow-num">Workflow 06</div>
+            </div>
+            <div class="pb-workflow-chain">
+              <span class="pb-chain-step">/incident-response</span>
+              <span class="pb-chain-arrow">→</span>
+              <span class="pb-chain-step">/find-fix</span>
+              <span class="pb-chain-arrow">→</span>
+              <span class="pb-chain-step">/quick-plan</span>
+              <span class="pb-chain-arrow">→</span>
+              <span class="pb-chain-step">/quick-work</span>
+              <span class="pb-chain-arrow">→</span>
+              <span class="pb-chain-step">/message-craft</span>
+              <span class="pb-chain-arrow">→</span>
+              <span class="pb-chain-step">/incident-plan</span>
+            </div>
+            <div class="pb-workflow-why">
+              <strong>Why</strong>
+              Active incident mode: triage → diagnose → fix → communicate →
+              post-mortem. <code>/message-craft</code> is mandatory the moment a
+              client is affected — never drop client comms.
+              <code>/incident-plan</code> writes the post-mortem within 48 hours,
+              not "later."
+            </div>
+          </div>
+
+          <!-- Workflow 7 -->
+          <div class="pb-workflow">
+            <div class="pb-workflow-header">
+              <div class="pb-workflow-title">Pre-PR Quality Gates</div>
+              <div class="pb-workflow-num">Workflow 07</div>
+            </div>
+            <div class="pb-workflow-chain">
+              <span class="pb-chain-step">/code-review</span>
+              <span class="pb-chain-arrow">→</span>
+              <span class="pb-chain-step is-optional">/sec-audit</span>
+              <span class="pb-chain-arrow">→</span>
+              <span class="pb-chain-step">/test-coverage</span>
+              <span class="pb-chain-arrow">→</span>
+              <span class="pb-chain-step">/smart-commit</span>
+            </div>
+            <div class="pb-workflow-why">
+              <strong>Why</strong>
+              The standard pre-merge gate. Every PR runs this minimum. Security
+              audit drops in for auth, payments, PII, or anything that touches a
+              regulated boundary. Reference Principle 7: standards have teeth.
+            </div>
+          </div>
+
+          <!-- Workflow 8 -->
+          <div class="pb-workflow">
+            <div class="pb-workflow-header">
+              <div class="pb-workflow-title">Sprint Planning</div>
+              <div class="pb-workflow-num">Workflow 08</div>
+            </div>
+            <div class="pb-workflow-chain">
+              <span class="pb-chain-step">/sprint-plan</span>
+              <span class="pb-chain-arrow">→</span>
+              <span class="pb-chain-step">/feature-prioritize</span>
+              <span class="pb-chain-arrow">→</span>
+              <span class="pb-chain-step">/user-story</span>
+              <span class="pb-chain-arrow">→</span>
+              <span class="pb-chain-step is-optional">/scope-negotiate</span>
+              <span class="pb-chain-arrow">→</span>
+              <span class="pb-chain-step">/metrics-define</span>
+            </div>
+            <div class="pb-workflow-why">
+              <strong>Why</strong>
+              PM + Tech Lead collaboration. Plan, prioritize, write stories, negotiate
+              scope, define success metrics. <code>/scope-negotiate</code> runs
+              when the ask exceeds the capacity — and it always does. Write the
+              metrics before the sprint starts, not after.
+            </div>
+          </div>
+
+          <!-- Workflow 9 -->
+          <div class="pb-workflow">
+            <div class="pb-workflow-header">
+              <div class="pb-workflow-title">Onboarding a New Engineer</div>
+              <div class="pb-workflow-num">Workflow 09</div>
+            </div>
+            <div class="pb-workflow-chain">
+              <span class="pb-chain-step">/onboard-dev</span>
+              <span class="pb-chain-arrow">→</span>
+              <span class="pb-chain-step">/code-standards</span>
+              <span class="pb-chain-arrow">→</span>
+              <span class="pb-chain-step">/pr-strategy</span>
+              <span class="pb-chain-arrow">→</span>
+              <span class="pb-chain-step is-optional">/explain</span>
+            </div>
+            <div class="pb-workflow-why">
+              <strong>Why</strong>
+              New hire's first month. Tech Lead invokes onboarding flow; new
+              engineer learns standards through real-context explanations rather
+              than abstract docs. <code>/explain</code> runs continuously — every
+              time the new engineer hits unfamiliar code.
+            </div>
+          </div>
+
+          <!-- Workflow 10 -->
+          <div class="pb-workflow">
+            <div class="pb-workflow-header">
+              <div class="pb-workflow-title">Cloud Infrastructure Change</div>
+              <div class="pb-workflow-num">Workflow 10</div>
+            </div>
+            <div class="pb-workflow-chain">
+              <span class="pb-chain-step">/cost-estimate</span>
+              <span class="pb-chain-arrow">→</span>
+              <span class="pb-chain-step">/system-design</span>
+              <span class="pb-chain-arrow">→</span>
+              <span class="pb-chain-step">/terraform-module</span>
+              <span class="pb-chain-arrow">→</span>
+              <span class="pb-chain-step">/iam-policy</span>
+              <span class="pb-chain-arrow">→</span>
+              <span class="pb-chain-step">/ci-cd-pipeline</span>
+              <span class="pb-chain-arrow">→</span>
+              <span class="pb-chain-step">/monitoring-setup</span>
+              <span class="pb-chain-arrow">→</span>
+              <span class="pb-chain-step is-optional">/disaster-recovery</span>
+            </div>
+            <div class="pb-workflow-why">
+              <strong>Why</strong>
+              Cloud Engineer Pack flow for any new AWS resource or significant
+              infra change. <code>/cost-estimate</code> first — never ship infra
+              without a cost number. <code>/disaster-recovery</code> runs as a
+              checkpoint for stateful resources (RDS, S3 with critical data, ECS
+              clusters running paid workloads).
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 5 — SKILL PAIRINGS
+         ════════════════════════════════════════════ -->
+    <section class="pb-section pb-pair-section">
+      <div class="container">
+        <div style="text-align:center; max-width: 760px; margin: 0 auto 16px;">
+          <div class="pb-eyebrow" style="justify-content:center;">Section 5 · Natural Pairings</div>
+          <h2 class="pb-title" style="margin: 0 auto 16px;">Skills that always travel together.</h2>
+          <p class="pb-lead" style="margin: 0 auto;">
+            If you've invoked the first skill, you'll almost always need the
+            second. These pairs encode the muscle memory of skilled developers.
+          </p>
+        </div>
+
+        <div class="pb-table-wrap">
+          <table class="pb-table">
+            <thead>
+              <tr>
+                <th>First Skill</th>
+                <th>Naturally Pairs With</th>
+                <th>Why</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>/quick-plan</code></td>
+                <td><code>/quick-work</code></td>
+                <td>Same plan, immediate implementation. Don't context-switch between them.</td>
+              </tr>
+              <tr>
+                <td><code>/feature-plan</code></td>
+                <td><code>/feature-work</code></td>
+                <td>Same plan, full implementation cycle. The plan is wasted if it doesn't drive the work.</td>
+              </tr>
+              <tr>
+                <td><code>/find-fix</code></td>
+                <td><code>/quick-plan</code> → <code>/quick-work</code></td>
+                <td>Diagnose root cause → plan the scoped fix → implement. Skipping the plan is how 15-minute bugs become 2-hour debugging sessions.</td>
+              </tr>
+              <tr>
+                <td><code>/mobile-quick-plan</code></td>
+                <td><code>/mobile-quick-work</code></td>
+                <td>Platform-aware plan, platform-aware implementation. Native verify commands carry between them.</td>
+              </tr>
+              <tr>
+                <td><code>/sec-audit</code></td>
+                <td><code>/hipaa-audit</code> · <code>/gdpr-audit</code> · <code>/soc2-audit</code> · <code>/pci-audit</code></td>
+                <td>General security pass + framework-specific findings. Both are required for regulated code; one is not a substitute for the other.</td>
+              </tr>
+              <tr>
+                <td><code>/code-review</code></td>
+                <td><code>/test-gen</code></td>
+                <td>Review surfaced untested code paths. Generate the tests in the same session — don't add a backlog item.</td>
+              </tr>
+              <tr>
+                <td><code>/arch-review</code></td>
+                <td><code>/decision-doc</code></td>
+                <td>The review surfaces a decision. Document it as an ADR while the reasoning is still fresh, not later.</td>
+              </tr>
+              <tr>
+                <td><code>/feature-plan</code></td>
+                <td><code>/api-design</code> + <code>/db-design</code></td>
+                <td>Substantive features need API contract and schema before code. Plan → contract → schema → implement is the order.</td>
+              </tr>
+              <tr>
+                <td><code>/incident-response</code></td>
+                <td><code>/message-craft</code></td>
+                <td>Live incident, client comms are mandatory. The fix and the message ship in parallel, not in series.</td>
+              </tr>
+              <tr>
+                <td><code>/migration-plan</code></td>
+                <td><code>/scalability-review</code></td>
+                <td>Migrations validate future capacity. Always check that the destination can handle three years of growth, not just today's load.</td>
+              </tr>
+              <tr>
+                <td><code>/sprint-plan</code></td>
+                <td><code>/user-story</code></td>
+                <td>Sprint planning needs decomposed stories with acceptance criteria. Stories before estimates.</td>
+              </tr>
+              <tr>
+                <td><code>/system-design</code></td>
+                <td><code>/cost-estimate</code></td>
+                <td>Every system design carries a cost. Estimate before you build; clients ask for the number.</td>
+              </tr>
+              <tr>
+                <td><code>/api-design</code></td>
+                <td><code>/contract-test</code></td>
+                <td>Contract defined → contract tested. Pact or schema validation tests get written with the contract, not after the consumer breaks.</td>
+              </tr>
+              <tr>
+                <td><code>/wireframe</code></td>
+                <td><code>/user-flow</code> → <code>/design-system</code></td>
+                <td>Wireframes need flow context, then resolve into design system primitives. Don't ship one-off components.</td>
+              </tr>
+              <tr>
+                <td><code>/dep-vuln</code></td>
+                <td><code>/sec-audit</code></td>
+                <td>Dependency CVEs surface vulnerable libraries. Security audit verifies whether the vulnerable paths are actually exposed.</td>
+              </tr>
+              <tr>
+                <td><code>/smart-commit</code></td>
+                <td><em>(always last)</em></td>
+                <td>Final step before push. Writes the conventional commit message, runs the pre-commit hooks, surfaces what's actually changing.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 6 — PER-PACK QUICK REFERENCE
+         ════════════════════════════════════════════ -->
+    <section class="pb-section pb-packs">
+      <div class="container pb-section-wide">
+        <div style="text-align:center; max-width: 760px; margin: 0 auto 16px;">
+          <div class="pb-eyebrow" style="justify-content:center;">Section 6 · Per-Pack Reference</div>
+          <h2 class="pb-title" style="margin: 0 auto 16px;">All 101 skills, organized by pack.</h2>
+          <p class="pb-lead" style="margin: 0 auto;">
+            This is the section engineers screenshot. One line per skill, telling
+            you when to reach for it. Search the page (<code style="background: var(--bg-code); padding: 2px 8px; border-radius: 4px; color: var(--accent-light); font-family: 'JetBrains Mono', monospace; font-size: 0.88em; border: 1px solid var(--border);">Cmd+F</code>) if you know the
+            skill name; scroll if you know the pack.
+          </p>
+        </div>
+
+        <div style="margin-top: 56px;">
+
+          <!-- Pack: Developer -->
+          <div class="pb-pack" id="pack-developer">
+            <div class="pb-pack-header">
+              <span class="pb-pack-emoji">💻</span>
+              <div class="pb-pack-title">Developer Pack</div>
+              <span class="pb-pack-count">13 skills</span>
+            </div>
+            <p class="pb-pack-tagline">Your daily-driver coding skills. The chain you'll wear out before any other.</p>
+            <table class="pb-pack-table">
+              <thead>
+                <tr><th>Skill</th><th>Use When</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>/feature-plan</code></td><td>Starting a multi-file feature; needs a real plan with mockups and risks.</td></tr>
+                <tr><td><code>/feature-work</code></td><td>Executing a <code>/feature-plan</code>. Don't skip the plan to use this.</td></tr>
+                <tr><td><code>/quick-plan</code></td><td>Starting a small task (under one day, one or two files).</td></tr>
+                <tr><td><code>/quick-work</code></td><td>Executing a <code>/quick-plan</code>. The most-invoked skill on the platform.</td></tr>
+                <tr><td><code>/find-fix</code></td><td>Diagnosing a bug whose root cause isn't obvious. Read the code, form a hypothesis, then plan.</td></tr>
+                <tr><td><code>/code-review</code></td><td>Before every PR — required. The standard pre-merge audit.</td></tr>
+                <tr><td><code>/test-gen</code></td><td>Adding test coverage to existing code. Pairs naturally with <code>/code-review</code>.</td></tr>
+                <tr><td><code>/sec-audit</code></td><td>Auth, payments, PII, or any boundary code — always. Don't ship without it.</td></tr>
+                <tr><td><code>/smart-commit</code></td><td>Final step of every commit. Writes the message, runs the hooks.</td></tr>
+                <tr><td><code>/explain</code></td><td>Reading unfamiliar code (preferred over guessing). Use during onboarding constantly.</td></tr>
+                <tr><td><code>/suggest</code></td><td>Stuck on an approach; want options. Reads context and recommends the next skill.</td></tr>
+                <tr><td><code>/release-notes</code></td><td>Producing client-facing release summaries. Pairs with sprint close.</td></tr>
+                <tr><td><code>/code-standards</code></td><td>New project setup; codifying conventions in <code>.cursor/rules</code> or <code>CLAUDE.md</code>.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pack: Lead Engineer -->
+          <div class="pb-pack" id="pack-lead">
+            <div class="pb-pack-header">
+              <span class="pb-pack-emoji">🎯</span>
+              <div class="pb-pack-title">Lead Engineer Pack</div>
+              <span class="pb-pack-count">9 skills</span>
+            </div>
+            <p class="pb-pack-tagline">Engineering leadership flows. Tech Leads invoke these weekly; SE IVs invoke them daily.</p>
+            <table class="pb-pack-table">
+              <thead>
+                <tr><th>Skill</th><th>Use When</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>/sprint-plan</code></td><td>Start of every sprint. Allocates capacity, identifies risks, sets the demo target.</td></tr>
+                <tr><td><code>/arch-review</code></td><td>Reviewing architecture for a change set. Surfaces decisions that need ADRs.</td></tr>
+                <tr><td><code>/tech-debt-audit</code></td><td>Quarterly debt review. Categorizes, prioritizes, attaches cost.</td></tr>
+                <tr><td><code>/incident-response</code></td><td>Active incident triage. The first skill in an incident chain.</td></tr>
+                <tr><td><code>/pr-strategy</code></td><td>Setting the PR culture for a team: size, review depth, merge criteria.</td></tr>
+                <tr><td><code>/onboard-dev</code></td><td>A new engineer's first day. Generates the 30-60-90 plan and reading list.</td></tr>
+                <tr><td><code>/perf-audit</code></td><td>Performance regression or pre-launch perf check. Surfaces hot paths.</td></tr>
+                <tr><td><code>/decision-doc</code></td><td>Writing an Architecture Decision Record. Required for any choice that constrains future work.</td></tr>
+                <tr><td><code>/message-craft</code></td><td>Writing client comms — incident updates, scope-change notes, status emails.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pack: Architect -->
+          <div class="pb-pack" id="pack-architect">
+            <div class="pb-pack-header">
+              <span class="pb-pack-emoji">🏗️</span>
+              <div class="pb-pack-title">Technical Architect Pack</div>
+              <span class="pb-pack-count">8 skills</span>
+            </div>
+            <p class="pb-pack-tagline">System-level design. SE IV and Architect territory. Use sparingly; the artifacts are heavy.</p>
+            <table class="pb-pack-table">
+              <thead>
+                <tr><th>Skill</th><th>Use When</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>/system-design</code></td><td>Green-field system or substantial new service. Produces the high-level architecture doc.</td></tr>
+                <tr><td><code>/api-design</code></td><td>API contract design: schema, versioning, error model, pagination.</td></tr>
+                <tr><td><code>/db-design</code></td><td>Schema design — tables, indexes, relations, migration path.</td></tr>
+                <tr><td><code>/integration-plan</code></td><td>Planning a third-party integration: auth, retry, idempotency, observability.</td></tr>
+                <tr><td><code>/migration-plan</code></td><td>Data or system migration plan with cutover, rollback, and verification.</td></tr>
+                <tr><td><code>/scalability-review</code></td><td>Future-capacity audit. Three-year load projection, bottleneck identification.</td></tr>
+                <tr><td><code>/event-design</code></td><td>Event-driven architecture: event taxonomy, schema registry, ordering, replay.</td></tr>
+                <tr><td><code>/cost-estimate</code></td><td>AWS / GCP / Azure cost projection for a design. Run before commitment.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pack: QA / Testing -->
+          <div class="pb-pack" id="pack-qa">
+            <div class="pb-pack-header">
+              <span class="pb-pack-emoji">🧪</span>
+              <div class="pb-pack-title">QA / Testing Pack</div>
+              <span class="pb-pack-count">8 skills</span>
+            </div>
+            <p class="pb-pack-tagline">Manual and exploratory testing. Pairs with the automation pack for full coverage.</p>
+            <table class="pb-pack-table">
+              <thead>
+                <tr><th>Skill</th><th>Use When</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>/test-plan</code></td><td>Pre-release test plan. Maps coverage to risk areas.</td></tr>
+                <tr><td><code>/e2e-test</code></td><td>End-to-end happy-path and critical-path tests. Playwright or Cypress.</td></tr>
+                <tr><td><code>/api-test</code></td><td>API contract and behavior tests. Status codes, payload shape, error paths.</td></tr>
+                <tr><td><code>/regression-check</code></td><td>Pre-release regression sweep across known-good paths.</td></tr>
+                <tr><td><code>/bug-report</code></td><td>Writing a reproducible, actionable bug ticket — repro, expected, actual.</td></tr>
+                <tr><td><code>/load-test</code></td><td>Load testing for traffic-sensitive endpoints. Pairs with <code>/perf-audit</code>.</td></tr>
+                <tr><td><code>/accessibility-audit</code></td><td>WCAG audit of shipped UI. Required for client-facing apps in regulated industries.</td></tr>
+                <tr><td><code>/test-data-gen</code></td><td>Generating realistic test data — fixtures, seed files, synthetic PII.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pack: Automation QA -->
+          <div class="pb-pack" id="pack-automation-qa">
+            <div class="pb-pack-header">
+              <span class="pb-pack-emoji">⚙️</span>
+              <div class="pb-pack-title">Automation QA Pack</div>
+              <span class="pb-pack-count">6 skills</span>
+            </div>
+            <p class="pb-pack-tagline">Test infrastructure and CI. The pack that makes "Standards have teeth" mean something.</p>
+            <table class="pb-pack-table">
+              <thead>
+                <tr><th>Skill</th><th>Use When</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>/cypress-test</code></td><td>Authoring Cypress E2E tests. Page-object pattern, fixtures, retry strategy.</td></tr>
+                <tr><td><code>/ci-test-pipeline</code></td><td>Wiring tests into CI. Parallelization, sharding, flake detection.</td></tr>
+                <tr><td><code>/mock-service</code></td><td>Building service mocks (MSW, WireMock) for isolated testing.</td></tr>
+                <tr><td><code>/visual-regression</code></td><td>Visual diff setup (Percy, Chromatic). Snapshot strategy, threshold tuning.</td></tr>
+                <tr><td><code>/test-coverage</code></td><td>Coverage reporting and threshold enforcement. Pre-PR gate.</td></tr>
+                <tr><td><code>/contract-test</code></td><td>Consumer-driven contract tests (Pact). Pairs with <code>/api-design</code>.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pack: Cloud Engineer (AWS) -->
+          <div class="pb-pack" id="pack-cloud">
+            <div class="pb-pack-header">
+              <span class="pb-pack-emoji">☁️</span>
+              <div class="pb-pack-title">AWS Cloud Pack</div>
+              <span class="pb-pack-count">10 skills</span>
+            </div>
+            <p class="pb-pack-tagline">Cloud Engineer territory. Every skill writes Terraform you can read and apply.</p>
+            <table class="pb-pack-table">
+              <thead>
+                <tr><th>Skill</th><th>Use When</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>/vpc-design</code></td><td>Designing or auditing a VPC: subnets, NAT, endpoints, peering, flow logs.</td></tr>
+                <tr><td><code>/ecs-deploy</code></td><td>ECS service deployment: task def, autoscaling, target groups, blue-green.</td></tr>
+                <tr><td><code>/rds-setup</code></td><td>RDS provisioning: instance class, multi-AZ, backups, parameter group, IAM auth.</td></tr>
+                <tr><td><code>/iam-policy</code></td><td>Authoring least-privilege IAM. Pairs with <code>/sec-audit</code>.</td></tr>
+                <tr><td><code>/terraform-module</code></td><td>Writing a reusable Terraform module with proper inputs, outputs, examples.</td></tr>
+                <tr><td><code>/ci-cd-pipeline</code></td><td>Building the deploy pipeline: GitHub Actions, CodePipeline, approvals.</td></tr>
+                <tr><td><code>/monitoring-setup</code></td><td>Observability stack: CloudWatch, Grafana, alerts, dashboards, SLOs.</td></tr>
+                <tr><td><code>/cost-optimize</code></td><td>Cost reduction pass on running infra: rightsizing, RIs, lifecycle rules.</td></tr>
+                <tr><td><code>/disaster-recovery</code></td><td>DR plan: RPO/RTO targets, backup strategy, cross-region replication.</td></tr>
+                <tr><td><code>/secrets-manage</code></td><td>Secrets architecture: AWS Secrets Manager, rotation, KMS, in-transit access.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pack: Designer -->
+          <div class="pb-pack" id="pack-designer">
+            <div class="pb-pack-header">
+              <span class="pb-pack-emoji">🎨</span>
+              <div class="pb-pack-title">Designer Pack</div>
+              <span class="pb-pack-count">8 skills</span>
+            </div>
+            <p class="pb-pack-tagline">Design-system-first thinking. Engineers can run these — designers benefit most.</p>
+            <table class="pb-pack-table">
+              <thead>
+                <tr><th>Skill</th><th>Use When</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>/wireframe</code></td><td>Low-fidelity wireframes for a new flow. ASCII or annotated boxes.</td></tr>
+                <tr><td><code>/user-flow</code></td><td>End-to-end user-flow diagram. Pairs with <code>/wireframe</code>.</td></tr>
+                <tr><td><code>/design-system</code></td><td>Establishing or auditing a design system: tokens, primitives, composition rules.</td></tr>
+                <tr><td><code>/ux-audit</code></td><td>UX audit of shipped product: friction, drop-offs, instrumentation gaps.</td></tr>
+                <tr><td><code>/responsive-design</code></td><td>Responsive breakpoints and component behavior across viewports.</td></tr>
+                <tr><td><code>/micro-interaction</code></td><td>Designing micro-interactions: states, transitions, motion timing.</td></tr>
+                <tr><td><code>/a11y-design</code></td><td>Accessibility-first design choices. Pairs with <code>/accessibility-audit</code> at QA.</td></tr>
+                <tr><td><code>/design-handoff</code></td><td>Engineer-ready design handoff: specs, tokens, edge cases, annotations.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pack: Business / Product -->
+          <div class="pb-pack" id="pack-business">
+            <div class="pb-pack-header">
+              <span class="pb-pack-emoji">📈</span>
+              <div class="pb-pack-title">Business / Product Pack</div>
+              <span class="pb-pack-count">8 skills</span>
+            </div>
+            <p class="pb-pack-tagline">PM and client-facing flows. Pairs with the Lead Engineer pack on client engagements.</p>
+            <table class="pb-pack-table">
+              <thead>
+                <tr><th>Skill</th><th>Use When</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>/prd-write</code></td><td>Writing a Product Requirements Document. Problem, audience, scope, success.</td></tr>
+                <tr><td><code>/user-story</code></td><td>Decomposing features into stories with acceptance criteria.</td></tr>
+                <tr><td><code>/competitor-analysis</code></td><td>Mapping the competitive landscape before scoping a feature.</td></tr>
+                <tr><td><code>/feature-prioritize</code></td><td>RICE / WSJF prioritization of a backlog. Numeric, defensible.</td></tr>
+                <tr><td><code>/client-proposal</code></td><td>Drafting a client proposal: scope, deliverables, milestones, pricing.</td></tr>
+                <tr><td><code>/metrics-define</code></td><td>Defining success metrics for a feature or quarter. Required before kickoff.</td></tr>
+                <tr><td><code>/scope-negotiate</code></td><td>Negotiating scope down to fit capacity. Honest, not defensive.</td></tr>
+                <tr><td><code>/stakeholder-update</code></td><td>Weekly status to client / stakeholder. Three buckets: shipped, in progress, blockers.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pack: Mobile -->
+          <div class="pb-pack" id="pack-mobile">
+            <div class="pb-pack-header">
+              <span class="pb-pack-emoji">📱</span>
+              <div class="pb-pack-title">Mobile Pack</div>
+              <span class="pb-pack-count">16 skills</span>
+            </div>
+            <p class="pb-pack-tagline">Platform-aware versions of the Developer pack, plus mobile-only concerns (push, offline, store release).</p>
+            <table class="pb-pack-table">
+              <thead>
+                <tr><th>Skill</th><th>Use When</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>/mobile-feature</code></td><td>Multi-platform feature spanning iOS and Android. Plan covers both.</td></tr>
+                <tr><td><code>/mobile-navigation</code></td><td>Designing or refactoring nav: stack, tab, deep links, modals.</td></tr>
+                <tr><td><code>/mobile-state</code></td><td>State management: Zustand, Redux, MobX, signals — picking and structuring.</td></tr>
+                <tr><td><code>/mobile-ui</code></td><td>Native-feeling UI components. Platform-specific affordances.</td></tr>
+                <tr><td><code>/mobile-debug</code></td><td>Debugging native crashes, reading dSYM / mapping files.</td></tr>
+                <tr><td><code>/mobile-perf</code></td><td>Mobile performance audit: cold start, frame drops, memory.</td></tr>
+                <tr><td><code>/mobile-test</code></td><td>Mobile testing strategy: Detox, Maestro, XCUITest, Espresso.</td></tr>
+                <tr><td><code>/app-release</code></td><td>iOS App Store + Google Play submission. Metadata, screenshots, review notes.</td></tr>
+                <tr><td><code>/mobile-api</code></td><td>Mobile-friendly API design: bandwidth, caching, offline tolerance.</td></tr>
+                <tr><td><code>/push-notify</code></td><td>Push notification architecture: FCM, APNs, topic strategy, opt-in flow.</td></tr>
+                <tr><td><code>/mobile-auth</code></td><td>Mobile auth: biometrics, secure storage, refresh, SSO.</td></tr>
+                <tr><td><code>/mobile-offline</code></td><td>Offline-first design: sync strategy, conflict resolution, queue.</td></tr>
+                <tr><td><code>/mobile-ci</code></td><td>Mobile CI: Fastlane, code signing, build numbers, beta channels.</td></tr>
+                <tr><td><code>/platform-adapt</code></td><td>Adapting a feature spec across iOS / Android / web targets.</td></tr>
+                <tr><td><code>/mobile-quick-plan</code></td><td>Small mobile task plan — under one day, single platform.</td></tr>
+                <tr><td><code>/mobile-quick-work</code></td><td>Executing a <code>/mobile-quick-plan</code>. Native verify commands inline.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pack: Compliance & Security -->
+          <div class="pb-pack" id="pack-compliance">
+            <div class="pb-pack-header">
+              <span class="pb-pack-emoji">🛡️</span>
+              <div class="pb-pack-title">Compliance &amp; Security Pack</div>
+              <span class="pb-pack-count">15 skills</span>
+            </div>
+            <p class="pb-pack-tagline">Framework-specific audits. Run inline on regulated work — never bolt on at the end.</p>
+            <table class="pb-pack-table">
+              <thead>
+                <tr><th>Skill</th><th>Use When</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>/hipaa-audit</code></td><td>HIPAA Security Rule audit: PHI handling, access controls, audit logs, BAAs.</td></tr>
+                <tr><td><code>/gdpr-audit</code></td><td>GDPR audit: lawful basis, consent, DSR flows, processor agreements, retention.</td></tr>
+                <tr><td><code>/soc2-audit</code></td><td>SOC2 readiness audit: trust principles, evidence collection, control mapping.</td></tr>
+                <tr><td><code>/pci-audit</code></td><td>PCI-DSS audit: cardholder data scope, segmentation, tokenization, key mgmt.</td></tr>
+                <tr><td><code>/cloud-security</code></td><td>Cloud configuration audit: S3 ACLs, IAM, network ingress, KMS, logging.</td></tr>
+                <tr><td><code>/infra-harden</code></td><td>Hardening pass on running infra: OS, container, network, service hardening.</td></tr>
+                <tr><td><code>/network-audit</code></td><td>Network security audit: segmentation, ingress / egress, encryption in transit.</td></tr>
+                <tr><td><code>/secrets-scan</code></td><td>Secret detection in code, history, and artifacts. Pre-commit and CI integration.</td></tr>
+                <tr><td><code>/dep-vuln</code></td><td>Dependency vulnerability scan and remediation plan. CVE triage.</td></tr>
+                <tr><td><code>/privacy-review</code></td><td>Privacy-by-design review for a new feature. Data flow, retention, minimization.</td></tr>
+                <tr><td><code>/access-audit</code></td><td>Access review: who has access to what, why, and when access was last used.</td></tr>
+                <tr><td><code>/audit-log</code></td><td>Audit-trail completeness review. What's logged, where, retention, integrity.</td></tr>
+                <tr><td><code>/incident-plan</code></td><td>Security incident plan or post-mortem. Roles, comms, evidence, lessons.</td></tr>
+                <tr><td><code>/compliance-report</code></td><td>Aggregating audit findings into an evidence packet for client / auditor.</td></tr>
+                <tr><td><code>/secure-hipaa</code></td><td>HIPAA-aware secure-coding pass. Combines <code>/sec-audit</code> with PHI-specific patterns.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 7 — WHEN NOT TO USE A SKILL
+         ════════════════════════════════════════════ -->
+    <section class="pb-section pb-tradeoffs">
+      <div class="container">
+        <div style="text-align:center; max-width: 760px; margin: 0 auto 16px;">
+          <div class="pb-eyebrow" style="justify-content:center;">Section 7 · Honest Trade-offs</div>
+          <h2 class="pb-title" style="margin: 0 auto 16px;">Not every skill fits every task.</h2>
+          <p class="pb-lead" style="margin: 0 auto;">
+            A heavy skill on a light task is wasted tokens, wasted time, and a
+            signal that you don't understand what you're doing. Skills are tools.
+            Pick the lightest one that fits.
+          </p>
+        </div>
+
+        <ul class="pb-tradeoff-list">
+          <li>
+            <code>/feature-plan</code> is overkill for a one-line CSS change or
+            a typo fix. Use <code>/quick-plan</code> — or for genuinely trivial
+            edits, just plan inline in two bullets and ship.
+          </li>
+          <li>
+            <code>/sec-audit</code> is overkill for a copy change, a UI tweak,
+            or a config update with no auth surface. <strong>It is mandatory for
+            anything touching auth, payments, PII, or a public API surface.</strong>
+            The line is: does this change who can do what, or who can see what?
+          </li>
+          <li>
+            <code>/system-design</code> is for new systems, not feature
+            additions to existing ones. If your team has been running the
+            service for two years, you don't need a system-design doc for the
+            next feature — you need <code>/feature-plan</code>.
+          </li>
+          <li>
+            <code>/cost-estimate</code> matters at the cloud-infra level and at
+            commitment time. Don't run it for every feature; do run it for any
+            new AWS resource, any change to autoscaling bounds, or any third-party
+            integration with usage-based pricing.
+          </li>
+          <li>
+            <code>/load-test</code> applies to traffic-sensitive endpoints —
+            authentication, checkout, search, anything that fans out to multiple
+            downstream services. Don't load-test every CRUD operation. Do
+            load-test before scaling events (launch, marketing push, enterprise rollout).
+          </li>
+          <li>
+            <code>/decision-doc</code> is for decisions that will outlast the
+            person making them. If the choice is reversible in an hour, you
+            don't need an ADR. If it's reversible in a week, you might. If it's
+            not reversible at all, you absolutely need one.
+          </li>
+          <li>
+            <code>/migration-plan</code> is for cutovers — database, framework,
+            service, vendor. Not for renaming a file or refactoring within a
+            module. The test is: is anyone outside your team affected by the
+            change? Then yes, you need a plan.
+          </li>
+          <li>
+            <code>/onboard-dev</code> is for human onboarding, not project setup.
+            Pair it with <code>/code-standards</code> at the same time so the
+            new engineer learns standards through real code, not abstract docs.
+          </li>
+          <li>
+            <code>/competitor-analysis</code> belongs to product, not engineering.
+            If an engineer is running it, the team probably has a scoping problem
+            that should be escalated to the PM or Tech Lead — don't paper over it.
+          </li>
+          <li>
+            <code>/sprint-plan</code> is for the team rhythm, not for picking
+            up an ad-hoc ticket. If you're just grabbing a card from the
+            backlog, run <code>/quick-plan</code> and start.
+          </li>
+        </ul>
+
+        <div class="pb-tradeoff-callout">
+          <strong>Token discipline matters too.</strong> Right-sized planning is
+          the entire point of Principle 1 — <em>Plan Before Code, Even for Small
+          Tasks</em>. "Even for small tasks" doesn't mean "every task gets a
+          1,500-line spec." It means every task gets a plan proportional to its
+          size. <code>/quick-plan</code> for small. <code>/feature-plan</code>
+          for substantive. <code>/system-design</code> for green-field. Pick the
+          lightest skill that fits, and ship. See
+          <a href="principles.html#principle-1">Principle 1</a> for the
+          right-sizing rules.
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 8 — THE ANTI-SKILL: RAW AI
+         ════════════════════════════════════════════ -->
+    <section class="pb-section pb-anti-section">
+      <div class="container">
+        <div style="text-align:center; max-width: 760px; margin: 0 auto 16px;">
+          <div class="pb-eyebrow" style="justify-content:center;">Section 8 · The Anti-Skill</div>
+          <h2 class="pb-title" style="margin: 0 auto 16px;">Raw AI is not a skill.</h2>
+          <p class="pb-lead" style="margin: 0 auto;">
+            The biggest threat to our quality bar isn't an engineer making a
+            mistake — it's an engineer bypassing skills because "the autocomplete
+            already wrote it." Reference
+            <a href="principles.html#principle-2" style="color: var(--accent-light); text-decoration: underline; text-decoration-color: rgba(52, 211, 153, 0.3); text-underline-offset: 3px;">Principle 2</a>.
+          </p>
+        </div>
+
+        <div class="pb-anti-card">
+          <p class="pb-anti-quote">
+            Don't use raw ChatGPT, raw Cursor autocomplete, or raw Copilot for
+            production code on regulated systems.
+          </p>
+          <p class="pb-anti-body">
+            Raw AI doesn't enforce our 7 principles. Skills do. Raw AI doesn't
+            generate consistent output across developers. Skills do. Raw AI
+            doesn't carry our project conventions, our security gates, our
+            compliance posture, or our communication standards. <strong>Skills do
+            all of that, by design.</strong>
+          </p>
+          <p class="pb-anti-body">
+            The output of raw AI is a function of the prompt. The output of a
+            skill is a function of the prompt plus our standards plus our
+            project context plus our role-aware checks. The variance between
+            those two is the entire reason we exist as a team.
+          </p>
+          <p class="pb-anti-body">
+            <strong>Raw AI is fine for:</strong> rubber-ducking an approach,
+            search-engine-substitute questions ("what's the syntax for X"),
+            prototyping non-production code, drafting an email or doc that
+            you'll edit by hand. None of that ships.
+          </p>
+          <p class="pb-anti-body">
+            <strong>Anything that ships, ships via a skill.</strong> If you find
+            yourself reaching for raw Cursor autocomplete on production code,
+            stop. Open a skill. Run it. Ship the skill's output. That's the only
+            workflow on regulated code.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 9 — ALPHABETICAL LOOKUP TABLE
+         ════════════════════════════════════════════ -->
+    <section class="pb-section pb-lookup-section">
+      <div class="container">
+        <div style="text-align:center; max-width: 760px; margin: 0 auto 16px;">
+          <div class="pb-eyebrow" style="justify-content:center;">Section 9 · Alphabetical Lookup</div>
+          <h2 class="pb-title" style="margin: 0 auto 16px;">All 101 skills. One line each.</h2>
+          <p class="pb-lead" style="margin: 0 auto;">
+            The most-referenced part of this doc. Bookmark it. Search it
+            (<code style="background: var(--bg-code); padding: 2px 8px; border-radius: 4px; color: var(--accent-light); font-family: 'JetBrains Mono', monospace; font-size: 0.88em; border: 1px solid var(--border);">Cmd+F</code> or use
+            the search box below) when you know the name but not the
+            purpose — or vice versa.
+          </p>
+        </div>
+
+        <div class="pb-lookup-wrap">
+          <div class="pb-lookup-search">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="lookup-search" placeholder="Filter skills — name, pack, or purpose…" autocomplete="off">
+            <span class="pb-lookup-count" id="lookup-count">101 / 101</span>
+          </div>
+
+          <div class="pb-lookup-table-wrap">
+            <table class="pb-lookup-table" id="lookup-table">
+              <thead>
+                <tr>
+                  <th>Skill</th>
+                  <th>Pack</th>
+                  <th>One-Line Purpose</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>/a11y-design</td><td>Designer</td><td>Accessibility-first design choices baked into the spec.</td></tr>
+                <tr><td>/accessibility-audit</td><td>QA</td><td>Audit shipped UI for WCAG 2.1 AA compliance.</td></tr>
+                <tr><td>/access-audit</td><td>Compliance</td><td>Review who has access to what, why, and when last used.</td></tr>
+                <tr><td>/api-design</td><td>Architect</td><td>API contract design: schema, versioning, error model, pagination.</td></tr>
+                <tr><td>/api-test</td><td>QA</td><td>API contract and behavior tests — status, payload, errors.</td></tr>
+                <tr><td>/app-release</td><td>Mobile</td><td>iOS App Store and Google Play submission flow.</td></tr>
+                <tr><td>/arch-review</td><td>Lead Engineer</td><td>Review architecture for a change set; surface decisions.</td></tr>
+                <tr><td>/audit-log</td><td>Compliance</td><td>Audit-trail completeness review — what's logged and where.</td></tr>
+                <tr><td>/bug-report</td><td>QA</td><td>Write a reproducible, actionable bug ticket.</td></tr>
+                <tr><td>/ci-cd-pipeline</td><td>Cloud</td><td>Deploy pipeline: GitHub Actions, CodePipeline, approvals.</td></tr>
+                <tr><td>/ci-test-pipeline</td><td>Automation QA</td><td>Wire tests into CI — parallelization, sharding, flake detection.</td></tr>
+                <tr><td>/client-proposal</td><td>Business</td><td>Draft a client proposal: scope, deliverables, milestones, price.</td></tr>
+                <tr><td>/cloud-security</td><td>Compliance</td><td>Cloud configuration audit — S3, IAM, network, KMS, logging.</td></tr>
+                <tr><td>/code-review</td><td>Developer</td><td>Pre-PR code review — the standard pre-merge audit.</td></tr>
+                <tr><td>/code-standards</td><td>Developer</td><td>Codify project conventions in rules / CLAUDE.md.</td></tr>
+                <tr><td>/competitor-analysis</td><td>Business</td><td>Map competitive landscape before scoping a feature.</td></tr>
+                <tr><td>/compliance-report</td><td>Compliance</td><td>Aggregate audit findings into an evidence packet.</td></tr>
+                <tr><td>/contract-test</td><td>Automation QA</td><td>Consumer-driven contract tests (Pact).</td></tr>
+                <tr><td>/cost-estimate</td><td>Architect</td><td>Cloud cost projection for a design — pre-commitment.</td></tr>
+                <tr><td>/cost-optimize</td><td>Cloud</td><td>Cost reduction pass on running infra.</td></tr>
+                <tr><td>/cypress-test</td><td>Automation QA</td><td>Author Cypress E2E tests with page-object pattern.</td></tr>
+                <tr><td>/db-design</td><td>Architect</td><td>Schema design — tables, indexes, relations, migration path.</td></tr>
+                <tr><td>/decision-doc</td><td>Lead Engineer</td><td>Write an Architecture Decision Record (ADR).</td></tr>
+                <tr><td>/dep-vuln</td><td>Compliance</td><td>Dependency CVE scan and remediation plan.</td></tr>
+                <tr><td>/design-handoff</td><td>Designer</td><td>Engineer-ready design handoff with specs, tokens, edge cases.</td></tr>
+                <tr><td>/design-system</td><td>Designer</td><td>Establish or audit a design system — tokens, primitives, rules.</td></tr>
+                <tr><td>/disaster-recovery</td><td>Cloud</td><td>DR plan with RPO/RTO targets and backup strategy.</td></tr>
+                <tr><td>/e2e-test</td><td>QA</td><td>End-to-end happy-path and critical-path tests.</td></tr>
+                <tr><td>/ecs-deploy</td><td>Cloud</td><td>ECS service deployment with autoscaling and blue-green.</td></tr>
+                <tr><td>/event-design</td><td>Architect</td><td>Event-driven architecture — taxonomy, schema, ordering, replay.</td></tr>
+                <tr><td>/explain</td><td>Developer</td><td>Read unfamiliar code; explain in context.</td></tr>
+                <tr><td>/feature-plan</td><td>Developer</td><td>Multi-file feature plan with mockups and risks.</td></tr>
+                <tr><td>/feature-prioritize</td><td>Business</td><td>RICE / WSJF prioritization of a backlog.</td></tr>
+                <tr><td>/feature-work</td><td>Developer</td><td>Execute a /feature-plan — full implementation cycle.</td></tr>
+                <tr><td>/find-fix</td><td>Developer</td><td>Diagnose a bug whose root cause isn't obvious.</td></tr>
+                <tr><td>/gdpr-audit</td><td>Compliance</td><td>GDPR audit: lawful basis, consent, DSRs, retention.</td></tr>
+                <tr><td>/hipaa-audit</td><td>Compliance</td><td>HIPAA Security Rule audit on PHI handling and controls.</td></tr>
+                <tr><td>/iam-policy</td><td>Cloud</td><td>Least-privilege IAM authoring.</td></tr>
+                <tr><td>/incident-plan</td><td>Compliance</td><td>Security incident plan or post-mortem write-up.</td></tr>
+                <tr><td>/incident-response</td><td>Lead Engineer</td><td>Active-incident triage — first skill in an incident chain.</td></tr>
+                <tr><td>/infra-harden</td><td>Compliance</td><td>Hardening pass on OS, container, network, service.</td></tr>
+                <tr><td>/integration-plan</td><td>Architect</td><td>Third-party integration plan: auth, retry, idempotency.</td></tr>
+                <tr><td>/load-test</td><td>QA</td><td>Load testing for traffic-sensitive endpoints.</td></tr>
+                <tr><td>/message-craft</td><td>Lead Engineer</td><td>Client comms — incident updates, scope notes, status emails.</td></tr>
+                <tr><td>/metrics-define</td><td>Business</td><td>Define success metrics for a feature or quarter.</td></tr>
+                <tr><td>/micro-interaction</td><td>Designer</td><td>Design micro-interactions, states, transitions, motion timing.</td></tr>
+                <tr><td>/migration-plan</td><td>Architect</td><td>Data or system migration plan with cutover and rollback.</td></tr>
+                <tr><td>/mobile-api</td><td>Mobile</td><td>Mobile-friendly API design — bandwidth, caching, offline.</td></tr>
+                <tr><td>/mobile-auth</td><td>Mobile</td><td>Mobile auth — biometrics, secure storage, refresh, SSO.</td></tr>
+                <tr><td>/mobile-ci</td><td>Mobile</td><td>Mobile CI — Fastlane, code signing, build numbers, beta channels.</td></tr>
+                <tr><td>/mobile-debug</td><td>Mobile</td><td>Debug native crashes; read dSYM / mapping files.</td></tr>
+                <tr><td>/mobile-feature</td><td>Mobile</td><td>Multi-platform feature plan spanning iOS and Android.</td></tr>
+                <tr><td>/mobile-navigation</td><td>Mobile</td><td>Design nav — stack, tab, deep links, modals.</td></tr>
+                <tr><td>/mobile-offline</td><td>Mobile</td><td>Offline-first design — sync, conflict resolution, queue.</td></tr>
+                <tr><td>/mobile-perf</td><td>Mobile</td><td>Mobile performance audit — cold start, frame drops, memory.</td></tr>
+                <tr><td>/mobile-quick-plan</td><td>Mobile</td><td>Small mobile task plan — under one day, single platform.</td></tr>
+                <tr><td>/mobile-quick-work</td><td>Mobile</td><td>Execute a /mobile-quick-plan with native verify commands.</td></tr>
+                <tr><td>/mobile-state</td><td>Mobile</td><td>State management — Zustand, Redux, MobX, signals.</td></tr>
+                <tr><td>/mobile-test</td><td>Mobile</td><td>Mobile testing strategy — Detox, Maestro, XCUITest, Espresso.</td></tr>
+                <tr><td>/mobile-ui</td><td>Mobile</td><td>Native-feeling UI components and platform affordances.</td></tr>
+                <tr><td>/mock-service</td><td>Automation QA</td><td>Build service mocks (MSW, WireMock) for isolated testing.</td></tr>
+                <tr><td>/monitoring-setup</td><td>Cloud</td><td>Observability stack — CloudWatch, Grafana, alerts, SLOs.</td></tr>
+                <tr><td>/network-audit</td><td>Compliance</td><td>Network security audit — segmentation, ingress/egress, TLS.</td></tr>
+                <tr><td>/onboard-dev</td><td>Lead Engineer</td><td>New engineer 30-60-90 plan and reading list.</td></tr>
+                <tr><td>/pci-audit</td><td>Compliance</td><td>PCI-DSS audit — cardholder data scope, segmentation, tokens.</td></tr>
+                <tr><td>/perf-audit</td><td>Lead Engineer</td><td>Performance regression or pre-launch perf check.</td></tr>
+                <tr><td>/platform-adapt</td><td>Mobile</td><td>Adapt a feature spec across iOS / Android / web targets.</td></tr>
+                <tr><td>/pr-strategy</td><td>Lead Engineer</td><td>Set PR culture — size, review depth, merge criteria.</td></tr>
+                <tr><td>/prd-write</td><td>Business</td><td>Write a Product Requirements Document.</td></tr>
+                <tr><td>/privacy-review</td><td>Compliance</td><td>Privacy-by-design review for a new feature.</td></tr>
+                <tr><td>/push-notify</td><td>Mobile</td><td>Push architecture — FCM, APNs, topic strategy, opt-in.</td></tr>
+                <tr><td>/quick-plan</td><td>Developer</td><td>Small task plan — under one day, one or two files.</td></tr>
+                <tr><td>/quick-work</td><td>Developer</td><td>Execute a /quick-plan. Most-invoked skill on the platform.</td></tr>
+                <tr><td>/rds-setup</td><td>Cloud</td><td>RDS provisioning — instance class, multi-AZ, backups, IAM auth.</td></tr>
+                <tr><td>/regression-check</td><td>QA</td><td>Pre-release regression sweep across known-good paths.</td></tr>
+                <tr><td>/release-notes</td><td>Developer</td><td>Client-facing release summary.</td></tr>
+                <tr><td>/responsive-design</td><td>Designer</td><td>Responsive breakpoints and component behavior across viewports.</td></tr>
+                <tr><td>/scalability-review</td><td>Architect</td><td>Future-capacity audit — three-year load projection.</td></tr>
+                <tr><td>/scope-negotiate</td><td>Business</td><td>Negotiate scope down to fit capacity — honest, not defensive.</td></tr>
+                <tr><td>/sec-audit</td><td>Developer</td><td>Security audit on auth, payments, PII, public API surface.</td></tr>
+                <tr><td>/secrets-manage</td><td>Cloud</td><td>Secrets architecture — Secrets Manager, rotation, KMS.</td></tr>
+                <tr><td>/secrets-scan</td><td>Compliance</td><td>Secret detection in code, history, and artifacts.</td></tr>
+                <tr><td>/secure-hipaa</td><td>Compliance</td><td>HIPAA-aware secure-coding pass over PHI-handling code.</td></tr>
+                <tr><td>/smart-commit</td><td>Developer</td><td>Final step of every commit — message, hooks, summary.</td></tr>
+                <tr><td>/soc2-audit</td><td>Compliance</td><td>SOC2 readiness audit — trust principles, evidence, controls.</td></tr>
+                <tr><td>/sprint-plan</td><td>Lead Engineer</td><td>Sprint planning with capacity, risks, demo target.</td></tr>
+                <tr><td>/stakeholder-update</td><td>Business</td><td>Weekly status update — shipped, in progress, blockers.</td></tr>
+                <tr><td>/suggest</td><td>Developer</td><td>Read context and recommend the next skill.</td></tr>
+                <tr><td>/system-design</td><td>Architect</td><td>Green-field system or new service architecture doc.</td></tr>
+                <tr><td>/tech-debt-audit</td><td>Lead Engineer</td><td>Quarterly debt review — categorize, prioritize, cost.</td></tr>
+                <tr><td>/terraform-module</td><td>Cloud</td><td>Write a reusable Terraform module with proper interface.</td></tr>
+                <tr><td>/test-coverage</td><td>Automation QA</td><td>Coverage reporting and threshold enforcement.</td></tr>
+                <tr><td>/test-data-gen</td><td>QA</td><td>Generate realistic test data — fixtures, seeds, synthetic PII.</td></tr>
+                <tr><td>/test-gen</td><td>Developer</td><td>Add test coverage to existing code.</td></tr>
+                <tr><td>/test-plan</td><td>QA</td><td>Pre-release test plan mapping coverage to risk areas.</td></tr>
+                <tr><td>/user-flow</td><td>Designer</td><td>End-to-end user-flow diagram.</td></tr>
+                <tr><td>/user-story</td><td>Business</td><td>Decompose features into stories with acceptance criteria.</td></tr>
+                <tr><td>/ux-audit</td><td>Designer</td><td>UX audit of shipped product — friction, drop-offs, gaps.</td></tr>
+                <tr><td>/visual-regression</td><td>Automation QA</td><td>Visual diff setup (Percy, Chromatic) and snapshot strategy.</td></tr>
+                <tr><td>/vpc-design</td><td>Cloud</td><td>Design or audit a VPC — subnets, NAT, endpoints, peering.</td></tr>
+                <tr><td>/wireframe</td><td>Designer</td><td>Low-fidelity wireframes for a new flow.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         SECTION 10 — WHERE TO GO NEXT
+         ════════════════════════════════════════════ -->
+    <section class="pb-section pb-next">
+      <div class="container">
+        <div class="text-center" style="max-width: 720px; margin: 0 auto;">
+          <div class="pb-eyebrow" style="justify-content:center;">Where to next</div>
+          <h2 class="pb-title" style="margin: 0 auto 16px;">Three docs remain.</h2>
+          <p class="pb-lead" style="margin: 0 auto;">
+            You now know which skill to use, when to use it, and which skills to
+            pair it with. The remaining three docs cover what we don't do, the
+            non-negotiable gates every PR passes, and the version of the
+            handbook we share with clients.
+          </p>
+        </div>
+
+        <div class="pb-next-grid">
+          <div class="pb-next-card is-disabled">
+            <span class="pb-next-card-badge">Coming soon</span>
+            <div class="pb-next-card-label">Doc 5 · For what NOT to do</div>
+            <div class="pb-next-card-title">Anti-Patterns</div>
+            <div class="pb-next-card-body">
+              Thirty patterns we don't tolerate — AI hallucination traps, skill
+              bypasses, communication failures, premature optimization. How to
+              spot each one early.
+            </div>
+            <span class="pb-next-card-cta">
+              Available shortly
+            </span>
+          </div>
+
+          <div class="pb-next-card is-disabled">
+            <span class="pb-next-card-badge">Coming soon</span>
+            <div class="pb-next-card-label">Doc 6 · For the standards</div>
+            <div class="pb-next-card-title">Quality Gates</div>
+            <div class="pb-next-card-body">
+              The PR checklist with teeth. Every gate, every threshold, every
+              "this fails CI" line. The execution of Principle 7.
+            </div>
+            <span class="pb-next-card-cta">
+              Available shortly
+            </span>
+          </div>
+
+          <div class="pb-next-card is-disabled">
+            <span class="pb-next-card-badge">Coming soon</span>
+            <div class="pb-next-card-label">Doc 7 · For clients</div>
+            <div class="pb-next-card-title">Client Edition</div>
+            <div class="pb-next-card-body">
+              The shareable version. Same standards, written for procurement,
+              client engineering leadership, and engagement reviews. No
+              internal-only context.
+            </div>
+            <span class="pb-next-card-cta">
+              Available shortly
+            </span>
+          </div>
+        </div>
+
+        <!-- Effective footer card -->
+        <div class="pb-effective">
+          <div class="pb-effective-divider">─────────────────────────────────────────────────────────</div>
+          <div><strong>Effective:</strong> April 2026</div>
+          <div><strong>Version:</strong> 1.0 (Initial Release)</div>
+          <div><strong>Maintained by:</strong> Heaptrace Engineering Leadership</div>
+          <div class="pb-effective-divider">─────────────────────────────────────────────────────────</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════
+         FOOTER
+         ════════════════════════════════════════════ -->
+    <footer class="footer">
+      <div class="footer-inner">
+        <div class="footer-links">
+          <a href="../index.html" class="footer-link">Home</a>
+          <a href="../index.html#packs" class="footer-link">Packs</a>
+          <a href="../setup/index.html" class="footer-link">Setup Guide</a>
+          <a href="../customize/index.html" class="footer-link">Customize</a>
+          <a href="index.html" class="footer-link">Handbook</a>
+          <a href="https://heaptrace.com" class="footer-link" target="_blank" rel="noopener">Heaptrace</a>
+        </div>
+        <div class="footer-copy">
+          MIT License &middot; Built by <a href="https://heaptrace.com" target="_blank" rel="noopener">Heaptrace Technology</a>
+          <br>101 Skills &middot; 10 Packs &middot; Free &amp; Open Source
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       PASSWORD GATE SCRIPT
+       ════════════════════════════════════════════ -->
+  <script>
+    (function() {
+      const STORED_HASH = '5866f0f6f885b943472fd7572b9c783e6b1a29958a34bd9f18e1f1e17b9a57a6';
+      const STORAGE_KEY = 'htms-handbook-access';
+      const EXPIRY_DAYS = 30;
+      const gate = document.getElementById('password-gate');
+      const content = document.getElementById('main-content');
+      const input = document.getElementById('gate-input');
+      const submit = document.getElementById('gate-submit');
+      const error = document.getElementById('gate-error');
+
+      function unlock() {
+        gate.style.display = 'none';
+        content.style.display = 'block';
+        document.body.style.overflow = 'auto';
+      }
+
+      function checkStored() {
+        try {
+          const stored = localStorage.getItem(STORAGE_KEY);
+          if (!stored) return false;
+          const { hash, expiry } = JSON.parse(stored);
+          if (hash !== STORED_HASH) return false;
+          if (Date.now() > expiry) { localStorage.removeItem(STORAGE_KEY); return false; }
+          return true;
+        } catch { return false; }
+      }
+
+      async function sha256(str) {
+        const buf = new TextEncoder().encode(str);
+        const hashBuf = await crypto.subtle.digest('SHA-256', buf);
+        return Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
+      }
+
+      async function tryUnlock() {
+        error.textContent = '';
+        const val = input.value.trim();
+        if (!val) return;
+        const hash = await sha256(val);
+        if (hash === STORED_HASH) {
+          const expiry = Date.now() + EXPIRY_DAYS * 24 * 60 * 60 * 1000;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({ hash, expiry }));
+          unlock();
+        } else {
+          error.textContent = 'Incorrect code. Contact your Heaptrace contact.';
+          input.value = '';
+          input.focus();
+        }
+      }
+
+      content.style.display = 'none';
+      document.body.style.overflow = 'hidden';
+
+      if (checkStored()) {
+        unlock();
+      } else {
+        submit.addEventListener('click', tryUnlock);
+        input.addEventListener('keyup', (e) => { if (e.key === 'Enter') tryUnlock(); });
+        setTimeout(() => input.focus(), 100);
+      }
+    })();
+  </script>
+
+  <!-- ════════════════════════════════════════════
+       LOOKUP TABLE FILTER
+       ════════════════════════════════════════════ -->
+  <script>
+    (function() {
+      const search = document.getElementById('lookup-search');
+      const table = document.getElementById('lookup-table');
+      const count = document.getElementById('lookup-count');
+      if (!search || !table || !count) return;
+
+      const rows = Array.from(table.querySelectorAll('tbody tr'));
+      const total = rows.length;
+
+      function filter() {
+        const q = search.value.trim().toLowerCase();
+        let visible = 0;
+        rows.forEach(row => {
+          if (!q) {
+            row.classList.remove('is-hidden');
+            visible++;
+            return;
+          }
+          const txt = row.textContent.toLowerCase();
+          if (txt.includes(q)) {
+            row.classList.remove('is-hidden');
+            visible++;
+          } else {
+            row.classList.add('is-hidden');
+          }
+        });
+        count.textContent = visible + ' / ' + total;
+      }
+
+      search.addEventListener('input', filter);
+    })();
+  </script>
+
+</body>
+</html>
