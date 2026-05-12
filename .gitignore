@@ -1,0 +1,6 @@
+# Local-only documents (Word docs, internal handbook PDFs, etc.)
+doc/
+
+# OS junk
+.DS_Store
+Thumbs.db
