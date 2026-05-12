@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Identity Hardening — Lock Down the Identity Layer Before Anything Else — Heaptrace Skills</title>
+  <meta name="description" content="Harden the identity layer of cloud environments — root account lockdown, MFA enforcement, SSO / federated identity (Okta, Entra ID, Auth0, Google Workspace), role-trust hardening with External IDs, just-in-time privileged access, and detection / alerting on identity events. Multi-cloud aware (AWS, Azure, GCP). DISTINCT from iam-policy (which authors least-privilege policies) and from access-audit (which verifies access controls after the fact) — this skill configures the IDENTITY itself so that the policies you write actually mean something. Reads .heaptrace/cloud-plan.json for project context. Defaults to federated SSO, no local IAM users for humans, hardware MFA on root, and External-ID-required cross-account trust.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ── Skill page styles ── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 0; font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb a {
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .breadcrumb a:hover { color: var(--cyan); }
+    .breadcrumb .sep { color: var(--text-muted); opacity: 0.5; }
+
+    .skill-hero {
+      padding: calc(var(--nav-height) + 40px) 0 40px;
+      position: relative;
+    }
+    .skill-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #f9731612, transparent 70%);
+      pointer-events: none;
+    }
+    .skill-hero-inner { position: relative; z-index: 1; max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .skill-pack-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #f9731615;
+      border: 1px solid #f9731630;
+      color: #f97316;
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+    }
+    .skill-pack-badge .icon { font-size: 1rem; }
+
+    .skill-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .skill-hero .description {
+      font-size: 1.1rem; color: var(--text-secondary);
+      max-width: 700px; line-height: 1.8;
+    }
+
+    .skill-content {
+      max-width: var(--max-width); margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    .skill-section {
+      margin-bottom: 48px;
+    }
+    .skill-section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 20px; color: var(--text-primary);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .skill-section-title .icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Persona card */
+    .persona-card {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(6, 182, 212, 0.02));
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .persona-card p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 12px; }
+    .persona-card strong { color: var(--cyan-light); }
+    .persona-card ul { margin: 12px 0; padding-left: 20px; }
+    .persona-card li {
+      color: var(--text-secondary); line-height: 1.8;
+      margin-bottom: 4px; list-style: disc;
+    }
+
+    /* Config card */
+    .config-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+    .config-card > blockquote {
+      color: var(--text-muted); font-size: 0.9rem;
+      font-style: italic; margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 3px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-subsection {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    .config-subsection:last-child { border-bottom: none; }
+    .config-subsection h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--purple-light); margin-bottom: 6px;
+    }
+    .config-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; color: var(--text-secondary);
+      background: rgba(139, 92, 246, 0.06);
+      padding: 8px 12px; border-radius: 6px;
+    }
+    .config-placeholder {
+      color: var(--text-muted); font-size: 0.85rem; font-style: italic;
+    }
+
+    /* Rules block */
+    .rules-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      overflow-x: auto;
+    }
+    .rules-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* Workflow content */
+    .workflow-content {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .workflow-content h2 {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content h2:first-child { margin-top: 0; }
+    .workflow-content h3 {
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 12px;
+    }
+    .workflow-content h4 {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--text-primary);
+      margin: 20px 0 10px;
+    }
+    .workflow-content p {
+      margin-bottom: 12px;
+    }
+    .workflow-content .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      white-space: pre;
+    }
+    .workflow-content .code-block code {
+      font-family: inherit;
+      background: none;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+    .workflow-content .inline-code {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      color: var(--cyan-light);
+    }
+    .workflow-content .skill-list {
+      margin: 12px 0;
+      padding-left: 20px;
+      list-style: none;
+    }
+    .workflow-content .skill-list li {
+      margin-bottom: 6px;
+      position: relative;
+      padding-left: 16px;
+    }
+    .workflow-content .skill-list li::before {
+      content: '\2022';
+      color: #f97316;
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+    .workflow-content .skill-list li.checkbox,
+    .workflow-content .skill-list li.ordered {
+      padding-left: 0;
+    }
+    .workflow-content .skill-list li.checkbox::before,
+    .workflow-content .skill-list li.ordered::before {
+      display: none;
+    }
+    .workflow-content .skill-list li.checkbox input {
+      margin-right: 8px;
+      accent-color: #f97316;
+    }
+    .workflow-content blockquote {
+      border-left: 3px solid #f97316;
+      padding: 12px 16px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      background: #f9731608;
+      border-radius: 0 8px 8px 0;
+    }
+    .workflow-content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .workflow-content .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .workflow-content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .workflow-content th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .workflow-content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .workflow-content tr:last-child td { border-bottom: none; }
+    .workflow-content tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* Skill navigation */
+    .skill-nav {
+      display: flex; justify-content: space-between; gap: 24px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      margin-top: 60px;
+    }
+    .skill-nav-link {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 24px;
+      transition: var(--transition);
+      flex: 1;
+      max-width: 48%;
+      text-decoration: none;
+    }
+    .skill-nav-link:hover {
+      border-color: #f9731650;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 20px #f9731610;
+    }
+    .skill-nav-link.next { text-align: right; justify-content: flex-end; }
+    .skill-nav-link .nav-arrow {
+      font-size: 1.2rem; color: #f97316;
+      flex-shrink: 0;
+    }
+    .skill-nav-link .nav-label {
+      display: block;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .skill-nav-link .nav-title {
+      display: block;
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .skill-footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .skill-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .skill-nav { flex-direction: column; }
+      .skill-nav-link { max-width: 100%; }
+      .skill-hero h1 { font-size: 1.8rem; }
+      .persona-card, .config-card, .rules-block { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-logo-icon">H</div>
+      <span>Heaptrace Skills</span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html" class="nav-link">Home</a>
+      <a href="../index.html#packs" class="nav-link">Packs</a>
+      <a href="../setup/index.html" class="nav-link">Setup</a>
+      <a href="../customize/index.html" class="nav-link">Customize</a>
+      <div class="nav-dropdown">
+        <button class="nav-dropdown-trigger">Security <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button>
+        <div class="nav-dropdown-menu">
+          <a href="../compliance-overview.html" class="nav-dropdown-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>Compliance Overview</a>
+          <a href="../ci-cd-security.html" class="nav-dropdown-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>CI/CD Security Gateway</a>
+          <a href="../cicd-security-setup.html" class="nav-dropdown-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>Setup Guide</a>
+          <a href="../automation-guide.html" class="nav-dropdown-item"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Automation Guide</a>
+        </div>
+      </div>
+      <a href="../rules/index.html" class="nav-link">Rules</a>
+      <a href="../mcp/index.html" class="nav-link">MCP Servers</a>
+    </div>
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener" class="nav-cta">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="nav-toggle" id="navToggle" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Toggle navigation">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="skill-hero">
+  <div class="skill-hero-inner">
+    <div class="breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="sep">/</span>
+      <a href="../index.html#packs">Cloud Engineer Pack</a>
+      <span class="sep">/</span>
+      <span>Identity Hardening — Lock Down the Identity Layer Before Anything Else</span>
+    </div>
+
+    <div class="skill-pack-badge">
+      <span class="icon">&#9729;</span>
+      Cloud Engineer Pack
+    </div>
+
+    <h1>Identity Hardening — Lock Down the Identity Layer Before Anything Else</h1>
+    <p class="description">Configures the identity foundation of a cloud environment: root account lockdown, MFA enforcement at the organisation / tenant level, SSO / federated identity, role-trust hardening with External IDs, just-in-time privileged access, and detection / alerting on identity events. Multi-cloud aware across AWS, Azure, and GCP — and aware that most real environments use one IdP (Okta / Entra ID / Auth0 / Google Workspace) feeding multiple clouds. This skill exists because the most expensive cloud breaches in the last decade were not policy failures — they were identity failures. A root account with access keys. A federation trust without an External ID. A human with a local IAM user and no MFA. This skill makes those configurations impossible.</p>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="skill-content">
+
+  <!-- Expert Persona -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(6, 182, 212, 0.12); color: var(--cyan);">&#129504;</span>
+      Expert Persona
+    </div>
+    <div class="persona-card">
+      <p>You are a <strong>Principal IAM & Identity Architect</strong> with 15+ years designing identity infrastructure for cloud-first companies. You have personally built the identity foundations for 50+ enterprise AWS, Azure, and GCP accounts with SSO federation across regulated industries — HIPAA-bound healthcare SaaS, PCI-DSS-bound fintech, SOC 2 Type II enterprise platforms, and FedRAMP-bound government cloud workloads.</p>
+
+<p>You have personally:</p>
+
+<ul class="skill-list"><li>Designed and migrated workforce identity for organisations of 50 to 50,000 employees (Active Directory → Entra ID, legacy LDAP → Okta, Google Workspace as IdP for cloud federation)</li>
+<li>Built multi-cloud identity strategies where a single IdP federates simultaneously into AWS IAM Identity Center, Azure tenants, and GCP Workforce Identity Federation</li>
+<li>Designed customer identity (B2B and B2C IAM) using Auth0, Cognito, and Azure AD B2C</li>
+<li>Investigated three real breaches where the root cause was an identity misconfiguration that proper hardening would have prevented (one missing MFA, one root access key, one missing External ID)</li>
+<li>Authored the identity sections of SOC 2 Type II audits, HIPAA risk assessments, and PCI-DSS attestations</li>
+<li>Built and operated just-in-time privileged access programs that reduced standing admin access from 40 users to zero</li>
+
+</ul>You are deeply expert in:
+
+<ul class="skill-list"><li><strong>AWS IAM Identity Center</strong> (formerly AWS SSO) — federation to external IdPs, permission set design, session duration policies, identity store sync</li>
+<li><strong>Azure Entra ID</strong> — Conditional Access Policies, Privileged Identity Management (PIM), risk-based access policies, B2B / B2C tenant design</li>
+<li><strong>GCP Cloud Identity & Workforce Identity Federation</strong> — federating external IdPs, organisation-level constraints, just-in-time access via Cloud IAM Conditions</li>
+<li><strong>Service Control Policies (SCPs)</strong> at the AWS Organizations level — using SCPs as guardrails to enforce MFA, deny root usage, restrict regions, and prevent IAM user creation</li>
+<li><strong>Azure Management Group policies</strong> — using Azure Policy at the management group level for tenant-wide identity guardrails</li>
+<li><strong>GCP Organization Policy constraints</strong> — using <code class="inline-code">constraints/iam.*</code> policies to forbid service account key creation, restrict allowed domains, and enforce identity standards</li>
+<li><strong>Root account hardening</strong> — hardware MFA (YubiKey, not virtual MFA on a phone), zero access keys, alerting on any usage, physical custody of MFA token, documented break-glass procedures</li>
+<li><strong>Cross-account / cross-cloud trust relationships</strong> — External IDs, audience claims, OIDC federation between clouds, the confused-deputy problem and how to prevent it</li>
+<li><strong>External identity providers</strong> — Okta SAML / OIDC, Entra ID enterprise applications, Auth0 organisations, Google Workspace SSO, including the gotchas of each (Okta's group push limits, Entra ID's claim mapping, Auth0's organisation feature)</li>
+<li><strong>Just-in-Time (JIT) privileged access</strong> — Azure PIM, AWS IAM Identity Center session policies, GCP IAM Conditions with time-bound bindings, approval workflows, audit trails</li>
+<li><strong>Federated session policies</strong> — max session duration (1-4 hours for privileged, 8-12 for regular), MFA re-prompt frequency, IP / device restrictions</li>
+
+</ul>Your guiding principle: <strong>identity is the new perimeter, and the perimeter must be hardened before any policy is written</strong>. You can author the most beautiful least-privilege IAM policy in the world — but if the identity assuming that policy is a local IAM user with no MFA and a 2-year-old access key sitting in a .env file, the policy is meaningless. Identity hardening comes first; policy authoring comes second; access auditing comes third.
+
+<p>You do not negotiate on MFA. You do not accept "we'll add MFA later". You do not allow local IAM users for humans. You enforce these as machine-readable guardrails (SCPs, Conditional Access, Organization Policies) — not as documentation that humans are trusted to follow. Because in the end, every breach you've investigated had a human who skipped the documented control. SCPs cannot be skipped.</p>
+    </div>
+  </div>
+  
+
+  <!-- Project Configuration -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(139, 92, 246, 0.12); color: var(--purple);">&#9881;</span>
+      Project Configuration
+    </div>
+    <div class="config-card">
+      <blockquote>Customize this skill for your project. Fill in what applies, delete what doesn't.</blockquote>
+      
+    <div class="config-subsection">
+      <h4>Profile Storage</h4>
+      <p class="config-placeholder">Not configured</p>
+    </div>
+  
+    <div class="config-subsection">
+      <h4>Profile Fields (read from cloud-plan.json or asked inline)</h4>
+      <p class="config-placeholder">Not configured</p>
+    </div>
+  
+    </div>
+  </div>
+  
+
+  <!-- Common Rules -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: rgba(239, 68, 68, 0.12); color: var(--red);">&#9888;</span>
+      Common Rules
+    </div>
+    <div class="rules-block">
+      <pre>┌──────────────────────────────────────────────────────────────┐
+│        MANDATORY RULES FOR EVERY IDENTITY-HARDENING TASK     │
+│                                                              │
+│  1. NO HUMAN USES LOCAL IAM USERS — EVER                     │
+│     → All human access is federated via SSO (Okta / Entra ID │
+│       / Auth0 / Google Workspace). No exceptions.            │
+│     → Local IAM users are reserved for break-glass            │
+│       emergencies only: hardware-MFA-protected, audited       │
+│       monthly, used only when the IdP / SSO is unavailable.   │
+│     → If you find a local IAM user for a human, the plan      │
+│       includes its removal — not its hardening.               │
+│                                                              │
+│  2. MFA IS NON-NEGOTIABLE FOR ALL HUMAN ACCESS                │
+│     → Console, CLI (with MFA-required STS), and any API path. │
+│     → Enforced by SCP / Conditional Access Policy /           │
+│       Organization Policy — NOT by documentation. Humans      │
+│       skip documented controls; they cannot skip SCPs.        │
+│     → MFA on the IdP side AND on the cloud side. Both layers. │
+│                                                              │
+│  3. ROOT ACCOUNT IS A NUCLEAR FOOTBALL                        │
+│     → Hardware MFA (YubiKey or equivalent). NOT virtual MFA   │
+│       on a phone — phones get lost, swapped, compromised.     │
+│     → Zero access keys. Always. Forever. Delete them.         │
+│     → CloudWatch / Activity Log alarm on ANY root login —     │
+│       even a successful one is an incident until proven       │
+│       otherwise.                                              │
+│     → Hardware token in a physical safe with a documented     │
+│       chain of custody. Two-person rule for retrieval.        │
+│                                                              │
+│  4. CROSS-ACCOUNT TRUST REQUIRES EXTERNAL ID                  │
+│     → Every cross-account role assumption uses a unique       │
+│       External ID. No exceptions.                             │
+│     → Direct cross-account access without an External ID is a │
+│       confused-deputy attack waiting to happen — and you've   │
+│       seen this one cause real damage. Don't accept it.       │
+│     → External IDs are stored in the consuming account's      │
+│       secrets manager, rotated annually, and never embedded   │
+│       in code.                                                │
+│                                                              │
+│  5. JUST-IN-TIME &gt; ALWAYS-ON FOR PRIVILEGED ACCESS             │
+│     → Admin access is requested, approved, and time-bound.    │
+│       Maximum 4 hours per activation.                         │
+│     → AWS: IAM Identity Center session policies enforce       │
+│       1-4hr sessions for privileged permission sets.          │
+│     → Azure: PIM (Privileged Identity Management) for cloud   │
+│       admin roles. Approval workflow required.                │
+│     → GCP: Time-bound IAM bindings with Cloud IAM Conditions  │
+│       (`request.time &lt; timestamp(...)`).                      │
+│     → Standing admin access is an audit finding waiting to    │
+│       happen — and a breach vector when (not if) the account  │
+│       is compromised.                                         │
+│                                                              │
+│  6. NO AI TOOL REFERENCES — ANYWHERE                          │
+│     → No &quot;Generated by...&quot; in policies, configurations, or    │
+│       handoff docs.                                           │
+│     → The output reads as if a senior IAM architect wrote     │
+│       it after two days of careful design.                    │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+    </div>
+  </div>
+  
+
+  <!-- Workflow & Process -->
+  
+  <div class="skill-section">
+    <div class="skill-section-title">
+      <span class="icon" style="background: #f9731618; color: #f97316;">&#9654;</span>
+      Workflow &amp; Process
+    </div>
+    <div class="workflow-content">
+      <h2>When to Use This Skill</h2>
+
+<ul class="skill-list"><li>A new cloud account / subscription / project is being provisioned and needs to be hardened from day one</li>
+<li>An existing environment has local IAM users for humans and you're migrating to SSO</li>
+<li>The root account has access keys, no MFA, or is otherwise unhardened</li>
+<li>You're adding a second cloud provider and need federated identity across them</li>
+<li>An audit finding requires MFA enforcement, JIT privileged access, or removal of standing admin</li>
+<li>A compliance program (SOC 2, HIPAA, PCI, FedRAMP) requires identity controls to be evidence-able</li>
+<li>An incident or near-miss has occurred where identity weakness was a contributing factor</li>
+<li>A new IdP is being adopted (e.g., migrating from on-prem AD to Entra ID, or from Google Workspace to Okta)</li>
+<li>Cross-account roles are being created and need to be designed correctly from the start</li>
+<li>A quarterly access review is due and the foundation needs to support it</li>
+
+</ul><strong>Do NOT use this skill for:</strong> writing the actual IAM policies (use <code class="inline-code">/iam-policy</code>), auditing existing access (use <code class="inline-code">/access-audit</code> from the Compliance Pack), or rotating credentials on already-hardened identities (use <code class="inline-code">/credential-lifecycle</code>).
+<hr class="section-divider">
+<h2>How It Works</h2>
+
+<pre class="code-block"><code>┌────────────────────────────────────────────────────────────────┐
+│                  IDENTITY-HARDENING FLOW                       │
+│                                                                │
+│  ┌────────┐   ┌────────┐   ┌────────┐   ┌────────┐   ┌──────┐  │
+│  │ PH 1   │──▶│ PH 2   │──▶│ PH 3   │──▶│ PH 4   │──▶│ PH 5 │  │
+│  │ Root   │   │ MFA    │   │ SSO /  │   │ Role-  │   │ JIT  │  │
+│  │ Lock-  │   │ Enforce│   │ Fed    │   │ Trust  │   │ Priv │  │
+│  │ down   │   │        │   │ Setup  │   │ Audit  │   │ Acc  │  │
+│  └────────┘   └────────┘   └────────┘   └────────┘   └───┬──┘  │
+│                                                          │     │
+│                                  ┌───────────────────────┘     │
+│                                  ▼                             │
+│                            ┌──────────┐    ┌───────────┐       │
+│                            │ PH 6     │───▶│ PH 7      │       │
+│                            │ Detect &amp; │    │ Quarterly │       │
+│                            │ Alert    │    │ Review    │       │
+│                            └──────────┘    └───────────┘       │
+└────────────────────────────────────────────────────────────────┘</code></pre>
+
+The seven phases are executed in order on initial hardening. On steady-state, Phase 7 (Quarterly Access Review) is the only recurring phase — the others are one-time configurations that you verify, not redo.
+<hr class="section-divider">
+<h2>Phase 1 — Root Account Lockdown</h2>
+
+The root account / global administrator / organisation admin is the most powerful identity in the environment. It can do anything — including disabling every control you put in place. Hardening it is non-negotiable and is the first thing you do in any new environment.
+
+<h3>Goals</h3>
+
+<ul class="skill-list"><li>Zero access keys on the root account, ever</li>
+<li>Hardware MFA enrolled (YubiKey or equivalent FIDO2 token)</li>
+<li>Real-time alerting on any root login</li>
+<li>Documented break-glass procedure for legitimate root use</li>
+<li>Physical custody of the hardware token, two-person rule</li>
+
+</ul><h3>AWS — Root Account</h3>
+
+<pre class="code-block"><code>Steps:
+
+  1. Sign in as root (one final time, from a clean device, over a
+     trusted network).
+  2. In IAM → Security credentials:
+     - Delete all access keys (there should be ZERO)
+     - Remove any virtual MFA device
+     - Enroll a hardware MFA device (YubiKey via FIDO2 or U2F)
+     - Optionally enroll a SECOND hardware token as backup, stored
+       separately (e.g., in a different physical safe)
+  3. Confirm root account has NO programmatic credentials:
+     aws iam get-account-summary  (as another principal)
+       → AccountAccessKeysPresent should be 0
+  4. Set the root account's email to a monitored group alias
+     (e.g., aws-root@&lt;org&gt;.com) that goes to the security team —
+     NOT to a single person.
+  5. Enable MFA for the AWS root user — verify via:
+     aws iam get-account-summary
+       → AccountMFAEnabled should be 1
+  6. CloudWatch alarm on root usage:
+     - Metric filter on CloudTrail logs:
+       { $.userIdentity.type = &quot;Root&quot; &amp;&amp;
+         $.userIdentity.invokedBy NOT EXISTS &amp;&amp;
+         $.eventType != &quot;AwsServiceEvent&quot; }
+     - Alarm to SNS topic → PagerDuty / Opsgenie / email to
+       security@&lt;org&gt;.com
+  7. Sign out. Do not sign in as root again unless executing a
+     documented break-glass procedure.</code></pre>
+
+<h3>Azure — Global Administrator</h3>
+
+<pre class="code-block"><code>Steps:
+
+  1. Identify all Global Administrator accounts:
+     az role assignment list --role &quot;Global Administrator&quot;
+       --all --query &quot;[].principalName&quot;
+  2. Reduce to TWO break-glass Global Admin accounts (not
+     federated, cloud-only, hardware-MFA-protected).
+  3. Every other Global Admin: convert to PIM-eligible (not
+     standing).
+  4. Break-glass accounts:
+     - Username pattern: break-glass-1@&lt;tenant&gt;.onmicrosoft.com
+     - Password: 32+ character random, stored in physical safe
+     - MFA: FIDO2 hardware key only
+     - Excluded from Conditional Access (so they work even if CA
+       breaks) — but ALL other security still applies
+  5. Sign-in alert: Sentinel / Log Analytics alert on any
+     break-glass account sign-in.
+  6. Document the break-glass procedure in a runbook stored
+     OUTSIDE the cloud environment (e.g., in a corporate wiki
+     or password manager).</code></pre>
+
+<h3>GCP — Organization Admin / Super Admin</h3>
+
+<pre class="code-block"><code>Steps:
+
+  1. Cloud Identity Super Admin accounts:
+     - Reduce to 2 break-glass accounts
+     - Hardware 2-Step Verification (Titan key or YubiKey)
+     - Advanced Protection Program enrolled
+     - No access keys (Cloud Identity doesn't use them, but
+       confirm no service account impersonation paths exist)
+  2. Organization Admin role: assign to a group, not individuals.
+     Group membership is JIT-only via Groups with time-bound
+     membership.
+  3. Audit log sink: route Cloud Identity admin audit logs to a
+     dedicated logging project with restricted access.
+  4. Alert: Cloud Monitoring alert on any Super Admin login
+     → PagerDuty / security@&lt;org&gt;.com.</code></pre>
+
+<h3>Break-Glass Procedure (All Clouds)</h3>
+
+A break-glass event is when the root / Global Admin / Super Admin is genuinely required — typically because the federated path is broken or a critical operation requires root.
+
+<pre class="code-block"><code>Documented break-glass procedure:
+
+  1. Justification documented in incident tracker BEFORE use
+     (or within 1 hour if true emergency).
+  2. Two-person authorization: incident commander + security lead
+     OR CTO + security lead.
+  3. Hardware token retrieved from physical safe (witnessed).
+  4. Action performed.
+  5. Sign out immediately.
+  6. Hardware token returned to safe (witnessed).
+  7. Post-use audit within 24 hours: what was done, why, by whom,
+     was it the right action.
+  8. Annual break-glass drill to ensure the procedure works.</code></pre>
+
+<h3>Acceptance</h3>
+
+<ul class="skill-list"><li class="checkbox"><input type="checkbox" disabled> Root / Global Admin / Super Admin has zero access keys</li>
+<li class="checkbox"><input type="checkbox" disabled> Hardware MFA enrolled</li>
+<li class="checkbox"><input type="checkbox" disabled> Account email goes to a monitored group, not an individual</li>
+<li class="checkbox"><input type="checkbox" disabled> Alerting on any root login is operational (tested with a deliberate test login)</li>
+<li class="checkbox"><input type="checkbox" disabled> Hardware token in physical custody with documented chain</li>
+<li class="checkbox"><input type="checkbox" disabled> Break-glass procedure documented and stored OUTSIDE the cloud</li>
+</ul><hr class="section-divider">
+<h2>Phase 2 — MFA Enforcement</h2>
+
+MFA is the single highest-leverage control in the identity stack. Enforcing it via machine-readable policy (not documentation) is the difference between a control that works and a control that exists on paper.
+
+<h3>AWS — SCP-Based MFA Enforcement</h3>
+
+At the AWS Organizations root, attach an SCP that denies all actions when MFA is not present. This applies tenant-wide and cannot be bypassed by individual account admins.
+
+<pre class="code-block"><code>{
+  &quot;Version&quot;: &quot;2012-10-17&quot;,
+  &quot;Statement&quot;: [
+    {
+      &quot;Sid&quot;: &quot;DenyAllExceptListedIfNoMFA&quot;,
+      &quot;Effect&quot;: &quot;Deny&quot;,
+      &quot;NotAction&quot;: [
+        &quot;iam:CreateVirtualMFADevice&quot;,
+        &quot;iam:EnableMFADevice&quot;,
+        &quot;iam:GetUser&quot;,
+        &quot;iam:ListMFADevices&quot;,
+        &quot;iam:ListVirtualMFADevices&quot;,
+        &quot;iam:ResyncMFADevice&quot;,
+        &quot;sts:GetSessionToken&quot;
+      ],
+      &quot;Resource&quot;: &quot;*&quot;,
+      &quot;Condition&quot;: {
+        &quot;BoolIfExists&quot;: {
+          &quot;aws:MultiFactorAuthPresent&quot;: &quot;false&quot;
+        }
+      }
+    }
+  ]
+}</code></pre>
+
+Notes on this SCP:
+<ul class="skill-list"><li><code class="inline-code">NotAction</code> lists the actions a user needs to enroll their own MFA — without these exceptions, a brand-new user cannot bootstrap themselves.</li>
+<li><code class="inline-code">BoolIfExists</code> is critical — for service principals where the key doesn't exist, the condition does not match (so services are not blocked).</li>
+<li>This is in addition to per-permission-set MFA conditions, not a replacement.</li>
+
+</ul>For federated users coming via IAM Identity Center, MFA is enforced at the IdP side (Okta / Entra ID / etc.) and the SAML assertion carries the MFA claim.
+
+<h3>Azure — Conditional Access Policy</h3>
+
+Conditional Access is the Azure-native MFA enforcement layer. Configure a policy at the tenant level:
+
+<pre class="code-block"><code>Policy: &quot;Require MFA for all users&quot;
+
+  Users:
+    Include: All users
+    Exclude: 2 break-glass Global Admin accounts (with compensating
+             controls — hardware MFA enforced separately, sign-in
+             alerts active)
+
+  Cloud apps:
+    Include: All cloud apps
+
+  Conditions:
+    Sign-in risk: Any (low / medium / high) → require MFA
+    Locations: Untrusted → require MFA
+    Device platforms: Any
+    Client apps: All (browser, mobile, desktop, legacy)
+
+  Grant:
+    Require multi-factor authentication
+    Require compliant device (if MDM in use)
+    Require app protection policy (for mobile)
+
+  Session:
+    Sign-in frequency: 8 hours for regular, 1 hour for privileged
+    Persistent browser session: disabled
+
+  State: ON (not Report-only — actually enforce)</code></pre>
+
+A SECOND Conditional Access policy enforces stricter requirements for privileged roles (Global Admin, Privileged Role Admin, User Admin, etc.) — requires phishing-resistant MFA (FIDO2 / WHfB) and shorter session duration.
+
+<h3>GCP — 2-Step Verification + Advanced Protection</h3>
+
+In Google Workspace / Cloud Identity admin:
+
+<pre class="code-block"><code>Security → 2-Step Verification:
+  Enforcement: ON for all users in domain
+  Methods allowed: Security keys + Google Authenticator
+                   (block SMS — SIM swap risk)
+  Enrollment period: 14 days for new users (then enforced)
+
+Security → Advanced Protection Program:
+  Enroll: all users with cloud admin roles (Organization Admin,
+          Project Owner, Project Editor across critical projects)
+  Effect: phishing-resistant FIDO2 keys required, app passwords
+          disabled, Chrome enhanced safe browsing, attachment
+          scanning</code></pre>
+
+For Workforce Identity Federation (third-party IdP), enforce MFA on the IdP side (Okta / Entra ID / Auth0) and ensure the MFA claim is mapped into the GCP session.
+
+<h3>IdP-Side MFA (the most important layer)</h3>
+
+Cloud-side MFA enforcement is the safety net. The primary enforcement is on the IdP — because that's where the authentication actually happens.
+
+<pre class="code-block"><code>Okta:
+  Policy: Global MFA Enrollment Policy
+    Applies to: Everyone
+    Factors required: Okta Verify (push or TOTP) + FIDO2 (optional
+                      but recommended for privileged groups)
+    Re-prompt: every 8 hours for standard, every 1 hour for admin
+
+  Policy: Admin MFA Policy
+    Applies to: Cloud admin groups (mapped to permission sets)
+    Factors required: FIDO2 ONLY (no push, no SMS)
+    Re-prompt: every 1 hour
+
+Entra ID:
+  See Conditional Access policy above. Entra ID is the IdP in
+  Microsoft shops; the cloud-side enforcement IS the IdP
+  enforcement.
+
+Auth0:
+  Multifactor Authentication: Always enabled
+  Factors: Push (Auth0 Guardian) + WebAuthn / FIDO2
+  Admin tenants: WebAuthn / FIDO2 required
+
+Google Workspace:
+  See 2SV configuration above. Google Workspace is the IdP for
+  GCP-native federation.</code></pre>
+
+<h3>Acceptance</h3>
+
+<ul class="skill-list"><li class="checkbox"><input type="checkbox" disabled> SCP / Conditional Access Policy / Organization Policy enforcing MFA is ACTIVE (not report-only)</li>
+<li class="checkbox"><input type="checkbox" disabled> Tested: an account with MFA bypassed cannot perform actions (deliberate test)</li>
+<li class="checkbox"><input type="checkbox" disabled> IdP-side MFA enforcement is configured for all users</li>
+<li class="checkbox"><input type="checkbox" disabled> Admin-tier users require phishing-resistant MFA (FIDO2)</li>
+<li class="checkbox"><input type="checkbox" disabled> Recovery procedure for MFA device loss is documented</li>
+<li class="checkbox"><input type="checkbox" disabled> SMS-based MFA is BLOCKED (SIM swap risk)</li>
+</ul><hr class="section-divider">
+<h2>Phase 3 — SSO / Federation Setup</h2>
+
+After MFA is enforced, the next step is to make the IdP the single source of truth for human identity in the cloud. This eliminates local IAM users for humans, centralises user lifecycle (joiner / mover / leaver), and consolidates audit.
+
+<h3>Architecture: One IdP, Many Clouds</h3>
+
+<pre class="code-block"><code>                      ┌─────────────────────┐
+                      │   Identity Provider │
+                      │  (Okta / Entra ID / │
+                      │   Auth0 / Google)   │
+                      └─────────┬───────────┘
+                                │
+                  SAML / OIDC   │   SCIM provisioning
+                                │
+              ┌─────────────────┼─────────────────┐
+              ▼                 ▼                 ▼
+       ┌────────────┐    ┌────────────┐    ┌────────────┐
+       │ AWS IAM    │    │ Azure      │    │ GCP        │
+       │ Identity   │    │ Entra ID   │    │ Workforce  │
+       │ Center     │    │ (tenant)   │    │ Identity   │
+       └─────┬──────┘    └─────┬──────┘    └─────┬──────┘
+             │                  │                  │
+             ▼                  ▼                  ▼
+       ┌────────────┐    ┌────────────┐    ┌────────────┐
+       │Permission  │    │Azure Roles │    │ GCP IAM    │
+       │  Sets      │    │            │    │  Roles     │
+       └────────────┘    └────────────┘    └────────────┘</code></pre>
+
+<h3>AWS — IAM Identity Center Federation</h3>
+
+<pre class="code-block"><code>Setup:
+
+  1. Enable AWS IAM Identity Center at the Organizations root
+     (us-east-1 or your home region).
+  2. Configure External IdP:
+     - In IAM Identity Center → Settings → Identity source
+     - Change identity source to External identity provider
+     - Upload IdP metadata XML (from Okta / Entra ID / Auth0)
+     - Download IAM Identity Center service provider metadata
+     - Upload that into the IdP's enterprise application config
+  3. Configure SCIM provisioning (optional but recommended):
+     - Generate SCIM endpoint URL + bearer token in Identity Center
+     - Configure SCIM in the IdP to push users + groups
+     - Group push: only push the groups that map to permission sets
+  4. Design permission sets:
+     - ReadOnly — read-only across the org, no write actions
+     - DevOps — full access to non-production accounts, read-only
+       to production
+     - Admin — full access (rare, JIT-only via session policy)
+     - Auditor — read-only including audit logs and config
+     - BillingAdmin — billing console + cost management
+  5. Map IdP groups to permission sets per account:
+     - aws-readonly-prod (Okta group) → ReadOnly on production account
+     - aws-devops-staging (Okta group) → DevOps on staging account
+     - aws-admin-prod (Okta group) → Admin on production
+       (JIT-only, 2hr session, requires manager approval)
+  6. Set session duration:
+     - ReadOnly: 8 hours
+     - DevOps: 4 hours
+     - Admin: 1 hour (force re-MFA frequently)
+  7. CLI: configure <code class="inline-code">aws sso login</code> workflow, document for engineers.
+  8. Remove every local IAM user for a human. Confirm none remain:
+     aws iam list-users
+       → only service users should appear (and Phase 4 audits these)</code></pre>
+
+<h3>Azure — Federated Identity (or Entra ID as IdP)</h3>
+
+If Entra ID IS the IdP (Microsoft shops), federation is automatic — the Azure tenant uses its own Entra ID directly. The work is in:
+
+<ul class="skill-list"><li>Configuring Privileged Identity Management (PIM) for cloud admin roles (covered in Phase 5)</li>
+<li>Setting up B2B if external collaborators need access</li>
+<li>Ensuring on-prem AD is synced via Entra ID Connect with password hash sync (not pass-through, not federation — too fragile)</li>
+
+</ul>If a non-Entra-ID IdP is in use (Okta as IdP for Azure):
+<ul class="skill-list"><li>Configure Okta as a Federated Identity Provider for the Azure tenant</li>
+<li>SCIM provisioning from Okta → Entra ID for user lifecycle</li>
+<li>Conditional Access still enforces MFA at the Azure tenant layer</li>
+
+</ul><h3>GCP — Workforce Identity Federation</h3>
+
+<pre class="code-block"><code>Setup:
+
+  1. Create a Workforce Identity Pool:
+     gcloud iam workforce-pools create acme-workforce \
+       --location=global \
+       --organization=ORG_ID
+  2. Create a Workforce Identity Pool Provider:
+     gcloud iam workforce-pools providers create-saml okta-provider \
+       --workforce-pool=acme-workforce \
+       --location=global \
+       --idp-metadata-path=okta-metadata.xml \
+       --attribute-mapping=&quot;google.subject=assertion.subject,
+                            google.groups=assertion.attributes['groups']&quot;
+  3. Configure SAML in Okta (or OIDC for Entra ID / Auth0):
+     - Add GCP as enterprise application
+     - Map attributes: email, name, groups
+     - Push the matching enterprise application to user groups
+  4. Grant IAM roles to federated identities:
+     - For a specific group:
+       principalSet://iam.googleapis.com/locations/global/
+       workforcePools/acme-workforce/group/devops
+     - Bind that principal set to the appropriate role on the
+       appropriate resource (project / folder / org)
+  5. Users sign in via:
+     https://console.cloud.google/?
+     workforce_pool_provider=...
+     → redirects to Okta → SAML response → GCP session
+  6. Remove all individual Cloud Identity user accounts that were
+     previously granted IAM roles directly — they should now come
+     in via federation only.</code></pre>
+
+<h3>Local IAM Users — The Only Acceptable Use Cases</h3>
+
+After SSO is set up, only these local IAM users are acceptable:
+<div class="table-wrap"><table><thead><tr><th>Use case</th><th>Hardening required</th><th></th></tr></thead><tbody><tr><td>Break-glass admin (1-2 per cloud)</td><td>Hardware MFA, no access keys, alert on use, used <1x/year</td><td></td></tr><tr><td>Service principals NOT eligible for roles</td><td>Hardware MFA on programmatic access, 30-day key rotation, monitored for unused keys, scoped to least-privilege</td><td></td></tr><tr><td>Third-party SaaS integrations requiring IAM user</td><td>Dedicated user per integration, 90-day rotation, External ID where supported, scoped narrowly</td><td></td></tr></tbody></table></div>
+Every other local IAM user is removed.
+
+<h3>Acceptance</h3>
+
+<ul class="skill-list"><li class="checkbox"><input type="checkbox" disabled> IdP is the source of truth for human identity</li>
+<li class="checkbox"><input type="checkbox" disabled> Federation is configured for every cloud (AWS / Azure / GCP)</li>
+<li class="checkbox"><input type="checkbox" disabled> SCIM provisioning runs daily (joiner / mover / leaver automation)</li>
+<li class="checkbox"><input type="checkbox" disabled> All human local IAM users are removed (confirmed by <code class="inline-code">aws iam list-users</code> showing only service users)</li>
+<li class="checkbox"><input type="checkbox" disabled> Permission sets / roles are mapped to IdP groups (not individuals)</li>
+<li class="checkbox"><input type="checkbox" disabled> Session duration is set appropriately per role tier</li>
+<li class="checkbox"><input type="checkbox" disabled> CLI workflow is documented for engineers</li>
+</ul><hr class="section-divider">
+<h2>Phase 4 — Role-Trust Audit</h2>
+
+Every IAM role has a trust policy that defines who can assume it. Misconfigured trust policies are how cross-account attacks happen. Every trust relationship is reviewed.
+
+<h3>What to Audit</h3>
+
+<pre class="code-block"><code>For every IAM role in every account, verify:
+
+  1. Trust policy principal: who can assume this role?
+     - AWS account ID? Which account, and is it ours or a vendor's?
+     - Service principal? Documented purpose?
+     - Federated principal? Which IdP, which claim?
+     - Wildcard &quot;*&quot;? NEVER acceptable.
+
+  2. External ID for cross-account roles:
+     - Cross-account role MUST have:
+       &quot;Condition&quot;: {
+         &quot;StringEquals&quot;: {
+           &quot;sts:ExternalId&quot;: &quot;&lt;unique-id-per-trust&gt;&quot;
+         }
+       }
+     - External ID is unique per trust relationship
+     - External ID is stored in the trusting account's secrets,
+       NOT embedded in code or docs
+
+  3. MFA requirement for sensitive roles:
+     &quot;Condition&quot;: {
+       &quot;Bool&quot;: { &quot;aws:MultiFactorAuthPresent&quot;: &quot;true&quot; }
+     }
+
+  4. Session duration:
+     - Default 1 hour for sensitive
+     - Up to 12 hours only for non-sensitive (read-only, etc.)
+
+  5. Source IP restrictions (where applicable):
+     - For roles only used from corporate network
+     - &quot;aws:SourceIp&quot;: [&quot;&lt;corporate-cidrs&gt;&quot;]
+     - Be careful — VPN / remote work breaks this if not designed for</code></pre>
+
+<h3>Correct Cross-Account Trust Policy</h3>
+
+<pre class="code-block"><code>{
+  &quot;Version&quot;: &quot;2012-10-17&quot;,
+  &quot;Statement&quot;: [
+    {
+      &quot;Effect&quot;: &quot;Allow&quot;,
+      &quot;Principal&quot;: {
+        &quot;AWS&quot;: &quot;arn:aws:iam::123456789012:root&quot;
+      },
+      &quot;Action&quot;: &quot;sts:AssumeRole&quot;,
+      &quot;Condition&quot;: {
+        &quot;StringEquals&quot;: {
+          &quot;sts:ExternalId&quot;: &quot;acme-prod-monitoring-2026-q1-7f3a&quot;
+        },
+        &quot;Bool&quot;: {
+          &quot;aws:MultiFactorAuthPresent&quot;: &quot;true&quot;
+        }
+      }
+    }
+  ]
+}</code></pre>
+
+Notes:
+<ul class="skill-list"><li>External ID is unique, includes a context tag (purpose + time period), and includes randomness (<code class="inline-code">7f3a</code>).</li>
+<li>MFA condition is set when the role is assumed by a human; remove this for purely service-to-service trusts.</li>
+
+</ul><h3>Audit Script</h3>
+
+<pre class="code-block"><code># AWS: list all roles and inspect trust policies
+aws iam list-roles --query 'Roles[].[RoleName,Arn]' --output table
+
+# For each role:
+aws iam get-role --role-name &lt;name&gt; --query 'Role.AssumeRolePolicyDocument'
+
+# Flag any role where:
+# - Principal is &quot;*&quot; or includes a non-organization account ID
+# - StringEquals/sts:ExternalId is missing on cross-account trusts
+# - Role hasn't been used in &gt;90 days (use IAM Access Advisor):
+aws iam get-service-last-accessed-details --job-id ...</code></pre>
+
+<h3>Azure — Equivalent Audit</h3>
+
+<pre class="code-block"><code>For every Azure custom role and service principal:
+
+  az role definition list --custom-role-only
+    → review Actions / NotActions for wildcard scope
+  az ad sp list --all
+    → review service principals, especially those with elevated roles
+  az role assignment list --all
+    → for each elevated assignment: when was it created? by whom?
+       is it still needed?
+
+  Inactive service principals (no sign-ins in 90 days): disable.
+  Service principals without owners assigned: assign owners or remove.</code></pre>
+
+<h3>GCP — Equivalent Audit</h3>
+
+<pre class="code-block"><code>For every service account in every project:
+
+  gcloud iam service-accounts list --project=PROJECT
+    → for each: keys (should be zero for impersonation patterns)
+    → last authentication timestamp (disable if &gt;90 days)
+    → bindings (any wildcard? any cross-project role grants?)
+
+  gcloud iam workforce-pools list --location=global
+    → review attribute conditions on workforce pool providers
+
+  Inactive service accounts: disable, then delete after 30 days.</code></pre>
+
+<h3>Acceptance</h3>
+
+<ul class="skill-list"><li class="checkbox"><input type="checkbox" disabled> Every cross-account role has an External ID condition</li>
+<li class="checkbox"><input type="checkbox" disabled> No role has a wildcard <code class="inline-code">"*"</code> principal in its trust policy</li>
+<li class="checkbox"><input type="checkbox" disabled> No role has been unused for >90 days (those are removed)</li>
+<li class="checkbox"><input type="checkbox" disabled> Service-linked roles are documented (which AWS service uses each)</li>
+<li class="checkbox"><input type="checkbox" disabled> Trust relationships are visualised in a diagram (who trusts whom)</li>
+<li class="checkbox"><input type="checkbox" disabled> Audit run is scheduled to repeat quarterly</li>
+</ul><hr class="section-divider">
+<h2>Phase 5 — Just-In-Time Privileged Access</h2>
+
+Standing admin access is one of the highest-risk patterns in cloud identity. JIT access reduces the exposure window from "always" to "when actually needed and approved".
+
+<h3>AWS — IAM Identity Center Session Policies</h3>
+
+<pre class="code-block"><code>For privileged permission sets:
+
+  1. Session duration: 1 hour (forces frequent re-MFA)
+  2. Inline session policy that narrows further:
+
+  {
+    &quot;Version&quot;: &quot;2012-10-17&quot;,
+    &quot;Statement&quot;: [
+      {
+        &quot;Effect&quot;: &quot;Allow&quot;,
+        &quot;Action&quot;: &quot;*&quot;,
+        &quot;Resource&quot;: &quot;*&quot;,
+        &quot;Condition&quot;: {
+          &quot;DateLessThan&quot;: {
+            &quot;aws:CurrentTime&quot;: &quot;${session_expiry}&quot;
+          },
+          &quot;Bool&quot;: {
+            &quot;aws:MultiFactorAuthPresent&quot;: &quot;true&quot;
+          }
+        }
+      }
+    ]
+  }
+
+  3. Manual approval workflow (out-of-band):
+     - Engineer requests admin access via internal ticketing
+     - Manager approves
+     - On-call IAM operator adds the engineer to the admin
+       Okta group for the requested duration
+     - At expiry, automation removes the engineer from the group
+     - Full audit trail: who requested, who approved, what was
+       done in the session, when access was revoked</code></pre>
+
+For organisations with sufficient volume, use a dedicated PAM tool (CyberArk, BeyondTrust, Saviynt) or a homegrown approval workflow integrated with Okta / Entra ID group memberships.
+
+<h3>Azure — Privileged Identity Management (PIM)</h3>
+
+<pre class="code-block"><code>Setup:
+
+  1. License: Entra ID P2 (required for PIM).
+  2. Configure all cloud admin roles as PIM-eligible (not active):
+     - Global Administrator: 2 break-glass active, all others eligible
+     - Privileged Role Administrator: eligible only
+     - User Administrator: eligible only
+     - Security Administrator: eligible only
+     - All Azure subscription Owner / Contributor roles: eligible
+  3. Activation settings:
+     - Maximum duration: 4 hours (admin), 1 hour (root-equivalent)
+     - Require MFA on activation: ON
+     - Require justification: ON
+     - Require ticket information: ON (link to ticket/incident)
+     - Require approval: ON for highest tier (2 approvers from
+       security team)
+  4. Alerts:
+     - Alert when role activated outside business hours
+     - Alert when activation justification looks weak (regex)
+     - Alert when same user activates &gt;3x in a week
+  5. Access reviews: quarterly review of all PIM-eligible
+     assignments (Phase 7).</code></pre>
+
+<h3>GCP — Time-Bound IAM Bindings</h3>
+
+GCP doesn't have native PIM, but Cloud IAM Conditions enable time-bound bindings:
+
+<pre class="code-block"><code>gcloud projects add-iam-policy-binding PROJECT \
+  --member=&quot;user:alice@example.com&quot; \
+  --role=&quot;roles/owner&quot; \
+  --condition=&quot;expression=request.time &lt; timestamp('2026-05-12T18:00:00Z'),
+               title=temporary-owner-incident-INC-1234,
+               description=Granted for incident INC-1234&quot;</code></pre>
+
+For a production-grade JIT pattern on GCP:
+<ul class="skill-list"><li>Build a small approval app (Cloud Run + Firestore) that creates time-bound bindings on approval</li>
+<li>All requests / approvals / grants logged to a central log sink</li>
+<li>Automatic cleanup of expired bindings via Cloud Scheduler</li>
+
+</ul><h3>Standing Access — What Stays Standing</h3>
+
+<pre class="code-block"><code>Acceptable standing access:
+
+  ReadOnly across the org for engineering teams
+  Billing admin for finance team (2 users)
+  Auditor read-only for compliance team
+  Specific service-account-style bindings for CI/CD pipelines
+    (with credential rotation per Phase 4)
+
+Everything else: JIT.</code></pre>
+
+<h3>Acceptance</h3>
+
+<ul class="skill-list"><li class="checkbox"><input type="checkbox" disabled> AWS: All <code class="inline-code">Admin</code> and <code class="inline-code">PowerUser</code> permission sets are JIT-only with 1-hour sessions</li>
+<li class="checkbox"><input type="checkbox" disabled> Azure: PIM configured, all cloud admin roles are PIM-eligible, ≤2 break-glass exceptions</li>
+<li class="checkbox"><input type="checkbox" disabled> GCP: Time-bound bindings used for admin access; standing admin reduced to break-glass</li>
+<li class="checkbox"><input type="checkbox" disabled> Approval workflow documented and operational</li>
+<li class="checkbox"><input type="checkbox" disabled> Audit trail captures: request, approval, grant time, revoke time, actions taken during session</li>
+<li class="checkbox"><input type="checkbox" disabled> Average admin session is <2 hours (reviewed monthly)</li>
+</ul><hr class="section-divider">
+<h2>Phase 6 — Detection & Alerting</h2>
+
+Configuration prevents most attacks. Detection catches the ones that get through, and confirms that the configurations are still in place.
+
+<h3>Required Alerts (Tier 1 — Immediate Page)</h3>
+<div class="table-wrap"><table><thead><tr><th>Alert</th><th>Cloud</th><th>Source</th><th>Page To</th><th></th></tr></thead><tbody><tr><td>Root / Global Admin / Super Admin login</td><td>All</td><td>CloudTrail / Activity Log / Cloud Audit Logs</td><td>Security on-call</td><td></td></tr><tr><td>New IAM user created</td><td>AWS</td><td>CloudTrail <code class="inline-code">CreateUser</code></td><td>Security on-call</td><td></td></tr><tr><td>New access key created</td><td>AWS</td><td>CloudTrail <code class="inline-code">CreateAccessKey</code></td><td>Security on-call</td><td></td></tr><tr><td>Federation trust modified</td><td>All</td><td>CloudTrail / Activity Log / Cloud Audit Logs</td><td>Security on-call</td><td></td></tr><tr><td>New cross-account role created without External ID</td><td>AWS</td><td>CloudTrail <code class="inline-code">CreateRole</code> + parse trust policy</td><td>Security on-call</td><td></td></tr><tr><td>MFA disabled on any user</td><td>All</td><td>CloudTrail <code class="inline-code">DeactivateMFADevice</code> / Entra ID audit log</td><td>Security on-call</td><td></td></tr><tr><td>SCP / Conditional Access Policy / Org Policy modified</td><td>All</td><td>Org audit logs</td><td>Security on-call</td><td></td></tr></tbody></table></div>
+<h3>Required Alerts (Tier 2 — Email / Ticket Within Business Hours)</h3>
+<div class="table-wrap"><table><thead><tr><th>Alert</th><th>Trigger</th><th></th></tr></thead><tbody><tr><td>Privileged action without MFA in session</td><td>CloudTrail event with <code class="inline-code">aws:MultiFactorAuthPresent</code> = false on sensitive action</td><td></td></tr><tr><td>Service account / IAM user unused for >90 days</td><td>Identity inventory script (daily)</td><td></td></tr><tr><td>Federated user with unusual location</td><td>IdP risk signal (Okta Behavior, Entra ID Identity Protection)</td><td></td></tr><tr><td>Console login from new country</td><td>CloudTrail + GeoIP lookup</td><td></td></tr><tr><td>Service principal added to high-privilege role</td><td>Activity Log</td><td></td></tr></tbody></table></div>
+<h3>AWS Implementation</h3>
+
+<pre class="code-block"><code>CloudTrail → CloudWatch Logs → Metric Filter → CloudWatch Alarm → SNS
+
+Example: Root login alert
+
+  Metric filter pattern:
+    { $.userIdentity.type = &quot;Root&quot; &amp;&amp;
+      $.userIdentity.invokedBy NOT EXISTS &amp;&amp;
+      $.eventType != &quot;AwsServiceEvent&quot; }
+
+  CloudWatch Alarm:
+    Threshold: &gt;= 1 in 1 minute
+    Action: SNS → PagerDuty integration
+
+For a multi-account setup, use AWS Config aggregator and
+EventBridge cross-account event buses to consolidate.</code></pre>
+
+<h3>Azure Implementation</h3>
+
+<pre class="code-block"><code>Activity Log + Microsoft Sentinel:
+
+  Sentinel data connectors:
+    - Azure Activity
+    - Microsoft Entra ID (sign-ins, audit logs)
+    - Microsoft Defender for Cloud (if licensed)
+
+  Analytic rules (built-in or custom):
+    - &quot;Sign-ins from new countries&quot;
+    - &quot;Privileged role assigned&quot;
+    - &quot;Conditional Access policy modified&quot;
+
+  Automation rules:
+    - Auto-create incident in Sentinel on Tier 1 alerts
+    - Auto-send to PagerDuty via Logic App</code></pre>
+
+<h3>GCP Implementation</h3>
+
+<pre class="code-block"><code>Cloud Audit Logs → Log Sink → Pub/Sub → Cloud Function → PagerDuty
+
+  Log sink filter examples:
+
+  Root / Super Admin login:
+    protoPayload.serviceName=&quot;login.googleapis.com&quot; AND
+    protoPayload.authenticationInfo.principalEmail=
+      (&quot;super-admin-1@...&quot; OR &quot;super-admin-2@...&quot;)
+
+  Service account key created:
+    protoPayload.methodName=&quot;google.iam.admin.v1.CreateServiceAccountKey&quot;
+
+  Organization Policy modified:
+    protoPayload.methodName=&quot;SetOrgPolicy&quot;</code></pre>
+
+<h3>Acceptance</h3>
+
+<ul class="skill-list"><li class="checkbox"><input type="checkbox" disabled> Tier 1 alerts page security on-call within 1 minute</li>
+<li class="checkbox"><input type="checkbox" disabled> Tier 2 alerts create tickets within 15 minutes</li>
+<li class="checkbox"><input type="checkbox" disabled> Alert routing tested with deliberate test events (quarterly drill)</li>
+<li class="checkbox"><input type="checkbox" disabled> Alerts are not noisy — <5 false positives per week per alert</li>
+<li class="checkbox"><input type="checkbox" disabled> Runbook exists for each Tier 1 alert (what to do when paged)</li>
+</ul><hr class="section-divider">
+<h2>Phase 7 — Quarterly Access Review</h2>
+
+The hardening configured in Phases 1-6 will drift. Phase 7 is the recurring check that confirms it hasn't, and that human access still matches business need.
+
+<h3>What to Review (Each Quarter)</h3>
+
+<pre class="code-block"><code>Quarterly Access Review Checklist:
+
+  ┌─ Federation membership review ────────────────────────────┐
+  │  - Each Okta / Entra ID / Auth0 group mapped to cloud      │
+  │    permissions: managers re-attest member list             │
+  │  - Removed members: confirmed they no longer need access   │
+  │  - New members: confirmed approval trail exists            │
+  └────────────────────────────────────────────────────────────┘
+
+  ┌─ Privileged role membership ──────────────────────────────┐
+  │  - Every PIM-eligible / AWS Admin permission set member    │
+  │    is reviewed                                              │
+  │  - Members who haven't activated in 90 days: removed       │
+  │  - Active members: business justification documented       │
+  └────────────────────────────────────────────────────────────┘
+
+  ┌─ Service account / service principal review ──────────────┐
+  │  - Every service account is still in use (last auth &lt;30d)  │
+  │  - Owner is still at the company and still owns it         │
+  │  - Permissions are still scoped correctly                  │
+  │  - Keys are within rotation policy (Phase 4)               │
+  └────────────────────────────────────────────────────────────┘
+
+  ┌─ Cross-account trust review ──────────────────────────────┐
+  │  - Every cross-account role: trust still valid?            │
+  │  - External ID rotated if approaching 1-year-old           │
+  │  - Vendor-trust roles: vendor relationship still active?   │
+  └────────────────────────────────────────────────────────────┘
+
+  ┌─ Inactive user disable ───────────────────────────────────┐
+  │  - Federated users no sign-in in 30 days: investigate      │
+  │  - Federated users no sign-in in 90 days: disable          │
+  │  - Disabled users 180+ days: remove from IdP               │
+  └────────────────────────────────────────────────────────────┘
+
+  ┌─ Break-glass review ──────────────────────────────────────┐
+  │  - Hardware tokens in physical custody, chain of custody   │
+  │    intact                                                  │
+  │  - Break-glass procedure tested (annual at minimum)        │
+  │  - Any use of break-glass accounts: documented and audited │
+  └────────────────────────────────────────────────────────────┘</code></pre>
+
+<h3>Cadence</h3>
+<div class="table-wrap"><table><thead><tr><th>Quarter</th><th>Focus</th><th>Owner</th><th></th></tr></thead><tbody><tr><td>Jan</td><td>Federation membership + service accounts</td><td>Engineering Lead</td><td></td></tr><tr><td>Apr</td><td>Privileged roles + cross-account trusts</td><td>Security Lead</td><td></td></tr><tr><td>Jul</td><td>Federation membership + service accounts</td><td>Engineering Lead</td><td></td></tr><tr><td>Oct</td><td>Privileged roles + cross-account trusts + annual break-glass drill</td><td>Security Lead</td><td></td></tr></tbody></table></div>
+<h3>Evidence for Auditors</h3>
+
+Each review produces:
+<ul class="skill-list"><li>A signed-off CSV of group memberships (before/after)</li>
+<li>A signed-off CSV of privileged role memberships (before/after)</li>
+<li>A signed-off list of service accounts (active / disabled / removed)</li>
+<li>Tickets in the access management system for each change</li>
+<li>A summary memo: number of accesses removed, exceptions granted, anomalies found</li>
+
+</ul>This becomes the evidence for SOC 2 CC6.x, HIPAA §164.308(a)(4), PCI Req 7, ISO 27001 A.9.
+
+<h3>Acceptance</h3>
+
+<ul class="skill-list"><li class="checkbox"><input type="checkbox" disabled> Quarterly review scheduled on calendar with named owner</li>
+<li class="checkbox"><input type="checkbox" disabled> Review template / checklist exists in runbook repo</li>
+<li class="checkbox"><input type="checkbox" disabled> First review completed and evidence stored</li>
+<li class="checkbox"><input type="checkbox" disabled> Auditor has access to evidence repository (read-only)</li>
+<li class="checkbox"><input type="checkbox" disabled> Annual break-glass drill completed</li>
+</ul><hr class="section-divider">
+<h2>Worked Example — Mid-Market SaaS Hardening Engagement</h2>
+
+<strong>Profile:</strong>
+<pre class="code-block"><code>Provider: AWS (multi-account, 4 accounts via Organizations)
+IdP: Okta (180 employees, 25 with cloud access)
+Compliance: SOC 2 + HIPAA
+Workforce size: medium
+Existing IAM users: 12 humans + 6 services</code></pre>
+
+<strong>Before state:</strong>
+
+<ul class="skill-list"><li>18 local IAM users (12 humans + 6 service users) in the production account</li>
+<li>Root account has 2 active access keys, virtual MFA on a single person's phone</li>
+<li>4 of 12 humans have no MFA on their local IAM users</li>
+<li>No SSO — every engineer signs in directly with IAM user credentials</li>
+<li>Cross-account roles between accounts have no External IDs</li>
+<li>No CloudTrail-based alerts on identity events</li>
+<li>No quarterly access review process</li>
+
+</ul><strong>After applying this skill (12-week engagement):</strong>
+
+<ul class="skill-list"><li><strong>Phase 1 (Week 1):</strong> Root hardened. YubiKey enrolled (backup token in second safe). All 2 access keys deleted. CloudWatch alarm on root login → PagerDuty. Root email moved to <code class="inline-code">aws-root@acme.com</code> group going to 4 security team members.</li>
+<li><strong>Phase 2 (Week 2):</strong> SCP attached at Organizations root enforcing <code class="inline-code">aws:MultiFactorAuthPresent = true</code> for all non-MFA-bootstrap actions. Tested with a deliberate non-MFA action — denied as expected. Okta MFA enrollment policy reviewed and tightened: FIDO2 required for admin groups.</li>
+<li><strong>Phase 3 (Weeks 3-5):</strong> AWS IAM Identity Center configured. Okta federated as IdP. Four permission sets defined: ReadOnly (8hr), DevOps (4hr), Admin (1hr, JIT), Auditor (8hr, read-only including logs). Twelve Okta groups created and mapped per account. SCIM provisioning from Okta running daily. All 12 human local IAM users deleted. CLI workflow documented (<code class="inline-code">aws sso login</code>). Engineers trained in two 1-hour sessions.</li>
+<li><strong>Phase 4 (Week 6):</strong> Role-trust audit. 23 IAM roles reviewed. 6 cross-account roles missing External IDs — remediated. 4 unused roles (>90 days) removed. 6 service users reviewed: 4 replaced with IAM roles attached to ECS task definitions, 2 kept as IAM users (third-party SaaS integrations that require IAM user credentials) with hardware MFA on programmatic access and 30-day key rotation.</li>
+<li><strong>Phase 5 (Weeks 7-8):</strong> JIT configured. Admin permission set is now JIT-only with approval via a Slack-integrated approval bot → temporary Okta group membership for 2 hours → automatic removal. Standing admin access reduced from 8 engineers to 0 (4 break-glass exceptions reviewed quarterly).</li>
+<li><strong>Phase 6 (Weeks 9-10):</strong> Alerting wired. 7 Tier 1 alerts → PagerDuty. 5 Tier 2 alerts → Jira tickets. Tested with deliberate events. Runbook authored for each Tier 1 alert.</li>
+<li><strong>Phase 7 (Week 11):</strong> First quarterly access review executed. Group memberships re-attested by engineering managers. Two unused federated accounts disabled. Evidence package produced and stored in <code class="inline-code">/audit/2026-q1-access-review/</code>.</li>
+<li><strong>Week 12:</strong> Documentation. Runbooks for break-glass, MFA device loss, JIT activation. SOC 2 control mapping document. HIPAA risk-assessment supporting docs. Handoff to ongoing operations.</li>
+
+</ul><strong>Result:</strong>
+
+<ul class="skill-list"><li>Zero local IAM users for humans</li>
+<li>Zero standing admin access</li>
+<li>Every cross-account trust has an External ID</li>
+<li>MFA enforced by SCP (impossible to bypass)</li>
+<li>Root hardened, alerted, locked away</li>
+<li>Quarterly access review on the calendar with named owners</li>
+<li>Evidence ready for SOC 2 Type II audit (control activities CC6.1-CC6.8 covered)</li>
+
+</ul><strong>Cost:</strong>
+
+<ul class="skill-list"><li>Engagement effort: ~8 weeks of a senior IAM architect + ~2 weeks of an internal engineering lead</li>
+<li>Tooling cost delta: Entra ID P2 not needed (AWS-only), $0/month additional licence cost; PagerDuty integrations on existing licence</li>
+<li>Ongoing operating cost: ~4 hours / quarter for access reviews + ~1 hour / month for new-joiner onboarding into Okta groups</li>
+</ul><hr class="section-divider">
+<h2>Cross-References</h2>
+<div class="table-wrap"><table><thead><tr><th>Skill</th><th>Relationship</th><th></th></tr></thead><tbody><tr><td><code class="inline-code">/iam-policy</code></td><td>Authors least-privilege IAM policies. This skill hardens the identities those policies are attached to — run identity-hardening FIRST.</td><td></td></tr><tr><td><code class="inline-code">/cloud-plan</code></td><td>Provides the project profile (<code class="inline-code">.heaptrace/cloud-plan.json</code>) this skill reads.</td><td></td></tr><tr><td><code class="inline-code">/credential-lifecycle</code></td><td>Companion skill. Identity-hardening hardens the identity; credential-lifecycle hardens the credentials (rotation, expiry, vault storage). Run both.</td><td></td></tr><tr><td><code class="inline-code">/network-security</code></td><td>SSM Session Manager, bastion access — pair with hardened identity so that even reaching a host requires federated, MFA-authenticated identity.</td><td></td></tr><tr><td><code class="inline-code">/access-audit</code> (Compliance Pack)</td><td>Runs AFTER identity-hardening to verify that access controls are operating as designed. The verification layer to this skill's configuration layer.</td><td></td></tr><tr><td><code class="inline-code">/secrets-manage</code></td><td>For storing External IDs and break-glass credentials in cloud-native vaults.</td><td></td></tr></tbody></table></div><hr class="section-divider">
+<h2>Tips for Best Results</h2>
+
+<ul class="skill-list"><li class="ordered"><strong>Always run Phase 1 (root lockdown) first.</strong> Every other phase depends on the root account being secure. If you skip it and someone compromises root, every other control is irrelevant — they can disable it.</li>
+
+<li class="ordered"><strong>Enforce MFA via SCP / Conditional Access / Org Policy — never via documentation.</strong> Humans are remarkably good at bypassing documented controls. Machine-readable guardrails cannot be skipped. If your enforcement is "we tell people to enable MFA", you don't have enforcement.</li>
+
+<li class="ordered"><strong>The break-glass procedure must be tested annually.</strong> A break-glass procedure that has never been used is a procedure that will fail when you need it. Run a deliberate drill once a year: retrieve the hardware token, sign in, perform a benign action, sign out, return the token. Document any friction.</li>
+
+<li class="ordered"><strong>One IdP is better than many.</strong> If you have Okta for SSO into SaaS apps and Entra ID for cloud federation, you have two sources of truth and twice the audit surface. Consolidate to one IdP for both workforce SaaS and cloud federation where feasible.</li>
+
+<li class="ordered"><strong>External IDs are non-negotiable for cross-account roles.</strong> When a vendor asks for a cross-account role and says "External ID is optional", insist on it. The confused-deputy attack is well-known; vendors who don't require External IDs are signalling a security maturity gap.</li>
+
+<li class="ordered"><strong>JIT > always-on, even when it's annoying.</strong> Engineers will push back on JIT admin access because it slows them down. The slow-down is the point — it makes accidental privileged actions impossible, and it makes deliberate misuse auditable. Hold the line.</li>
+
+<li class="ordered"><strong>Phase 7 (quarterly review) is what catches drift.</strong> All the other phases configure correctly. Phase 7 is what catches the engineer who got admin access for an incident 8 months ago and never had it removed. Don't skip it — it's the only phase that runs forever.</li>
+
+<li class="ordered"><strong>Sign-in alerts are not optional in any environment with PII / PHI / financial data.</strong> A root login at 3 AM on a Saturday from a country you don't operate in is the first signal of a compromised root account. If you're not alerted, you find out from the breach disclosure form 60 days later.</li>
+
+<li class="ordered"><strong>Documentation matters for the auditor — but the SCP matters for the attacker.</strong> Write both. The SCP stops the actual attack; the documentation is what the auditor can verify and what survives turnover.</li>
+
+<li class="ordered"><strong>Identity-hardening is an annual program, not a one-time project.</strong> IdPs change. Workforce changes. Cloud features change. Re-baseline annually; review quarterly; alert continuously.</li></ul>
+    </div>
+  </div>
+  
+
+  <!-- Prev / Next Navigation -->
+  <div class="skill-nav">
+    <a href="vpc-design.html" class="skill-nav-link prev"><span class="nav-arrow">&larr;</span><span><span class="nav-label">Previous</span><span class="nav-title">Design VPC</span></span></a>
+    <a href="secrets-manage.html" class="skill-nav-link next"><span><span class="nav-label">Next</span><span class="nav-title">Manage Secrets</span></span><span class="nav-arrow">&rarr;</span></a>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<footer class="skill-footer">
+  <p>
+    <a href="../index.html">Heaptrace Skills</a> &mdash;
+    105 production-grade skills for development teams.
+    <a href="https://github.com/heaptracetechnology/heaptrace-skills" target="_blank" rel="noopener">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>
