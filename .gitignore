@@ -4,3 +4,8 @@ doc/
 # OS junk
 .DS_Store
 Thumbs.db
+
+# Local MCP config — never commit tokens or personal server config
+.mcp.json
+
+.vscode/

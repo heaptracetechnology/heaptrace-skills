@@ -1,14 +1,14 @@
 <p align="center">
-  <img src="https://img.shields.io/badge/Skills-81-06b6d4?style=for-the-badge&labelColor=0f172a" alt="81 Skills">
-  <img src="https://img.shields.io/badge/Packs-9-a855f7?style=for-the-badge&labelColor=0f172a" alt="9 Packs">
-  <img src="https://img.shields.io/badge/Works_With-Claude_|_Cursor-10b981?style=for-the-badge&labelColor=0f172a" alt="Claude & Cursor">
+  <img src="https://img.shields.io/badge/Skills-105-06b6d4?style=for-the-badge&labelColor=0f172a" alt="105 Skills">
+  <img src="https://img.shields.io/badge/Plugins-10-a855f7?style=for-the-badge&labelColor=0f172a" alt="10 Plugins">
+  <img src="https://img.shields.io/badge/Claude_Code-Plugin-10b981?style=for-the-badge&labelColor=0f172a" alt="Claude Code Plugin">
   <img src="https://img.shields.io/badge/License-MIT-f59e0b?style=for-the-badge&labelColor=0f172a" alt="MIT License">
 </p>
 
 <h1 align="center">Heaptrace Developer Skills</h1>
 
 <p align="center">
-  <strong>81 structured skills for development teams — from planning to release.</strong><br>
+  <strong>105 structured skills for development teams — from planning to release.</strong><br>
   Every skill comes with step-by-step guides, flow diagrams, checklists, templates, and anti-patterns.
 </p>
 
@@ -20,24 +20,44 @@
 
 ## Quick Setup
 
-Both **Claude Code** and **Cursor** use the same skill file format. Clone this repo and copy.
+### Claude Code Plugin (Recommended)
 
-### Step 1 — Clone
+This repo is a native **Claude Code plugin**. Install individual packs directly from within Claude Code:
+
+1. Open Claude Code in your project
+2. Run `/install-plugin` and point it to this repo, or add to your `settings.json`:
+
+```json
+{
+  "plugins": [
+    { "source": "https://github.com/heaptracetechnology/heaptrace-skills", "plugin": "heaptrace-dev" },
+    { "source": "https://github.com/heaptracetechnology/heaptrace-skills", "plugin": "heaptrace-architect" }
+  ]
+}
+```
+
+Install only the packs your team needs. Each plugin is listed in `.claude-plugin/marketplace.json`.
+
+---
+
+### Manual Setup (Claude Code & Cursor)
+
+Clone and copy individual plugin skills to your tool's skills directory.
 
 ```bash
 git clone https://github.com/heaptracetechnology/heaptrace-skills.git
 ```
 
-### Step 2 — Copy to Your Tool
-
 #### Claude Code
 
 ```bash
-# Project-level (this project only)
-cp -r heaptrace-skills/*/ your-project/.claude/skills/
+# Copy a specific plugin's skills (e.g. developer pack)
+cp -r heaptrace-skills/plugins/heaptrace-dev/skills/* your-project/.claude/skills/
 
-# Personal (all projects)
-cp -r heaptrace-skills/*/ ~/.claude/skills/
+# Copy all plugins at once
+for plugin in heaptrace-skills/plugins/*/; do
+  cp -r "$plugin/skills/"* your-project/.claude/skills/
+done
 ```
 
 **Path:** `.claude/skills/<skill-name>/SKILL.md`
@@ -45,21 +65,17 @@ cp -r heaptrace-skills/*/ ~/.claude/skills/
 #### Cursor
 
 ```bash
-# Project-level (this project only)
-cp -r heaptrace-skills/*/ your-project/.cursor/skills/
-
-# Personal (all projects — check Cursor docs for global path)
-cp -r heaptrace-skills/*/ ~/.cursor/skills/
+# Copy a specific plugin's skills
+cp -r heaptrace-skills/plugins/heaptrace-dev/skills/* your-project/.cursor/skills/
 ```
 
 **Path:** `.cursor/skills/<skill-name>/skill.md`
 
-### Step 3 — Add to .gitignore
+### Add to .gitignore
 
 Skills are **personal tools** — don't commit them to your project repo:
 
 ```bash
-# Add to your project's .gitignore
 echo ".claude/skills/" >> .gitignore
 echo ".cursor/skills/" >> .gitignore
 ```
@@ -84,7 +100,7 @@ Client gives a task
 
 ## Skill Packs
 
-### 🔷 Developer (10 skills)
+### 🔷 Developer (13 skills)
 
 The daily toolkit for every developer.
 
@@ -100,8 +116,11 @@ The daily toolkit for every developer.
 | `explain` | Understand any code before you touch it |
 | `sec-audit` | OWASP Top 10, secrets scan, dependency check |
 | `release-notes` | Turn git history into client-ready changelogs |
+| `quick-plan` | Rapid planning for small, well-scoped tasks |
+| `quick-work` | Fast execution mode for clearly defined tasks |
+| `code-standards` | Enforce and document team coding standards |
 
-### 🟡 Lead Engineer (8 skills)
+### 🟡 Lead Engineer (9 skills)
 
 For tech leads managing teams and making architectural decisions.
 
@@ -115,6 +134,7 @@ For tech leads managing teams and making architectural decisions.
 | `onboard-dev` | Generate onboarding guide for new team members |
 | `perf-audit` | Profile slow endpoints, N+1 queries, memory leaks |
 | `decision-doc` | Write Architecture Decision Records (ADRs) |
+| `message-craft` | Craft clear technical messages and stakeholder updates |
 
 ### 🟣 Technical Architect (8 skills)
 
@@ -159,7 +179,7 @@ CI/CD test automation, visual regression, and contract testing.
 | `test-coverage` | Analyze gaps and improve meaningful coverage |
 | `contract-test` | Write contract tests between services |
 
-### 🟠 AWS Cloud Engineer (10 skills)
+### 🟠 AWS Cloud Engineer (14 skills)
 
 Infrastructure, deployment, and operations on AWS.
 
@@ -175,6 +195,33 @@ Infrastructure, deployment, and operations on AWS.
 | `cost-optimize` | Audit and reduce AWS costs |
 | `disaster-recovery` | Plan DR: RTO/RPO, backups, cross-region failover |
 | `secrets-manage` | Manage secrets with SSM/Secrets Manager |
+| `cloud-plan` | Plan multi-cloud architectures and migrations |
+| `credential-lifecycle` | Manage credential rotation and lifecycle |
+| `identity-hardening` | Harden identity and access management |
+| `network-security` | Design network security controls and segmentation |
+
+### 📱 Mobile (16 skills)
+
+Mobile development for React Native, Flutter, and native platforms.
+
+| Skill | What It Does |
+|-------|-------------|
+| `app-release` | Prepare and submit app store releases (iOS & Android) |
+| `mobile-api` | Design mobile-optimised API integrations |
+| `mobile-auth` | Implement mobile authentication flows |
+| `mobile-ci` | Set up mobile CI/CD pipelines |
+| `mobile-debug` | Debug mobile crashes and performance issues |
+| `mobile-feature` | Build mobile features with platform best practices |
+| `mobile-navigation` | Design mobile navigation architectures |
+| `mobile-offline` | Implement offline-first data sync patterns |
+| `mobile-perf` | Optimise mobile app performance |
+| `mobile-quick-plan` | Rapid planning for mobile tasks |
+| `mobile-quick-work` | Fast execution for mobile development |
+| `mobile-state` | Manage application state in mobile apps |
+| `mobile-test` | Write tests for mobile applications |
+| `mobile-ui` | Build mobile UI components and screens |
+| `platform-adapt` | Adapt features for iOS and Android differences |
+| `push-notify` | Implement push notification systems |
 
 ### 🩷 UI/UX Designer (8 skills)
 
@@ -265,50 +312,41 @@ Skills are yours to customize. Make them fit your workflow.
 
 ## Repo Structure
 
+This repo is structured as a **Claude Code Plugin** with one plugin per skill pack.
+
 ```
 heaptrace-skills/
-├── feature-plan/SKILL.md          ← Developer pack
-├── feature-work/SKILL.md
-├── find-fix/SKILL.md
-├── smart-commit/SKILL.md
-├── suggest/SKILL.md
-├── code-review/SKILL.md
-├── test-gen/SKILL.md
-├── explain/SKILL.md
-├── sec-audit/SKILL.md
-├── release-notes/SKILL.md
-├── lead-engineer/                  ← Lead Engineer pack
-│   ├── sprint-plan/SKILL.md
-│   ├── arch-review/SKILL.md
-│   └── ...
-├── architect/                      ← Technical Architect pack
-│   ├── system-design/SKILL.md
-│   └── ...
-├── qa/                             ← QA / Testing pack
-│   ├── test-plan/SKILL.md
-│   └── ...
-├── automation-qa/                  ← Automation QA pack
-│   ├── cypress-test/SKILL.md
-│   └── ...
-├── cloud-engineer/                 ← AWS Cloud Engineer pack
-│   ├── vpc-design/SKILL.md
-│   └── ...
-├── designer/                       ← UI/UX Designer pack
-│   ├── wireframe/SKILL.md
-│   └── ...
-├── business/                       ← Business / Product pack
-│   ├── prd-write/SKILL.md
-│   └── ...
-├── compliance/                     ← Compliance & Security pack
-│   ├── hipaa-audit/SKILL.md
-│   ├── secure-hipaa/SKILL.md
-│   ├── gdpr-audit/SKILL.md
-│   ├── soc2-audit/SKILL.md
-│   └── ...
+├── .claude-plugin/
+│   └── marketplace.json            ← Plugin registry (lists all 10 plugins)
+├── plugins/
+│   ├── heaptrace-dev/              ← Core developer skills (13)
+│   │   ├── plugin.json
+│   │   ├── README.md
+│   │   └── skills/
+│   │       ├── feature-plan/SKILL.md
+│   │       ├── code-review/SKILL.md
+│   │       └── ...
+│   ├── heaptrace-architect/        ← Technical Architect (8)
+│   │   └── skills/
+│   │       ├── system-design/SKILL.md
+│   │       └── ...
+│   ├── heaptrace-automation-qa/    ← Automation QA (6)
+│   ├── heaptrace-business/         ← Business / Product (8)
+│   ├── heaptrace-cloud-engineer/   ← AWS Cloud Engineer (14)
+│   ├── heaptrace-compliance/       ← Compliance & Security (15)
+│   ├── heaptrace-designer/         ← UI/UX Designer (8)
+│   ├── heaptrace-lead-engineer/    ← Lead Engineer (9)
+│   ├── heaptrace-mobile/           ← Mobile (16)
+│   └── heaptrace-qa/               ← QA / Testing (8)
 └── docs/
     ├── index.html                  ← Skills documentation site
     └── announcement-email.html     ← Team announcement template
 ```
+
+Each plugin folder contains:
+- **`plugin.json`** — name, version, description, skills path
+- **`README.md`** — skill inventory with descriptions
+- **`skills/`** — one subfolder per skill, each with a `SKILL.md`
 
 ---
 

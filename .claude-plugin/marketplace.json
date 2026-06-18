@@ -1,0 +1,68 @@
+{
+  "name": "heaptrace-skills",
+  "owner": {
+    "name": "heaptrace"
+  },
+  "plugins": [
+    {
+      "name": "heaptrace-dev",
+      "version": "1.0.0",
+      "source": "./plugins/heaptrace-dev",
+      "description": "Core developer skills for feature planning, code review, testing, commits, and daily development workflows."
+    },
+    {
+      "name": "heaptrace-architect",
+      "version": "1.0.0",
+      "source": "./plugins/heaptrace-architect",
+      "description": "Technical architecture skills for system design, API design, database design, event-driven systems, and migration planning."
+    },
+    {
+      "name": "heaptrace-automation-qa",
+      "version": "1.0.0",
+      "source": "./plugins/heaptrace-automation-qa",
+      "description": "Automation QA skills for Cypress testing, CI test pipelines, contract testing, mock services, and visual regression."
+    },
+    {
+      "name": "heaptrace-business",
+      "version": "1.0.0",
+      "source": "./plugins/heaptrace-business",
+      "description": "Business and product skills for PRDs, user stories, client proposals, competitor analysis, feature prioritization, and stakeholder updates."
+    },
+    {
+      "name": "heaptrace-cloud-engineer",
+      "version": "1.0.0",
+      "source": "./plugins/heaptrace-cloud-engineer",
+      "description": "Cloud engineering skills for AWS infrastructure, VPC design, ECS, RDS, IAM policies, Terraform modules, CI/CD pipelines, and cloud security."
+    },
+    {
+      "name": "heaptrace-compliance",
+      "version": "1.0.0",
+      "source": "./plugins/heaptrace-compliance",
+      "description": "Compliance and security skills for HIPAA, GDPR, SOC2, PCI-DSS audits, infrastructure hardening, incident planning, and secrets management."
+    },
+    {
+      "name": "heaptrace-designer",
+      "version": "1.0.0",
+      "source": "./plugins/heaptrace-designer",
+      "description": "UI/UX designer skills for wireframing, user flows, design systems, UX audits, responsive design, accessibility, and design handoff."
+    },
+    {
+      "name": "heaptrace-lead-engineer",
+      "version": "1.0.0",
+      "source": "./plugins/heaptrace-lead-engineer",
+      "description": "Lead engineer skills for sprint planning, architecture reviews, tech debt audits, incident response, PR strategy, and developer onboarding."
+    },
+    {
+      "name": "heaptrace-mobile",
+      "version": "1.0.0",
+      "source": "./plugins/heaptrace-mobile",
+      "description": "Mobile development skills for app releases, mobile APIs, authentication, CI/CD, debugging, offline support, performance, and state management."
+    },
+    {
+      "name": "heaptrace-qa",
+      "version": "1.0.0",
+      "source": "./plugins/heaptrace-qa",
+      "description": "QA skills for test planning, E2E testing, API testing, regression checks, bug reporting, load testing, accessibility audits, and test data generation."
+    }
+  ]
+}

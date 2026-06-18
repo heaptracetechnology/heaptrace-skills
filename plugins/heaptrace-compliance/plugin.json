@@ -1,0 +1,6 @@
+{
+  "name": "heaptrace-compliance",
+  "version": "1.0.0",
+  "description": "Compliance and security skills for HIPAA, GDPR, SOC2, PCI-DSS audits, infrastructure hardening, incident planning, and secrets management.",
+  "skills": ["./skills/"]
+}
