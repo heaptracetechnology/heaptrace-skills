@@ -1,0 +1,6 @@
+{
+  "name": "heaptrace-qa",
+  "version": "1.0.0",
+  "description": "QA skills for test planning, E2E testing, API testing, regression checks, bug reporting, load testing, accessibility audits, and test data generation.",
+  "skills": ["./skills/"]
+}

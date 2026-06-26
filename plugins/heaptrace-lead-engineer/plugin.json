@@ -1,0 +1,6 @@
+{
+  "name": "heaptrace-lead-engineer",
+  "version": "1.0.0",
+  "description": "Lead engineer skills for sprint planning, architecture reviews, tech debt audits, incident response, PR strategy, and developer onboarding.",
+  "skills": ["./skills/"]
+}

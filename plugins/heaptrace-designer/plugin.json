@@ -1,0 +1,6 @@
+{
+  "name": "heaptrace-designer",
+  "version": "1.0.0",
+  "description": "UI/UX designer skills for wireframing, user flows, design systems, UX audits, responsive design, accessibility, and design handoff.",
+  "skills": ["./skills/"]
+}

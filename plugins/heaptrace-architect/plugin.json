@@ -1,0 +1,6 @@
+{
+  "name": "heaptrace-architect",
+  "version": "1.0.0",
+  "description": "Technical architecture skills for system design, API design, database design, event-driven systems, and migration planning.",
+  "skills": ["./skills/"]
+}

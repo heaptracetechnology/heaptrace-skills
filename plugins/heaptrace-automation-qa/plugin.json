@@ -1,0 +1,6 @@
+{
+  "name": "heaptrace-automation-qa",
+  "version": "1.0.0",
+  "description": "Automation QA skills for Cypress testing, CI test pipelines, contract testing, mock services, and visual regression.",
+  "skills": ["./skills/"]
+}

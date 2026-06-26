@@ -1,0 +1,6 @@
+{
+  "name": "heaptrace-business",
+  "version": "1.0.0",
+  "description": "Business and product skills for PRDs, user stories, client proposals, competitor analysis, feature prioritization, and stakeholder updates.",
+  "skills": ["./skills/"]
+}

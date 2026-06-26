@@ -1,0 +1,121 @@
+name: Bump changed plugin versions on release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  bump-versions:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # ─── Find the tag that preceded this release ──────────────────────────
+      - name: Resolve previous release tag
+        id: tags
+        run: |
+          CURRENT="${{ github.ref_name }}"
+          PREVIOUS=$(git tag --sort=-creatordate | grep -v "^${CURRENT}$" | head -1)
+          echo "current=${CURRENT}"   >> "$GITHUB_OUTPUT"
+          echo "previous=${PREVIOUS}" >> "$GITHUB_OUTPUT"
+          echo "Current  : ${CURRENT}"
+          echo "Previous : ${PREVIOUS:-(first release — will check full history)}"
+
+      # ─── Detect which plugins changed and bump their patch version ─────────
+      - name: Bump patch version for changed plugins
+        id: bump
+        run: |
+          CURRENT="${{ steps.tags.outputs.current }}"
+          PREVIOUS="${{ steps.tags.outputs.previous }}"
+          BUMPED_ANY=false
+
+          PLUGINS=(
+            heaptrace-dev
+            heaptrace-architect
+            heaptrace-automation-qa
+            heaptrace-business
+            heaptrace-cloud-engineer
+            heaptrace-compliance
+            heaptrace-designer
+            heaptrace-lead-engineer
+            heaptrace-mobile
+            heaptrace-qa
+          )
+
+          for PLUGIN in "${PLUGINS[@]}"; do
+            # Compare this plugin's directory between the two release tags.
+            # On first release (no previous tag) treat every file as new.
+            if [ -n "$PREVIOUS" ]; then
+              DIFF=$(git diff --name-only "${PREVIOUS}..${CURRENT}" -- "plugins/${PLUGIN}/")
+            else
+              DIFF=$(git ls-files "plugins/${PLUGIN}/")
+            fi
+
+            if [ -n "$DIFF" ]; then
+              CUR_VER=$(jq -r '.version' "plugins/${PLUGIN}/plugin.json")
+              MAJOR=$(cut -d. -f1 <<< "$CUR_VER")
+              MINOR=$(cut -d. -f2 <<< "$CUR_VER")
+              PATCH=$(cut -d. -f3 <<< "$CUR_VER")
+              NEW_VER="${MAJOR}.${MINOR}.$((PATCH + 1))"
+
+              jq --arg v "$NEW_VER" '.version = $v' \
+                "plugins/${PLUGIN}/plugin.json" > /tmp/pj.json
+              mv /tmp/pj.json "plugins/${PLUGIN}/plugin.json"
+
+              echo "✅  ${PLUGIN}: ${CUR_VER} → ${NEW_VER}"
+              BUMPED_ANY=true
+            else
+              CUR_VER=$(jq -r '.version' "plugins/${PLUGIN}/plugin.json")
+              echo "⏭️   ${PLUGIN} v${CUR_VER}: unchanged"
+            fi
+          done
+
+          echo "bumped_any=${BUMPED_ANY}" >> "$GITHUB_OUTPUT"
+
+      # ─── Sync updated versions back into marketplace.json ─────────────────
+      - name: Sync versions into marketplace.json
+        if: steps.bump.outputs.bumped_any == 'true'
+        run: |
+          node - << 'EOF'
+          const fs = require('fs');
+
+          const mpPath = '.claude-plugin/marketplace.json';
+          const mp = JSON.parse(fs.readFileSync(mpPath, 'utf8'));
+
+          for (const entry of mp.plugins) {
+            const pjPath = `plugins/${entry.name}/plugin.json`;
+            if (fs.existsSync(pjPath)) {
+              const { version } = JSON.parse(fs.readFileSync(pjPath, 'utf8'));
+              entry.version = version;
+            }
+          }
+
+          fs.writeFileSync(mpPath, JSON.stringify(mp, null, 2) + '\n');
+          console.log('marketplace.json versions synced');
+          EOF
+
+      # ─── Commit and push the version bumps ────────────────────────────────
+      - name: Commit and push
+        if: steps.bump.outputs.bumped_any == 'true'
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add plugins/*/plugin.json .claude-plugin/marketplace.json
+
+          if git diff --staged --quiet; then
+            echo "Nothing to commit — versions already up to date."
+            exit 0
+          fi
+
+          git commit -m "chore: bump plugin versions for ${{ steps.tags.outputs.current }} [skip ci]"
+          git push origin main

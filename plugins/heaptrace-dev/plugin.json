@@ -1,0 +1,6 @@
+{
+  "name": "heaptrace-dev",
+  "version": "1.0.0",
+  "description": "Core developer skills for feature planning, code review, testing, commits, and daily development workflows.",
+  "skills": ["./skills/"]
+}

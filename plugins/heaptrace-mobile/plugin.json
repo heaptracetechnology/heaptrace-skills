@@ -1,0 +1,6 @@
+{
+  "name": "heaptrace-mobile",
+  "version": "1.0.0",
+  "description": "Mobile development skills for app releases, mobile APIs, authentication, CI/CD, debugging, offline support, performance, and state management.",
+  "skills": ["./skills/"]
+}

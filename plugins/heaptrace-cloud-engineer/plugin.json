@@ -1,0 +1,6 @@
+{
+  "name": "heaptrace-cloud-engineer",
+  "version": "1.0.0",
+  "description": "Cloud engineering skills for AWS infrastructure, VPC design, ECS, RDS, IAM policies, Terraform modules, CI/CD pipelines, and cloud security.",
+  "skills": ["./skills/"]
+}
