@@ -320,7 +320,8 @@ heaptrace-skills/
 │   └── marketplace.json            ← Plugin registry (lists all 10 plugins)
 ├── plugins/
 │   ├── heaptrace-dev/              ← Core developer skills (13)
-│   │   ├── plugin.json
+│   │   ├── .claude-plugin/
+│   │   │   └── plugin.json
 │   │   ├── README.md
 │   │   └── skills/
 │   │       ├── feature-plan/SKILL.md
@@ -344,7 +345,7 @@ heaptrace-skills/
 ```
 
 Each plugin folder contains:
-- **`plugin.json`** — name, version, description, skills path
+- **`.claude-plugin/plugin.json`** — name, version, description, skills path
 - **`README.md`** — skill inventory with descriptions
 - **`skills/`** — one subfolder per skill, each with a `SKILL.md`
 
