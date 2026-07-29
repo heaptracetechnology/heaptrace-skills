@@ -61,20 +61,20 @@ jobs:
             fi
 
             if [ -n "$DIFF" ]; then
-              CUR_VER=$(jq -r '.version' "plugins/${PLUGIN}/plugin.json")
+              CUR_VER=$(jq -r '.version' "plugins/${PLUGIN}/.claude-plugin/plugin.json")
               MAJOR=$(cut -d. -f1 <<< "$CUR_VER")
               MINOR=$(cut -d. -f2 <<< "$CUR_VER")
               PATCH=$(cut -d. -f3 <<< "$CUR_VER")
               NEW_VER="${MAJOR}.${MINOR}.$((PATCH + 1))"
 
               jq --arg v "$NEW_VER" '.version = $v' \
-                "plugins/${PLUGIN}/plugin.json" > /tmp/pj.json
-              mv /tmp/pj.json "plugins/${PLUGIN}/plugin.json"
+                "plugins/${PLUGIN}/.claude-plugin/plugin.json" > /tmp/pj.json
+              mv /tmp/pj.json "plugins/${PLUGIN}/.claude-plugin/plugin.json"
 
               echo "✅  ${PLUGIN}: ${CUR_VER} → ${NEW_VER}"
               BUMPED_ANY=true
             else
-              CUR_VER=$(jq -r '.version' "plugins/${PLUGIN}/plugin.json")
+              CUR_VER=$(jq -r '.version' "plugins/${PLUGIN}/.claude-plugin/plugin.json")
               echo "⏭️   ${PLUGIN} v${CUR_VER}: unchanged"
             fi
           done
@@ -92,7 +92,7 @@ jobs:
           const mp = JSON.parse(fs.readFileSync(mpPath, 'utf8'));
 
           for (const entry of mp.plugins) {
-            const pjPath = `plugins/${entry.name}/plugin.json`;
+            const pjPath = `plugins/${entry.name}/.claude-plugin/plugin.json`;
             if (fs.existsSync(pjPath)) {
               const { version } = JSON.parse(fs.readFileSync(pjPath, 'utf8'));
               entry.version = version;
@@ -110,7 +110,7 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          git add plugins/*/plugin.json .claude-plugin/marketplace.json
+          git add plugins/*/.claude-plugin/plugin.json .claude-plugin/marketplace.json
 
           if git diff --staged --quiet; then
             echo "Nothing to commit — versions already up to date."
